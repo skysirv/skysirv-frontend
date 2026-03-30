@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 
 type Billing = "monthly" | "annual"
 
@@ -18,9 +18,6 @@ export default function PricingSection({
 
   const [billing, setBilling] = useState<Billing>("monthly")
   const router = useRouter()
-  const searchParams = useSearchParams()
-
-  const selectedPlan = searchParams.get("plan")
 
   const prices = useMemo(() => {
     const monthly = { free: 0, pro: 19, intelligence: 59 }
@@ -99,7 +96,7 @@ export default function PricingSection({
           <TierCard
             mode={mode}
             router={router}
-            highlight={selectedPlan === "free"}
+            highlight={false}
             title="Free"
             subtitle="Basic fare monitoring"
             price={prices.free}
@@ -119,7 +116,7 @@ export default function PricingSection({
           <TierCard
             mode={mode}
             router={router}
-            highlight={selectedPlan === "pro"}
+            highlight={false}
             title="Pro"
             subtitle="Advanced intelligence"
             price={prices.pro}
@@ -144,7 +141,7 @@ export default function PricingSection({
           <TierCard
             mode={mode}
             router={router}
-            highlight={selectedPlan === "enterprise"}
+            highlight={false}
             title="Enterprise"
             subtitle="Full Skysirv engine"
             price={prices.intelligence}
@@ -210,8 +207,8 @@ function TierCard(props: {
         highlight
           ? "border-slate-400 shadow-md"
           : accent
-          ? "border-slate-300 shadow-xl ring-1 ring-slate-200"
-          : "border-slate-200"
+            ? "border-slate-300 shadow-xl ring-1 ring-slate-200"
+            : "border-slate-200"
       )}
     >
 
