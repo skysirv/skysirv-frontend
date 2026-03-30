@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 
 type Billing = "monthly" | "annual"
 
@@ -9,24 +9,27 @@ function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ")
 }
 
-export default function PricingSection({
-  mode = "choose-plan",
-}: {
-  mode?: "marketing" | "choose-plan"
-}) {
+export default function PricingSection() {
+  const mode: "choose-plan" = "choose-plan"
   const [billing, setBilling] = useState<Billing>("monthly")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
-  const searchParams = useSearchParams()
 
   useEffect(() => {
-    const tokenFromUrl = searchParams.get("token")
+    const params = new URLSearchParams(window.location.search)
+    const tokenFromUrl = params.get("token")
 
-    if (tokenFromUrl) {
-      localStorage.setItem("skysirv_token", tokenFromUrl)
-    }
-  }, [searchParams])
+    if (!tokenFromUrl) return
+
+    localStorage.setItem("skysirv_token", tokenFromUrl)
+
+    params.delete("token")
+    const nextQuery = params.toString()
+    const cleanUrl = nextQuery ? `/choose-plan?${nextQuery}` : "/choose-plan"
+
+    router.replace(cleanUrl)
+  }, [router])
 
   async function handlePlanSelection(plan: string) {
     const token = localStorage.getItem("skysirv_token")
@@ -41,16 +44,19 @@ export default function PricingSection({
 
     try {
       if (plan === "free") {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/subscriptions/create`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            plan: "free"
-          })
-        })
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/subscriptions/create`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              plan: "free",
+            }),
+          }
+        )
 
         const data = await res.json().catch(() => null)
 
@@ -71,12 +77,12 @@ export default function PricingSection({
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
               plan,
-              billing: billingType
-            })
+              billing: billingType,
+            }),
           }
         )
 
@@ -348,30 +354,81 @@ function DetailedPricingTable() {
     {
       title: "Core Monitoring",
       rows: [
-        { label: "Watchlist", values: ["3 routes", "25 routes", "Unlimited"] },
-        { label: "Monitoring cadence", values: ["Standard", "High frequency", "Real-time priority"] },
-        { label: "Route coverage", values: ["Basic", "Expanded", "Global coverage"] },
+        {
+          label: "Watchlist",
+          values: ["3 routes", "25 routes", "Unlimited"],
+        },
+        {
+          label: "Monitoring cadence",
+          values: ["Standard", "High frequency", "Real-time priority"],
+        },
+        {
+          label: "Route coverage",
+          values: ["Basic", "Expanded", "Global coverage"],
+        },
       ],
     },
     {
       title: "Skysirv Intelligence Layer",
       rows: [
-        { label: "Skysirv Monitor™", values: ["Basic monitoring", "High-frequency monitoring", "Priority monitoring"] },
-        { label: "Skysirv Signals™", values: ["Limited alerts", "Smart drop detection", "Priority intelligence alerts"] },
-        { label: "Skysirv Price Behavior™", values: ["Basic snapshots", "30–90 day analysis", "Extended behavioral history"] },
-        { label: "Skysirv Predict™", values: ["—", "Forecast signals", "Deep forecasting models"] },
-        { label: "Skyscore™", values: ["Preview only", "Full scoring", "Advanced scoring"] },
-        { label: "Skysirv Insights™", values: ["—", "Standard insights", "Advanced route analysis"] },
-        { label: "Skysirv Route Digest™", values: ["—", "Included", "Enhanced summaries"] },
-        { label: "Skysirv Intelligence Engine™", values: ["—", "Partial access", "Full system access"] },
+        {
+          label: "Skysirv Monitor™",
+          values: [
+            "Basic monitoring",
+            "High-frequency monitoring",
+            "Priority monitoring",
+          ],
+        },
+        {
+          label: "Skysirv Signals™",
+          values: [
+            "Limited alerts",
+            "Smart drop detection",
+            "Priority intelligence alerts",
+          ],
+        },
+        {
+          label: "Skysirv Price Behavior™",
+          values: [
+            "Basic snapshots",
+            "30–90 day analysis",
+            "Extended behavioral history",
+          ],
+        },
+        {
+          label: "Skysirv Predict™",
+          values: ["—", "Forecast signals", "Deep forecasting models"],
+        },
+        {
+          label: "Skyscore™",
+          values: ["Preview only", "Full scoring", "Advanced scoring"],
+        },
+        {
+          label: "Skysirv Insights™",
+          values: ["—", "Standard insights", "Advanced route analysis"],
+        },
+        {
+          label: "Skysirv Route Digest™",
+          values: ["—", "Included", "Enhanced summaries"],
+        },
+        {
+          label: "Skysirv Intelligence Engine™",
+          values: ["—", "Partial access", "Full system access"],
+        },
       ],
     },
     {
       title: "Advanced Intelligence",
       rows: [
         { label: "Trend analysis", values: ["—", "Standard", "Advanced"] },
-        { label: "Volatility insights", values: ["—", "Included", "Enhanced"] },
-        { label: "Historical depth", values: ["Limited", "Expanded", "Full dataset"] },
+        {
+          label: "Volatility insights",
+          values: ["—", "Included", "Enhanced"],
+        },
+        {
+          label: "Historical depth",
+          values: ["Limited", "Expanded", "Full dataset"],
+        },
       ],
     },
     {
