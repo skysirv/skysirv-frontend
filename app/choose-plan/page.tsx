@@ -9,11 +9,8 @@ function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ")
 }
 
-export default function PricingSection({
-  mode = "choose-plan",
-}: {
-  mode?: "marketing" | "choose-plan"
-}) {
+export default function PricingSection() {
+  const mode: "choose-plan" = "choose-plan"
   const [billing, setBilling] = useState<Billing>("monthly")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
