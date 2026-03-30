@@ -1,0 +1,25 @@
+.root {
+  @apply fixed inset-x-0 top-0 z-40 bg-transparent pointer-events-none;
+}
+
+.link {
+  @apply inline-flex items-center rounded-full px-3 py-2 text-sm font-medium leading-6
+  text-slate-700 transition-colors duration-150 ease-in-out
+  dark:text-white;
+}
+
+.link:hover {
+  @apply bg-slate-50 text-sky-700 dark:text-sky-400;
+}
+
+.link:focus {
+  @apply outline-none ring-2 ring-sky-500/30;
+}
+
+.logo {
+  @apply cursor-pointer rounded-full transition-transform duration-150 ease-in-out;
+}
+
+.logo:hover {
+  @apply scale-[1.02];
+}

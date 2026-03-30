@@ -1,0 +1,398 @@
+"use client"
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import Map, {
+  Marker,
+  NavigationControl,
+  type MapRef,
+  type ViewState,
+  type ViewStateChangeEvent,
+} from "react-map-gl/mapbox"
+import { motion } from "framer-motion"
+import "mapbox-gl/dist/mapbox-gl.css"
+
+type AirportNode = {
+  code: string
+  name: string
+  city: string
+  country: string
+  lat: number
+  lng: number
+  visits: number
+  layoverHours: number
+  loungeHours: number
+  flights: number
+}
+
+type RouteArc = {
+  from: string
+  to: string
+}
+
+export default function TravelGlobe() {
+  const mapRef = useRef<MapRef | null>(null)
+  const interactionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const [selectedAirport, setSelectedAirport] = useState<AirportNode | null>(null)
+  const [mapReady, setMapReady] = useState(false)
+  const [isInteracting, setIsInteracting] = useState(false)
+  const [viewState, setViewState] = useState<ViewState>({
+    latitude: 20,
+    longitude: 0,
+    zoom: 0.8,
+    bearing: 0,
+    pitch: 0,
+    padding: { top: 0, bottom: 0, left: 0, right: 0 },
+  })
+
+  const airports = useMemo<AirportNode[]>(
+    () => [
+      {
+        code: "BOS",
+        name: "Boston Logan International Airport",
+        city: "Boston",
+        country: "United States",
+        lat: 42.3656,
+        lng: -71.0096,
+        visits: 5,
+        layoverHours: 12.5,
+        loungeHours: 2.0,
+        flights: 5,
+      },
+      {
+        code: "MIA",
+        name: "Miami International Airport",
+        city: "Miami",
+        country: "United States",
+        lat: 25.7959,
+        lng: -80.287,
+        visits: 4,
+        layoverHours: 8.0,
+        loungeHours: 1.5,
+        flights: 4,
+      },
+      {
+        code: "LAX",
+        name: "Los Angeles International Airport",
+        city: "Los Angeles",
+        country: "United States",
+        lat: 33.9416,
+        lng: -118.4085,
+        visits: 3,
+        layoverHours: 6.5,
+        loungeHours: 1.0,
+        flights: 3,
+      },
+      {
+        code: "FRA",
+        name: "Frankfurt Airport",
+        city: "Frankfurt",
+        country: "Germany",
+        lat: 50.0379,
+        lng: 8.5622,
+        visits: 5,
+        layoverHours: 47.5,
+        loungeHours: 3.0,
+        flights: 5,
+      },
+      {
+        code: "CDG",
+        name: "Charles de Gaulle Airport",
+        city: "Paris",
+        country: "France",
+        lat: 49.0097,
+        lng: 2.5479,
+        visits: 2,
+        layoverHours: 5.0,
+        loungeHours: 0.5,
+        flights: 2,
+      },
+      {
+        code: "VVI",
+        name: "Viru Viru International Airport",
+        city: "Santa Cruz",
+        country: "Bolivia",
+        lat: -17.6448,
+        lng: -63.1354,
+        visits: 6,
+        layoverHours: 4.0,
+        loungeHours: 0.0,
+        flights: 6,
+      },
+    ],
+    []
+  )
+
+  const routes = useMemo<RouteArc[]>(
+    () => [
+      { from: "BOS", to: "MIA" },
+      { from: "MIA", to: "LAX" },
+      { from: "BOS", to: "FRA" },
+      { from: "FRA", to: "CDG" },
+      { from: "VVI", to: "MIA" },
+      { from: "MIA", to: "FRA" },
+    ],
+    []
+  )
+
+  const airportMap = useMemo(() => {
+    return new globalThis.Map<string, AirportNode>(
+      airports.map((airport) => [airport.code, airport] as const)
+    )
+  }, [airports])
+
+  const markInteraction = useCallback(() => {
+    setIsInteracting(true)
+
+    if (interactionTimeoutRef.current) {
+      clearTimeout(interactionTimeoutRef.current)
+    }
+
+    interactionTimeoutRef.current = setTimeout(() => {
+      setIsInteracting(false)
+    }, 1400)
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (interactionTimeoutRef.current) {
+        clearTimeout(interactionTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!mapReady) return
+    if (isInteracting) return
+
+    const interval = setInterval(() => {
+      setViewState((prev) => ({
+        ...prev,
+        longitude: prev.longitude + 0.12,
+      }))
+    }, 50)
+
+    return () => clearInterval(interval)
+  }, [mapReady, isInteracting])
+
+  const handleAirportSelect = useCallback((airport: AirportNode) => {
+    setSelectedAirport(airport)
+    setIsInteracting(true)
+
+    mapRef.current?.flyTo({
+      center: [airport.lng, airport.lat],
+      zoom: 2.6,
+      duration: 2200,
+      essential: true,
+    })
+
+    if (interactionTimeoutRef.current) {
+      clearTimeout(interactionTimeoutRef.current)
+    }
+
+    interactionTimeoutRef.current = setTimeout(() => {
+      setIsInteracting(false)
+    }, 2600)
+  }, [])
+
+  const arcPaths = useMemo(() => {
+    if (!mapReady || !mapRef.current) return []
+
+    const map = mapRef.current.getMap()
+
+    return routes
+      .map((route, index) => {
+        const fromAirport = airportMap.get(route.from)
+        const toAirport = airportMap.get(route.to)
+
+        if (!fromAirport || !toAirport) return null
+
+        const start = map.project([fromAirport.lng, fromAirport.lat])
+        const end = map.project([toAirport.lng, toAirport.lat])
+
+        const dx = end.x - start.x
+        const dy = end.y - start.y
+        const distance = Math.sqrt(dx * dx + dy * dy)
+
+        const midX = (start.x + end.x) / 2
+        const midY = (start.y + end.y) / 2 - Math.min(120, distance * 0.18)
+
+        const path = `M ${start.x} ${start.y} Q ${midX} ${midY} ${end.x} ${end.y}`
+
+        return {
+          id: `${route.from}-${route.to}-${index}`,
+          path,
+        }
+      })
+      .filter(Boolean) as { id: string; path: string }[]
+  }, [airportMap, mapReady, routes, viewState])
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
+      <div className="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/90 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur">
+        <div className="flex items-center justify-between border-b border-slate-200/80 px-5 py-4">
+          <div>
+            <p className="text-xs font-medium tracking-[0.16em] text-slate-500 uppercase">
+              Globe View
+            </p>
+            <h3 className="mt-1 text-lg font-semibold text-slate-950">
+              Airports visited in 2026
+            </h3>
+          </div>
+
+          <div className="rounded-full border border-sky-100 bg-sky-50 px-3 py-1 text-xs font-medium text-sky-700">
+            Interactive
+          </div>
+        </div>
+
+        <div className="relative h-[520px] w-full overflow-hidden">
+          <Map
+            ref={mapRef}
+            mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+            {...viewState}
+            onMove={(evt: ViewStateChangeEvent) => setViewState(evt.viewState)}
+            onLoad={() => setMapReady(true)}
+            onDragStart={markInteraction}
+            onDragEnd={markInteraction}
+            onZoomStart={markInteraction}
+            onZoomEnd={markInteraction}
+            onRotateStart={markInteraction}
+            onRotateEnd={markInteraction}
+            projection="globe"
+            mapStyle="mapbox://styles/mapbox/light-v11"
+            style={{ width: "100%", height: "100%" }}
+            attributionControl={false}
+          >
+            <NavigationControl position="top-right" showCompass showZoom />
+
+            {airports.map((airport, index) => (
+              <Marker
+                key={airport.code}
+                latitude={airport.lat}
+                longitude={airport.lng}
+                anchor="center"
+              >
+                <button
+                  type="button"
+                  onClick={() => handleAirportSelect(airport)}
+                  className="group relative flex h-6 w-6 items-center justify-center"
+                  aria-label={`Open airport details for ${airport.code}`}
+                >
+                  <motion.span
+                    animate={{
+                      scale: [1, 1.8, 1],
+                      opacity: [0.4, 0.05, 0.4],
+                    }}
+                    transition={{
+                      duration: 2.4,
+                      repeat: Infinity,
+                      delay: index * 0.18,
+                      ease: "easeInOut",
+                    }}
+                    className="absolute h-6 w-6 rounded-full bg-sky-400/60"
+                  />
+
+                  <motion.span
+                    whileHover={{ scale: 1.2 }}
+                    className="relative block h-3.5 w-3.5 rounded-full bg-sky-600 shadow-[0_0_16px_rgba(14,165,233,0.75)] ring-4 ring-sky-200/50"
+                  />
+                </button>
+              </Marker>
+            ))}
+          </Map>
+
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white via-white/60 to-transparent" />
+        </div>
+      </div>
+
+      <motion.div
+        key={selectedAirport?.code ?? "empty"}
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className="rounded-[2rem] border border-slate-200/80 bg-white/90 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur"
+      >
+        {selectedAirport ? (
+          <>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-medium tracking-[0.16em] text-slate-500 uppercase">
+                  Airport Intelligence
+                </p>
+                <h3 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
+                  {selectedAirport.code}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  {selectedAirport.name}
+                </p>
+                <p className="text-sm text-slate-500">
+                  {selectedAirport.city}, {selectedAirport.country}
+                </p>
+              </div>
+
+              <div className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+                Selected
+              </div>
+            </div>
+
+            <div className="mt-8 grid gap-4 sm:grid-cols-2">
+              <GlobeMetric label="Visits" value={String(selectedAirport.visits)} />
+              <GlobeMetric label="Flights" value={String(selectedAirport.flights)} />
+              <GlobeMetric
+                label="Layover Time"
+                value={`${selectedAirport.layoverHours.toFixed(1)} hrs`}
+              />
+              <GlobeMetric
+                label="Lounge Time"
+                value={`${selectedAirport.loungeHours.toFixed(1)} hrs`}
+              />
+            </div>
+
+            <div className="mt-8 rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+              <p className="text-xs font-medium tracking-[0.14em] text-slate-500 uppercase">
+                Snapshot
+              </p>
+              <p className="mt-3 text-sm leading-7 text-slate-600">
+                {selectedAirport.code} appeared {selectedAirport.visits} times in your
+                2026 travel path, with {selectedAirport.layoverHours.toFixed(1)} total
+                hours spent in transit and {selectedAirport.loungeHours.toFixed(1)} hours
+                attributed to lounge access.
+              </p>
+            </div>
+          </>
+        ) : (
+          <div className="flex h-full min-h-[520px] flex-col items-center justify-center text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-sky-100 bg-sky-50">
+              <motion.span
+                animate={{ scale: [1, 1.15, 1], opacity: [0.6, 1, 0.6] }}
+                transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                className="block h-3 w-3 rounded-full bg-sky-600 shadow-[0_0_14px_rgba(14,165,233,0.55)]"
+              />
+            </div>
+
+            <h3 className="mt-6 text-2xl font-bold tracking-tight text-slate-950">
+              Click an airport on the globe
+            </h3>
+            <p className="mt-4 max-w-sm text-sm leading-7 text-slate-600">
+              Select a glowing destination node to inspect airport activity,
+              transit time, and yearly travel footprint.
+            </p>
+          </div>
+        )}
+      </motion.div>
+    </div>
+  )
+}
+
+function GlobeMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm">
+      <p className="text-xs font-medium tracking-[0.14em] text-slate-500 uppercase">
+        {label}
+      </p>
+      <p className="mt-2 text-lg font-semibold tracking-tight text-slate-950">
+        {value}
+      </p>
+    </div>
+  )
+}
