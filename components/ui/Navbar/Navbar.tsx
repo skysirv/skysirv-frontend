@@ -1,19 +1,46 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import s from './Navbar.module.css';
 import Navlinks from './Navlinks';
 
 export default function Navbar() {
-  const [tick, setTick] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
-    const interval = window.setInterval(() => {
-      setTick((prev) => !prev);
-    }, 1000);
+    const handleScroll = () => {
+      const currentScrollY =
+        window.scrollY ||
+        document.documentElement.scrollTop ||
+        document.body.scrollTop ||
+        0;
+
+      if (currentScrollY <= 24) {
+        setHidden(false);
+        lastScrollY.current = currentScrollY;
+        return;
+      }
+
+      if (currentScrollY > lastScrollY.current && currentScrollY > 80) {
+        setHidden(true);
+      } else if (currentScrollY < lastScrollY.current) {
+        setHidden(false);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    lastScrollY.current =
+      window.scrollY ||
+      document.documentElement.scrollTop ||
+      document.body.scrollTop ||
+      0;
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
-      window.clearInterval(interval);
+      window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
@@ -21,9 +48,9 @@ export default function Navbar() {
     <nav
       className={s.root}
       style={{
-        transform: tick ? 'translateY(-18px)' : 'translateY(0)',
-        opacity: tick ? 0.45 : 1,
-        transition: 'transform 300ms ease, opacity 300ms ease'
+        transform: hidden ? 'translateY(-120%)' : 'translateY(0)',
+        opacity: hidden ? 0 : 1,
+        transition: 'transform 240ms ease, opacity 240ms ease'
       }}
     >
       <a href="#skip" className="sr-only focus:not-sr-only">
@@ -31,18 +58,7 @@ export default function Navbar() {
       </a>
 
       <div className="mx-auto max-w-7xl px-6">
-        <div className="pointer-events-auto pt-5">
-          <div className="relative">
-            <div
-              className="absolute -bottom-8 left-1/2 z-[999] -translate-x-1/2 rounded-full px-3 py-1 text-xs font-bold text-white shadow-lg"
-              style={{ backgroundColor: tick ? '#dc2626' : '#0f172a' }}
-            >
-              {tick ? 'NAV ACTIVE B' : 'NAV ACTIVE A'}
-            </div>
-
-            <Navlinks />
-          </div>
-        </div>
+        <Navlinks />
       </div>
     </nav>
   );

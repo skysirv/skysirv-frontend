@@ -1,6 +1,5 @@
 .root {
   @apply fixed inset-x-0 top-0 z-40 bg-transparent pointer-events-none;
-  will-change: transform, opacity;
 }
 
 .link {
