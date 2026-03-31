@@ -1,11 +1,10 @@
 .root {
   @apply fixed inset-x-0 top-0 z-40 bg-transparent pointer-events-none;
+  will-change: transform, opacity;
 }
 
 .link {
-  @apply inline-flex items-center rounded-full px-3 py-2 text-sm font-medium leading-6
-  text-slate-700 transition-colors duration-150 ease-in-out
-  dark:text-white;
+  @apply inline-flex items-center rounded-full px-3 py-2 text-sm font-medium leading-6 text-slate-700 transition-colors duration-150 ease-in-out dark:text-white;
 }
 
 .link:hover {

@@ -71,7 +71,7 @@ export default function HomePage() {
   return (
     <>
       {/* HERO SECTION */}
-      <section className="relative min-h-[calc(100dvh-4rem)] overflow-hidden bg-white pt-20 md:pt-24">
+      <section className="relative min-h-[100dvh] overflow-hidden bg-white">
         <div className="pointer-events-none absolute inset-0">
           <motion.div
             animate={{ x: [0, 40, 0], y: [0, 28, 0] }}
@@ -95,7 +95,7 @@ export default function HomePage() {
           />
         </div>
 
-        <div className="relative mx-auto flex max-w-7xl flex-col items-center px-6 pb-24 pt-20 text-center sm:px-8 sm:pb-28 sm:pt-24 lg:px-12 lg:pb-32 lg:pt-28">
+        <div className="relative mx-auto flex max-w-7xl flex-col items-center px-6 pb-24 pt-32 text-center sm:px-8 sm:pb-28 sm:pt-36 lg:px-12 lg:pb-32 lg:pt-40">
           <motion.div
             initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}

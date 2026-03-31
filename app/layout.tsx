@@ -70,7 +70,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
 
         <main
           id="skip"
-          className="min-h-[calc(100dvh-4rem)] pt-28 md:min-h-[calc(100dvh-5rem)] md:pt-32"
+          className="min-h-screen"
         >
           {children}
         </main>
