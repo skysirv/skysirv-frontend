@@ -22,9 +22,9 @@ export default function Navbar() {
         return;
       }
 
-      if (currentScrollY > lastScrollY.current && currentScrollY > 80) {
+      if (currentScrollY - lastScrollY.current > 6 && currentScrollY > 80) {
         setHidden(true);
-      } else if (currentScrollY < lastScrollY.current) {
+      } else if (lastScrollY.current - currentScrollY > 6) {
         setHidden(false);
       }
 
@@ -48,9 +48,9 @@ export default function Navbar() {
     <nav
       className={s.root}
       style={{
-        transform: hidden ? 'translateY(-120%)' : 'translateY(0)',
+        transform: hidden ? 'translateY(-80%)' : 'translateY(0)',
         opacity: hidden ? 0 : 1,
-        transition: 'transform 240ms ease, opacity 240ms ease'
+        transition: 'transform 320ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms ease'
       }}
     >
       <a href="#skip" className="sr-only focus:not-sr-only">
