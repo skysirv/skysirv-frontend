@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 
 declare global {
@@ -10,7 +10,6 @@ declare global {
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!
-
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""
 
 export default function CreateAccountPage() {
@@ -25,6 +24,17 @@ export default function CreateAccountPage() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
+
+  const hasStartedConfirming = confirmPassword.length > 0
+  const passwordsMatch = hasStartedConfirming && password === confirmPassword
+  const passwordsMismatch = hasStartedConfirming && password !== confirmPassword
+
+  const passwordMatchMessage = useMemo(() => {
+    if (!hasStartedConfirming) return ""
+    if (!password) return "Enter your password first."
+    if (passwordsMatch) return "Passwords match."
+    return "Passwords do not match."
+  }, [hasStartedConfirming, password, passwordsMatch])
 
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID) {
@@ -187,7 +197,12 @@ export default function CreateAccountPage() {
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-16 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+              className={`w-full rounded-xl px-4 py-3 pr-16 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-2 ${passwordsMismatch
+                  ? "border border-red-300 focus:border-red-500 focus:ring-red-500/10"
+                  : passwordsMatch
+                    ? "border border-emerald-300 focus:border-emerald-500 focus:ring-emerald-500/10"
+                    : "border border-slate-200 focus:border-slate-900 focus:ring-slate-900/10"
+                }`}
             />
             <button
               type="button"
@@ -198,11 +213,24 @@ export default function CreateAccountPage() {
             </button>
           </div>
 
+          {passwordMatchMessage && (
+            <p
+              className={`text-sm ${passwordsMismatch
+                  ? "text-red-500"
+                  : passwordsMatch
+                    ? "text-emerald-600"
+                    : "text-slate-500"
+                }`}
+            >
+              {passwordMatchMessage}
+            </p>
+          )}
+
           {error && <p className="text-sm text-red-500">{error}</p>}
 
           <button
             type="submit"
-            disabled={loading || googleLoading}
+            disabled={loading || googleLoading || passwordsMismatch}
             className="w-full rounded-xl bg-slate-900 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {loading ? "Creating account..." : "Create account"}
