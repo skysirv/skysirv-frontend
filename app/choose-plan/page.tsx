@@ -119,21 +119,25 @@ export default function PricingSection() {
       : "Billed annually (save ~20%)"
 
   return (
-    <section className="w-full bg-white py-24">
+    <section className="w-full bg-white py-10 md:py-12">
       <div className="mx-auto max-w-5xl px-6">
-        <div className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-end">
-          <div>
-            <h2 className="mt-3 text-5xl font-bold tracking-light text-slate-900 sm:text-6xl">
-              Start free — Upgrade when intelligence becomes leverage
+        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-slate-500">
+              Choose your plan
+            </div>
+
+            <h2 className="mt-4 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
+              Start free — upgrade when intelligence becomes leverage
             </h2>
 
-            <p className="mt-6 max-w-2xl text-lg text-slate-600">
+            <p className="mt-4 max-w-2xl text-base text-slate-600 sm:text-lg">
               Skysirv™ is built for travelers who want signal over noise —
               and timing advantage over guesswork.
             </p>
           </div>
 
-          <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-100 p-1">
+          <div className="flex shrink-0 items-center gap-2 rounded-lg border border-slate-200 bg-slate-100 p-1">
             <button
               type="button"
               onClick={() => setBilling("monthly")}
@@ -162,15 +166,15 @@ export default function PricingSection() {
           </div>
         </div>
 
-        <p className="mt-4 text-xs text-slate-400">{billingLabel}</p>
+        <p className="mt-3 text-xs text-slate-400">{billingLabel}</p>
 
         {error && (
-          <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+          <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
             {error}
           </div>
         )}
 
-        <div className="mt-12 grid gap-6 lg:grid-cols-3">
+        <div className="mt-8 grid gap-6 lg:grid-cols-3">
           <TierCard
             mode={mode}
             handlePlanSelection={handlePlanSelection}
@@ -241,7 +245,7 @@ export default function PricingSection() {
           />
         </div>
 
-        <div className="mt-24">
+        <div className="mt-16 md:mt-20">
           <DetailedPricingTable />
         </div>
       </div>
