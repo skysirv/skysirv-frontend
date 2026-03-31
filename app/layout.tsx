@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/Toasts/toaster';
 import { PropsWithChildren, Suspense } from 'react';
 import { getURL } from '@/utils/helpers';
 import { Inter } from 'next/font/google';
+import MainContentShell from '@/components/layout/MainContentShell';
 import 'styles/main.css';
 
 const inter = Inter({
@@ -68,12 +69,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
 
         <Navbar />
 
-        <main
-          id="skip"
-          className="min-h-screen"
-        >
-          {children}
-        </main>
+        <MainContentShell>{children}</MainContentShell>
 
         <Footer />
 
