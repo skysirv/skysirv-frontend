@@ -9,9 +9,7 @@ declare global {
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!
-
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""
-console.log("GOOGLE CLIENT ID IN USE:", GOOGLE_CLIENT_ID)
 
 export default function SignInPage() {
   const googleButtonRef = useRef<HTMLDivElement | null>(null)
@@ -63,6 +61,58 @@ export default function SignInPage() {
     initializeGoogle()
   }, [])
 
+  async function routeUserAfterAuth(token: string, isAdmin: boolean) {
+    if (isAdmin) {
+      window.location.href = "/admin"
+      return
+    }
+
+    const sessionRes = await fetch(`${API_BASE_URL}/auth/session`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+
+    const sessionData = await sessionRes.json().catch(() => null)
+
+    if (!sessionRes.ok || !sessionData?.user) {
+      throw new Error("Unable to load session")
+    }
+
+    const subscription = sessionData.subscription
+    const planId = subscription?.plan_id || null
+
+    if (!planId) {
+      window.location.href = "/choose-plan"
+      return
+    }
+
+    if (planId === "free") {
+      window.location.href = "/dashboard/free"
+      return
+    }
+
+    if (
+      planId === "pro" ||
+      planId === "pro_monthly" ||
+      planId === "pro_yearly"
+    ) {
+      window.location.href = "/dashboard/pro"
+      return
+    }
+
+    if (
+      planId === "enterprise" ||
+      planId === "enterprise_monthly" ||
+      planId === "enterprise_yearly"
+    ) {
+      window.location.href = "/dashboard/enterprise"
+      return
+    }
+
+    window.location.href = "/dashboard"
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
@@ -81,22 +131,18 @@ export default function SignInPage() {
         })
       })
 
-      if (!res.ok) {
-        throw new Error("Login failed")
-      }
+      const data = await res.json().catch(() => null)
 
-      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data?.error || "Login failed")
+      }
 
       localStorage.setItem("skysirv_token", data.token)
       localStorage.setItem("skysirv_admin", data.user?.is_admin ? "true" : "false")
 
-      if (data.user?.is_admin) {
-        window.location.href = "/admin"
-      } else {
-        window.location.href = "/dashboard"
-      }
-    } catch {
-      setError("Invalid email or password")
+      await routeUserAfterAuth(data.token, data.user?.is_admin === true)
+    } catch (err: any) {
+      setError(err?.message || "Invalid email or password")
     } finally {
       setLoading(false)
     }
@@ -119,7 +165,7 @@ export default function SignInPage() {
         },
         body: JSON.stringify({
           credential: response.credential,
-          mode: "signin" // 🔥 IMPORTANT
+          mode: "signin"
         })
       })
 
@@ -132,11 +178,7 @@ export default function SignInPage() {
       localStorage.setItem("skysirv_token", data.token)
       localStorage.setItem("skysirv_admin", data.user?.is_admin ? "true" : "false")
 
-      if (data.user?.is_admin) {
-        window.location.href = "/admin"
-      } else {
-        window.location.href = "/dashboard"
-      }
+      await routeUserAfterAuth(data.token, data.user?.is_admin === true)
     } catch (err: any) {
       setError(err?.message || "Unable to continue with Google")
       setGoogleLoading(false)

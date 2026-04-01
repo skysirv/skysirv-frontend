@@ -51,18 +51,10 @@ export default function WelcomePage() {
   useEffect(() => {
     let isMounted = true
 
-    async function loadPlan() {
-      const token = localStorage.getItem("skysirv_token")
+    async function fetchSessionWithRetry(token: string) {
+      const MAX_ATTEMPTS = 5
 
-      if (!token) {
-        router.push("/signin")
-        return
-      }
-
-      try {
-        setLoading(true)
-        setError("")
-
+      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_BASE_URL!}/auth/session`,
           {
@@ -78,7 +70,36 @@ export default function WelcomePage() {
           throw new Error(data?.error || "Unable to load subscription")
         }
 
-        const resolvedPlan = normalizePlan(data?.subscription?.plan_id ?? "free")
+        const planId = data?.subscription?.plan_id
+
+        // 🔥 If we see a paid plan, stop immediately
+        if (planId && planId !== "free") {
+          return normalizePlan(planId)
+        }
+
+        // If still free, wait and retry
+        if (attempt < MAX_ATTEMPTS) {
+          await new Promise((r) => setTimeout(r, 1200))
+        }
+      }
+
+      // fallback (after retries)
+      return "free"
+    }
+
+    async function loadPlan() {
+      const token = localStorage.getItem("skysirv_token")
+
+      if (!token) {
+        router.push("/signin")
+        return
+      }
+
+      try {
+        setLoading(true)
+        setError("")
+
+        const resolvedPlan = await fetchSessionWithRetry(token)
 
         if (!isMounted) return
 
@@ -112,7 +133,7 @@ export default function WelcomePage() {
 
         <p className="mt-4 text-slate-600">
           {loading
-            ? "Preparing your dashboard access..."
+            ? "Finalizing your subscription and preparing your dashboard..."
             : error
               ? "We ran into a problem while checking your plan."
               : "Your flight intelligence dashboard is ready."}
