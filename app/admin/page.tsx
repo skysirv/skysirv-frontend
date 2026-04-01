@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
@@ -15,6 +15,7 @@ type AdminUser = {
 }
 
 type ActivityEvent = {
+  id?: string
   time: string
   message: string
 }
@@ -28,6 +29,17 @@ export default function AdminPage() {
   const [userToDelete, setUserToDelete] = useState<AdminUser | null>(null)
   const [stats, setStats] = useState<any>(null)
   const [telemetry, setTelemetry] = useState<any>(null)
+  const [activityLoaded, setActivityLoaded] = useState(false)
+
+  const adminUsers = useMemo(
+    () => users.filter((user) => user.plan === "admin"),
+    [users]
+  )
+
+  const platformUsers = useMemo(
+    () => users.filter((user) => user.plan !== "admin"),
+    [users]
+  )
 
   function formatPlanLabel(user: AdminUser) {
     if (user.plan === "admin") return "Admin"
@@ -90,8 +102,8 @@ export default function AdminPage() {
     }
 
     let eventSource: EventSource | null = null
+    const seenActivityKeys = new Set<string>()
 
-    // ✅ 1. AUTH CHECK
     fetch(`${API_BASE_URL}/auth/session`, {
       headers: {
         Authorization: `Bearer ${token}`
@@ -104,7 +116,6 @@ export default function AdminPage() {
           return
         }
 
-        // ✅ 2. FETCH USERS
         fetch(`${API_BASE_URL}/api/admin/users`, {
           headers: {
             Authorization: `Bearer ${token}`
@@ -115,7 +126,6 @@ export default function AdminPage() {
             setUsers(result.users || [])
           })
 
-        // ✅ 3. FETCH STATUS STATS
         fetch(`${API_BASE_URL}/api/admin/status`, {
           headers: {
             Authorization: `Bearer ${token}`
@@ -126,7 +136,6 @@ export default function AdminPage() {
             setStats(data)
           })
 
-        // ✅ 4. FETCH TELEMETRY (for alertsSent)
         fetch(`${API_BASE_URL}/api/admin/telemetry`, {
           headers: {
             Authorization: `Bearer ${token}`
@@ -137,7 +146,27 @@ export default function AdminPage() {
             setTelemetry(data)
           })
 
-        // ✅ 5. ACTIVITY STREAM
+        fetch(`${API_BASE_URL}/api/admin/activity`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+          .then((res) => res.json())
+          .then((result) => {
+            const initialActivity = (result.activity || []) as ActivityEvent[]
+
+            for (const item of initialActivity) {
+              const key = item.id || `${item.time}-${item.message}`
+              seenActivityKeys.add(key)
+            }
+
+            setActivity(initialActivity)
+            setActivityLoaded(true)
+          })
+          .catch(() => {
+            setActivityLoaded(true)
+          })
+
         eventSource = new EventSource(
           `${API_BASE_URL}/api/admin/activity-stream?token=${token}`
         )
@@ -145,6 +174,14 @@ export default function AdminPage() {
         eventSource.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data) as ActivityEvent
+            const key = data.id || `${data.time}-${data.message}`
+
+            if (seenActivityKeys.has(key)) {
+              return
+            }
+
+            seenActivityKeys.add(key)
+
             setActivity((prev) => [data, ...prev].slice(0, 50))
           } catch { }
         }
@@ -206,23 +243,30 @@ export default function AdminPage() {
 
       <section className="mb-10">
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-md transition-shadow hover:shadow-lg">
-          <h2 className="mb-4 text-lg font-semibold">Recent Activity</h2>
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <h2 className="text-lg font-semibold">Recent Activity</h2>
+            <p className="text-xs text-slate-400">Latest platform events</p>
+          </div>
 
           <div className="max-h-64 overflow-y-auto pr-2">
-            {activity.length === 0 ? (
+            {!activityLoaded ? (
               <div className="text-sm text-slate-500">
-                Waiting for live activity stream...
+                Loading recent activity...
+              </div>
+            ) : activity.length === 0 ? (
+              <div className="text-sm text-slate-500">
+                No recent platform activity yet.
               </div>
             ) : (
               <div className="space-y-3">
                 {activity.map((item, index) => (
                   <div
-                    key={`${item.time}-${item.message}-${index}`}
+                    key={item.id || `${item.time}-${item.message}-${index}`}
                     className="flex items-start justify-between gap-4 rounded-lg border border-slate-100 bg-slate-50 px-4 py-3"
                   >
                     <div className="text-sm text-slate-700">{item.message}</div>
                     <div className="shrink-0 text-xs text-slate-500">
-                      {new Date(item.time).toLocaleTimeString()}
+                      {new Date(item.time).toLocaleString()}
                     </div>
                   </div>
                 ))}
@@ -260,6 +304,56 @@ export default function AdminPage() {
         </div>
       </section>
 
+      {adminUsers.length > 0 && (
+        <section className="mb-10">
+          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-md transition-shadow hover:shadow-lg">
+            <h2 className="mb-6 text-lg font-semibold">Protected Admin Accounts</h2>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="border-b border-slate-200 text-slate-500">
+                  <tr>
+                    <th className="py-3">Email</th>
+                    <th className="py-3">Plan</th>
+                    <th className="py-3">Status</th>
+                    <th className="py-3">Created</th>
+                    <th className="py-3">Actions</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {adminUsers.map((user) => (
+                    <tr key={user.id} className="border-b border-slate-100">
+                      <td className="py-4">{user.email}</td>
+
+                      <td>
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-medium ${getPlanBadgeClasses(user.plan)}`}
+                        >
+                          {formatPlanLabel(user)}
+                        </span>
+                      </td>
+
+                      <td className="font-medium text-green-600">{user.status}</td>
+
+                      <td>
+                        {user.createdAt
+                          ? new Date(user.createdAt).toLocaleDateString()
+                          : "-"}
+                      </td>
+
+                      <td>
+                        <span className="text-slate-400">Protected</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      )}
+
       <section>
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-md transition-shadow hover:shadow-lg">
           <h2 className="mb-6 text-lg font-semibold">Platform Users</h2>
@@ -277,7 +371,7 @@ export default function AdminPage() {
               </thead>
 
               <tbody>
-                {users.map((user) => (
+                {platformUsers.map((user) => (
                   <tr key={user.id} className="border-b border-slate-100">
                     <td className="py-4">{user.email}</td>
 
@@ -298,22 +392,26 @@ export default function AdminPage() {
                     </td>
 
                     <td>
-                      {user.plan === "admin" ? (
-                        <span className="text-slate-400">Protected</span>
-                      ) : (
-                        <button
-                          onClick={() => {
-                            setUserToDelete(user)
-                            setDeleteModalOpen(true)
-                          }}
-                          className="rounded-md bg-red-50 px-3 py-1 text-xs font-medium text-red-600 transition hover:bg-red-100"
-                        >
-                          Remove
-                        </button>
-                      )}
+                      <button
+                        onClick={() => {
+                          setUserToDelete(user)
+                          setDeleteModalOpen(true)
+                        }}
+                        className="rounded-md bg-red-50 px-3 py-1 text-xs font-medium text-red-600 transition hover:bg-red-100"
+                      >
+                        Remove
+                      </button>
                     </td>
                   </tr>
                 ))}
+
+                {platformUsers.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="py-6 text-center text-sm text-slate-500">
+                      No non-admin users found.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -321,18 +419,16 @@ export default function AdminPage() {
       </section>
 
       <section className="mt-10">
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-md hover:shadow-lg transition-shadow">
-
-          <h2 className="text-lg font-semibold mb-2">
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-md transition-shadow hover:shadow-lg">
+          <h2 className="mb-2 text-lg font-semibold">
             Invite Beta User
           </h2>
 
-          <p className="text-sm text-slate-500 mb-6">
+          <p className="mb-6 text-sm text-slate-500">
             Send an invitation link to grant beta access to Skysirv.
           </p>
 
           <div className="flex gap-3">
-
             <input
               type="email"
               placeholder="email@example.com"
@@ -342,7 +438,6 @@ export default function AdminPage() {
 
             <button
               onClick={async () => {
-
                 const emailInput = document.getElementById("invite-email") as HTMLInputElement
                 const email = emailInput.value.trim()
 
@@ -370,15 +465,12 @@ export default function AdminPage() {
                 } else {
                   alert(data.error || "Failed to send invite")
                 }
-
               }}
               className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
             >
               Send Invite
             </button>
-
           </div>
-
         </div>
       </section>
 
