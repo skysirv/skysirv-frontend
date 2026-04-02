@@ -20,6 +20,17 @@ type ActivityEvent = {
   message: string
 }
 
+type BetaApplication = {
+  id: string
+  full_name: string
+  email: string
+  travel_frequency: string
+  booking_method: string
+  reason: string
+  status: string
+  created_at: string
+}
+
 export default function AdminPage() {
   const router = useRouter()
 
@@ -30,6 +41,7 @@ export default function AdminPage() {
   const [stats, setStats] = useState<any>(null)
   const [telemetry, setTelemetry] = useState<any>(null)
   const [activityLoaded, setActivityLoaded] = useState(false)
+  const [betaApplications, setBetaApplications] = useState<BetaApplication[]>([])
 
   const adminUsers = useMemo(
     () => users.filter((user) => user.plan === "admin"),
@@ -165,6 +177,16 @@ export default function AdminPage() {
           })
           .catch(() => {
             setActivityLoaded(true)
+          })
+
+        fetch(`${API_BASE_URL}/api/admin/beta-applications`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            setBetaApplications(data.applications || [])
           })
 
         eventSource = new EventSource(
@@ -409,6 +431,68 @@ export default function AdminPage() {
                   <tr>
                     <td colSpan={5} className="py-6 text-center text-sm text-slate-500">
                       No non-admin users found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-md transition-shadow hover:shadow-lg">
+          <h2 className="mb-2 text-lg font-semibold">Beta Applications</h2>
+
+          <p className="mb-6 text-sm text-slate-500">
+            Review incoming beta access requests before sending lifetime Pro invites.
+          </p>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-slate-200 text-slate-500">
+                <tr>
+                  <th className="py-3">Name</th>
+                  <th className="py-3">Email</th>
+                  <th className="py-3">Travel Frequency</th>
+                  <th className="py-3">Status</th>
+                  <th className="py-3">Submitted</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {betaApplications.map((application) => (
+                  <tr key={application.id} className="border-b border-slate-100 align-top">
+                    <td className="py-4 font-medium text-slate-900">
+                      {application.full_name}
+                    </td>
+
+                    <td className="py-4 text-slate-700">
+                      {application.email}
+                    </td>
+
+                    <td className="py-4 text-slate-700">
+                      {application.travel_frequency}
+                    </td>
+
+                    <td className="py-4">
+                      <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
+                        {application.status}
+                      </span>
+                    </td>
+
+                    <td className="py-4 text-slate-700">
+                      {application.created_at
+                        ? new Date(application.created_at).toLocaleDateString()
+                        : "-"}
+                    </td>
+                  </tr>
+                ))}
+
+                {betaApplications.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="py-6 text-center text-sm text-slate-500">
+                      No beta applications submitted yet.
                     </td>
                   </tr>
                 )}
