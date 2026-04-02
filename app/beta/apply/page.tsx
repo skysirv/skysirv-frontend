@@ -35,8 +35,25 @@ export default function BetaApplyPage() {
         setSubmitting(true)
 
         try {
-            // Temporary placeholder until backend beta application endpoint is connected
-            await new Promise((resolve) => setTimeout(resolve, 900))
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/beta/apply`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    fullName,
+                    email,
+                    travelFrequency,
+                    bookingMethod,
+                    reason,
+                }),
+            })
+
+            const data = await res.json().catch(() => null)
+
+            if (!res.ok) {
+                throw new Error(data?.error || "Failed to submit beta application")
+            }
 
             toast({
                 title: "Application received",
