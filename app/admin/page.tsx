@@ -505,11 +505,26 @@ export default function AdminPage() {
                             )
 
                             if (res.ok) {
+                              // Update UI
                               setBetaApplications((prev) =>
                                 prev.map((a) =>
                                   a.id === application.id ? { ...a, status: "approved" } : a
                                 )
                               )
+
+                              // 🔥 AUTO CREATE LIFETIME PRO INVITE
+                              await fetch(`${API_BASE_URL}/api/admin/invite-user`, {
+                                method: "POST",
+                                headers: {
+                                  "Content-Type": "application/json",
+                                  Authorization: `Bearer ${token}`,
+                                },
+                                body: JSON.stringify({
+                                  email: application.email,
+                                }),
+                              })
+
+                              alert("Application approved + invite created")
                             } else {
                               alert("Failed to approve")
                             }
