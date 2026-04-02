@@ -44,6 +44,29 @@ const staggerItem = {
   },
 }
 
+type SessionSubscription = {
+  id: string | null
+  user_id: string
+  plan_id: string
+  status: string
+  billing_interval: string | null
+  stripe_subscription_id: string | null
+  current_period_end: string | null
+  created_at: string | null
+}
+
+type SessionResponse = {
+  user?: {
+    id: string
+    email: string
+    is_admin: boolean
+    is_verified: boolean
+    created_at: string
+  }
+  subscription?: SessionSubscription
+  error?: string
+}
+
 type WrappedData = {
   flights: number
   countries: number
@@ -159,6 +182,9 @@ export default function ProDashboardPage() {
   const [selectedYear, setSelectedYear] = useState<number>(2026)
   const [availableWrappedYears, setAvailableWrappedYears] = useState<number[]>([2026])
   const [wrappedSegments, setWrappedSegments] = useState<WrappedSegment[]>([])
+  const [subscription, setSubscription] = useState<SessionSubscription | null>(null)
+
+  const isLifetimePro = subscription?.plan_id === "pro_lifetime"
 
   const proIntelligenceItems = [
     {
@@ -211,6 +237,38 @@ export default function ProDashboardPage() {
   useEffect(() => {
     let cancelled = false
 
+    async function loadSession() {
+      const token = localStorage.getItem("skysirv_token")
+
+      if (!token) return
+
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/session`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        const data: SessionResponse = await res.json().catch(() => ({}))
+
+        if (!cancelled && res.ok) {
+          setSubscription(data.subscription ?? null)
+        }
+      } catch (error) {
+        console.error("Failed to load pro dashboard session", error)
+      }
+    }
+
+    loadSession()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+
     async function loadAvailableYears() {
       const token = localStorage.getItem("skysirv_token")
 
@@ -238,7 +296,7 @@ export default function ProDashboardPage() {
     return () => {
       cancelled = true
     }
-  }, [selectedYear])
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -371,8 +429,14 @@ export default function ProDashboardPage() {
           >
             <div className="max-w-3xl">
               <div className="mb-4 inline-flex items-center rounded-full border border-sky-200 bg-white/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-sky-700 shadow-sm backdrop-blur-sm">
-                Pro Plan Dashboard
+                {isLifetimePro ? "Lifetime Pro Dashboard" : "Pro Plan Dashboard"}
               </div>
+
+              {isLifetimePro && (
+                <div className="mb-4 inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 shadow-sm">
+                  Gifted Lifetime Access
+                </div>
+              )}
 
               <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl md:text-6xl">
                 A sharper intelligence layer for more serious travelers
@@ -416,7 +480,7 @@ export default function ProDashboardPage() {
               label="Routes Remaining"
               value={loading ? "—" : String(remainingRoutes)}
             />
-            <HeroStat label="Access Tier" value="Pro" />
+            <HeroStat label="Access Tier" value={isLifetimePro ? "Lifetime Pro" : "Pro"} />
           </motion.div>
         </div>
       </div>
@@ -508,7 +572,7 @@ export default function ProDashboardPage() {
                     label="Remaining"
                     value={loading ? "—" : String(remainingRoutes)}
                   />
-                  <CompactStat label="Tier" value="Pro" />
+                  <CompactStat label="Tier" value={isLifetimePro ? "Lifetime Pro" : "Pro"} />
                 </div>
               </div>
 
@@ -579,7 +643,7 @@ export default function ProDashboardPage() {
                   transition={{ duration: 0.75, ease: "easeOut" }}
                   className="mx-auto max-w-4xl text-center"
                 >
-                  <div className="flex flex-col items-center gap-5">
+                  <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
                     <motion.div
                       initial={{ opacity: 0, y: 10, scale: 0.98 }}
                       whileInView={{ opacity: 1, y: 0, scale: 1 }}
@@ -590,19 +654,19 @@ export default function ProDashboardPage() {
                       {selectedYear} Annual Intelligence Report
                     </motion.div>
 
-                    <div className="flex flex-col items-center gap-2">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-2 shadow-sm backdrop-blur">
                       <label
                         htmlFor="wrapped-year"
                         className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500"
                       >
-                        Wrapped Year
+                        Year
                       </label>
 
                       <select
                         id="wrapped-year"
                         value={selectedYear}
                         onChange={(e) => setSelectedYear(Number(e.target.value))}
-                        className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 shadow-sm outline-none transition focus:border-sky-300 focus:ring-2 focus:ring-sky-100"
+                        className="bg-transparent pr-1 text-sm font-medium text-slate-900 outline-none"
                       >
                         {availableWrappedYears.map((year: number) => (
                           <option key={year} value={year}>

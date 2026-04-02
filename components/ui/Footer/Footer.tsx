@@ -68,6 +68,12 @@ export default function Footer() {
                 </Link>
               </li>
 
+              <li>
+                <Link href="/beta" className="transition hover:text-slate-400">
+                  Beta Program
+                </Link>
+              </li>
+
             </ul>
           </div>
 

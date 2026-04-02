@@ -1,20 +1,77 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
-import { useRouter } from "next/navigation"
+import { Suspense, useEffect, useMemo, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 
 type Billing = "monthly" | "annual"
+
+type SessionUser = {
+  id: string
+  email: string
+  is_admin: boolean
+  is_verified: boolean
+  created_at: string
+}
+
+type SessionSubscription = {
+  id: string | null
+  user_id: string
+  plan_id: string
+  status: string
+  billing_interval: string | null
+  stripe_subscription_id: string | null
+  current_period_end: string | null
+  created_at: string | null
+}
+
+type SessionResponse = {
+  user?: SessionUser
+  subscription?: SessionSubscription
+  error?: string
+}
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ")
 }
 
-export default function PricingSection() {
+function normalizePlanTier(planId?: string | null): "free" | "pro" | "enterprise" | null {
+  if (!planId) return null
+
+  if (planId === "free") return "free"
+  if (planId === "pro_lifetime" || planId === "pro_monthly" || planId === "pro_yearly") {
+    return "pro"
+  }
+  if (planId === "enterprise_monthly" || planId === "enterprise_yearly") {
+    return "enterprise"
+  }
+
+  return null
+}
+
+export default function ChoosePlanPage() {
+  return (
+    <Suspense fallback={<ChoosePlanPageSkeleton />}>
+      <ChoosePlanPageContent />
+    </Suspense>
+  )
+}
+
+function ChoosePlanPageContent() {
   const mode: "choose-plan" = "choose-plan"
   const [billing, setBilling] = useState<Billing>("monthly")
   const [loading, setLoading] = useState(false)
+  const [sessionLoading, setSessionLoading] = useState(true)
   const [error, setError] = useState("")
+  const [sessionSubscription, setSessionSubscription] = useState<SessionSubscription | null>(null)
+
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const pageMode = searchParams.get("mode")
+  const target = searchParams.get("target")
+
+  const isUpgradeMode = pageMode === "upgrade"
+  const currentPlanTier = normalizePlanTier(sessionSubscription?.plan_id)
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -31,12 +88,67 @@ export default function PricingSection() {
     router.replace(cleanUrl)
   }, [router])
 
+  useEffect(() => {
+    async function loadSession() {
+      const token = localStorage.getItem("skysirv_token")
+
+      if (!token) {
+        setSessionLoading(false)
+        return
+      }
+
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/session`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        const data: SessionResponse = await res.json().catch(() => ({}))
+
+        if (!res.ok) {
+          throw new Error(data?.error || "Failed to load session")
+        }
+
+        setSessionSubscription(data.subscription ?? null)
+      } catch (err) {
+        console.error("Failed to load choose-plan session:", err)
+      } finally {
+        setSessionLoading(false)
+      }
+    }
+
+    loadSession()
+  }, [])
+
   async function handlePlanSelection(plan: string) {
     const token = localStorage.getItem("skysirv_token")
 
     if (!token) {
       router.push("/signin")
       return
+    }
+
+    if (isUpgradeMode) {
+      if (plan === currentPlanTier) {
+        return
+      }
+
+      if (currentPlanTier === "pro" && plan === "free") {
+        return
+      }
+
+      if (currentPlanTier === "enterprise" && (plan === "free" || plan === "pro")) {
+        return
+      }
+
+      if (sessionSubscription?.plan_id === "pro_lifetime" && plan !== "enterprise") {
+        return
+      }
+
+      if (target === "enterprise" && plan !== "enterprise") {
+        return
+      }
     }
 
     setLoading(true)
@@ -118,22 +230,58 @@ export default function PricingSection() {
       ? "Billed monthly"
       : "Billed annually (save ~20%)"
 
+  const heroEyebrow = isUpgradeMode ? "Upgrade your plan" : "Choose your plan"
+
+  const heroTitle = isUpgradeMode
+    ? "Upgrade your Skysirv intelligence layer"
+    : "Start free — upgrade when intelligence becomes leverage"
+
+  const heroCopy = isUpgradeMode
+    ? "Choose the next level of Skysirv™ access based on your current subscription."
+    : "Skysirv™ is built for travelers who want signal over noise — and timing advantage over guesswork."
+
+  const freeCardState = getPlanCardState({
+    plan: "free",
+    currentPlanTier,
+    currentPlanId: sessionSubscription?.plan_id ?? null,
+    isUpgradeMode,
+    target,
+    sessionLoading,
+  })
+
+  const proCardState = getPlanCardState({
+    plan: "pro",
+    currentPlanTier,
+    currentPlanId: sessionSubscription?.plan_id ?? null,
+    isUpgradeMode,
+    target,
+    sessionLoading,
+  })
+
+  const enterpriseCardState = getPlanCardState({
+    plan: "enterprise",
+    currentPlanTier,
+    currentPlanId: sessionSubscription?.plan_id ?? null,
+    isUpgradeMode,
+    target,
+    sessionLoading,
+  })
+
   return (
     <section className="w-full bg-white py-10 md:py-12">
       <div className="mx-auto max-w-5xl px-6">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="max-w-3xl">
             <div className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-slate-500">
-              Choose your plan
+              {heroEyebrow}
             </div>
 
             <h2 className="mt-4 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-              Start free — upgrade when intelligence becomes leverage
+              {heroTitle}
             </h2>
 
             <p className="mt-4 max-w-2xl text-base text-slate-600 sm:text-lg">
-              Skysirv™ is built for travelers who want signal over noise —
-              and timing advantage over guesswork.
+              {heroCopy}
             </p>
           </div>
 
@@ -184,8 +332,10 @@ export default function PricingSection() {
             price={prices.free}
             priceNote="Always free"
             accent={false}
-            ctaLabel="Start Free"
+            ctaLabel={freeCardState.ctaLabel}
             ctaVariant="secondary"
+            disabled={freeCardState.disabled}
+            badge={freeCardState.badge}
             bullets={[
               { label: "Watchlist", value: "Up to 3 routes" },
               { label: "Price history", value: "Basic snapshots" },
@@ -208,9 +358,10 @@ export default function PricingSection() {
                 : "per month"
             }
             accent
-            badge="Most Popular"
-            ctaLabel="Upgrade to Pro"
+            badge={proCardState.badge}
+            ctaLabel={proCardState.ctaLabel}
             ctaVariant="primary"
+            disabled={proCardState.disabled}
             bullets={[
               { label: "Watchlist", value: "Up to 25 routes" },
               { label: "Price Behavior™", value: "30–90 day analysis" },
@@ -233,8 +384,10 @@ export default function PricingSection() {
                 : "per month"
             }
             accent={false}
-            ctaLabel="Upgrade to Enterprise"
+            ctaLabel={enterpriseCardState.ctaLabel}
             ctaVariant="secondary"
+            disabled={enterpriseCardState.disabled}
+            badge={enterpriseCardState.badge}
             bullets={[
               { label: "Watchlist", value: "Unlimited routes" },
               { label: "Price Behavior™", value: "Extended history" },
@@ -253,6 +406,147 @@ export default function PricingSection() {
   )
 }
 
+function ChoosePlanPageSkeleton() {
+  return (
+    <section className="w-full bg-white py-10 md:py-12">
+      <div className="mx-auto max-w-5xl px-6">
+        <div className="animate-pulse">
+          <div className="h-6 w-32 rounded bg-slate-100" />
+          <div className="mt-4 h-12 w-3/4 rounded bg-slate-100" />
+          <div className="mt-4 h-6 w-2/3 rounded bg-slate-100" />
+
+          <div className="mt-8 grid gap-6 lg:grid-cols-3">
+            <div className="h-[420px] rounded-2xl border border-slate-200 bg-slate-50" />
+            <div className="h-[420px] rounded-2xl border border-slate-200 bg-slate-50" />
+            <div className="h-[420px] rounded-2xl border border-slate-200 bg-slate-50" />
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function getPlanCardState(args: {
+  plan: "free" | "pro" | "enterprise"
+  currentPlanTier: "free" | "pro" | "enterprise" | null
+  currentPlanId: string | null
+  isUpgradeMode: boolean
+  target: string | null
+  sessionLoading: boolean
+}) {
+  const { plan, currentPlanTier, currentPlanId, isUpgradeMode, target, sessionLoading } = args
+
+  if (sessionLoading && isUpgradeMode) {
+    return {
+      disabled: true,
+      ctaLabel: "Loading...",
+      badge: undefined as string | undefined,
+    }
+  }
+
+  if (!isUpgradeMode) {
+    if (plan === "pro") {
+      return {
+        disabled: false,
+        ctaLabel: "Upgrade to Pro",
+        badge: "Most Popular",
+      }
+    }
+
+    if (plan === "enterprise") {
+      return {
+        disabled: false,
+        ctaLabel: "Upgrade to Enterprise",
+        badge: undefined,
+      }
+    }
+
+    return {
+      disabled: false,
+      ctaLabel: "Start Free",
+      badge: undefined,
+    }
+  }
+
+  if (plan === currentPlanTier) {
+    if (plan === "pro" && currentPlanId === "pro_lifetime") {
+      return {
+        disabled: true,
+        ctaLabel: "Current Plan",
+        badge: "Lifetime Pro",
+      }
+    }
+
+    return {
+      disabled: true,
+      ctaLabel: "Current Plan",
+      badge: "Current Plan",
+    }
+  }
+
+  if (currentPlanTier === "pro" && plan === "free") {
+    return {
+      disabled: true,
+      ctaLabel: "Unavailable",
+      badge: undefined,
+    }
+  }
+
+  if (currentPlanTier === "enterprise" && (plan === "free" || plan === "pro")) {
+    return {
+      disabled: true,
+      ctaLabel: "Unavailable",
+      badge: undefined,
+    }
+  }
+
+  if (currentPlanId === "pro_lifetime") {
+    if (plan === "enterprise") {
+      return {
+        disabled: false,
+        ctaLabel: "Upgrade to Enterprise",
+        badge: "Eligible Upgrade",
+      }
+    }
+
+    return {
+      disabled: true,
+      ctaLabel: "Unavailable",
+      badge: undefined,
+    }
+  }
+
+  if (target === "enterprise" && plan !== "enterprise") {
+    return {
+      disabled: true,
+      ctaLabel: "Unavailable",
+      badge: undefined,
+    }
+  }
+
+  if (plan === "pro") {
+    return {
+      disabled: false,
+      ctaLabel: "Upgrade to Pro",
+      badge: "Most Popular",
+    }
+  }
+
+  if (plan === "enterprise") {
+    return {
+      disabled: false,
+      ctaLabel: "Upgrade to Enterprise",
+      badge: isUpgradeMode ? "Best Value" : undefined,
+    }
+  }
+
+  return {
+    disabled: false,
+    ctaLabel: "Start Free",
+    badge: undefined,
+  }
+}
+
 function TierCard(props: {
   mode: "marketing" | "choose-plan"
   handlePlanSelection: (plan: string) => void
@@ -267,6 +561,7 @@ function TierCard(props: {
   badge?: string
   ctaLabel: string
   ctaVariant: "primary" | "secondary"
+  disabled?: boolean
 }) {
   const {
     mode,
@@ -282,12 +577,14 @@ function TierCard(props: {
     badge,
     ctaLabel,
     ctaVariant,
+    disabled = false,
   } = props
 
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl border bg-white p-7 shadow-sm transition hover:-translate-y-1",
+        "relative overflow-hidden rounded-2xl border bg-white p-7 shadow-sm transition",
+        disabled ? "opacity-70" : "hover:-translate-y-1",
         highlight
           ? "border-slate-400 shadow-md"
           : accent
@@ -316,9 +613,9 @@ function TierCard(props: {
         <div className="mt-6">
           <button
             type="button"
-            disabled={loading}
+            disabled={loading || disabled}
             onClick={() => {
-              if (mode === "choose-plan") {
+              if (mode === "choose-plan" && !disabled) {
                 handlePlanSelection(title.toLowerCase())
               }
             }}
@@ -329,7 +626,7 @@ function TierCard(props: {
                 : "border border-slate-200 text-slate-700 hover:bg-slate-50"
             )}
           >
-            {loading ? "Please wait..." : ctaLabel}
+            {loading && !disabled ? "Please wait..." : ctaLabel}
           </button>
         </div>
 

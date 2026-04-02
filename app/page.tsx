@@ -230,7 +230,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.32, duration: 0.55 }}
-            className="mt-8 flex justify-center gap-4"
+            className="mt-8 flex flex-wrap justify-center gap-4"
           >
             <motion.div whileHover={{ y: -2, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Link
@@ -238,6 +238,15 @@ export default function HomePage() {
                 className="rounded-lg bg-slate-900 px-6 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-slate-700"
               >
                 Start Monitoring Flights
+              </Link>
+            </motion.div>
+
+            <motion.div whileHover={{ y: -2, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Link
+                href="/beta"
+                className="rounded-lg border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-900 shadow-sm transition hover:bg-slate-50"
+              >
+                Explore Beta Program
               </Link>
             </motion.div>
           </motion.div>
@@ -262,7 +271,7 @@ export default function HomePage() {
                     </h2>
 
                     <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
-                      Skysirv transforms noisy fare movement into a calmer, more
+                      Skysirv™ transforms noisy fare movement into a calmer, more
                       structured decision layer — so travelers know when to act,
                       when to wait, and what the market is really saying.
                     </p>
@@ -478,7 +487,7 @@ export default function HomePage() {
                 />
                 <DarkInsightRow
                   label="Why it matters"
-                  text="This is the kind of route signal Skysirv is built to surface before the market shifts back."
+                  text="This is the kind of route signal Skysirv™ is built to surface before the market shifts back."
                 />
               </div>
             </div>
@@ -552,7 +561,7 @@ export default function HomePage() {
               Not another search tool. A structured intelligence experience.
             </h2>
             <p className="mt-6 max-w-xl text-sm leading-7 text-slate-300 sm:text-base">
-              Skysirv is being built for travelers who want more than fare listings.
+              Skysirv™ is being built for travelers who want more than fare listings.
               It is a decision environment designed around timing, price behavior,
               clarity, and confidence.
             </p>

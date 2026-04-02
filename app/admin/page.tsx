@@ -421,11 +421,11 @@ export default function AdminPage() {
       <section className="mt-10">
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-md transition-shadow hover:shadow-lg">
           <h2 className="mb-2 text-lg font-semibold">
-            Invite Beta User
+            Free Lifeime Pro Subscription
           </h2>
 
           <p className="mb-6 text-sm text-slate-500">
-            Send an invitation link to grant beta access to Skysirv.
+            Send an invitation link to grant free lifetime pro subscription.
           </p>
 
           <div className="flex gap-3">

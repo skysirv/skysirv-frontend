@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { toast } from "@/components/ui/Toasts/use-toast"
+import { useRouter } from "next/navigation"
 
 type SessionUser = {
   id: string
@@ -30,6 +31,7 @@ type SessionResponse = {
 }
 
 export default function AccountPage() {
+  const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [sessionUser, setSessionUser] = useState<SessionUser | null>(null)
   const [subscription, setSubscription] = useState<SessionSubscription | null>(null)
@@ -82,6 +84,8 @@ export default function AccountPage() {
     const planId = subscription?.plan_id
 
     switch (planId) {
+      case "pro_lifetime":
+        return "Lifetime Pro"
       case "pro_monthly":
         return "Pro Monthly"
       case "pro_yearly":
@@ -97,8 +101,16 @@ export default function AccountPage() {
   }, [subscription])
 
   const billingCycleLabel = useMemo(() => {
-    if (!subscription || subscription.plan_id === "free") {
+    if (!subscription) {
+      return "—"
+    }
+
+    if (subscription.plan_id === "free") {
       return "Free plan"
+    }
+
+    if (subscription.plan_id === "pro_lifetime") {
+      return "Lifetime access"
     }
 
     if (subscription.billing_interval) {
@@ -124,6 +136,20 @@ export default function AccountPage() {
     }
 
     return "Active"
+  }, [subscription])
+
+  const subscriptionActionLabel = useMemo(() => {
+    const planId = subscription?.plan_id
+
+    if (!planId || planId === "free") {
+      return "Upgrade Plan"
+    }
+
+    if (planId === "pro_lifetime") {
+      return "Upgrade to Enterprise"
+    }
+
+    return "Manage Subscription"
   }, [subscription])
 
   const accountStatusLabel = useMemo(() => {
@@ -155,7 +181,12 @@ export default function AccountPage() {
   }, [sessionUser])
 
   const nextBillingDateLabel = useMemo(() => {
-    if (!subscription || subscription.plan_id === "free" || !subscription.current_period_end) {
+    if (
+      !subscription ||
+      subscription.plan_id === "free" ||
+      subscription.plan_id === "pro_lifetime" ||
+      !subscription.current_period_end
+    ) {
       return "—"
     }
 
@@ -174,6 +205,23 @@ export default function AccountPage() {
   }
 
   function handleManageSubscription() {
+    const planId = subscription?.plan_id
+
+    if (!planId || planId === "free") {
+      router.push("/choose-plan?mode=upgrade")
+      return
+    }
+
+    if (planId === "pro_lifetime") {
+      router.push("/choose-plan?mode=upgrade&target=enterprise")
+      return
+    }
+
+    if (planId === "pro_monthly" || planId === "pro_yearly") {
+      router.push("/choose-plan?mode=upgrade")
+      return
+    }
+
     toast({
       title: "Coming soon",
       description: "Stripe Customer Portal will be connected here soon."
@@ -283,7 +331,7 @@ export default function AccountPage() {
                   onClick={handleManageSubscription}
                   className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
                 >
-                  Manage Subscription
+                  {subscriptionActionLabel}
                 </button>
               </div>
 

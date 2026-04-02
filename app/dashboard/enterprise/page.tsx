@@ -111,7 +111,7 @@ const defaultWrappedData: WrappedData = {
   },
 }
 
-const WRAPPED_YEAR_OPTIONS = [2026, 2025, 2024, 2023]
+const WRAPPED_YEAR_OPTIONS = [2026]
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
@@ -487,7 +487,7 @@ export default function DashboardPage() {
                   transition={{ duration: 0.75, ease: "easeOut" }}
                   className="mx-auto max-w-4xl text-center"
                 >
-                  <div className="flex flex-col items-center gap-5">
+                  <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
                     <motion.div
                       initial={{ opacity: 0, y: 10, scale: 0.98 }}
                       whileInView={{ opacity: 1, y: 0, scale: 1 }}
@@ -498,19 +498,19 @@ export default function DashboardPage() {
                       {selectedYear} Annual Intelligence Report
                     </motion.div>
 
-                    <div className="flex flex-col items-center gap-2">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-2 shadow-sm backdrop-blur">
                       <label
                         htmlFor="wrapped-year"
                         className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500"
                       >
-                        Wrapped Year
+                        Year
                       </label>
 
                       <select
                         id="wrapped-year"
                         value={selectedYear}
                         onChange={(e) => setSelectedYear(Number(e.target.value))}
-                        className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 shadow-sm outline-none transition focus:border-sky-300 focus:ring-2 focus:ring-sky-100"
+                        className="bg-transparent pr-1 text-sm font-medium text-slate-900 outline-none"
                       >
                         {WRAPPED_YEAR_OPTIONS.map((year) => (
                           <option key={year} value={year}>
