@@ -457,6 +457,7 @@ export default function AdminPage() {
                   <th className="py-3">Travel Frequency</th>
                   <th className="py-3">Status</th>
                   <th className="py-3">Submitted</th>
+                  <th className="py-3">Actions</th>
                 </tr>
               </thead>
 
@@ -485,6 +486,68 @@ export default function AdminPage() {
                       {application.created_at
                         ? new Date(application.created_at).toLocaleDateString()
                         : "-"}
+                    </td>
+
+                    <td className="py-4">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={async () => {
+                            const token = localStorage.getItem("skysirv_token")
+
+                            const res = await fetch(
+                              `${API_BASE_URL}/api/admin/beta-applications/${application.id}/approve`,
+                              {
+                                method: "POST",
+                                headers: {
+                                  Authorization: `Bearer ${token}`,
+                                },
+                              }
+                            )
+
+                            if (res.ok) {
+                              setBetaApplications((prev) =>
+                                prev.map((a) =>
+                                  a.id === application.id ? { ...a, status: "approved" } : a
+                                )
+                              )
+                            } else {
+                              alert("Failed to approve")
+                            }
+                          }}
+                          className="rounded-md bg-green-50 px-3 py-1 text-xs font-medium text-green-600 hover:bg-green-100"
+                        >
+                          Approve
+                        </button>
+
+                        <button
+                          onClick={async () => {
+                            const token = localStorage.getItem("skysirv_token")
+
+                            const res = await fetch(
+                              `${API_BASE_URL}/api/admin/beta-applications/${application.id}/reject`,
+                              {
+                                method: "POST",
+                                headers: {
+                                  Authorization: `Bearer ${token}`,
+                                },
+                              }
+                            )
+
+                            if (res.ok) {
+                              setBetaApplications((prev) =>
+                                prev.map((a) =>
+                                  a.id === application.id ? { ...a, status: "rejected" } : a
+                                )
+                              )
+                            } else {
+                              alert("Failed to reject")
+                            }
+                          }}
+                          className="rounded-md bg-red-50 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-100"
+                        >
+                          Reject
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
