@@ -1,7 +1,13 @@
 "use client"
 
 import Link from "next/link"
-import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion"
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "framer-motion"
 import { useRef } from "react"
 import PricingSection from "@/components/pricing-section"
 
@@ -78,43 +84,56 @@ export default function HomePage() {
   })
 
   const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 90,
-    damping: 20,
-    mass: 0.2,
+    stiffness: 110,
+    damping: 24,
+    mass: 0.24,
   })
 
-  const heroBadgeOpacity = useTransform(smoothProgress, [0, 0.16, 0.26], [1, 1, 0.35])
-  const heroTextY = useTransform(smoothProgress, [0, 0.34], [0, shouldReduceMotion ? 0 : -80])
-  const heroTextOpacity = useTransform(smoothProgress, [0, 0.18, 0.34], [1, 1, 0.16])
+  const heroBadgeOpacity = useTransform(smoothProgress, [0, 0.14, 0.26], [1, 1, 0.45])
 
-  const transformHeadlinesY = useTransform(smoothProgress, [0.08, 0.42], [shouldReduceMotion ? 0 : 60, shouldReduceMotion ? 0 : -40])
-  const transformHeadlinesOpacity = useTransform(smoothProgress, [0.12, 0.22, 0.68], [0, 1, 1])
+  const introOpacity = useTransform(smoothProgress, [0, 0.16, 0.28], [1, 1, 0])
+  const introY = useTransform(smoothProgress, [0, 0.28], [0, shouldReduceMotion ? 0 : -36])
 
-  const supportingContentY = useTransform(smoothProgress, [0, 0.65], [0, shouldReduceMotion ? 0 : -90])
-  const supportingContentOpacity = useTransform(smoothProgress, [0, 0.12, 0.72], [1, 1, 0.68])
+  const sequenceWrapOpacity = useTransform(smoothProgress, [0.24, 0.34, 0.74, 0.84], [0, 1, 1, 0])
+  const sequenceWrapY = useTransform(
+    smoothProgress,
+    [0.24, 0.84],
+    [shouldReduceMotion ? 0 : 16, shouldReduceMotion ? 0 : -18]
+  )
 
-  const panelY = useTransform(smoothProgress, [0, 0.65], [0, shouldReduceMotion ? 0 : -120])
-  const panelScale = useTransform(smoothProgress, [0, 0.65], [1, shouldReduceMotion ? 1 : 0.94])
-  const panelOpacity = useTransform(smoothProgress, [0, 0.16, 0.78], [0.95, 1, 0.72])
+  const line1Opacity = useTransform(smoothProgress, [0.32, 0.38, 0.48, 0.54], [0, 1, 1, 0])
+  const line1Y = useTransform(smoothProgress, [0.32, 0.54], [shouldReduceMotion ? 0 : 18, shouldReduceMotion ? 0 : -10])
 
-  const orbLeftX = useTransform(smoothProgress, [0, 1], [0, shouldReduceMotion ? 0 : -80])
-  const orbLeftY = useTransform(smoothProgress, [0, 1], [0, shouldReduceMotion ? 0 : 60])
+  const line2Opacity = useTransform(smoothProgress, [0.5, 0.56, 0.66, 0.72], [0, 1, 1, 0])
+  const line2Y = useTransform(smoothProgress, [0.5, 0.72], [shouldReduceMotion ? 0 : 18, shouldReduceMotion ? 0 : -10])
 
-  const orbRightX = useTransform(smoothProgress, [0, 1], [0, shouldReduceMotion ? 0 : 95])
-  const orbRightY = useTransform(smoothProgress, [0, 1], [0, shouldReduceMotion ? 0 : -70])
+  const line3Opacity = useTransform(smoothProgress, [0.68, 0.74, 0.88], [0, 1, 1])
+  const line3Y = useTransform(smoothProgress, [0.68, 0.88], [shouldReduceMotion ? 0 : 18, 0])
 
-  const orbBottomY = useTransform(smoothProgress, [0, 1], [0, shouldReduceMotion ? 0 : -90])
-  const glowOpacity = useTransform(smoothProgress, [0, 0.5, 1], [0.18, 0.3, 0.22])
+  const supportingContentOpacity = useTransform(smoothProgress, [0, 0.58, 0.72], [1, 1, 0.78])
+  const supportingContentY = useTransform(smoothProgress, [0, 0.72], [0, shouldReduceMotion ? 0 : -42])
 
-  const heroOverlayOpacity = useTransform(smoothProgress, [0.56, 0.88], [0, 1])
-  const heroExitGradientOpacity = useTransform(smoothProgress, [0.58, 0.92], [0.08, 0.95])
+  const panelOpacity = useTransform(smoothProgress, [0, 0.52, 0.82], [0.96, 1, 0.84])
+  const panelY = useTransform(smoothProgress, [0, 0.82], [0, shouldReduceMotion ? 0 : -64])
+  const panelScale = useTransform(smoothProgress, [0, 0.82], [1, shouldReduceMotion ? 1 : 0.97])
+
+  const orbLeftX = useTransform(smoothProgress, [0, 1], [0, shouldReduceMotion ? 0 : -42])
+  const orbLeftY = useTransform(smoothProgress, [0, 1], [0, shouldReduceMotion ? 0 : 26])
+
+  const orbRightX = useTransform(smoothProgress, [0, 1], [0, shouldReduceMotion ? 0 : 52])
+  const orbRightY = useTransform(smoothProgress, [0, 1], [0, shouldReduceMotion ? 0 : -34])
+
+  const orbBottomY = useTransform(smoothProgress, [0, 1], [0, shouldReduceMotion ? 0 : -34])
+  const glowOpacity = useTransform(smoothProgress, [0, 0.5, 1], [0.16, 0.26, 0.18])
+
+  const bottomFadeOpacity = useTransform(smoothProgress, [0.66, 0.92], [0.08, 0.9])
 
   return (
     <>
       {/* HERO SECTION */}
       <section
         ref={heroRef}
-        className="relative min-h-[200dvh] bg-white"
+        className="relative min-h-[140dvh] bg-white"
       >
         <div className="sticky top-0 h-[100dvh] overflow-hidden bg-white">
           <div className="pointer-events-none absolute inset-0">
@@ -123,7 +142,7 @@ export default function HomePage() {
               animate={
                 shouldReduceMotion
                   ? undefined
-                  : { x: [0, 30, 0], y: [0, 20, 0] }
+                  : { x: [0, 26, 0], y: [0, 18, 0] }
               }
               transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
               className="absolute left-[-120px] top-10 h-96 w-96 rounded-full bg-sky-100/70 blur-3xl"
@@ -133,7 +152,7 @@ export default function HomePage() {
               animate={
                 shouldReduceMotion
                   ? undefined
-                  : { x: [0, -28, 0], y: [0, -18, 0] }
+                  : { x: [0, -24, 0], y: [0, -16, 0] }
               }
               transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
               className="absolute right-[-140px] top-12 h-[28rem] w-[28rem] rounded-full bg-indigo-100/60 blur-3xl"
@@ -143,7 +162,7 @@ export default function HomePage() {
               animate={
                 shouldReduceMotion
                   ? undefined
-                  : { x: [0, 20, 0], y: [0, -16, 0] }
+                  : { x: [0, 18, 0], y: [0, -14, 0] }
               }
               transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
               className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-cyan-100/50 blur-3xl"
@@ -153,15 +172,14 @@ export default function HomePage() {
               animate={
                 shouldReduceMotion
                   ? undefined
-                  : { opacity: [0.18, 0.32, 0.18] }
+                  : { opacity: [0.16, 0.28, 0.16] }
               }
               transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
               className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.10),transparent_38%)]"
             />
-
             <motion.div
-              style={{ opacity: heroExitGradientOpacity }}
-              className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent via-white/65 to-white"
+              style={{ opacity: bottomFadeOpacity }}
+              className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-b from-transparent via-white/60 to-white"
             />
           </div>
 
@@ -177,16 +195,17 @@ export default function HomePage() {
                 Premium Airfare Intelligence
               </motion.div>
 
-              <div className="relative mt-8 flex min-h-[230px] w-full max-w-5xl items-center justify-center sm:min-h-[260px] md:min-h-[300px]">
+              <div className="relative mt-8 flex min-h-[220px] w-full max-w-5xl items-center justify-center sm:min-h-[250px] md:min-h-[280px]">
                 <motion.div
                   style={{
-                    y: heroTextY,
-                    opacity: heroTextOpacity,
+                    opacity: introOpacity,
+                    y: introY,
                   }}
                   className="absolute inset-0 flex flex-col items-center justify-center"
                 >
                   <h1 className="text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl md:text-7xl">
-                    Flight Intelligence That Helps Travelers Understand Pricing
+                    Intelligent monitoring for
+                    premium air travel
                   </h1>
 
                   <motion.p
@@ -202,51 +221,40 @@ export default function HomePage() {
 
                 <motion.div
                   style={{
-                    y: transformHeadlinesY,
-                    opacity: transformHeadlinesOpacity,
+                    opacity: sequenceWrapOpacity,
+                    y: sequenceWrapY,
                   }}
                   className="pointer-events-none absolute inset-0 flex items-center justify-center"
                 >
-                  <div className="max-w-4xl">
-                    <div className="space-y-3 sm:space-y-4">
-                      <motion.p
-                        style={{
-                          opacity: useTransform(smoothProgress, [0.18, 0.3, 0.44], [0.25, 1, 0.7]),
-                          y: useTransform(smoothProgress, [0.18, 0.44], [24, 0]),
-                        }}
-                        className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-5xl md:text-6xl"
-                      >
-                        Understand pricing
-                      </motion.p>
+                  <div className="flex min-h-[170px] w-full items-center justify-center">
+                    <motion.p
+                      style={{ opacity: line1Opacity, y: line1Y }}
+                      className="absolute max-w-4xl text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl md:text-6xl"
+                    >
+                      Understand pricing
+                    </motion.p>
 
-                      <motion.p
-                        style={{
-                          opacity: useTransform(smoothProgress, [0.28, 0.42, 0.56], [0.15, 1, 0.78]),
-                          y: useTransform(smoothProgress, [0.24, 0.56], [28, 0]),
-                        }}
-                        className="text-3xl font-semibold tracking-tight text-slate-900/85 sm:text-5xl md:text-6xl"
-                      >
-                        Predict trends
-                      </motion.p>
+                    <motion.p
+                      style={{ opacity: line2Opacity, y: line2Y }}
+                      className="absolute max-w-4xl text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl md:text-6xl"
+                    >
+                      Predict trends
+                    </motion.p>
 
-                      <motion.p
-                        style={{
-                          opacity: useTransform(smoothProgress, [0.4, 0.56, 0.74], [0.12, 1, 0.92]),
-                          y: useTransform(smoothProgress, [0.36, 0.74], [32, 0]),
-                        }}
-                        className="bg-gradient-to-r from-slate-900 via-sky-700 to-cyan-600 bg-clip-text text-3xl font-semibold tracking-tight text-transparent sm:text-5xl md:text-6xl"
-                      >
-                        Book with confidence
-                      </motion.p>
-                    </div>
+                    <motion.p
+                      style={{ opacity: line3Opacity, y: line3Y }}
+                      className="absolute max-w-4xl bg-gradient-to-r from-slate-900 via-sky-700 to-cyan-600 bg-clip-text text-4xl font-semibold tracking-tight text-transparent sm:text-5xl md:text-6xl"
+                    >
+                      Book with confidence
+                    </motion.p>
                   </div>
                 </motion.div>
               </div>
 
               <motion.div
                 style={{
-                  y: supportingContentY,
                   opacity: supportingContentOpacity,
+                  y: supportingContentY,
                 }}
                 className="w-full"
               >
@@ -380,11 +388,11 @@ export default function HomePage() {
                 {...fadeUp}
                 transition={{ delay: 0.38, duration: 0.85, ease: "easeOut" }}
                 style={{
+                  opacity: panelOpacity,
                   y: panelY,
                   scale: panelScale,
-                  opacity: panelOpacity,
                 }}
-                className="mt-12 w-full max-w-6xl"
+                className="mt-14 w-full max-w-6xl"
               >
                 <div className="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/90 shadow-[0_25px_70px_rgba(15,23,42,0.08)] backdrop-blur">
                   <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
@@ -483,11 +491,6 @@ export default function HomePage() {
               </motion.div>
             </div>
           </div>
-
-          <motion.div
-            style={{ opacity: heroOverlayOpacity }}
-            className="pointer-events-none absolute inset-0 bg-white"
-          />
         </div>
       </section>
 
