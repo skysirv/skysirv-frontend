@@ -92,7 +92,7 @@ export default function Navlinks({ user }: NavlinksProps) {
   return (
     <div className="pointer-events-auto pt-4 md:pt-5">
       <div className="relative mx-auto flex max-w-5xl items-center justify-between rounded-full border border-slate-200 bg-white px-6 py-3 shadow-[0_12px_30px_rgba(15,23,42,0.10)]">
-        <div className="flex items-center translate-y-[1px] -translate-x-3">
+        <div className="flex items-center translate-y-[1px] -translate-x-2">
           <Link href="/" className={s.logo} aria-label="Skysirv">
             <span style={{ display: 'flex', alignItems: 'center', height: '40px' }}>
               <img
