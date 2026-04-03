@@ -17,7 +17,7 @@ export default function Footer() {
               <img
                 src="/branding/logo/skysirv-logo.svg"
                 alt="Skysirv"
-                className="h-20 w-auto"
+                className="h-32 w-auto"
               />
             </Link>
 
