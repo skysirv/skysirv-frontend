@@ -11,9 +11,14 @@ export default function Footer() {
           <div className="max-w-xs text-center md:text-left">
             <Link
               href="/"
-              className="text-xl font-bold text-slate-900 transition hover:text-slate-700"
+              className="inline-flex items-center"
+              aria-label="Skysirv"
             >
-              Skysirv™
+              <img
+                src="/branding/logo/skysirv-logo.svg"
+                alt="Skysirv"
+                className="h-7 w-auto"
+              />
             </Link>
 
             <p className="mt-4 text-sm leading-6 text-slate-600">
