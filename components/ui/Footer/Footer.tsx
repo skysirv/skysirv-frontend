@@ -21,7 +21,7 @@ export default function Footer() {
               />
             </Link>
 
-            <p className="mt-4 text-sm leading-6 text-slate-600">
+            <p className="mt-2 text-sm leading-6 text-slate-600">
               Flight intelligence that helps travelers understand pricing and
               book with more confidence.
             </p>
