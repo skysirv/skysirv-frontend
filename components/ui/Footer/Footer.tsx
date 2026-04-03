@@ -11,7 +11,7 @@ export default function Footer() {
           <div className="max-w-xs text-center md:text-left flex flex-col justify-start">
             <Link
               href="/"
-              className="text-xl font-bold text-slate-900 transition hover:text-slate-700"
+              className="text-xl font-bold leading-none text-slate-900 transition hover:text-slate-700"
             >
               Skysirv™
             </Link>
