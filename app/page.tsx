@@ -531,58 +531,62 @@ export default function HomePage() {
       {/* Dark contrast section */}
       <motion.section
         {...fadeUp}
-        className="relative overflow-hidden bg-slate-950 py-24 text-white"
+        className="relative w-full bg-white py-24"
       >
-        <div className="pointer-events-none absolute inset-0">
-          <motion.div
-            animate={{ opacity: [0.12, 0.24, 0.12], scale: [1, 1.04, 1] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.20),transparent_38%)]"
-          />
-          <motion.div
-            animate={{ x: [0, 18, 0], y: [0, -14, 0] }}
-            transition={{ duration: 7.6, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute right-[-20px] top-[-20px] h-44 w-44 rounded-full bg-sky-500/10 blur-3xl"
-          />
-          <motion.div
-            animate={{ x: [0, -14, 0], y: [0, 18, 0] }}
-            transition={{ duration: 8.4, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute bottom-[-24px] left-[-16px] h-48 w-48 rounded-full bg-indigo-500/10 blur-3xl"
-          />
-        </div>
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="relative overflow-hidden rounded-[2rem] bg-slate-950 px-6 py-12 text-white shadow-[0_25px_70px_rgba(15,23,42,0.18)] sm:px-8 sm:py-14 lg:px-10 lg:py-16">
+            <div className="pointer-events-none absolute inset-0">
+              <motion.div
+                animate={{ opacity: [0.12, 0.24, 0.12], scale: [1, 1.04, 1] }}
+                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.20),transparent_38%)]"
+              />
+              <motion.div
+                animate={{ x: [0, 18, 0], y: [0, -14, 0] }}
+                transition={{ duration: 7.6, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute right-[-20px] top-[-20px] h-44 w-44 rounded-full bg-sky-500/10 blur-3xl"
+              />
+              <motion.div
+                animate={{ x: [0, -14, 0], y: [0, 18, 0] }}
+                transition={{ duration: 8.4, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute bottom-[-24px] left-[-16px] h-48 w-48 rounded-full bg-indigo-500/10 blur-3xl"
+              />
+            </div>
 
-        <div className="relative mx-auto grid max-w-6xl gap-10 px-6 lg:grid-cols-[0.95fr_1.05fr]">
-          <div>
-            <p className="text-xs font-medium tracking-[0.18em] text-slate-400 uppercase">
-              A calmer decision layer
-            </p>
-            <h2 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">
-              Not another search tool. A structured intelligence experience.
-            </h2>
-            <p className="mt-6 max-w-xl text-sm leading-7 text-slate-300 sm:text-base">
-              Skysirv™ is being built for travelers who want more than fare listings.
-              It is a decision environment designed around timing, price behavior,
-              clarity, and confidence.
-            </p>
-          </div>
+            <div className="relative grid gap-10 lg:grid-cols-[0.95fr_1.05fr]">
+              <div>
+                <p className="text-xs font-medium tracking-[0.18em] text-slate-400 uppercase">
+                  A calmer decision layer
+                </p>
+                <h2 className="mt-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">
+                  Not another search tool. A structured intelligence experience.
+                </h2>
+                <p className="mt-6 max-w-xl text-sm leading-7 text-slate-300 sm:text-base">
+                  Skysirv™ is being built for travelers who want more than fare listings.
+                  It is a decision environment designed around timing, price behavior,
+                  clarity, and confidence.
+                </p>
+              </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <DarkFeatureCard
-              title="Clarity"
-              text="Organize route behavior into signals that are easier to understand and act on."
-            />
-            <DarkFeatureCard
-              title="Timing"
-              text="Spot meaningful market moments instead of reacting blindly to every fare change."
-            />
-            <DarkFeatureCard
-              title="Confidence"
-              text="Use scoring, summaries, and signals to travel with less uncertainty."
-            />
-            <DarkFeatureCard
-              title="Discipline"
-              text="Turn a noisy airfare market into a cleaner booking workflow."
-            />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <DarkFeatureCard
+                  title="Clarity"
+                  text="Organize route behavior into signals that are easier to understand and act on."
+                />
+                <DarkFeatureCard
+                  title="Timing"
+                  text="Spot meaningful market moments instead of reacting blindly to every fare change."
+                />
+                <DarkFeatureCard
+                  title="Confidence"
+                  text="Use scoring, summaries, and signals to travel with less uncertainty."
+                />
+                <DarkFeatureCard
+                  title="Discipline"
+                  text="Turn a noisy airfare market into a cleaner booking workflow."
+                />
+              </div>
+            </div>
           </div>
         </div>
       </motion.section>
