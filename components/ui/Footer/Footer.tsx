@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 gap-12 md:grid-cols-4 md:justify-items-center md:text-center">
 
           {/* Brand */}
-          <div className="max-w-xs text-center md:text-left">
+          <div className="max-w-xs text-center md:text-left self-start">
             <Link
               href="/"
               className="text-xl font-bold text-slate-900 transition hover:text-slate-700"
@@ -44,7 +44,7 @@ export default function Footer() {
 
               <li>
                 <Link href="/ai-assistant" className="transition hover:text-slate-400">
-                  Skysirv Flight Attendant
+                  Skysirv Flight Attendant™
                 </Link>
               </li>
 
