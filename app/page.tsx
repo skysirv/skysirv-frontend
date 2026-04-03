@@ -1,7 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { motion } from "framer-motion"
+import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion"
+import { useRef } from "react"
 import PricingSection from "@/components/pricing-section"
 
 const fadeUp = {
@@ -68,312 +69,425 @@ export default function HomePage() {
     },
   ]
 
+  const heroRef = useRef<HTMLElement | null>(null)
+  const shouldReduceMotion = useReducedMotion()
+
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end end"],
+  })
+
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 90,
+    damping: 20,
+    mass: 0.2,
+  })
+
+  const heroBadgeOpacity = useTransform(smoothProgress, [0, 0.16, 0.26], [1, 1, 0.35])
+  const heroTextY = useTransform(smoothProgress, [0, 0.34], [0, shouldReduceMotion ? 0 : -80])
+  const heroTextOpacity = useTransform(smoothProgress, [0, 0.18, 0.34], [1, 1, 0.16])
+
+  const transformHeadlinesY = useTransform(smoothProgress, [0.08, 0.42], [shouldReduceMotion ? 0 : 60, shouldReduceMotion ? 0 : -40])
+  const transformHeadlinesOpacity = useTransform(smoothProgress, [0.12, 0.22, 0.68], [0, 1, 1])
+
+  const supportingContentY = useTransform(smoothProgress, [0, 0.65], [0, shouldReduceMotion ? 0 : -90])
+  const supportingContentOpacity = useTransform(smoothProgress, [0, 0.12, 0.72], [1, 1, 0.68])
+
+  const panelY = useTransform(smoothProgress, [0, 0.65], [0, shouldReduceMotion ? 0 : -120])
+  const panelScale = useTransform(smoothProgress, [0, 0.65], [1, shouldReduceMotion ? 1 : 0.94])
+  const panelOpacity = useTransform(smoothProgress, [0, 0.16, 0.78], [0.95, 1, 0.72])
+
+  const orbLeftX = useTransform(smoothProgress, [0, 1], [0, shouldReduceMotion ? 0 : -80])
+  const orbLeftY = useTransform(smoothProgress, [0, 1], [0, shouldReduceMotion ? 0 : 60])
+
+  const orbRightX = useTransform(smoothProgress, [0, 1], [0, shouldReduceMotion ? 0 : 95])
+  const orbRightY = useTransform(smoothProgress, [0, 1], [0, shouldReduceMotion ? 0 : -70])
+
+  const orbBottomY = useTransform(smoothProgress, [0, 1], [0, shouldReduceMotion ? 0 : -90])
+  const glowOpacity = useTransform(smoothProgress, [0, 0.5, 1], [0.18, 0.3, 0.22])
+
+  const heroOverlayOpacity = useTransform(smoothProgress, [0.56, 0.88], [0, 1])
+  const heroExitGradientOpacity = useTransform(smoothProgress, [0.58, 0.92], [0.08, 0.95])
+
   return (
     <>
       {/* HERO SECTION */}
-      <section className="relative min-h-[100dvh] overflow-hidden bg-white">
-        <div className="pointer-events-none absolute inset-0">
-          <motion.div
-            animate={{ x: [0, 40, 0], y: [0, 28, 0] }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute left-[-120px] top-10 h-96 w-96 rounded-full bg-sky-100/70 blur-3xl"
-          />
-          <motion.div
-            animate={{ x: [0, -36, 0], y: [0, -24, 0] }}
-            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute right-[-140px] top-12 h-[28rem] w-[28rem] rounded-full bg-indigo-100/60 blur-3xl"
-          />
-          <motion.div
-            animate={{ x: [0, 24, 0], y: [0, -20, 0] }}
-            transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-cyan-100/50 blur-3xl"
-          />
-          <motion.div
-            animate={{ opacity: [0.18, 0.32, 0.18] }}
-            transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.10),transparent_38%)]"
-          />
-        </div>
-
-        <div className="relative mx-auto flex max-w-7xl flex-col items-center px-6 pb-24 pt-32 text-center sm:px-8 sm:pb-28 sm:pt-36 lg:px-12 lg:pb-32 lg:pt-40">
-          <motion.div
-            initial={{ opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="max-w-5xl"
-          >
+      <section
+        ref={heroRef}
+        className="relative min-h-[200dvh] bg-white"
+      >
+        <div className="sticky top-0 h-[100dvh] overflow-hidden bg-white">
+          <div className="pointer-events-none absolute inset-0">
             <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: 0.05, duration: 0.55 }}
-              className="inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-600 shadow-sm backdrop-blur"
-            >
-              Premium Airfare Intelligence
-            </motion.div>
+              style={{ x: orbLeftX, y: orbLeftY }}
+              animate={
+                shouldReduceMotion
+                  ? undefined
+                  : { x: [0, 30, 0], y: [0, 20, 0] }
+              }
+              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute left-[-120px] top-10 h-96 w-96 rounded-full bg-sky-100/70 blur-3xl"
+            />
+            <motion.div
+              style={{ x: orbRightX, y: orbRightY }}
+              animate={
+                shouldReduceMotion
+                  ? undefined
+                  : { x: [0, -28, 0], y: [0, -18, 0] }
+              }
+              transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute right-[-140px] top-12 h-[28rem] w-[28rem] rounded-full bg-indigo-100/60 blur-3xl"
+            />
+            <motion.div
+              style={{ y: orbBottomY }}
+              animate={
+                shouldReduceMotion
+                  ? undefined
+                  : { x: [0, 20, 0], y: [0, -16, 0] }
+              }
+              transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-cyan-100/50 blur-3xl"
+            />
+            <motion.div
+              style={{ opacity: glowOpacity }}
+              animate={
+                shouldReduceMotion
+                  ? undefined
+                  : { opacity: [0.18, 0.32, 0.18] }
+              }
+              transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.10),transparent_38%)]"
+            />
 
-            <h1 className="mt-8 text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl md:text-7xl">
-              Intelligent monitoring for
-              premium air travel
-            </h1>
+            <motion.div
+              style={{ opacity: heroExitGradientOpacity }}
+              className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent via-white/65 to-white"
+            />
+          </div>
 
-            <motion.p
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.18, duration: 0.6 }}
-              className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-600 sm:text-xl"
-            >
-              Skysirv™ helps travelers track routes, understand fare movement, and
-              make smarter booking decisions with calm, clear travel intelligence.
-            </motion.p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.24, duration: 0.65 }}
-            className="mt-10 flex flex-wrap items-center justify-center gap-3"
-          >
-            <HeroStatPill label="Routes monitored" value="24/7" />
-            <HeroStatPill label="Signal quality" value="Adaptive" />
-            <HeroStatPill label="Intelligence layer" value="Live" />
-          </motion.div>
-
-          {/* TICKER STRIP */}
-          <motion.div
-            initial={{ opacity: 0, y: 24, scale: 0.985 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ delay: 0.28, duration: 0.75 }}
-            className="relative mt-12 w-full max-w-5xl overflow-hidden rounded-full border border-slate-200 bg-white/80 py-3 shadow-sm backdrop-blur"
-          >
-            <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-16 bg-gradient-to-r from-white to-transparent" />
-            <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-16 bg-gradient-to-l from-white to-transparent" />
-
-            <div className="ticker-track text-sm text-slate-600">
-              <div className="flex items-center gap-4 px-6">
-                <span>PTY → VVI</span>
-                <span>$882</span>
-                <span className="font-medium">Skyscore™ 76</span>
-                <span className="font-medium text-amber-600">WATCH</span>
-
-                <span className="text-slate-300">•</span>
-
-                <span>LAX → MIA</span>
-                <span>$544</span>
-                <span className="font-medium">Skyscore™ 88</span>
-                <span className="font-medium text-emerald-600">BUY</span>
-
-                <span className="text-slate-300">•</span>
-
-                <span>BOS → PTY</span>
-                <span>$712</span>
-                <span className="font-medium">Skyscore™ 69</span>
-                <span className="font-medium text-amber-600">WAIT</span>
-
-                <span className="text-slate-300">•</span>
-
-                <span>JFK → CDG</span>
-                <span>$631</span>
-                <span className="font-medium">Skyscore™ 82</span>
-                <span className="font-medium text-emerald-600">BUY</span>
-              </div>
-
-              <div className="flex items-center gap-4 px-6">
-                <span>$882</span>
-                <span className="font-medium">Skyscore™ 76</span>
-                <span className="font-medium text-amber-600">WATCH</span>
-
-                <span className="text-slate-300">•</span>
-
-                <span>PTY → VVI</span>
-                <span>$544</span>
-                <span className="font-medium">Skyscore™ 95</span>
-                <span className="font-medium text-emerald-600">BUY</span>
-
-                <span className="text-slate-300">•</span>
-
-                <span>BOS → PTY</span>
-                <span>$712</span>
-                <span className="font-medium">Skyscore™ 69</span>
-                <span className="font-medium text-amber-600">WAIT</span>
-
-                <span className="text-slate-300">•</span>
-
-                <span>JFK → CDG</span>
-                <span>$631</span>
-                <span className="font-medium">Skyscore™ 82</span>
-                <span className="font-medium text-emerald-600">BUY</span>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* FEATURE BULLETS */}
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            animate="show"
-            className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-lg text-slate-500"
-          >
-            <motion.span variants={staggerItem}>Real-time monitoring engine</motion.span>
-            <motion.span variants={staggerItem} className="text-slate-300">
-              •
-            </motion.span>
-
-            <motion.span variants={staggerItem}>Milestone-based price alerts</motion.span>
-            <motion.span variants={staggerItem} className="text-slate-300">
-              •
-            </motion.span>
-
-            <motion.span variants={staggerItem}>Adaptive fare scoring</motion.span>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.32, duration: 0.55 }}
-            className="mt-8 flex flex-wrap justify-center gap-4"
-          >
-            <motion.div whileHover={{ y: -2, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Link
-                href="/create-account"
-                className="rounded-lg bg-slate-900 px-6 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-slate-700"
+          <div className="relative mx-auto flex h-full max-w-7xl flex-col items-center px-6 pb-16 pt-28 text-center sm:px-8 sm:pb-20 sm:pt-32 lg:px-12 lg:pb-24 lg:pt-36">
+            <div className="flex w-full flex-1 flex-col items-center">
+              <motion.div
+                style={{ opacity: heroBadgeOpacity }}
+                initial={{ opacity: 0, y: 14, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.55 }}
+                className="inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-600 shadow-sm backdrop-blur"
               >
-                Start Monitoring Flights
-              </Link>
-            </motion.div>
+                Premium Airfare Intelligence
+              </motion.div>
 
-            <motion.div whileHover={{ y: -2, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Link
-                href="/beta"
-                className="rounded-lg border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-900 shadow-sm transition hover:bg-slate-50"
-              >
-                Explore Beta Program
-              </Link>
-            </motion.div>
-          </motion.div>
+              <div className="relative mt-8 flex min-h-[230px] w-full max-w-5xl items-center justify-center sm:min-h-[260px] md:min-h-[300px]">
+                <motion.div
+                  style={{
+                    y: heroTextY,
+                    opacity: heroTextOpacity,
+                  }}
+                  className="absolute inset-0 flex flex-col items-center justify-center"
+                >
+                  <h1 className="text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl md:text-7xl">
+                    Flight Intelligence That Helps Travelers Understand Pricing
+                  </h1>
 
-          {/* HERO CINEMATIC PANEL */}
-          <motion.div
-            {...fadeUp}
-            transition={{ delay: 0.38, duration: 0.85, ease: "easeOut" }}
-            className="mt-16 w-full max-w-6xl"
-          >
-            <div className="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/90 shadow-[0_25px_70px_rgba(15,23,42,0.08)] backdrop-blur">
-              <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
-                <div className="relative p-8 sm:p-10">
-                  <div className="absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-sky-50/70" />
-                  <div className="relative">
-                    <div className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium tracking-[0.14em] text-slate-600 uppercase shadow-sm">
-                      Live Intelligence Snapshot
-                    </div>
+                  <motion.p
+                    initial={{ opacity: 0, y: 18 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.18, duration: 0.6 }}
+                    className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-600 sm:text-xl"
+                  >
+                    Skysirv™ helps travelers track routes, understand fare movement, and
+                    make smarter booking decisions with calm, clear travel intelligence.
+                  </motion.p>
+                </motion.div>
 
-                    <h2 className="mt-6 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-                      Read the market before you book
-                    </h2>
+                <motion.div
+                  style={{
+                    y: transformHeadlinesY,
+                    opacity: transformHeadlinesOpacity,
+                  }}
+                  className="pointer-events-none absolute inset-0 flex items-center justify-center"
+                >
+                  <div className="max-w-4xl">
+                    <div className="space-y-3 sm:space-y-4">
+                      <motion.p
+                        style={{
+                          opacity: useTransform(smoothProgress, [0.18, 0.3, 0.44], [0.25, 1, 0.7]),
+                          y: useTransform(smoothProgress, [0.18, 0.44], [24, 0]),
+                        }}
+                        className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-5xl md:text-6xl"
+                      >
+                        Understand pricing
+                      </motion.p>
 
-                    <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
-                      Skysirv™ transforms noisy fare movement into a calmer, more
-                      structured decision layer — so travelers know when to act,
-                      when to wait, and what the market is really saying.
-                    </p>
+                      <motion.p
+                        style={{
+                          opacity: useTransform(smoothProgress, [0.28, 0.42, 0.56], [0.15, 1, 0.78]),
+                          y: useTransform(smoothProgress, [0.24, 0.56], [28, 0]),
+                        }}
+                        className="text-3xl font-semibold tracking-tight text-slate-900/85 sm:text-5xl md:text-6xl"
+                      >
+                        Predict trends
+                      </motion.p>
 
-                    <div className="mt-8 grid gap-4 sm:grid-cols-3">
-                      <MiniHeroMetric label="Skyscore™" value="87" subtext="Buy window" />
-                      <MiniHeroMetric label="Delta vs Avg" value="- $138" subtext="30-day baseline" />
-                      <MiniHeroMetric label="Signal" value="High" subtext="Confidence" />
+                      <motion.p
+                        style={{
+                          opacity: useTransform(smoothProgress, [0.4, 0.56, 0.74], [0.12, 1, 0.92]),
+                          y: useTransform(smoothProgress, [0.36, 0.74], [32, 0]),
+                        }}
+                        className="bg-gradient-to-r from-slate-900 via-sky-700 to-cyan-600 bg-clip-text text-3xl font-semibold tracking-tight text-transparent sm:text-5xl md:text-6xl"
+                      >
+                        Book with confidence
+                      </motion.p>
                     </div>
                   </div>
-                </div>
+                </motion.div>
+              </div>
 
-                <div className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-8 text-white sm:p-10">
-                  <motion.div
-                    animate={{ x: [0, 20, 0], y: [0, -12, 0] }}
-                    transition={{ duration: 7.2, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute right-[-18px] top-[-18px] h-40 w-40 rounded-full bg-sky-500/10 blur-3xl"
-                  />
-                  <motion.div
-                    animate={{ x: [0, -14, 0], y: [0, 16, 0] }}
-                    transition={{ duration: 8.4, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute bottom-[-28px] left-[-18px] h-44 w-44 rounded-full bg-indigo-500/10 blur-3xl"
-                  />
+              <motion.div
+                style={{
+                  y: supportingContentY,
+                  opacity: supportingContentOpacity,
+                }}
+                className="w-full"
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.24, duration: 0.65 }}
+                  className="mt-4 flex flex-wrap items-center justify-center gap-3"
+                >
+                  <HeroStatPill label="Routes monitored" value="24/7" />
+                  <HeroStatPill label="Signal quality" value="Adaptive" />
+                  <HeroStatPill label="Intelligence layer" value="Live" />
+                </motion.div>
 
-                  <div className="relative">
-                    <p className="text-xs font-medium tracking-[0.16em] text-slate-300 uppercase">
-                      Example route
-                    </p>
+                {/* TICKER STRIP */}
+                <motion.div
+                  initial={{ opacity: 0, y: 24, scale: 0.985 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: 0.28, duration: 0.75 }}
+                  className="relative mx-auto mt-12 w-full max-w-5xl overflow-hidden rounded-full border border-slate-200 bg-white/80 py-3 shadow-sm backdrop-blur"
+                >
+                  <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-16 bg-gradient-to-r from-white to-transparent" />
+                  <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-16 bg-gradient-to-l from-white to-transparent" />
 
-                    <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
-                      <div className="flex items-start justify-between gap-6">
-                        <div>
-                          <h3 className="text-2xl font-semibold tracking-tight text-white">
-                            BOS → CDG
-                          </h3>
-                          <p className="mt-2 text-sm text-slate-300">
-                            Current Price <span className="font-medium text-white">$412</span>
-                          </p>
-                          <p className="mt-1 text-sm text-slate-400">
-                            Down $138 vs 30-day average
-                          </p>
+                  <div className="ticker-track text-sm text-slate-600">
+                    <div className="flex items-center gap-4 px-6">
+                      <span>PTY → VVI</span>
+                      <span>$882</span>
+                      <span className="font-medium">Skyscore™ 76</span>
+                      <span className="font-medium text-amber-600">WATCH</span>
+
+                      <span className="text-slate-300">•</span>
+
+                      <span>LAX → MIA</span>
+                      <span>$544</span>
+                      <span className="font-medium">Skyscore™ 88</span>
+                      <span className="font-medium text-emerald-600">BUY</span>
+
+                      <span className="text-slate-300">•</span>
+
+                      <span>BOS → PTY</span>
+                      <span>$712</span>
+                      <span className="font-medium">Skyscore™ 69</span>
+                      <span className="font-medium text-amber-600">WAIT</span>
+
+                      <span className="text-slate-300">•</span>
+
+                      <span>JFK → CDG</span>
+                      <span>$631</span>
+                      <span className="font-medium">Skyscore™ 82</span>
+                      <span className="font-medium text-emerald-600">BUY</span>
+                    </div>
+
+                    <div className="flex items-center gap-4 px-6">
+                      <span>$882</span>
+                      <span className="font-medium">Skyscore™ 76</span>
+                      <span className="font-medium text-amber-600">WATCH</span>
+
+                      <span className="text-slate-300">•</span>
+
+                      <span>PTY → VVI</span>
+                      <span>$544</span>
+                      <span className="font-medium">Skyscore™ 95</span>
+                      <span className="font-medium text-emerald-600">BUY</span>
+
+                      <span className="text-slate-300">•</span>
+
+                      <span>BOS → PTY</span>
+                      <span>$712</span>
+                      <span className="font-medium">Skyscore™ 69</span>
+                      <span className="font-medium text-amber-600">WAIT</span>
+
+                      <span className="text-slate-300">•</span>
+
+                      <span>JFK → CDG</span>
+                      <span>$631</span>
+                      <span className="font-medium">Skyscore™ 82</span>
+                      <span className="font-medium text-emerald-600">BUY</span>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* FEATURE BULLETS */}
+                <motion.div
+                  variants={staggerContainer}
+                  initial="hidden"
+                  animate="show"
+                  className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-lg text-slate-500"
+                >
+                  <motion.span variants={staggerItem}>Real-time monitoring engine</motion.span>
+                  <motion.span variants={staggerItem} className="text-slate-300">
+                    •
+                  </motion.span>
+
+                  <motion.span variants={staggerItem}>Milestone-based price alerts</motion.span>
+                  <motion.span variants={staggerItem} className="text-slate-300">
+                    •
+                  </motion.span>
+
+                  <motion.span variants={staggerItem}>Adaptive fare scoring</motion.span>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.32, duration: 0.55 }}
+                  className="mt-8 flex flex-wrap justify-center gap-4"
+                >
+                  <motion.div whileHover={{ y: -2, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Link
+                      href="/create-account"
+                      className="rounded-lg bg-slate-900 px-6 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-slate-700"
+                    >
+                      Start Monitoring Flights
+                    </Link>
+                  </motion.div>
+
+                  <motion.div whileHover={{ y: -2, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <Link
+                      href="/beta"
+                      className="rounded-lg border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-900 shadow-sm transition hover:bg-slate-50"
+                    >
+                      Explore Beta Program
+                    </Link>
+                  </motion.div>
+                </motion.div>
+              </motion.div>
+
+              {/* HERO CINEMATIC PANEL */}
+              <motion.div
+                {...fadeUp}
+                transition={{ delay: 0.38, duration: 0.85, ease: "easeOut" }}
+                style={{
+                  y: panelY,
+                  scale: panelScale,
+                  opacity: panelOpacity,
+                }}
+                className="mt-12 w-full max-w-6xl"
+              >
+                <div className="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/90 shadow-[0_25px_70px_rgba(15,23,42,0.08)] backdrop-blur">
+                  <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
+                    <div className="relative p-8 sm:p-10">
+                      <div className="absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-sky-50/70" />
+                      <div className="relative">
+                        <div className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium tracking-[0.14em] text-slate-600 uppercase shadow-sm">
+                          Live Intelligence Snapshot
                         </div>
 
-                        <div className="text-right">
-                          <p className="text-xs font-semibold tracking-[0.14em] text-slate-400">
-                            SKYSCORE™
-                          </p>
-                          <p className="mt-1 text-4xl font-semibold text-emerald-400">
-                            87
-                          </p>
-                          <p className="mt-2 text-xs font-medium text-emerald-300">
-                            BUY WINDOW
-                          </p>
+                        <h2 className="mt-6 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+                          Read the market before you book
+                        </h2>
+
+                        <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
+                          Skysirv™ transforms noisy fare movement into a calmer, more
+                          structured decision layer — so travelers know when to act,
+                          when to wait, and what the market is really saying.
+                        </p>
+
+                        <div className="mt-8 grid gap-4 sm:grid-cols-3">
+                          <MiniHeroMetric label="Skyscore™" value="87" subtext="Buy window" />
+                          <MiniHeroMetric label="Delta vs Avg" value="- $138" subtext="30-day baseline" />
+                          <MiniHeroMetric label="Signal" value="High" subtext="Confidence" />
                         </div>
                       </div>
                     </div>
 
-                    <div className="mt-5 grid gap-3">
-                      <DarkInsightRow
-                        label="Price behavior"
-                        text="Recent movement suggests a stronger booking pocket before volatility returns."
+                    <div className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-8 text-white sm:p-10">
+                      <motion.div
+                        animate={
+                          shouldReduceMotion
+                            ? undefined
+                            : { x: [0, 20, 0], y: [0, -12, 0] }
+                        }
+                        transition={{ duration: 7.2, repeat: Infinity, ease: "easeInOut" }}
+                        className="absolute right-[-18px] top-[-18px] h-40 w-40 rounded-full bg-sky-500/10 blur-3xl"
                       />
-                      <DarkInsightRow
-                        label="Signal quality"
-                        text="Multiple indicators align on value relative to the route’s recent baseline."
+                      <motion.div
+                        animate={
+                          shouldReduceMotion
+                            ? undefined
+                            : { x: [0, -14, 0], y: [0, 16, 0] }
+                        }
+                        transition={{ duration: 8.4, repeat: Infinity, ease: "easeInOut" }}
+                        className="absolute bottom-[-28px] left-[-18px] h-44 w-44 rounded-full bg-indigo-500/10 blur-3xl"
                       />
+
+                      <div className="relative">
+                        <p className="text-xs font-medium tracking-[0.16em] text-slate-300 uppercase">
+                          Example route
+                        </p>
+
+                        <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
+                          <div className="flex items-start justify-between gap-6">
+                            <div>
+                              <h3 className="text-2xl font-semibold tracking-tight text-white">
+                                BOS → CDG
+                              </h3>
+                              <p className="mt-2 text-sm text-slate-300">
+                                Current Price <span className="font-medium text-white">$412</span>
+                              </p>
+                              <p className="mt-1 text-sm text-slate-400">
+                                Down $138 vs 30-day average
+                              </p>
+                            </div>
+
+                            <div className="text-right">
+                              <p className="text-xs font-semibold tracking-[0.14em] text-slate-400">
+                                SKYSCORE™
+                              </p>
+                              <p className="mt-1 text-4xl font-semibold text-emerald-400">
+                                87
+                              </p>
+                              <p className="mt-2 text-xs font-medium text-emerald-300">
+                                BUY WINDOW
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-5 grid gap-3">
+                          <DarkInsightRow
+                            label="Price behavior"
+                            text="Recent movement suggests a stronger booking pocket before volatility returns."
+                          />
+                          <DarkInsightRow
+                            label="Signal quality"
+                            text="Multiple indicators align on value relative to the route’s recent baseline."
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             </div>
-          </motion.div>
+          </div>
 
-          {/* FEATURE CARDS */}
           <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.15 }}
-            className="mt-20 grid w-full gap-6 md:grid-cols-3"
-          >
-            <motion.div variants={staggerItem}>
-              <HeroFeatureCard
-                title="Track routes and watch fares with less guesswork"
-                text="Follow the routes that matter to you and keep pricing movement in one clean, readable place."
-              />
-            </motion.div>
-
-            <motion.div variants={staggerItem}>
-              <HeroFeatureCard
-                title="Read the market and understand timing signals"
-                text="Turn raw fare changes into a clearer picture of what may be worth booking now versus waiting on."
-              />
-            </motion.div>
-
-            <motion.div variants={staggerItem}>
-              <HeroFeatureCard
-                title="Travel smarter and have more booking confidence"
-                text="Skysirv™ is being rebuilt into a brighter, cleaner travel experience designed around confidence, clarity, and timing."
-              />
-            </motion.div>
-          </motion.div>
+            style={{ opacity: heroOverlayOpacity }}
+            className="pointer-events-none absolute inset-0 bg-white"
+          />
         </div>
       </section>
 
