@@ -345,7 +345,7 @@ export default function AdminPage() {
           <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-md transition-shadow hover:shadow-lg">
             <h2 className="mb-6 text-lg font-semibold">Protected Admin Accounts</h2>
 
-            <div className="overflow-x-auto">
+            <div className="max-h-[420px] overflow-x-auto overflow-y-auto">
               <table className="w-full text-left text-sm">
                 <thead className="border-b border-slate-200 text-slate-500">
                   <tr>
@@ -394,7 +394,7 @@ export default function AdminPage() {
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-md transition-shadow hover:shadow-lg">
           <h2 className="mb-6 text-lg font-semibold">Platform Users</h2>
 
-          <div className="overflow-x-auto">
+          <div className="max-h-[420px] overflow-x-auto overflow-y-auto">
             <table className="w-full text-left text-sm">
               <thead className="border-b border-slate-200 text-slate-500">
                 <tr>
@@ -462,7 +462,7 @@ export default function AdminPage() {
             Review incoming beta access requests before sending lifetime Pro invites.
           </p>
 
-          <div className="overflow-x-auto">
+          <div className="max-h-[420px] overflow-x-auto overflow-y-auto">
             <table className="w-full text-left text-sm">
               <thead className="border-b border-slate-200 text-slate-500">
                 <tr>
