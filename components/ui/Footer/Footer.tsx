@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 gap-12 md:grid-cols-4 md:justify-items-center md:text-center">
 
           {/* Brand */}
-          <div className="max-w-xs text-center md:text-left">
+          <div className="flex h-12 items-center">
             <Link
               href="/"
               className="inline-flex items-center"
