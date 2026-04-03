@@ -42,6 +42,8 @@ export default function AdminPage() {
   const [telemetry, setTelemetry] = useState<any>(null)
   const [activityLoaded, setActivityLoaded] = useState(false)
   const [betaApplications, setBetaApplications] = useState<BetaApplication[]>([])
+  const [betaReviewModalOpen, setBetaReviewModalOpen] = useState(false)
+  const [selectedBetaApplication, setSelectedBetaApplication] = useState<BetaApplication | null>(null)
 
   const adminUsers = useMemo(
     () => users.filter((user) => user.plan === "admin"),
@@ -86,6 +88,18 @@ export default function AdminPage() {
     }
 
     return "bg-slate-100 text-slate-700"
+  }
+
+  function getBetaStatusBadgeClasses(status: string) {
+    if (status === "approved") {
+      return "bg-green-100 text-green-700"
+    }
+
+    if (status === "rejected") {
+      return "bg-red-100 text-red-700"
+    }
+
+    return "bg-amber-100 text-amber-700"
   }
 
   async function deleteUser(userId: string) {
@@ -429,7 +443,7 @@ export default function AdminPage() {
 
                 {platformUsers.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="py-6 text-center text-sm text-slate-500">
+                    <td colSpan={6} className="py-6 text-center text-sm text-slate-500">
                       No non-admin users found.
                     </td>
                   </tr>
@@ -477,7 +491,9 @@ export default function AdminPage() {
                     </td>
 
                     <td className="py-4">
-                      <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-medium ${getBetaStatusBadgeClasses(application.status)}`}
+                      >
                         {application.status}
                       </span>
                     </td>
@@ -489,80 +505,15 @@ export default function AdminPage() {
                     </td>
 
                     <td className="py-4">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={async () => {
-                            const token = localStorage.getItem("skysirv_token")
-
-                            const res = await fetch(
-                              `${API_BASE_URL}/api/admin/beta-applications/${application.id}/approve`,
-                              {
-                                method: "POST",
-                                headers: {
-                                  Authorization: `Bearer ${token}`,
-                                },
-                              }
-                            )
-
-                            if (res.ok) {
-                              // Update UI
-                              setBetaApplications((prev) =>
-                                prev.map((a) =>
-                                  a.id === application.id ? { ...a, status: "approved" } : a
-                                )
-                              )
-
-                              // 🔥 AUTO CREATE LIFETIME PRO INVITE
-                              await fetch(`${API_BASE_URL}/api/admin/invite-user`, {
-                                method: "POST",
-                                headers: {
-                                  "Content-Type": "application/json",
-                                  Authorization: `Bearer ${token}`,
-                                },
-                                body: JSON.stringify({
-                                  email: application.email,
-                                }),
-                              })
-
-                              alert("Application approved + invite created")
-                            } else {
-                              alert("Failed to approve")
-                            }
-                          }}
-                          className="rounded-md bg-green-50 px-3 py-1 text-xs font-medium text-green-600 hover:bg-green-100"
-                        >
-                          Approve
-                        </button>
-
-                        <button
-                          onClick={async () => {
-                            const token = localStorage.getItem("skysirv_token")
-
-                            const res = await fetch(
-                              `${API_BASE_URL}/api/admin/beta-applications/${application.id}/reject`,
-                              {
-                                method: "POST",
-                                headers: {
-                                  Authorization: `Bearer ${token}`,
-                                },
-                              }
-                            )
-
-                            if (res.ok) {
-                              setBetaApplications((prev) =>
-                                prev.map((a) =>
-                                  a.id === application.id ? { ...a, status: "rejected" } : a
-                                )
-                              )
-                            } else {
-                              alert("Failed to reject")
-                            }
-                          }}
-                          className="rounded-md bg-red-50 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-100"
-                        >
-                          Reject
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => {
+                          setSelectedBetaApplication(application)
+                          setBetaReviewModalOpen(true)
+                        }}
+                        className="rounded-md bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-200"
+                      >
+                        Review
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -635,6 +586,204 @@ export default function AdminPage() {
           </div>
         </div>
       </section>
+
+      {betaReviewModalOpen && selectedBetaApplication && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">
+                  Review Beta Application
+                </h3>
+
+                <p className="mt-1 text-sm text-slate-500">
+                  Review the full application before making a decision.
+                </p>
+              </div>
+
+              <button
+                onClick={() => {
+                  setBetaReviewModalOpen(false)
+                  setSelectedBetaApplication(null)
+                }}
+                className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="mt-6 grid gap-5 sm:grid-cols-2">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                  Full Name
+                </p>
+                <p className="mt-2 text-sm font-medium text-slate-900">
+                  {selectedBetaApplication.full_name}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                  Email
+                </p>
+                <p className="mt-2 text-sm font-medium text-slate-900 break-all">
+                  {selectedBetaApplication.email}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                  Travel Frequency
+                </p>
+                <p className="mt-2 text-sm font-medium text-slate-900">
+                  {selectedBetaApplication.travel_frequency}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                  Status
+                </p>
+                <div className="mt-2">
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${getBetaStatusBadgeClasses(selectedBetaApplication.status)}`}
+                  >
+                    {selectedBetaApplication.status}
+                  </span>
+                </div>
+              </div>
+
+              <div className="sm:col-span-2">
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                  How They Currently Book Flights
+                </p>
+                <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700">
+                  {selectedBetaApplication.booking_method}
+                </div>
+              </div>
+
+              <div className="sm:col-span-2">
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                  Why They Want To Join The Beta
+                </p>
+                <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700">
+                  {selectedBetaApplication.reason}
+                </div>
+              </div>
+
+              <div className="sm:col-span-2">
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                  Submitted
+                </p>
+                <p className="mt-2 text-sm font-medium text-slate-900">
+                  {selectedBetaApplication.created_at
+                    ? new Date(selectedBetaApplication.created_at).toLocaleString()
+                    : "-"}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-8 flex flex-wrap justify-end gap-3">
+              <button
+                onClick={async () => {
+                  if (selectedBetaApplication.status !== "pending") return
+
+                  const confirmed = window.confirm(
+                    `Approve this beta application and create a lifetime Pro invite for ${selectedBetaApplication.email}?`
+                  )
+
+                  if (!confirmed) return
+
+                  const token = localStorage.getItem("skysirv_token")
+
+                  const res = await fetch(
+                    `${API_BASE_URL}/api/admin/beta-applications/${selectedBetaApplication.id}/approve`,
+                    {
+                      method: "POST",
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                      },
+                    }
+                  )
+
+                  if (res.ok) {
+                    setBetaApplications((prev) =>
+                      prev.map((a) =>
+                        a.id === selectedBetaApplication.id ? { ...a, status: "approved" } : a
+                      )
+                    )
+
+                    await fetch(`${API_BASE_URL}/api/admin/invite-user`, {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                      },
+                      body: JSON.stringify({
+                        email: selectedBetaApplication.email,
+                      }),
+                    })
+
+                    setSelectedBetaApplication((prev) =>
+                      prev ? { ...prev, status: "approved" } : prev
+                    )
+
+                    alert("Application approved + invite created")
+                  } else {
+                    alert("Failed to approve")
+                  }
+                }}
+                disabled={selectedBetaApplication.status !== "pending"}
+                className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Approve
+              </button>
+
+              <button
+                onClick={async () => {
+                  if (selectedBetaApplication.status !== "pending") return
+
+                  const confirmed = window.confirm(
+                    `Reject this beta application for ${selectedBetaApplication.email}?`
+                  )
+
+                  if (!confirmed) return
+
+                  const token = localStorage.getItem("skysirv_token")
+
+                  const res = await fetch(
+                    `${API_BASE_URL}/api/admin/beta-applications/${selectedBetaApplication.id}/reject`,
+                    {
+                      method: "POST",
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                      },
+                    }
+                  )
+
+                  if (res.ok) {
+                    setBetaApplications((prev) =>
+                      prev.map((a) =>
+                        a.id === selectedBetaApplication.id ? { ...a, status: "rejected" } : a
+                      )
+                    )
+
+                    setSelectedBetaApplication((prev) =>
+                      prev ? { ...prev, status: "rejected" } : prev
+                    )
+                  } else {
+                    alert("Failed to reject")
+                  }
+                }}
+                disabled={selectedBetaApplication.status !== "pending"}
+                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Reject
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {deleteModalOpen && userToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
