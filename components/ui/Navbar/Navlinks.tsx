@@ -91,14 +91,14 @@ export default function Navlinks({ user }: NavlinksProps) {
 
   return (
     <div className="pointer-events-auto pt-4 md:pt-5">
-      <div className="relative mx-auto flex max-w-5xl items-center justify-between rounded-full border border-slate-200 bg-white px-6 py-3 shadow-[0_12px_30px_rgba(15,23,42,0.10)]">
+      <div className="relative mx-auto flex max-w-7xl items-center justify-between rounded-full border border-slate-200 bg-white px-6 py-3 shadow-[0_12px_30px_rgba(15,23,42,0.10)]">
         <div className="flex items-center translate-y-[1px]">
           <Link href="/" className={s.logo} aria-label="Skysirv">
-            <span style={{ display: 'flex', alignItems: 'center', height: '40px', outline: '1px solid red' }}>
+            <span style={{ display: 'flex', alignItems: 'center', height: '40px' }}>
               <img
                 src="/branding/logo/skysirv-logo.svg"
                 alt="Skysirv"
-                style={{ width: '200px', height: 'auto', display: 'block', outline: '1px solid blue' }}
+                style={{ width: '200px', height: 'auto', display: 'block' }}
               />
             </span>
           </Link>
