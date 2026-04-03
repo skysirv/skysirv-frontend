@@ -25,29 +25,26 @@ export default function Footer() {
           {/* Product */}
           <div className="text-center md:text-left">
             <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-slate-900">
-              Product
+              Products
             </h3>
 
             <ul className="mt-4 space-y-3 text-sm text-slate-600">
 
               <li>
-                <Link href="/" className="transition hover:text-slate-400">
-                  Home
+                <Link href="/choose-plan" className="transition hover:text-slate-400">
+                  Plans
                 </Link>
               </li>
 
               <li>
-                <Link href="/signin" className="transition hover:text-slate-400">
-                  Sign in
+                <Link href="/booking" className="transition hover:text-slate-400">
+                  Booking
                 </Link>
               </li>
 
               <li>
-                <Link
-                  href="/create-account"
-                  className="transition hover:text-slate-400"
-                >
-                  Create account
+                <Link href="/ai-assistant" className="transition hover:text-slate-400">
+                  Skysirv Flight Attendant
                 </Link>
               </li>
 
@@ -86,28 +83,19 @@ export default function Footer() {
             <ul className="mt-4 space-y-3 text-sm text-slate-600">
 
               <li>
-                <Link
-                  href="/privacy"
-                  className="transition hover:text-slate-400"
-                >
+                <Link href="/privacy" className="transition hover:text-slate-400">
                   Privacy
                 </Link>
               </li>
 
               <li>
-                <Link
-                  href="/terms"
-                  className="transition hover:text-slate-400"
-                >
+                <Link href="/terms" className="transition hover:text-slate-400">
                   Terms
                 </Link>
               </li>
 
               <li>
-                <Link
-                  href="/refund-policy"
-                  className="transition hover:text-slate-400"
-                >
+                <Link href="/refund-policy" className="transition hover:text-slate-400">
                   Refund Policy
                 </Link>
               </li>
