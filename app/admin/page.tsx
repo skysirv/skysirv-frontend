@@ -729,6 +729,8 @@ export default function AdminPage() {
                     )
 
                     alert("Application approved + invite created")
+                    setBetaReviewModalOpen(false)
+                    setSelectedBetaApplication(null)
                   } else {
                     alert("Failed to approve")
                   }
@@ -771,6 +773,9 @@ export default function AdminPage() {
                     setSelectedBetaApplication((prev) =>
                       prev ? { ...prev, status: "rejected" } : prev
                     )
+
+                    setBetaReviewModalOpen(false)
+                    setSelectedBetaApplication(null)
                   } else {
                     alert("Failed to reject")
                   }
