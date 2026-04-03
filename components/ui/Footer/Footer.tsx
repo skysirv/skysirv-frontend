@@ -11,17 +11,12 @@ export default function Footer() {
           <div className="max-w-xs text-center md:text-left">
             <Link
               href="/"
-              aria-label="Skysirv"
-              className="inline-block"
+              className="text-xl font-bold text-slate-900 transition hover:text-slate-700"
             >
-              <img
-                src="/branding/logo/skysirv-logo.svg"
-                alt="Skysirv"
-                className="h-22 w-auto"
-              />
+              Skysirv™
             </Link>
 
-            <p className="mt-3 text-sm leading-6 text-slate-600">
+            <p className="mt-4 text-sm leading-6 text-slate-600">
               Flight intelligence that helps travelers understand pricing and
               book with more confidence.
             </p>
