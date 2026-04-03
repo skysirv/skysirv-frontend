@@ -660,45 +660,49 @@ export default function HomePage() {
       {/* CTA Bridge */}
       <motion.section
         {...fadeUp}
-        className="relative w-full overflow-hidden bg-slate-950 py-20 text-white"
+        className="relative w-full bg-white py-20"
       >
-        <div className="pointer-events-none absolute inset-0">
-          <motion.div
-            animate={{ opacity: [0.12, 0.24, 0.12], scale: [1, 1.04, 1] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.20),transparent_38%)]"
-          />
-          <motion.div
-            animate={{ x: [0, 18, 0], y: [0, -14, 0] }}
-            transition={{ duration: 7.6, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute right-[-20px] top-[-20px] h-44 w-44 rounded-full bg-sky-500/10 blur-3xl"
-          />
-          <motion.div
-            animate={{ x: [0, -14, 0], y: [0, 18, 0] }}
-            transition={{ duration: 8.4, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute bottom-[-24px] left-[-16px] h-48 w-48 rounded-full bg-indigo-500/10 blur-3xl"
-          />
-        </div>
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="relative overflow-hidden rounded-[2rem] bg-slate-950 px-6 py-14 text-white shadow-[0_25px_70px_rgba(15,23,42,0.18)] sm:px-8 sm:py-16">
+            <div className="pointer-events-none absolute inset-0">
+              <motion.div
+                animate={{ opacity: [0.12, 0.24, 0.12], scale: [1, 1.04, 1] }}
+                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.20),transparent_38%)]"
+              />
+              <motion.div
+                animate={{ x: [0, 18, 0], y: [0, -14, 0] }}
+                transition={{ duration: 7.6, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute right-[-20px] top-[-20px] h-44 w-44 rounded-full bg-sky-500/10 blur-3xl"
+              />
+              <motion.div
+                animate={{ x: [0, -14, 0], y: [0, 18, 0] }}
+                transition={{ duration: 8.4, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute bottom-[-24px] left-[-16px] h-48 w-48 rounded-full bg-indigo-500/10 blur-3xl"
+              />
+            </div>
 
-        <div className="relative mx-auto max-w-4xl px-6 text-center">
-          <h2 className="text-5xl font-bold tracking-tight text-white sm:text-6xl">
-            Ready to start tracking airfare intelligently?
-          </h2>
+            <div className="relative mx-auto max-w-4xl text-center">
+              <h2 className="text-5xl font-bold tracking-tight text-white sm:text-6xl">
+                Ready to start tracking airfare intelligently?
+              </h2>
 
-          <p className="mt-8 text-lg leading-8 text-slate-300 sm:text-xl">
-            Join travelers using Skysirv™ to monitor routes, detect price signals,
-            and book flights with confidence.
-          </p>
+              <p className="mt-8 text-lg leading-8 text-slate-300 sm:text-xl">
+                Join travelers using Skysirv™ to monitor routes, detect price signals,
+                and book flights with confidence.
+              </p>
 
-          <div className="mt-8 flex justify-center gap-4">
-            <motion.div whileHover={{ y: -2, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Link
-                href="/create-account"
-                className="rounded-lg bg-white px-6 py-3 text-sm font-medium text-slate-950 shadow-sm transition hover:bg-slate-200"
-              >
-                Start Monitoring Flights
-              </Link>
-            </motion.div>
+              <div className="mt-8 flex justify-center gap-4">
+                <motion.div whileHover={{ y: -2, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Link
+                    href="/create-account"
+                    className="rounded-lg bg-white px-6 py-3 text-sm font-medium text-slate-950 shadow-sm transition hover:bg-slate-200"
+                  >
+                    Start Monitoring Flights
+                  </Link>
+                </motion.div>
+              </div>
+            </div>
           </div>
         </div>
       </motion.section>
