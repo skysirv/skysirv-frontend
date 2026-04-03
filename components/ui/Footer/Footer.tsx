@@ -8,20 +8,20 @@ export default function Footer() {
         <div className="grid grid-cols-1 gap-12 md:grid-cols-4 md:justify-items-center md:text-center">
 
           {/* Brand */}
-          <div className="flex h-12 items-center">
+          <div className="max-w-xs text-center md:text-left">
             <Link
               href="/"
-              className="inline-flex items-center"
               aria-label="Skysirv"
+              className="inline-block"
             >
               <img
                 src="/branding/logo/skysirv-logo.svg"
                 alt="Skysirv"
-                className="h-40 w-auto"
+                className="h-12 w-auto"
               />
             </Link>
 
-            <p className="mt-2 text-sm leading-6 text-slate-600">
+            <p className="mt-3 text-sm leading-6 text-slate-600">
               Flight intelligence that helps travelers understand pricing and
               book with more confidence.
             </p>
