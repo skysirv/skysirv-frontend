@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import s from './Navbar.module.css';
 import AuthModal from '@/components/auth/AuthModal';
-import CreateAccountForm from '@/components/auth/CreateAccountForm';
+import AuthPanel from '@/components/auth/AuthPanel';
 
 interface NavlinksProps {
   user?: any;
@@ -90,8 +90,8 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
       <div className="pointer-events-auto pt-4 md:pt-5">
         <div
           className={`relative mx-auto flex max-w-5xl items-center justify-between rounded-full px-6 py-3 shadow-[0_12px_30px_rgba(15,23,42,0.10)] ${isDark
-              ? 'border border-white/10 bg-slate-900/80 backdrop-blur'
-              : 'border border-slate-200 bg-white'
+            ? 'border border-white/10 bg-slate-900/80 backdrop-blur'
+            : 'border border-slate-200 bg-white'
             }`}
         >
           <div className="flex items-center translate-y-[1px] -translate-x-3">
@@ -149,8 +149,8 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
                 type="button"
                 onClick={() => setCreateAccountModalOpen(true)}
                 className={`rounded-full px-4 py-2 text-sm font-semibold transition ${isDark
-                    ? 'bg-white text-slate-900 hover:bg-slate-200'
-                    : 'bg-slate-900 text-white hover:bg-slate-700'
+                  ? 'bg-white text-slate-900 hover:bg-slate-200'
+                  : 'bg-slate-900 text-white hover:bg-slate-700'
                   }`}
               >
                 Sign in
@@ -167,7 +167,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
         description="Start monitoring airfare with real travel intelligence"
         maxWidthClassName="max-w-sm"
       >
-        <CreateAccountForm />
+        <AuthPanel />
       </AuthModal>
     </>
   );
