@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import s from './Navbar.module.css';
+import AuthModal from '@/components/auth/AuthModal';
+import CreateAccountForm from '@/components/auth/CreateAccountForm';
 
 interface NavlinksProps {
   user?: any;
@@ -11,6 +13,7 @@ interface NavlinksProps {
 export default function Navlinks({ user }: NavlinksProps) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [createAccountModalOpen, setCreateAccountModalOpen] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -90,70 +93,83 @@ export default function Navlinks({ user }: NavlinksProps) {
   }, []);
 
   return (
-    <div className="pointer-events-auto pt-4 md:pt-5">
-      <div className="relative mx-auto flex max-w-5xl items-center justify-between rounded-full border border-slate-200 bg-white px-6 py-3 shadow-[0_12px_30px_rgba(15,23,42,0.10)]">
-        <div className="flex items-center translate-y-[1px] -translate-x-3">
-          <Link href="/" className={s.logo} aria-label="Skysirv" style={{ marginLeft: '-22px' }}>
-            <span style={{ display: 'flex', alignItems: 'center', height: '40px' }}>
-              <img
-                src="/branding/logo/skysirv-logo.svg"
-                alt="Skysirv"
-                style={{ width: '200px', height: 'auto', display: 'block' }}
-              />
-            </span>
-          </Link>
-        </div>
-
-        <div className="flex items-center space-x-2 md:space-x-3">
-          {isLoggedIn && isAdmin && (
-            <Link
-              href="/admin"
-              className={`${s.link} rounded-full px-3 py-2 text-sm font-medium transition hover:bg-slate-50`}
-            >
-              Admin
+    <>
+      <div className="pointer-events-auto pt-4 md:pt-5">
+        <div className="relative mx-auto flex max-w-5xl items-center justify-between rounded-full border border-slate-200 bg-white px-6 py-3 shadow-[0_12px_30px_rgba(15,23,42,0.10)]">
+          <div className="flex items-center translate-y-[1px] -translate-x-3">
+            <Link href="/" className={s.logo} aria-label="Skysirv" style={{ marginLeft: '-22px' }}>
+              <span style={{ display: 'flex', alignItems: 'center', height: '40px' }}>
+                <img
+                  src="/branding/logo/skysirv-logo.svg"
+                  alt="Skysirv"
+                  style={{ width: '180px', height: 'auto', display: 'block' }}
+                />
+              </span>
             </Link>
-          )}
+          </div>
 
-          {isLoggedIn && !isAdmin && (
-            <Link
-              href="/dashboard"
-              className={`${s.link} rounded-full px-3 py-2 text-sm font-medium transition hover:bg-slate-50`}
-            >
-              Dashboard
-            </Link>
-          )}
+          <div className="flex items-center space-x-2 md:space-x-3">
+            {isLoggedIn && isAdmin && (
+              <Link
+                href="/admin"
+                className={`${s.link} rounded-full px-3 py-2 text-sm font-medium transition hover:bg-slate-50`}
+              >
+                Admin
+              </Link>
+            )}
 
-          {isLoggedIn ? (
-            <button
-              onClick={() => {
-                localStorage.removeItem('skysirv_token');
-                localStorage.removeItem('skysirv_admin');
-                window.dispatchEvent(new Event('skysirv-auth-changed'));
-                window.location.href = '/';
-              }}
-              className={`${s.link} rounded-full px-3 py-2 text-sm font-medium transition hover:bg-slate-50`}
-            >
-              Sign out
-            </button>
-          ) : (
-            <Link
-              href="/signin"
-              className={`${s.link} rounded-full px-3 py-2 text-sm font-medium transition hover:bg-slate-50`}
-            >
-              Sign in
-            </Link>
-          )}
+            {isLoggedIn && !isAdmin && (
+              <Link
+                href="/dashboard"
+                className={`${s.link} rounded-full px-3 py-2 text-sm font-medium transition hover:bg-slate-50`}
+              >
+                Dashboard
+              </Link>
+            )}
 
-          {!isLoggedIn && (
-            <Link
-              href="/create-account"
-              className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
-            >
-              Create account
-            </Link>
-          )}
+            {isLoggedIn ? (
+              <button
+                onClick={() => {
+                  localStorage.removeItem('skysirv_token');
+                  localStorage.removeItem('skysirv_admin');
+                  window.dispatchEvent(new Event('skysirv-auth-changed'));
+                  window.location.href = '/';
+                }}
+                className={`${s.link} rounded-full px-3 py-2 text-sm font-medium transition hover:bg-slate-50`}
+              >
+                Sign out
+              </button>
+            ) : (
+              <Link
+                href="/signin"
+                className={`${s.link} rounded-full px-3 py-2 text-sm font-medium transition hover:bg-slate-50`}
+              >
+                Sign in
+              </Link>
+            )}
+
+            {!isLoggedIn && (
+              <button
+                type="button"
+                onClick={() => setCreateAccountModalOpen(true)}
+                className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
+              >
+                Create account
+              </button>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+
+      <AuthModal
+        open={createAccountModalOpen}
+        onClose={() => setCreateAccountModalOpen(false)}
+        title="Create your Skysirv™ account"
+        description="Start monitoring airfare with real travel intelligence"
+        maxWidthClassName="max-w-sm"
+      >
+        <CreateAccountForm />
+      </AuthModal>
+    </>
   );
 }
