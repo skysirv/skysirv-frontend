@@ -234,26 +234,30 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.32, duration: 0.55 }}
-            className="mt-8 flex flex-wrap justify-center gap-4"
+            className="mt-8 flex flex-wrap items-center justify-center gap-4"
           >
             <motion.div
               whileHover={{ y: -2, scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="flex"
+              className="flex shrink-0"
             >
               <button
                 type="button"
                 onClick={() => setCreateAccountModalOpen(true)}
-                className="inline-flex items-center justify-center rounded-lg bg-slate-900 px-6 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-slate-700"
+                className="inline-flex h-[44px] items-center justify-center rounded-lg bg-slate-900 px-6 text-sm font-medium text-white shadow-sm transition hover:bg-slate-700"
               >
                 Start Monitoring Flights
               </button>
             </motion.div>
 
-            <motion.div whileHover={{ y: -2, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <motion.div
+              whileHover={{ y: -2, scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex shrink-0"
+            >
               <Link
                 href="/beta"
-                className="rounded-lg border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-900 shadow-sm transition hover:bg-slate-50"
+                className="inline-flex h-[44px] items-center justify-center rounded-lg border border-slate-200 bg-white px-6 text-sm font-medium text-slate-900 shadow-sm transition hover:bg-slate-50"
               >
                 Explore Beta Program
               </Link>
