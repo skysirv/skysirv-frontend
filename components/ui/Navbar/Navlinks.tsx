@@ -90,8 +90,8 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
       <div className="pointer-events-auto pt-4 md:pt-5">
         <div
           className={`relative mx-auto flex max-w-5xl items-center justify-between rounded-full px-6 py-3 shadow-[0_12px_30px_rgba(15,23,42,0.10)] ${isDark
-              ? 'border border-white/10 bg-slate-900/80 backdrop-blur'
-              : 'border border-slate-200 bg-white'
+            ? 'border border-white/10 bg-slate-950/95 backdrop-blur'
+            : 'border border-slate-200 bg-white'
             }`}
         >
           <div className="flex items-center translate-y-[1px] -translate-x-3">
