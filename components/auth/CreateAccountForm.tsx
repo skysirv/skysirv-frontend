@@ -242,21 +242,23 @@ export default function CreateAccountForm({
                 <div className="h-px flex-1 bg-slate-200" />
             </div>
 
-            <div className="flex w-full justify-center">
-                <div ref={googleButtonRef} />
+            <div className="min-h-[72px]">
+                <div className="flex w-full justify-center">
+                    <div ref={googleButtonRef} className="min-h-[44px]" />
+                </div>
+
+                {googleLoading && (
+                    <p className="mt-3 text-center text-sm text-slate-500">
+                        Continuing with Google...
+                    </p>
+                )}
+
+                {!GOOGLE_CLIENT_ID && (
+                    <p className="mt-3 text-center text-sm text-red-500">
+                        Google sign-in is not configured yet.
+                    </p>
+                )}
             </div>
-
-            {googleLoading && (
-                <p className="mt-3 text-center text-sm text-slate-500">
-                    Continuing with Google...
-                </p>
-            )}
-
-            {!GOOGLE_CLIENT_ID && (
-                <p className="mt-3 text-center text-sm text-red-500">
-                    Google sign-in is not configured yet.
-                </p>
-            )}
         </>
     )
 }
