@@ -31,7 +31,7 @@ export default function Footer() {
             <ul className="mt-4 space-y-3 text-sm text-slate-600">
 
               <li>
-                <Link href="/choose-plan" className="transition hover:text-slate-400">
+                <Link href="/pricing" className="transition hover:text-slate-400">
                   Pricing
                 </Link>
               </li>
