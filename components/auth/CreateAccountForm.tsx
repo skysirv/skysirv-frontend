@@ -242,9 +242,9 @@ export default function CreateAccountForm({
                 <div className="h-px flex-1 bg-slate-200" />
             </div>
 
-            <div className="min-h-[72px]">
+            <div className="min-h-[84px]">
                 <div className="flex w-full justify-center">
-                    <div ref={googleButtonRef} className="min-h-[44px]" />
+                    <div ref={googleButtonRef} className="min-h-[44px] w-[320px]" />
                 </div>
 
                 {googleLoading && (

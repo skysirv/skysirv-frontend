@@ -55,15 +55,22 @@ export default function AuthModal({
         }
     }, [open, onClose])
 
-    if (!mounted || !open) return null
+    if (!mounted) return null
 
     return createPortal(
         <div
-            className="fixed inset-0 z-[1000] flex min-h-screen items-center justify-center bg-black/40 px-4 py-6 backdrop-blur-sm"
-            onClick={onClose}
+            className={`fixed inset-0 z-[1000] flex min-h-screen items-center justify-center px-4 py-6 transition-all duration-200 ${open
+                    ? "pointer-events-auto bg-black/40 backdrop-blur-sm opacity-100"
+                    : "pointer-events-none bg-black/0 backdrop-blur-0 opacity-0"
+                }`}
+            onClick={open ? onClose : undefined}
+            aria-hidden={!open}
         >
             <div
-                className={`w-full ${maxWidthClassName} rounded-3xl border border-slate-200 bg-white p-6 shadow-xl sm:p-8`}
+                className={`w-full ${maxWidthClassName} rounded-3xl border border-slate-200 bg-white p-6 shadow-xl transition-all duration-200 sm:p-8 ${open
+                        ? "translate-y-0 scale-100 opacity-100"
+                        : "translate-y-2 scale-[0.985] opacity-0"
+                    }`}
                 onClick={(event) => event.stopPropagation()}
             >
                 {(title || description) && (
