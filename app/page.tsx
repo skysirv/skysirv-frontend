@@ -236,11 +236,15 @@ export default function HomePage() {
             transition={{ delay: 0.32, duration: 0.55 }}
             className="mt-8 flex flex-wrap justify-center gap-4"
           >
-            <motion.div whileHover={{ y: -2, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <motion.div
+              whileHover={{ y: -2, scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex"
+            >
               <button
                 type="button"
                 onClick={() => setCreateAccountModalOpen(true)}
-                className="rounded-lg bg-slate-900 px-6 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-slate-700"
+                className="inline-flex items-center justify-center rounded-lg bg-slate-900 px-6 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-slate-700"
               >
                 Start Monitoring Flights
               </button>
