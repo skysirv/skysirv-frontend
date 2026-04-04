@@ -113,13 +113,16 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
           <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center justify-center">
             <div className={`flex items-center gap-6 text-sm font-semibold ${isDark ? 'text-white/70' : 'text-slate-600'
               }`}>
-              <Link href="/pricing" className="hover:text-slate-900 transition">
+              <Link href="/pricing" className={`transition ${isDark ? 'hover:text-white' : 'hover:text-slate-900'
+                }`}>
                 Pricing
               </Link>
-              <Link href="/booking" className="hover:text-slate-900 transition">
+              <Link href="/booking" className={`transition ${isDark ? 'hover:text-white' : 'hover:text-slate-900'
+                }`}>
                 Booking
               </Link>
-              <Link href="/flight-attendant" className="hover:text-slate-900 transition">
+              <Link href="/flight-attendant" className={`transition ${isDark ? 'hover:text-white' : 'hover:text-slate-900'
+                }`}>
                 Skysirv Flight Attendant™
               </Link>
             </div>
