@@ -1,6 +1,7 @@
 "use client"
 
-import { ReactNode, useEffect } from "react"
+import { ReactNode, useEffect, useState } from "react"
+import { createPortal } from "react-dom"
 
 type AuthModalProps = {
     open: boolean
@@ -19,6 +20,12 @@ export default function AuthModal({
     children,
     maxWidthClassName = "max-w-md",
 }: AuthModalProps) {
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
     useEffect(() => {
         if (!open) return
 
@@ -39,11 +46,11 @@ export default function AuthModal({
         }
     }, [open, onClose])
 
-    if (!open) return null
+    if (!mounted || !open) return null
 
-    return (
+    return createPortal(
         <div
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm"
+            className="fixed inset-0 z-[1000] flex min-h-screen items-center justify-center bg-black/40 px-4 py-6 backdrop-blur-sm"
             onClick={onClose}
         >
             <div
@@ -79,6 +86,7 @@ export default function AuthModal({
 
                 {children}
             </div>
-        </div>
+        </div>,
+        document.body
     )
 }
