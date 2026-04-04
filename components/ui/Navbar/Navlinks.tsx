@@ -110,7 +110,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
             </Link>
           </div>
 
-          <div className="hidden md:flex flex-1 justify-center">
+          <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center justify-center">
             <div className="flex items-center gap-6 text-sm font-semibold text-slate-600">
               <Link href="/pricing" className="hover:text-slate-900 transition">
                 Pricing
