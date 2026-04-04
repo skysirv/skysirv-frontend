@@ -60,11 +60,6 @@ export default function PricingPage() {
                         transition={{ duration: 9.2, repeat: Infinity, ease: "easeInOut" }}
                         className="absolute bottom-[-40px] left-[-20px] h-80 w-80 rounded-full bg-indigo-500/10 blur-3xl"
                     />
-                    <motion.div
-                        animate={{ opacity: [0.08, 0.16, 0.08] }}
-                        transition={{ duration: 6.4, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent,rgba(15,23,42,0.24),transparent)]"
-                    />
                 </div>
 
                 <div className="relative mx-auto max-w-7xl px-6 pb-20 pt-28 sm:px-8 sm:pb-24 sm:pt-32 lg:px-12">
