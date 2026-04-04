@@ -159,7 +159,7 @@ export default function BookingPage() {
                     </p>
 
                     <h3 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                        Skysirv Booking will turn intelligence into action.
+                        Skysirv™ Booking will turn intelligence into action.
                     </h3>
 
                     <p className="mx-auto mt-5 max-w-3xl text-base leading-8 text-slate-300 sm:text-lg">
