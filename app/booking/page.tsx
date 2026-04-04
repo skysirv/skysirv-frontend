@@ -40,7 +40,7 @@ export default function BookingPage() {
                 />
             </div>
 
-            <div className="relative mx-auto flex max-w-7xl flex-col px-6 pb-0 pt-20 sm:px-8 sm:pb-0 sm:pt-24 lg:px-12">
+            <div className="relative mx-auto flex max-w-7xl flex-col px-6 pb-10 pt-20 sm:px-8 sm:pb-12 sm:pt-24 lg:px-12">
                 <div className="mx-auto max-w-5xl text-center">
                     <motion.div
                         initial={{ opacity: 0, y: 16 }}
