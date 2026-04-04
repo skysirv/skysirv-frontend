@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import AuthModal from "@/components/auth/AuthModal"
@@ -15,6 +15,19 @@ function cn(...classes: Array<string | false | null | undefined>) {
 export default function PricingPage() {
     const [billing, setBilling] = useState<Billing>("monthly")
     const [createAccountModalOpen, setCreateAccountModalOpen] = useState(false)
+
+    useEffect(() => {
+        const originalBackground = document.body.style.background
+        const originalBackgroundColor = document.body.style.backgroundColor
+
+        document.body.style.background = "linear-gradient(to bottom, rgb(2 6 23), rgb(2 6 23), rgb(15 23 42))"
+        document.body.style.backgroundColor = "rgb(2 6 23)"
+
+        return () => {
+            document.body.style.background = originalBackground
+            document.body.style.backgroundColor = originalBackgroundColor
+        }
+    }, [])
 
     const prices = useMemo(() => {
         const monthly = { free: 0, pro: 19, enterprise: 59 }

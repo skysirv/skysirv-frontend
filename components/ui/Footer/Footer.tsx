@@ -11,19 +11,11 @@ export default function Footer() {
     <footer
       className={
         isDark
-          ? "relative overflow-hidden bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950 text-white"
+          ? "bg-transparent text-white"
           : "border-t border-slate-200 bg-white"
       }
     >
-      {isDark && (
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_left,rgba(56,189,248,0.12),transparent_28%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(56,189,248,0.08),transparent_30%)]" />
-          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(15,23,42,0.10),transparent)]" />
-        </div>
-      )}
-
-      <div className="relative mx-auto max-w-6xl px-6 py-16 text-center md:max-w-4xl md:text-left">
+      <div className="mx-auto max-w-6xl px-6 py-16 text-center md:max-w-4xl md:text-left">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-4 md:justify-items-center md:text-center">
           {/* Brand */}
           <div className="flex max-w-xs flex-col justify-start text-center md:text-left">
