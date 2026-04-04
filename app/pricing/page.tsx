@@ -44,7 +44,7 @@ export default function PricingPage() {
 
     return (
         <>
-            <section className="relative -mt-32 overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 pt-32 text-white">
+            <section className="relative -mt-32 overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 pt-16 text-white">
                 <div className="pointer-events-none absolute inset-0">
                     <motion.div
                         animate={{ opacity: [0.16, 0.28, 0.16], scale: [1, 1.04, 1] }}
@@ -63,7 +63,7 @@ export default function PricingPage() {
                     />
                 </div>
 
-                <div className="relative mx-auto max-w-7xl px-6 pb-20 pt-16 sm:px-8 sm:pb-24 sm:pt-20 lg:px-12">
+                <div className="relative mx-auto max-w-7xl px-6 pb-20 pt-28 sm:px-8 sm:pb-24 sm:pt-32 lg:px-12">
                     {/* HERO */}
                     <div className="mx-auto max-w-4xl text-center">
                         <motion.div
