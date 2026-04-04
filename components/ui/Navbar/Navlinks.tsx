@@ -8,9 +8,10 @@ import CreateAccountForm from '@/components/auth/CreateAccountForm';
 
 interface NavlinksProps {
   user?: any;
+  isDark?: boolean;
 }
 
-export default function Navlinks({ user }: NavlinksProps) {
+export default function Navlinks({ user, isDark = false }: NavlinksProps) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [createAccountModalOpen, setCreateAccountModalOpen] = useState(false);
@@ -68,17 +69,9 @@ export default function Navlinks({ user }: NavlinksProps) {
 
     checkSession();
 
-    const handleFocus = () => {
-      checkSession();
-    };
-
-    const handleStorage = () => {
-      checkSession();
-    };
-
-    const handleAuthChanged = () => {
-      checkSession();
-    };
+    const handleFocus = () => checkSession();
+    const handleStorage = () => checkSession();
+    const handleAuthChanged = () => checkSession();
 
     window.addEventListener('focus', handleFocus);
     window.addEventListener('storage', handleStorage);
@@ -95,12 +88,21 @@ export default function Navlinks({ user }: NavlinksProps) {
   return (
     <>
       <div className="pointer-events-auto pt-4 md:pt-5">
-        <div className="relative mx-auto flex max-w-5xl items-center justify-between rounded-full border border-slate-200 bg-white px-6 py-3 shadow-[0_12px_30px_rgba(15,23,42,0.10)]">
+        <div
+          className={`relative mx-auto flex max-w-5xl items-center justify-between rounded-full px-6 py-3 shadow-[0_12px_30px_rgba(15,23,42,0.10)] ${isDark
+              ? 'border border-white/10 bg-slate-900/80 backdrop-blur'
+              : 'border border-slate-200 bg-white'
+            }`}
+        >
           <div className="flex items-center translate-y-[1px] -translate-x-3">
             <Link href="/" className={s.logo} aria-label="Skysirv" style={{ marginLeft: '-22px' }}>
               <span style={{ display: 'flex', alignItems: 'center', height: '40px' }}>
                 <img
-                  src="/branding/logo/skysirv-logo.svg"
+                  src={
+                    isDark
+                      ? '/branding/logo/skysirv-logo-white.svg'
+                      : '/branding/logo/skysirv-logo.svg'
+                  }
                   alt="Skysirv"
                   style={{ width: '180px', height: 'auto', display: 'block' }}
                 />
@@ -112,7 +114,8 @@ export default function Navlinks({ user }: NavlinksProps) {
             {isLoggedIn && isAdmin && (
               <Link
                 href="/admin"
-                className={`${s.link} rounded-full px-3 py-2 text-sm font-medium transition hover:bg-slate-50`}
+                className={`rounded-full px-3 py-2 text-sm font-medium transition ${isDark ? 'text-white hover:bg-white/10' : 'hover:bg-slate-50'
+                  }`}
               >
                 Admin
               </Link>
@@ -121,7 +124,8 @@ export default function Navlinks({ user }: NavlinksProps) {
             {isLoggedIn && !isAdmin && (
               <Link
                 href="/dashboard"
-                className={`${s.link} rounded-full px-3 py-2 text-sm font-medium transition hover:bg-slate-50`}
+                className={`rounded-full px-3 py-2 text-sm font-medium transition ${isDark ? 'text-white hover:bg-white/10' : 'hover:bg-slate-50'
+                  }`}
               >
                 Dashboard
               </Link>
@@ -135,14 +139,16 @@ export default function Navlinks({ user }: NavlinksProps) {
                   window.dispatchEvent(new Event('skysirv-auth-changed'));
                   window.location.href = '/';
                 }}
-                className={`${s.link} rounded-full px-3 py-2 text-sm font-medium transition hover:bg-slate-50`}
+                className={`rounded-full px-3 py-2 text-sm font-medium transition ${isDark ? 'text-white hover:bg-white/10' : 'hover:bg-slate-50'
+                  }`}
               >
                 Sign out
               </button>
             ) : (
               <Link
                 href="/signin"
-                className={`${s.link} rounded-full px-3 py-2 text-sm font-medium transition hover:bg-slate-50`}
+                className={`rounded-full px-3 py-2 text-sm font-medium transition ${isDark ? 'text-white hover:bg-white/10' : 'hover:bg-slate-50'
+                  }`}
               >
                 Sign in
               </Link>
@@ -152,7 +158,7 @@ export default function Navlinks({ user }: NavlinksProps) {
               <button
                 type="button"
                 onClick={() => setCreateAccountModalOpen(true)}
-                className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
+                className="rounded-full bg-white text-slate-900 px-4 py-2 text-sm font-semibold transition hover:bg-slate-200"
               >
                 Create account
               </button>

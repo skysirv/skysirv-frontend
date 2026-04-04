@@ -1,12 +1,16 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import s from './Navbar.module.css';
 import Navlinks from './Navlinks';
 
 export default function Navbar() {
   const [hidden, setHidden] = useState(false);
   const lastScrollY = useRef(0);
+
+  const pathname = usePathname();
+  const isDark = pathname === '/pricing';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,7 +54,8 @@ export default function Navbar() {
       style={{
         transform: hidden ? 'translateY(-80%)' : 'translateY(0)',
         opacity: hidden ? 0 : 1,
-        transition: 'transform 320ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms ease'
+        transition:
+          'transform 320ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms ease',
       }}
     >
       <a href="#skip" className="sr-only focus:not-sr-only">
@@ -58,7 +63,7 @@ export default function Navbar() {
       </a>
 
       <div className="mx-auto max-w-7xl px-6">
-        <Navlinks />
+        <Navlinks isDark={isDark} />
       </div>
     </nav>
   );
