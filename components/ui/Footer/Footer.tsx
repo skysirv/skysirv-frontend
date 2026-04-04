@@ -32,7 +32,7 @@ export default function Footer() {
 
               <li>
                 <Link href="/choose-plan" className="transition hover:text-slate-400">
-                  Plans
+                  Pricing
                 </Link>
               </li>
 
