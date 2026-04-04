@@ -11,7 +11,7 @@ export default function Footer() {
     <footer
       className={
         isDark
-          ? "bg-transparent text-white"
+          ? "bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 text-white"
           : "border-t border-slate-200 bg-white"
       }
     >
