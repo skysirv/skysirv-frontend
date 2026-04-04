@@ -1,9 +1,25 @@
 "use client"
 
+import { useEffect } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 
 export default function BookingPage() {
+
+    useEffect(() => {
+        const originalBackground = document.body.style.background
+        const originalBackgroundColor = document.body.style.backgroundColor
+
+        document.body.style.background =
+            "linear-gradient(to bottom, rgb(2 6 23), rgb(2 6 23), rgb(15 23 42))"
+        document.body.style.backgroundColor = "rgb(2 6 23)"
+
+        return () => {
+            document.body.style.background = originalBackground
+            document.body.style.backgroundColor = originalBackgroundColor
+        }
+    }, [])
+
     return (
         <section className="relative min-h-screen overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 text-white">
             <div className="pointer-events-none absolute inset-0">
