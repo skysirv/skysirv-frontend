@@ -1,7 +1,10 @@
 "use client"
 
 import Link from "next/link"
+import { useState } from "react"
 import { motion } from "framer-motion"
+import AuthModal from "@/components/auth/AuthModal"
+import CreateAccountForm from "@/components/auth/CreateAccountForm"
 
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
@@ -32,6 +35,8 @@ const staggerItem = {
 }
 
 export default function HomePage() {
+  const [createAccountModalOpen, setCreateAccountModalOpen] = useState(false)
+
   const intelligenceCards = [
     {
       title: "Skysirv Monitor™",
@@ -232,12 +237,13 @@ export default function HomePage() {
             className="mt-8 flex flex-wrap justify-center gap-4"
           >
             <motion.div whileHover={{ y: -2, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Link
-                href="/create-account"
+              <button
+                type="button"
+                onClick={() => setCreateAccountModalOpen(true)}
                 className="rounded-lg bg-slate-900 px-6 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-slate-700"
               >
                 Start Monitoring Flights
-              </Link>
+              </button>
             </motion.div>
 
             <motion.div whileHover={{ y: -2, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
@@ -694,18 +700,29 @@ export default function HomePage() {
 
               <div className="mt-8 flex justify-center gap-4">
                 <motion.div whileHover={{ y: -2, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Link
-                    href="/create-account"
+                  <button
+                    type="button"
+                    onClick={() => setCreateAccountModalOpen(true)}
                     className="rounded-lg bg-white px-6 py-3 text-sm font-medium text-slate-950 shadow-sm transition hover:bg-slate-200"
                   >
                     Start Monitoring Flights
-                  </Link>
+                  </button>
                 </motion.div>
               </div>
             </div>
           </div>
         </div>
       </motion.section>
+
+      <AuthModal
+        open={createAccountModalOpen}
+        onClose={() => setCreateAccountModalOpen(false)}
+        title="Create your Skysirv™ account"
+        description="Start monitoring airfare with real travel intelligence"
+        maxWidthClassName="max-w-sm"
+      >
+        <CreateAccountForm />
+      </AuthModal>
     </>
   )
 }
