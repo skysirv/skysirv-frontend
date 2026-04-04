@@ -163,8 +163,6 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
       <AuthModal
         open={createAccountModalOpen}
         onClose={() => setCreateAccountModalOpen(false)}
-        title="Create your Skysirv™ account"
-        description="Start monitoring airfare with real travel intelligence"
         maxWidthClassName="max-w-sm"
       >
         <AuthPanel />
