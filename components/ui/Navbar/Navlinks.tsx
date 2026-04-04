@@ -158,7 +158,10 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
               <button
                 type="button"
                 onClick={() => setCreateAccountModalOpen(true)}
-                className="rounded-full bg-white text-slate-900 px-4 py-2 text-sm font-semibold transition hover:bg-slate-200"
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${isDark
+                  ? 'bg-white text-slate-900 hover:bg-slate-200'
+                  : 'bg-slate-900 text-white hover:bg-slate-700'
+                  }`}
               >
                 Create account
               </button>
