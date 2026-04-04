@@ -21,7 +21,7 @@ export default function BookingPage() {
     }, [])
 
     return (
-        <section className="relative -mt-32 overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 pt-16 text-white">
+        <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 pt-32 text-white">
             <div className="pointer-events-none absolute inset-0">
                 <motion.div
                     animate={{ opacity: [0.14, 0.24, 0.14], scale: [1, 1.03, 1] }}
@@ -40,7 +40,7 @@ export default function BookingPage() {
                 />
             </div>
 
-            <div className="relative mx-auto flex max-w-7xl flex-col px-6 pb-10 pt-20 sm:px-8 sm:pb-12 sm:pt-24 lg:px-12">
+            <div className="relative mx-auto flex max-w-7xl flex-col px-6 pb-20 pt-8 sm:px-8 sm:pb-24 sm:pt-10 lg:px-12">
                 <div className="mx-auto max-w-5xl text-center">
                     <motion.div
                         initial={{ opacity: 0, y: 16 }}
