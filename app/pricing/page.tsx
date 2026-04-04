@@ -63,7 +63,7 @@ export default function PricingPage() {
                     />
                 </div>
 
-                <div className="relative mx-auto max-w-7xl px-6 pb-20 pt-28 sm:px-8 sm:pb-24 sm:pt-32 lg:px-12">
+                <div className="relative mx-auto max-w-7xl px-6 pb-20 pt-8 sm:px-8 sm:pb-24 sm:pt-10 lg:px-12">
                     {/* HERO */}
                     <div className="mx-auto max-w-4xl text-center">
                         <motion.div
