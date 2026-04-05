@@ -1110,15 +1110,15 @@ export default function ProDashboardPage() {
           <motion.section {...fadeUp} className="mt-14">
             <div className="mb-8 max-w-3xl">
               <p className="text-sm font-medium uppercase tracking-[0.16em] text-slate-500">
-                Live Market View
+                Pro Market View
               </p>
               <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-                Better visibility into price behavior
+                Better visibility once monitoring begins
               </h2>
               <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base">
-                Pro gives you more than a snapshot. It gives you a more useful
-                decision surface — price behavior context, route pressure, and
-                signal quality that help you understand when not to rush.
+                Pro is designed to surface deeper price behavior, stronger route
+                context, and more actionable monitoring visibility — but those
+                intelligence layers only appear after you begin tracking routes.
               </p>
             </div>
 
@@ -1127,70 +1127,61 @@ export default function ProDashboardPage() {
                 <div className="mb-6 flex items-center justify-between">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                      Featured Route
+                      Route Intelligence Preview
                     </p>
                     <h3 className="mt-2 text-2xl font-semibold text-white">
-                      BOS → LHR
+                      No monitored route data yet
                     </h3>
                   </div>
 
-                  <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300">
-                    PRO SIGNAL
+                  <span className="rounded-full border border-sky-400/20 bg-sky-400/10 px-3 py-1 text-xs font-semibold text-sky-300">
+                    Waiting for data
                   </span>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-3">
                   <ProRouteStat
                     label="Current Fare"
-                    value="$412"
-                    subtext="↓ $133 vs avg"
+                    value="—"
+                    subtext="Appears after route monitoring begins"
                   />
                   <ProRouteStat
-                    label="Volatility"
-                    value="Moderate"
-                    subtext="Stable downward bias"
+                    label="Price Behavior™"
+                    value="Pending"
+                    subtext="Waiting for enough tracked history"
                   />
                   <ProRouteStat
-                    label="Confidence"
-                    value="High"
-                    subtext="Signal strength 82%"
+                    label="Signal Status"
+                    value="Pending"
+                    subtext="Signals appear after monitoring begins"
                   />
                 </div>
 
                 <div className="mt-8">
                   <div className="mb-3 flex items-center justify-between text-xs uppercase tracking-[0.16em] text-slate-400">
                     <span>Price Behavior™</span>
-                    <span>30–90 day window</span>
+                    <span>Monitoring required</span>
                   </div>
 
                   <div className="relative h-40 overflow-hidden rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.4)_0%,rgba(2,6,23,0.65)_100%)] p-4">
                     <div className="absolute inset-x-0 top-1/2 border-t border-dashed border-white/10" />
                     <div className="absolute inset-x-0 bottom-8 border-t border-dashed border-white/10" />
 
-                    <svg
-                      viewBox="0 0 600 180"
-                      className="h-full w-full"
-                      preserveAspectRatio="none"
-                    >
-                      <path
-                        d="M0 48 C42 54, 78 86, 122 74 C170 62, 210 104, 252 92 C302 79, 342 111, 389 94 C434 78, 470 60, 520 67 C550 71, 578 58, 600 46"
-                        fill="none"
-                        stroke="rgba(56,189,248,0.95)"
-                        strokeWidth="4"
-                        strokeLinecap="round"
-                      />
-                      <path
-                        d="M0 48 C42 54, 78 86, 122 74 C170 62, 210 104, 252 92 C302 79, 342 111, 389 94 C434 78, 470 60, 520 67 C550 71, 578 58, 600 46 L600 180 L0 180 Z"
-                        fill="url(#proPriceGlow)"
-                        opacity="0.35"
-                      />
-                      <defs>
-                        <linearGradient id="proPriceGlow" x1="0" x2="0" y1="0" y2="1">
-                          <stop offset="0%" stopColor="rgba(56,189,248,0.35)" />
-                          <stop offset="100%" stopColor="rgba(56,189,248,0)" />
-                        </linearGradient>
-                      </defs>
-                    </svg>
+                    <div className="flex h-full items-center justify-center">
+                      <div className="max-w-sm text-center">
+                        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 text-slate-300 shadow-inner">
+                          ✈
+                        </div>
+                        <p className="text-sm font-semibold text-white">
+                          No chart data available yet
+                        </p>
+                        <p className="mt-2 text-sm leading-6 text-slate-400">
+                          Once you add routes and monitoring begins, this area
+                          will populate with real pricing behavior from your
+                          tracked activity.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1201,25 +1192,20 @@ export default function ProDashboardPage() {
                     Signal Feed
                   </p>
 
-                  <div className="mt-5 space-y-4">
-                    <SignalItem
-                      route="NYC → MAD"
-                      signal="WAIT"
-                      description="Momentum is softening, but the route has not yet confirmed a stronger entry window."
-                      tone="amber"
-                    />
-                    <SignalItem
-                      route="MIA → BCN"
-                      signal="BUY"
-                      description="Below-average fare with stronger pressure signals and improving timing quality."
-                      tone="emerald"
-                    />
-                    <SignalItem
-                      route="LAX → NRT"
-                      signal="AVOID"
-                      description="Persistent elevation and weaker conditions suggest patience over reaction."
-                      tone="rose"
-                    />
+                  <div className="mt-5 rounded-[1.5rem] border border-dashed border-white/10 bg-slate-950/20 p-6 text-center">
+                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 text-slate-300 shadow-inner">
+                      ⌁
+                    </div>
+
+                    <h3 className="text-lg font-semibold text-white">
+                      No signals available yet
+                    </h3>
+
+                    <p className="mt-3 text-sm leading-6 text-slate-300">
+                      Pro signals are generated from real monitored route behavior.
+                      Once your tracked routes begin collecting enough pricing data,
+                      this feed will populate automatically.
+                    </p>
                   </div>
                 </div>
 
