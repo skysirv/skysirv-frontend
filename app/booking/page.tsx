@@ -40,7 +40,7 @@ export default function BookingPage() {
                 />
             </div>
 
-            <div className="relative mx-auto flex max-w-7xl flex-col px-6 pb-20 pt-8 sm:px-8 sm:pb-24 sm:pt-10 lg:px-12">
+            <div className="relative mx-auto flex max-w-7xl flex-col px-6 pb-0 pt-8 sm:px-8 sm:pb-0 sm:pt-10 lg:px-12">
                 <div className="mx-auto max-w-5xl text-center">
                     <motion.div
                         initial={{ opacity: 0, y: 16 }}
@@ -48,14 +48,14 @@ export default function BookingPage() {
                         transition={{ duration: 0.5, ease: "easeOut" }}
                         className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-300 backdrop-blur-sm"
                     >
-                        Skysirv™ Booking
+                        Coming soon to Skysirv™
                     </motion.div>
 
                     <motion.h1
                         initial={{ opacity: 0, y: 22 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.05, duration: 0.7, ease: "easeOut" }}
-                        className="mt-8 text-5xl font-bold tracking-tight text-white sm:text-6xl md:text-7xl"
+                        className="mt-8 text-5xl font-bold leading-[1.08] tracking-tight text-white sm:text-6xl md:text-7xl"
                     >
                         Booking built on
                         <span className="block bg-gradient-to-r from-white via-slate-200 to-sky-300 bg-clip-text text-transparent">
@@ -83,27 +83,6 @@ export default function BookingPage() {
                         <PreviewPill label="Timing-aware booking flow" />
                         <PreviewPill label="Intelligence-backed fare context" />
                         <PreviewPill label="Premium travel focus" />
-                    </motion.div>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 14 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.24, duration: 0.55, ease: "easeOut" }}
-                        className="mt-10 flex flex-wrap justify-center gap-4"
-                    >
-                        <Link
-                            href="/beta"
-                            className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-200"
-                        >
-                            Join the beta program
-                        </Link>
-
-                        <Link
-                            href="/pricing"
-                            className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-                        >
-                            View pricing
-                        </Link>
                     </motion.div>
                 </div>
 

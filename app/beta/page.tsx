@@ -134,7 +134,7 @@ export default function BetaPage() {
                             initial={{ opacity: 0, y: 28 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.06, duration: 0.72, ease: "easeOut" }}
-                            className="mt-8 text-5xl font-bold tracking-tight text-white sm:text-6xl md:text-7xl"
+                            className="mt-8 text-5xl font-bold leading-[1.08] tracking-tight text-white sm:text-6xl md:text-7xl"
                         >
                             Join the Skysirv™ Beta
                             <span className="block bg-gradient-to-r from-white via-slate-200 to-sky-300 bg-clip-text text-transparent">
