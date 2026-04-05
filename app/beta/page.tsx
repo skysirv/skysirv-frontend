@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { motion } from "framer-motion"
+import { useEffect } from "react"
 
 const fadeUp = {
     initial: { opacity: 0, y: 26 },
@@ -82,10 +83,25 @@ const betaBenefits = [
 ]
 
 export default function BetaPage() {
+
+    useEffect(() => {
+        const originalBackground = document.body.style.background
+        const originalBackgroundColor = document.body.style.backgroundColor
+
+        document.body.style.background =
+            "linear-gradient(to bottom, rgb(2 6 23), rgb(2 6 23), rgb(15 23 42))"
+        document.body.style.backgroundColor = "rgb(2 6 23)"
+
+        return () => {
+            document.body.style.background = originalBackground
+            document.body.style.backgroundColor = originalBackgroundColor
+        }
+    }, [])
+
     return (
-        <main className="min-h-screen bg-white">
+        <main className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 text-white">
             {/* Hero */}
-            <section className="relative overflow-hidden bg-[linear-gradient(180deg,#ffffff_0%,#f7fbff_42%,#ffffff_100%)]">
+            <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900">
                 <div className="pointer-events-none absolute inset-0">
                     <motion.div
                         animate={{ x: [0, 30, 0], y: [0, 20, 0] }}
