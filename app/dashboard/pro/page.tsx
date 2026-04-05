@@ -127,10 +127,10 @@ const defaultWrappedData: WrappedData = {
   alertsWon: 0,
   travelerIdentity: "Smart Traveler",
   bestRoute: {
-    route: "BOS-LHR",
-    saved: 312,
-    beforeSpike: "19%",
-    timingGrade: "A+",
+    route: "—",
+    saved: 0,
+    beforeSpike: "—",
+    timingGrade: "—",
   },
 }
 
@@ -353,10 +353,10 @@ export default function ProDashboardPage() {
           alertsWon: Number(data.wrapped.alerts_won ?? 0),
           travelerIdentity: data.wrapped.traveler_identity ?? "Smart Traveler",
           bestRoute: {
-            route: bestRoute.route ?? "BOS-LHR",
-            saved: Number(bestRoute.saved ?? 312),
-            beforeSpike: bestRoute.beforeSpike ?? "19%",
-            timingGrade: bestRoute.timingGrade ?? "A+",
+            route: bestRoute.route ?? "—",
+            saved: Number(bestRoute.saved ?? 0),
+            beforeSpike: bestRoute.beforeSpike ?? "—",
+            timingGrade: bestRoute.timingGrade ?? "—",
           },
         })
 
@@ -444,8 +444,8 @@ export default function ProDashboardPage() {
 
               <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
                 Pro unlocks deeper route behavior, stronger signal visibility,
-                full Skyscore™ access, and a more capable dashboard built for
-                travelers who want more confidence in when to act.
+                full Skyscore™ access, and a more capable dashboard designed for
+                travelers who want richer insight as real route data begins to build.
               </p>
             </div>
 
@@ -455,8 +455,7 @@ export default function ProDashboardPage() {
                   System Status
                 </p>
                 <p className="mt-1 text-sm font-medium text-slate-900">
-                  Add routes to begin monitoring
-                  live pricing data
+                  Add routes to begin monitoringlive pricing data
                 </p>
               </div>
 
@@ -553,9 +552,9 @@ export default function ProDashboardPage() {
                     </h3>
 
                     <p className="mx-auto max-w-md text-sm leading-6 text-slate-600">
-                      Add routes above to begin building a stronger route
-                      intelligence layer with deeper signal quality and richer
-                      visibility than Free.
+                      Add routes above to begin monitoring pricing activity. As your
+                      tracked routes collect real data, Pro intelligence layers will
+                      begin populating automatically.
                     </p>
                   </div>
                 ) : (
@@ -579,23 +578,23 @@ export default function ProDashboardPage() {
           >
             <InfoCard
               label="Price Behavior™"
-              value="30–90 Days"
-              description="Deeper lookback windows for understanding route direction and pricing rhythm."
+              value="30–90 Day Window"
+              description="Pro supports deeper historical monitoring windows once your tracked routes begin collecting enough data."
             />
             <InfoCard
               label="Skysirv Signals™"
-              value="Smart Detection"
-              description="More meaningful signal surfacing with stronger buy, wait, and avoid visibility."
+              value="Pro Access"
+              description="Signal visibility becomes available as monitored routes build real pricing history over time."
             />
             <InfoCard
               label="Skyscore™"
-              value="Full Access"
-              description="Pro includes full scoring visibility instead of a teaser-level preview."
+              value="Included"
+              description="Pro includes full scoring access when enough real monitoring data exists to generate it."
             />
             <InfoCard
               label="Forecast Visibility"
-              value="Unlocked"
-              description="A forward-looking signal layer that helps reduce guesswork in booking timing."
+              value="Available"
+              description="Forward-looking guidance appears once monitored routes have enough live data to support it."
             />
           </motion.section>
 
@@ -1355,35 +1354,6 @@ function ProRouteStat({
       </p>
       <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
       <p className="mt-1 text-xs text-slate-400">{subtext}</p>
-    </div>
-  )
-}
-
-function SignalItem({
-  route,
-  signal,
-  description,
-  tone,
-}: {
-  route: string
-  signal: string
-  description: string
-  tone: "amber" | "emerald" | "rose"
-}) {
-  const toneClass =
-    tone === "emerald"
-      ? "text-emerald-300"
-      : tone === "rose"
-        ? "text-rose-300"
-        : "text-amber-300"
-
-  return (
-    <div className="rounded-2xl border border-white/10 bg-slate-950/20 p-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold text-white">{route}</p>
-        <span className={`text-xs font-semibold ${toneClass}`}>{signal}</span>
-      </div>
-      <p className="mt-2 text-sm leading-6 text-slate-300">{description}</p>
     </div>
   )
 }
