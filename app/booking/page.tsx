@@ -217,7 +217,7 @@ function FeatureBlock({
 
 function BookingFooter() {
     return (
-        <div className="mx-auto max-w-6xl px-6 py-16 text-center md:max-w-4xl md:text-left">
+        <div className="mx-auto max-w-6xl px-6 pt-8 pb-6 text-center md:max-w-4xl md:text-left">
             <div className="grid grid-cols-1 gap-12 md:grid-cols-4 md:justify-items-center md:text-center">
                 {/* Brand */}
                 <div className="flex max-w-xs flex-col justify-start text-center md:text-left">
