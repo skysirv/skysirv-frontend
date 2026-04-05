@@ -7,7 +7,7 @@ export default function MainContentShell({ children }: PropsWithChildren) {
     const pathname = usePathname();
 
     const isHomePage = pathname === '/';
-    const isFullBleedPage = pathname === '/pricing' || pathname === '/booking';
+    const isFullBleedPage = pathname === '/pricing' || pathname === '/booking' || pathname === '/beta';
 
     return (
         <main
