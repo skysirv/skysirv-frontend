@@ -10,19 +10,18 @@ export default function OpportunityBanner() {
 
       <div className="relative">
         <div className="mb-4 inline-flex items-center rounded-full border border-sky-400/20 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-300 backdrop-blur-sm">
-          Featured Opportunity
+          Opportunity Layer
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-end">
           <div className="max-w-2xl">
             <h3 className="text-2xl font-semibold tracking-tight text-white">
-              A favorable booking window is forming
+              Opportunity signals will appear as real route data builds
             </h3>
 
             <p className="mt-3 text-sm leading-7 text-slate-300 sm:text-base">
-              Skysirv has detected improving price behavior across monitored
-              routes, with signal strength rising as fares remain below recent
-              averages.
+              Skysirv surfaces stronger booking opportunities after routes are
+              added and enough live monitoring data begins to accumulate.
             </p>
           </div>
 
@@ -31,8 +30,8 @@ export default function OpportunityBanner() {
               <p className="truncate text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
                 Signal
               </p>
-              <p className="mt-1 text-lg font-semibold text-emerald-300">
-                BUY
+              <p className="mt-1 text-lg font-semibold text-slate-200">
+                —
               </p>
             </div>
 
@@ -40,14 +39,18 @@ export default function OpportunityBanner() {
               <p className="truncate text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
                 Strength
               </p>
-              <p className="mt-1 text-lg font-semibold text-white">82%</p>
+              <p className="mt-1 text-lg font-semibold text-slate-200">
+                —
+              </p>
             </div>
 
             <div className="min-w-0 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 shadow-sm backdrop-blur-sm">
               <p className="truncate text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
                 Status
               </p>
-              <p className="mt-1 text-lg font-semibold text-white">Live</p>
+              <p className="mt-1 text-lg font-semibold text-white">
+                Waiting
+              </p>
             </div>
           </div>
         </div>
@@ -60,19 +63,20 @@ export default function OpportunityBanner() {
               </p>
 
               <p className="mt-2 text-sm leading-6 text-slate-300">
-                Price compression and softer volatility suggest that at least
-                one monitored route may be entering an attractive purchase range.
+                Once live monitoring is active, this area will highlight
+                meaningful route opportunities based on pricing behavior and
+                signal quality.
               </p>
             </div>
 
             <div className="min-w-0">
               <div className="mb-2 flex items-center justify-between gap-3 text-xs text-slate-400">
                 <span className="truncate">Opportunity Score</span>
-                <span className="shrink-0 font-semibold text-white">82%</span>
+                <span className="shrink-0 font-semibold text-slate-200">—</span>
               </div>
 
               <div className="h-2 overflow-hidden rounded-full bg-white/10">
-                <div className="h-full w-[82%] rounded-full bg-emerald-400" />
+                <div className="h-full w-0 rounded-full bg-emerald-400" />
               </div>
             </div>
           </div>
