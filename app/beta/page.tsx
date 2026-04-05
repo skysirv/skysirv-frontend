@@ -99,9 +99,9 @@ export default function BetaPage() {
     }, [])
 
     return (
-        <main className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 text-white">
+        <main className="min-h-screen">
             {/* Hero */}
-            <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900">
+            <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 pt-32 text-white">
                 <div className="pointer-events-none absolute inset-0">
                     <motion.div
                         animate={{ x: [0, 30, 0], y: [0, 20, 0] }}
@@ -120,7 +120,7 @@ export default function BetaPage() {
                     />
                 </div>
 
-                <div className="relative mx-auto max-w-7xl px-6 pb-24 pt-16 md:pb-32 md:pt-24">
+                <div className="relative mx-auto max-w-7xl px-6 pb-24 pt-8 sm:px-8 sm:pb-32 sm:pt-10 lg:px-12">
                     <motion.div
                         initial={{ opacity: 0, y: 18 }}
                         animate={{ opacity: 1, y: 0 }}
