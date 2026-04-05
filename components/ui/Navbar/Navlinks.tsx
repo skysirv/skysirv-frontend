@@ -125,6 +125,10 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
                 }`}>
                 Skysirv Flight Attendant™
               </Link>
+              <Link href="/beta" className={`transition ${isDark ? 'hover:text-white' : 'hover:text-slate-900'
+                }`}>
+                Skysirv™ Beta
+              </Link>
             </div>
           </div>
 

@@ -249,19 +249,6 @@ export default function HomePage() {
                 Start Monitoring Flights
               </button>
             </motion.div>
-
-            <motion.div
-              whileHover={{ y: -2, scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="flex shrink-0"
-            >
-              <Link
-                href="/beta"
-                className="inline-flex h-[44px] items-center justify-center rounded-lg border border-slate-200 bg-white px-6 text-sm font-medium text-slate-900 shadow-sm transition hover:bg-slate-50"
-              >
-                Explore Beta Program
-              </Link>
-            </motion.div>
           </motion.div>
 
           {/* HERO CINEMATIC PANEL */}

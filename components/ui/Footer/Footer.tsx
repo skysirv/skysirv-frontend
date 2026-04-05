@@ -71,7 +71,7 @@ export default function Footer() {
 
               <li>
                 <Link href="/beta" className="transition hover:text-slate-400">
-                  Beta Program
+                  Skysirv™ Beta
                 </Link>
               </li>
             </ul>
