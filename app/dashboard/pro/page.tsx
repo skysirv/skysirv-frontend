@@ -455,7 +455,8 @@ export default function ProDashboardPage() {
                   System Status
                 </p>
                 <p className="mt-1 text-sm font-medium text-slate-900">
-                  Monitoring markets in real time
+                  Add routes to begin monitoring
+                  live pricing data
                 </p>
               </div>
 
