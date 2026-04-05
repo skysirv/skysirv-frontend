@@ -299,7 +299,7 @@ function BookingFooter() {
 
                         <li>
                             <Link href="/beta" className="transition hover:text-white">
-                                Beta Program
+                                Skysirv™ Beta
                             </Link>
                         </li>
                     </ul>
