@@ -112,52 +112,10 @@ export default function FreeDashboardPage() {
             <RouteSearch onRouteAdded={handleRouteAdded} />
           </div>
 
-          {/* Quick Free Stats */}
-          <motion.section
-            {...fadeUp}
-            className="mb-12 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
-          >
-            <InfoCard
-              label="Monitoring Cadence"
-              value="Standard"
-              description="Steady route tracking for users getting started."
-            />
-            <InfoCard
-              label="Price History"
-              value="Basic"
-              description="Light fare snapshots instead of deep historical analysis."
-            />
-            <InfoCard
-              label="Alerts"
-              value="Limited"
-              description="Essential signals without the advanced intelligence stack."
-            />
-            <InfoCard
-              label="Skyscore™"
-              value="Preview"
-              description="A teaser of your intelligence profile, not the full readout."
-            />
-          </motion.section>
-
-          {/* Global Intelligence */}
-          <div className="mb-12 grid gap-8 lg:grid-cols-2">
-            {loading ? (
-              <>
-                <OpportunitySkeleton />
-                <MarketSignalsSkeleton />
-              </>
-            ) : (
-              <>
-                <OpportunityBanner />
-                <MarketSignals />
-              </>
-            )}
-          </div>
-
           {/* Watchlist Section */}
           <motion.section
             {...fadeUp}
-            className="relative overflow-hidden rounded-[2rem] border border-slate-200/80 bg-[linear-gradient(180deg,#f8fbff_0%,#f6f9fc_42%,#ffffff_100%)] px-5 py-8 shadow-[0_20px_60px_rgba(15,23,42,0.06)] sm:px-7 md:px-8 md:py-10"
+            className="mb-12 relative overflow-hidden rounded-[2rem] border border-slate-200/80 bg-[linear-gradient(180deg,#f8fbff_0%,#f6f9fc_42%,#ffffff_100%)] px-5 py-8 shadow-[0_20px_60px_rgba(15,23,42,0.06)] sm:px-7 md:px-8 md:py-10"
           >
             <div className="pointer-events-none absolute inset-0">
               <div className="absolute -left-20 top-0 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.10)_0%,rgba(255,255,255,0)_72%)] blur-3xl" />
@@ -230,6 +188,48 @@ export default function FreeDashboardPage() {
               </div>
             </div>
           </motion.section>
+
+          {/* Quick Free Stats */}
+          <motion.section
+            {...fadeUp}
+            className="mb-12 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+          >
+            <InfoCard
+              label="Monitoring Cadence"
+              value="Standard"
+              description="Steady route tracking for users getting started."
+            />
+            <InfoCard
+              label="Price History"
+              value="Basic"
+              description="Light fare snapshots instead of deep historical analysis."
+            />
+            <InfoCard
+              label="Alerts"
+              value="Limited"
+              description="Essential signals without the advanced intelligence stack."
+            />
+            <InfoCard
+              label="Skyscore™"
+              value="Preview"
+              description="A teaser of your intelligence profile, not the full readout."
+            />
+          </motion.section>
+
+          {/* Global Intelligence */}
+          <div className="mb-12 grid gap-8 lg:grid-cols-2">
+            {loading ? (
+              <>
+                <OpportunitySkeleton />
+                <MarketSignalsSkeleton />
+              </>
+            ) : (
+              <>
+                <OpportunityBanner />
+                <MarketSignals />
+              </>
+            )}
+          </div>
 
           {/* Preview Section */}
           <motion.section
