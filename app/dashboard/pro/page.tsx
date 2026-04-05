@@ -493,48 +493,6 @@ export default function ProDashboardPage() {
             <RouteSearch onRouteAdded={handleRouteAdded} />
           </div>
 
-          {/* Pro Capability Stats */}
-          <motion.section
-            {...fadeUp}
-            className="mb-12 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
-          >
-            <InfoCard
-              label="Price Behavior™"
-              value="30–90 Days"
-              description="Deeper lookback windows for understanding route direction and pricing rhythm."
-            />
-            <InfoCard
-              label="Skysirv Signals™"
-              value="Smart Detection"
-              description="More meaningful signal surfacing with stronger buy, wait, and avoid visibility."
-            />
-            <InfoCard
-              label="Skyscore™"
-              value="Full Access"
-              description="Pro includes full scoring visibility instead of a teaser-level preview."
-            />
-            <InfoCard
-              label="Forecast Visibility"
-              value="Unlocked"
-              description="A forward-looking signal layer that helps reduce guesswork in booking timing."
-            />
-          </motion.section>
-
-          {/* Global Intelligence Signals */}
-          <div className="mb-12 grid gap-8 lg:grid-cols-2">
-            {loading ? (
-              <>
-                <OpportunitySkeleton />
-                <MarketSignalsSkeleton />
-              </>
-            ) : (
-              <>
-                <OpportunityBanner />
-                <MarketSignals />
-              </>
-            )}
-          </div>
-
           {/* Watchlist Zone */}
           <motion.section
             {...fadeUp}
@@ -612,6 +570,48 @@ export default function ProDashboardPage() {
               </div>
             </div>
           </motion.section>
+
+          {/* Pro Capability Stats */}
+          <motion.section
+            {...fadeUp}
+            className="mb-12 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+          >
+            <InfoCard
+              label="Price Behavior™"
+              value="30–90 Days"
+              description="Deeper lookback windows for understanding route direction and pricing rhythm."
+            />
+            <InfoCard
+              label="Skysirv Signals™"
+              value="Smart Detection"
+              description="More meaningful signal surfacing with stronger buy, wait, and avoid visibility."
+            />
+            <InfoCard
+              label="Skyscore™"
+              value="Full Access"
+              description="Pro includes full scoring visibility instead of a teaser-level preview."
+            />
+            <InfoCard
+              label="Forecast Visibility"
+              value="Unlocked"
+              description="A forward-looking signal layer that helps reduce guesswork in booking timing."
+            />
+          </motion.section>
+
+          {/* Global Intelligence Signals */}
+          <div className="mb-12 grid gap-8 lg:grid-cols-2">
+            {loading ? (
+              <>
+                <OpportunitySkeleton />
+                <MarketSignalsSkeleton />
+              </>
+            ) : (
+              <>
+                <OpportunityBanner />
+                <MarketSignals />
+              </>
+            )}
+          </div>
 
           {/* Intelligence Wrapped Section */}
           <div className="relative mt-14 overflow-hidden rounded-[2rem] border border-slate-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_36%,#ffffff_100%)] shadow-[0_24px_70px_rgba(15,23,42,0.07)]">
