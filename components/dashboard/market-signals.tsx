@@ -9,7 +9,7 @@ export default function MarketSignals() {
 
       <div className="relative">
         <div className="mb-4 inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600 shadow-sm backdrop-blur-sm">
-          Live Signal Feed
+          Signal Layer
         </div>
 
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -19,8 +19,8 @@ export default function MarketSignals() {
             </h2>
 
             <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-              A live readout of current airfare conditions, timing pressure, and
-              confidence signals shaping the booking environment.
+              Market-level signal readouts will appear here once live route
+              monitoring begins generating enough intelligence data.
             </p>
           </div>
 
@@ -29,7 +29,7 @@ export default function MarketSignals() {
               Network Status
             </p>
             <p className="mt-1 text-sm font-semibold text-slate-900">
-              Signals updating in real time
+              Waiting for monitored route data
             </p>
           </div>
         </div>
@@ -40,18 +40,18 @@ export default function MarketSignals() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                 Volatility Index
               </p>
-              <span className="rounded-full bg-amber-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-700">
-                Moderate
+              <span className="rounded-full bg-slate-200 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-600">
+                Pending
               </span>
             </div>
 
             <p className="mt-4 text-2xl font-semibold tracking-tight text-slate-950">
-              Moderate
+              —
             </p>
 
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Market movement remains active but controlled, with selective fare
-              dips appearing across monitored routes.
+              Volatility signals will populate after active monitoring starts
+              capturing enough fare movement.
             </p>
           </div>
 
@@ -60,18 +60,18 @@ export default function MarketSignals() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                 Booking Window
               </p>
-              <span className="rounded-full bg-sky-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-sky-700">
-                Active
+              <span className="rounded-full bg-slate-200 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-600">
+                Pending
               </span>
             </div>
 
             <p className="mt-4 text-2xl font-semibold tracking-tight text-slate-950">
-              3–5 weeks
+              —
             </p>
 
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Timing conditions currently favor travelers monitoring near-term
-              international pricing behavior.
+              Timing guidance will appear when Skysirv has enough route-level
+              data to estimate stronger booking conditions.
             </p>
           </div>
 
@@ -80,18 +80,18 @@ export default function MarketSignals() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                 Market Confidence
               </p>
-              <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
-                High
+              <span className="rounded-full bg-slate-200 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-600">
+                Pending
               </span>
             </div>
 
             <p className="mt-4 text-2xl font-semibold tracking-tight text-slate-950">
-              High
+              —
             </p>
 
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              Pricing signals remain consistent enough to support stronger route
-              guidance and clearer buy-or-wait decisions.
+              Confidence scores will show once enough live pricing behavior is
+              available to support clearer route guidance.
             </p>
           </div>
         </div>
