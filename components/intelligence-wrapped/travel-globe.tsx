@@ -45,95 +45,9 @@ export default function TravelGlobe() {
     padding: { top: 0, bottom: 0, left: 0, right: 0 },
   })
 
-  const airports = useMemo<AirportNode[]>(
-    () => [
-      {
-        code: "BOS",
-        name: "Boston Logan International Airport",
-        city: "Boston",
-        country: "United States",
-        lat: 42.3656,
-        lng: -71.0096,
-        visits: 5,
-        layoverHours: 12.5,
-        loungeHours: 2.0,
-        flights: 5,
-      },
-      {
-        code: "MIA",
-        name: "Miami International Airport",
-        city: "Miami",
-        country: "United States",
-        lat: 25.7959,
-        lng: -80.287,
-        visits: 4,
-        layoverHours: 8.0,
-        loungeHours: 1.5,
-        flights: 4,
-      },
-      {
-        code: "LAX",
-        name: "Los Angeles International Airport",
-        city: "Los Angeles",
-        country: "United States",
-        lat: 33.9416,
-        lng: -118.4085,
-        visits: 3,
-        layoverHours: 6.5,
-        loungeHours: 1.0,
-        flights: 3,
-      },
-      {
-        code: "FRA",
-        name: "Frankfurt Airport",
-        city: "Frankfurt",
-        country: "Germany",
-        lat: 50.0379,
-        lng: 8.5622,
-        visits: 5,
-        layoverHours: 47.5,
-        loungeHours: 3.0,
-        flights: 5,
-      },
-      {
-        code: "CDG",
-        name: "Charles de Gaulle Airport",
-        city: "Paris",
-        country: "France",
-        lat: 49.0097,
-        lng: 2.5479,
-        visits: 2,
-        layoverHours: 5.0,
-        loungeHours: 0.5,
-        flights: 2,
-      },
-      {
-        code: "VVI",
-        name: "Viru Viru International Airport",
-        city: "Santa Cruz",
-        country: "Bolivia",
-        lat: -17.6448,
-        lng: -63.1354,
-        visits: 6,
-        layoverHours: 4.0,
-        loungeHours: 0.0,
-        flights: 6,
-      },
-    ],
-    []
-  )
+  const airports = useMemo<AirportNode[]>(() => [], [])
 
-  const routes = useMemo<RouteArc[]>(
-    () => [
-      { from: "BOS", to: "MIA" },
-      { from: "MIA", to: "LAX" },
-      { from: "BOS", to: "FRA" },
-      { from: "FRA", to: "CDG" },
-      { from: "VVI", to: "MIA" },
-      { from: "MIA", to: "FRA" },
-    ],
-    []
-  )
+  const routes = useMemo<RouteArc[]>(() => [], [])
 
   const airportMap = useMemo(() => {
     return new globalThis.Map<string, AirportNode>(
