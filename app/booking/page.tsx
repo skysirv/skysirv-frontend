@@ -310,7 +310,7 @@ function BookingFooter() {
                 </div>
             </div>
 
-            <div className="mt-12 pt-6 text-center">
+            <div className="mt-16 pt-6 text-center">
                 <p className="text-sm text-slate-300">
                     &copy; {new Date().getFullYear()} Skysirv™. All rights reserved.
                 </p>
