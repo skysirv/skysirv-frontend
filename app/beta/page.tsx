@@ -137,9 +137,7 @@ export default function BetaPage() {
                             className="mt-8 text-5xl font-bold leading-[1.08] tracking-tight text-white sm:text-6xl md:text-7xl"
                         >
                             Join the Skysirv™ Beta
-                            <span className="block bg-gradient-to-r from-white via-slate-200 to-sky-300 bg-clip-text text-transparent">
-                                before wider rollout begins
-                            </span>
+                            before wider rollout begins
                         </motion.h1>
 
                         <motion.p

@@ -58,9 +58,7 @@ export default function BookingPage() {
                         className="mt-8 text-5xl font-bold leading-[1.08] tracking-tight text-white sm:text-6xl md:text-7xl"
                     >
                         Booking built on
-                        <span className="block bg-gradient-to-r from-white via-slate-200 to-sky-300 bg-clip-text text-transparent">
-                            fare intelligence, not guesswork
-                        </span>
+                        fare intelligence, not guesswork
                     </motion.h1>
 
                     <motion.p
