@@ -365,9 +365,9 @@ export default function DashboardPage() {
                   </h2>
 
                   <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600 sm:text-base">
-                    Every monitored route becomes an intelligence surface with
-                    pricing context, signal strength, and booking guidance
-                    designed to help you act faster with more confidence.
+                    Every monitored route begins as a tracked data layer. As pricing
+                    history builds, Enterprise intelligence surfaces will begin
+                    populating with richer route context and deeper monitoring detail.
                   </p>
                 </div>
 
@@ -383,10 +383,10 @@ export default function DashboardPage() {
 
                   <div className="rounded-2xl border border-white/70 bg-white/75 px-4 py-3 shadow-sm backdrop-blur-sm">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                      Last Update
+                      Data Status
                     </p>
                     <p className="mt-1 text-lg font-semibold text-slate-900">
-                      2 min
+                      Building
                     </p>
                   </div>
 
@@ -395,7 +395,7 @@ export default function DashboardPage() {
                       Signals
                     </p>
                     <p className="mt-1 text-lg font-semibold text-slate-900">
-                      3 active
+                      Pending
                     </p>
                   </div>
                 </div>
@@ -419,9 +419,9 @@ export default function DashboardPage() {
                     </h3>
 
                     <p className="mx-auto max-w-md text-sm leading-6 text-slate-600">
-                      Start tracking a flight route above to populate your
-                      intelligence layer with live market signals, pricing
-                      behavior, and booking guidance.
+                      Start tracking a flight route above to begin collecting pricing
+                      history. Enterprise intelligence layers will populate
+                      automatically as real monitored data accumulates.
                     </p>
                   </div>
                 ) : (
@@ -1115,13 +1115,13 @@ export default function DashboardPage() {
                 </div>
 
                 <h2 className="text-3xl font-semibold tracking-tight text-slate-950 md:text-4xl">
-                  The market never really sleeps
+                  Your intelligence layer, building in real time
                 </h2>
 
                 <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-                  Skysirv continuously reads fare movement, route pressure, and
-                  volatility patterns to surface timing opportunities before they
-                  become obvious.
+                  As routes are monitored and pricing history develops, your intelligence
+                  layer will begin surfacing route behavior, signal strength, and
+                  timing insights based on real market data.
                 </p>
               </div>
 
@@ -1130,21 +1130,23 @@ export default function DashboardPage() {
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                     Routes Scanned
                   </p>
-                  <p className="mt-1 text-lg font-semibold text-slate-950">12</p>
+                  <p className="mt-1 text-lg font-semibold text-slate-950">
+                    {watchlist.length}
+                  </p>
                 </div>
 
                 <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                     Price Shifts
                   </p>
-                  <p className="mt-1 text-lg font-semibold text-slate-950">27</p>
+                  <p className="mt-1 text-lg font-semibold text-slate-950">—</p>
                 </div>
 
                 <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                     Alerts Triggered
                   </p>
-                  <p className="mt-1 text-lg font-semibold text-slate-950">3</p>
+                  <p className="mt-1 text-lg font-semibold text-slate-950">—</p>
                 </div>
               </div>
             </div>
@@ -1163,12 +1165,12 @@ export default function DashboardPage() {
                       Featured Route
                     </p>
                     <h3 className="mt-2 text-2xl font-semibold text-white">
-                      BOS → LHR
+                      No route selected
                     </h3>
                   </div>
 
                   <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300">
-                    BUY WINDOW
+                    DATA PENDING
                   </span>
                 </div>
 
@@ -1177,8 +1179,8 @@ export default function DashboardPage() {
                     <p className="text-[11px] uppercase tracking-[0.16em] text-slate-400">
                       Current Fare
                     </p>
-                    <p className="mt-2 text-2xl font-semibold text-white">$412</p>
-                    <p className="mt-1 text-xs text-emerald-300">↓ $133 vs avg</p>
+                    <p className="mt-2 text-2xl font-semibold text-white">—</p>
+                    <p className="mt-1 text-xs text-emerald-300">No data yet</p>
                   </div>
 
                   <div className="rounded-2xl border border-white/10 bg-slate-950/20 p-4">
@@ -1186,10 +1188,10 @@ export default function DashboardPage() {
                       Volatility
                     </p>
                     <p className="mt-2 text-2xl font-semibold text-white">
-                      Moderate
+                      —
                     </p>
                     <p className="mt-1 text-xs text-slate-400">
-                      Stable downward bias
+                      Awaiting data
                     </p>
                   </div>
 
@@ -1197,9 +1199,9 @@ export default function DashboardPage() {
                     <p className="text-[11px] uppercase tracking-[0.16em] text-slate-400">
                       Confidence
                     </p>
-                    <p className="mt-2 text-2xl font-semibold text-white">High</p>
+                    <p className="mt-2 text-2xl font-semibold text-white">—</p>
                     <p className="mt-1 text-xs text-sky-300">
-                      Model signal strength 82%
+                      Not available
                     </p>
                   </div>
                 </div>
@@ -1207,7 +1209,7 @@ export default function DashboardPage() {
                 <div className="mt-8">
                   <div className="mb-3 flex items-center justify-between text-xs uppercase tracking-[0.16em] text-slate-400">
                     <span>Price Behavior</span>
-                    <span>Last 30 Days</span>
+                    <span>Data builds after monitoring begins</span>
                   </div>
 
                   <div className="relative h-40 overflow-hidden rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.4)_0%,rgba(2,6,23,0.65)_100%)] p-4">
@@ -1259,51 +1261,11 @@ export default function DashboardPage() {
                     Signal Feed
                   </p>
 
-                  <div className="mt-5 space-y-4">
-                    <div className="rounded-2xl border border-white/10 bg-slate-950/20 p-4">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-semibold text-white">
-                          NYC → MAD
-                        </p>
-                        <span className="text-xs font-semibold text-amber-300">
-                          WAIT
-                        </span>
-                      </div>
-                      <p className="mt-2 text-sm leading-6 text-slate-300">
-                        Fare momentum is softening, but not enough yet to confirm
-                        a strong booking window.
-                      </p>
-                    </div>
-
-                    <div className="rounded-2xl border border-white/10 bg-slate-950/20 p-4">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-semibold text-white">
-                          MIA → BCN
-                        </p>
-                        <span className="text-xs font-semibold text-emerald-300">
-                          BUY
-                        </span>
-                      </div>
-                      <p className="mt-2 text-sm leading-6 text-slate-300">
-                        Below-average fare with favorable pressure signals and
-                        stable confidence.
-                      </p>
-                    </div>
-
-                    <div className="rounded-2xl border border-white/10 bg-slate-950/20 p-4">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-semibold text-white">
-                          LAX → NRT
-                        </p>
-                        <span className="text-xs font-semibold text-rose-300">
-                          AVOID
-                        </span>
-                      </div>
-                      <p className="mt-2 text-sm leading-6 text-slate-300">
-                        Elevated pricing remains persistent with higher volatility
-                        and weaker booking conditions.
-                      </p>
-                    </div>
+                  <div className="mt-5 rounded-2xl border border-dashed border-white/20 bg-slate-950/20 p-6 text-center">
+                    <p className="text-sm text-slate-300">
+                      Signal feed will activate once monitored routes begin generating
+                      real market data.
+                    </p>
                   </div>
                 </div>
 
@@ -1312,36 +1274,11 @@ export default function DashboardPage() {
                     System Readout
                   </p>
 
-                  <div className="mt-5 space-y-4">
-                    <div>
-                      <div className="mb-2 flex items-center justify-between text-xs text-slate-400">
-                        <span>Monitor Coverage</span>
-                        <span>84%</span>
-                      </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-white/10">
-                        <div className="h-full w-[84%] rounded-full bg-sky-400" />
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="mb-2 flex items-center justify-between text-xs text-slate-400">
-                        <span>Signal Confidence</span>
-                        <span>78%</span>
-                      </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-white/10">
-                        <div className="h-full w-[78%] rounded-full bg-emerald-400" />
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="mb-2 flex items-center justify-between text-xs text-slate-400">
-                        <span>Volatility Detection</span>
-                        <span>65%</span>
-                      </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-white/10">
-                        <div className="h-full w-[65%] rounded-full bg-amber-400" />
-                      </div>
-                    </div>
+                  <div className="mt-5 rounded-2xl border border-dashed border-white/20 bg-slate-950/20 p-6 text-center">
+                    <p className="text-sm text-slate-300">
+                      System metrics will populate as route monitoring and signal
+                      processing begins.
+                    </p>
                   </div>
 
                   <p className="mt-5 text-sm leading-6 text-slate-300">
