@@ -461,7 +461,7 @@ export default function ProDashboardPage() {
 
               <Link
                 href="/account"
-                className="inline-flex items-center justify-center rounded-2xl bg-slate-950 px-6 py-4 text-base font-medium text-white shadow-[0_18px_40px_rgba(15,23,42,0.16)] transition hover:bg-slate-900"
+                className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-3 text-sm font-medium text-white shadow-[0_10px_30px_rgba(15,23,42,0.16)] transition hover:bg-slate-800"
               >
                 Account Settings
               </Link>
