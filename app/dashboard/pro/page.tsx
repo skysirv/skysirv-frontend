@@ -114,6 +114,23 @@ type WrappedSegment = {
   updated_at: string | null
 }
 
+type WatchlistRoute = {
+  id: string
+  route?: string | null
+  route_hash?: string | null
+  origin?: string | null
+  destination?: string | null
+  departure_date?: string | null
+  last_checked_at?: string | null
+  created_at?: string | null
+}
+
+type WatchlistResponse = {
+  watchlist?: WatchlistRoute[]
+  routes?: WatchlistRoute[]
+  data?: WatchlistRoute[]
+}
+
 const defaultWrappedData: WrappedData = {
   flights: 0,
   countries: 0,
@@ -177,7 +194,7 @@ async function fetchAvailableWrappedYears(token: string) {
 export default function ProDashboardPage() {
   const [loading, setLoading] = useState(true)
   const [wrappedLoading, setWrappedLoading] = useState(true)
-  const [watchlist, setWatchlist] = useState<any[]>([])
+  const [watchlist, setWatchlist] = useState<WatchlistRoute[]>([])
   const [wrappedData, setWrappedData] = useState<WrappedData>(defaultWrappedData)
   const [selectedYear, setSelectedYear] = useState<number>(2026)
   const [availableWrappedYears, setAvailableWrappedYears] = useState<number[]>([2026])
@@ -226,12 +243,57 @@ export default function ProDashboardPage() {
   ]
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false)
-      setWatchlist([])
-    }, 1100)
+    let cancelled = false
 
-    return () => clearTimeout(timer)
+    async function loadWatchlist() {
+      const token = localStorage.getItem("skysirv_token")
+
+      if (!token) {
+        if (!cancelled) {
+          setWatchlist([])
+          setLoading(false)
+        }
+        return
+      }
+
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/watchlist`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        const data: WatchlistResponse = await res.json().catch(() => ({}))
+
+        if (cancelled) return
+
+        const routes = Array.isArray(data.watchlist)
+          ? data.watchlist
+          : Array.isArray(data.routes)
+            ? data.routes
+            : Array.isArray(data.data)
+              ? data.data
+              : []
+
+        setWatchlist(routes)
+      } catch (error) {
+        console.error("Failed to load watchlist", error)
+
+        if (!cancelled) {
+          setWatchlist([])
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+        }
+      }
+    }
+
+    loadWatchlist()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   useEffect(() => {
@@ -389,7 +451,7 @@ export default function ProDashboardPage() {
     }
   }, [selectedYear])
 
-  function handleRouteAdded(route: any) {
+  function handleRouteAdded(route: WatchlistRoute) {
     setWatchlist((prev) => {
       if (prev.length >= 25) {
         toast({
@@ -399,12 +461,27 @@ export default function ProDashboardPage() {
         return prev
       }
 
+      const routeId = route.id ?? route.route_hash ?? route.route
+
+      const alreadyExists = prev.some((item) => {
+        const itemId = item.id ?? item.route_hash ?? item.route
+        return itemId && routeId && itemId === routeId
+      })
+
+      if (alreadyExists) {
+        toast({
+          title: "Route already monitored",
+          description: "That route is already in your Pro watchlist.",
+        })
+        return prev
+      }
+
       toast({
         title: "Route added",
         description: "The route is now being monitored on your Pro plan.",
       })
 
-      return [...prev, route]
+      return [route, ...prev]
     })
   }
 
@@ -561,21 +638,34 @@ export default function ProDashboardPage() {
                     </p>
                   </div>
                 ) : (
-                  watchlist.slice(0, 6).map((route, index) => (
-                    <div
-                      key={index}
-                      className="animate-[fadeInUp_0.35s_ease-out]"
-                    >
-                      <WatchlistCard
-                        origin={route.origin}
-                        destination={route.destination}
-                        departureDate={route.departureDate ?? "Pending"}
-                        onRemove={() => {
-                          setWatchlist((prev) => prev.filter((_, i) => i !== index))
-                        }}
-                      />
-                    </div>
-                  ))
+                  watchlist.slice(0, 6).map((route, index) => {
+                    const routeCode = route.route ?? ""
+                    const [fallbackOrigin, fallbackDestination] = routeCode.includes("-")
+                      ? routeCode.split("-")
+                      : ["", ""]
+
+                    const origin = route.origin ?? fallbackOrigin ?? "—"
+                    const destination = route.destination ?? fallbackDestination ?? "—"
+                    const departureDate = route.departure_date ?? "Pending"
+
+                    return (
+                      <div
+                        key={route.id ?? route.route_hash ?? `${origin}-${destination}-${index}`}
+                        className="animate-[fadeInUp_0.35s_ease-out]"
+                      >
+                        <WatchlistCard
+                          origin={origin}
+                          destination={destination}
+                          departureDate={departureDate}
+                          onRemove={() => {
+                            setWatchlist((prev) =>
+                              prev.filter((item) => item.id !== route.id)
+                            )
+                          }}
+                        />
+                      </div>
+                    )
+                  })
                 )}
               </div>
             </div>
