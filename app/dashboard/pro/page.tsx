@@ -439,7 +439,7 @@ export default function ProDashboardPage() {
               )}
 
               <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl md:text-6xl">
-                A sharper intelligence layer for more serious travelers
+                A sharper intelligence solution for more serious travelers
               </h1>
 
               <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
@@ -461,7 +461,7 @@ export default function ProDashboardPage() {
 
               <Link
                 href="/account"
-                className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-3 text-sm font-medium text-white shadow-[0_10px_30px_rgba(15,23,42,0.16)] transition hover:bg-slate-800"
+                className="inline-flex items-center justify-center whitespace-nowrap rounded-2xl bg-slate-950 px-6 py-4 text-base font-medium text-white shadow-[0_18px_40px_rgba(15,23,42,0.16)] transition hover:bg-slate-900"
               >
                 Account Settings
               </Link>
@@ -473,14 +473,17 @@ export default function ProDashboardPage() {
             className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3 lg:max-w-xl"
           >
             <HeroStat
-              label="Watchlist Capacity"
+              label={"Watchlist\nCapacity"}
               value={loading ? "—" : `${watchlist.length}/25`}
             />
             <HeroStat
-              label="Routes Remaining"
+              label={"Routes\nRemaining"}
               value={loading ? "—" : String(remainingRoutes)}
             />
-            <HeroStat label="Access Tier" value={isLifetimePro ? "Lifetime Pro" : "Pro"} />
+            <HeroStat
+              label={"Access\nTier"}
+              value={isLifetimePro ? "Lifetime Pro" : "Pro"}
+            />
           </motion.div>
         </div>
       </div>
@@ -1254,8 +1257,8 @@ function HeroStat({
   value: string
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white/85 px-4 py-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur-sm">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+    <div className="rounded-2xl border border-slate-200 bg-white/85 px-4 py-4 text-center shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur-sm">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 whitespace-pre-line">
         {label}
       </p>
       <p className="mt-2 text-2xl font-semibold text-slate-950">{value}</p>
