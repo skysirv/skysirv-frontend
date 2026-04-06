@@ -125,11 +125,13 @@ type WatchlistRoute = {
   created_at?: string | null
 }
 
-type WatchlistResponse = {
-  watchlist?: WatchlistRoute[]
-  routes?: WatchlistRoute[]
-  data?: WatchlistRoute[]
-}
+type WatchlistResponse =
+  | WatchlistRoute[]
+  | {
+    watchlist?: WatchlistRoute[]
+    routes?: WatchlistRoute[]
+    data?: WatchlistRoute[]
+  }
 
 const defaultWrappedData: WrappedData = {
   flights: 0,
@@ -263,17 +265,19 @@ export default function ProDashboardPage() {
           },
         })
 
-        const data: WatchlistResponse = await res.json().catch(() => ({}))
+        const data: WatchlistResponse = await res.json().catch(() => [])
 
         if (cancelled) return
 
-        const routes = Array.isArray(data.watchlist)
-          ? data.watchlist
-          : Array.isArray(data.routes)
-            ? data.routes
-            : Array.isArray(data.data)
-              ? data.data
-              : []
+        const routes = Array.isArray(data)
+          ? data
+          : Array.isArray(data.watchlist)
+            ? data.watchlist
+            : Array.isArray(data.routes)
+              ? data.routes
+              : Array.isArray(data.data)
+                ? data.data
+                : []
 
         setWatchlist(routes)
       } catch (error) {
