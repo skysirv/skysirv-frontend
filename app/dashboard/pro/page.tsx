@@ -1025,10 +1025,12 @@ export default function ProDashboardPage() {
                   className="mt-10"
                 >
                   <div
-                    ref={wrappedShareCardRef}
                     className="mx-auto max-w-xl rounded-[2rem] border border-slate-200 bg-white p-4 shadow-[0_22px_60px_rgba(15,23,42,0.10)]"
                   >
-                    <div className="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-8 text-white">
+                    <div
+                      ref={wrappedShareCardRef}
+                      className="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-8 text-white"
+                    >
                       <motion.div
                         animate={{ x: [0, 16, 0], y: [0, -10, 0] }}
                         transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
