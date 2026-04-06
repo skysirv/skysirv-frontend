@@ -423,9 +423,18 @@ export default function ProDashboardPage() {
     if (!wrappedShareCardRef.current) return
 
     try {
-      const dataUrl = await toPng(wrappedShareCardRef.current, {
+      const node = wrappedShareCardRef.current
+
+      const dataUrl = await toPng(node, {
         cacheBust: true,
         pixelRatio: 2,
+        backgroundColor: "#ffffff",
+        canvasWidth: node.offsetWidth * 2,
+        canvasHeight: node.offsetHeight * 2,
+        style: {
+          width: `${node.offsetWidth}px`,
+          height: `${node.offsetHeight}px`,
+        },
       })
 
       const link = document.createElement("a")
@@ -486,7 +495,7 @@ export default function ProDashboardPage() {
 
               <Link
                 href="/account"
-                className="inline-flex items-center justify-center whitespace-nowrap rounded-2xl bg-slate-950 px-6 py-4 text-base font-medium text-white shadow-[0_18px_40px_rgba(15,23,42,0.16)] transition hover:bg-slate-900"
+                className="inline-flex items-center justify-center whitespace-nowrap rounded-2xl bg-slate-950 px-6 py-4 text-sm font-medium text-white shadow-[0_18px_40px_rgba(15,23,42,0.16)] transition hover:bg-slate-900"
               >
                 Account Settings
               </Link>
