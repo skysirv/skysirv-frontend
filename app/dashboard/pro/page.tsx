@@ -427,13 +427,14 @@ export default function ProDashboardPage() {
 
       const dataUrl = await toPng(node, {
         cacheBust: true,
-        pixelRatio: 2,
+        pixelRatio: 1.2,
         backgroundColor: "#ffffff",
-        canvasWidth: node.offsetWidth * 2,
-        canvasHeight: node.offsetHeight * 2,
         style: {
-          width: `${node.offsetWidth}px`,
-          height: `${node.offsetHeight}px`,
+          width: "720px",
+          maxWidth: "720px",
+          padding: "20px",
+          boxSizing: "border-box",
+          overflow: "visible",
         },
       })
 
@@ -1025,10 +1026,10 @@ export default function ProDashboardPage() {
                   className="mt-10"
                 >
                   <div
+                    ref={wrappedShareCardRef}
                     className="mx-auto max-w-xl rounded-[2rem] border border-slate-200 bg-white p-4 shadow-[0_22px_60px_rgba(15,23,42,0.10)]"
                   >
                     <div
-                      ref={wrappedShareCardRef}
                       className="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-8 text-white"
                     >
                       <motion.div
