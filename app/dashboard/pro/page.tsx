@@ -449,7 +449,7 @@ export default function ProDashboardPage() {
               </p>
             </div>
 
-            <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+            <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center lg:flex-col lg:items-end lg:gap-4">
               <div className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur-sm">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                   System Status
