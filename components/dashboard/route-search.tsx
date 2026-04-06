@@ -2,50 +2,77 @@
 
 import { useState } from "react"
 
+type WatchlistRoute = {
+  id: string
+  route?: string | null
+  route_hash?: string | null
+  origin?: string | null
+  destination?: string | null
+  departure_date?: string | null
+  last_checked_at?: string | null
+  created_at?: string | null
+}
+
 type RouteSearchProps = {
-  onRouteAdded?: (route: any) => void
+  onRouteAdded?: (route: WatchlistRoute) => void
 }
 
 export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
-
   const [origin, setOrigin] = useState("")
   const [destination, setDestination] = useState("")
   const [departureDate, setDepartureDate] = useState("")
   const [isMonitoring, setIsMonitoring] = useState(false)
 
-  function handleMonitorRoute() {
-
+  async function handleMonitorRoute() {
     if (!origin || !destination || !departureDate) {
+      return
+    }
+
+    const token = localStorage.getItem("skysirv_token")
+
+    if (!token) {
       return
     }
 
     setIsMonitoring(true)
 
-    const newRoute = {
-      origin,
-      destination,
-      departureDate
-    }
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/watchlist`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          origin: origin.trim().toUpperCase(),
+          destination: destination.trim().toUpperCase(),
+          departureDate,
+        }),
+      })
 
-    // simulate backend processing delay
-    setTimeout(() => {
+      const data = await res.json().catch(() => null)
+
+      if (!res.ok) {
+        console.error("Failed to create watchlist route", data)
+        return
+      }
 
       if (onRouteAdded) {
-        onRouteAdded(newRoute)
+        onRouteAdded(data)
       }
 
       setOrigin("")
       setDestination("")
       setDepartureDate("")
-
+    } catch (error) {
+      console.error("Watchlist create request failed", error)
+    } finally {
       setIsMonitoring(false)
-
-    }, 600)
+    }
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md hover:shadow-lg transition-shadow">
-
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md transition-shadow hover:shadow-lg">
       <h2 className="text-lg font-semibold text-slate-900">
         Track a Route
       </h2>
@@ -55,7 +82,6 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
       </p>
 
       <div className="mt-6 grid gap-4 md:grid-cols-3">
-
         <input
           type="text"
           placeholder="Origin (ex: BOS)"
@@ -78,17 +104,15 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
           onChange={(e) => setDepartureDate(e.target.value)}
           className="rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
         />
-
       </div>
 
       <button
         onClick={handleMonitorRoute}
         disabled={isMonitoring}
-        className="mt-6 rounded-lg bg-slate-900 px-5 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-60 disabled:cursor-not-allowed"
+        className="mt-6 rounded-lg bg-slate-900 px-5 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isMonitoring ? "Monitoring..." : "Start Monitoring"}
       </button>
-
     </div>
   )
 }
