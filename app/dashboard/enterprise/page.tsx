@@ -305,9 +305,9 @@ export default function DashboardPage() {
               </h1>
 
               <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
-                Monitor airfare markets, detect opportunity signals, and track
-                routes with a live intelligence layer built to surface timing,
-                confidence, and pricing behavior at a glance.
+                Monitor tracked routes, build pricing history over time, and unlock
+                a fuller intelligence layer designed to surface richer route context
+                as real data begins to accumulate.
               </p>
             </div>
 
@@ -317,7 +317,7 @@ export default function DashboardPage() {
                   System Status
                 </p>
                 <p className="mt-1 text-sm font-medium text-slate-900">
-                  Monitoring markets in real time
+                  Pending
                 </p>
               </div>
 
