@@ -455,7 +455,7 @@ export default function ProDashboardPage() {
                   System Status
                 </p>
                 <p className="mt-1 text-sm font-medium text-slate-900">
-                  Add routes to begin monitoring live pricing data
+                  Pending
                 </p>
               </div>
 
