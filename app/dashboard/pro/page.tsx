@@ -838,13 +838,13 @@ export default function ProDashboardPage() {
                       </h3>
 
                       <p className="mt-3 text-lg font-semibold text-emerald-600">
-                        Pro Intelligence Traveler
+                        {wrappedLoading || wrappedData.skyscore === 0 ? "Awaiting score data" : "Pro Intelligence Traveler"}
                       </p>
 
                       <p className="mt-5 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
-                        Your booking behavior shows stronger timing discipline,
-                        better signal usage, and more consistent market awareness
-                        across the year.
+                        {wrappedLoading || wrappedData.skyscore === 0
+                          ? "Your annual score and booking profile will appear here once enough real monitoring and wrapped travel data exists."
+                          : "Your booking behavior consistently landed in high-confidence territory, with strong timing discipline and above-market decision quality throughout the year."}
                       </p>
                     </div>
 
@@ -905,8 +905,9 @@ export default function ProDashboardPage() {
                     $<CountUpNumber end={wrappedData.savings} />
                   </h3>
                   <p className="mt-3 text-sm leading-6 text-slate-600">
-                    Estimated savings captured through smarter timing and monitored
-                    opportunities.
+                    {wrappedLoading || wrappedData.savings === 0
+                      ? "Savings totals will appear here once monitored bookings and wrapped travel data are available."
+                      : "Estimated savings captured through smarter timing and monitored opportunities."}
                   </p>
                 </MotionCard>
 
@@ -916,7 +917,9 @@ export default function ProDashboardPage() {
                     $<CountUpNumber end={wrappedData.avgSavings} />
                   </h3>
                   <p className="mt-3 text-sm leading-6 text-slate-600">
-                    Your average booking advantage across completed trips this year.
+                    {wrappedLoading || wrappedData.avgSavings === 0
+                      ? "Average per-flight savings will appear once enough completed trip data exists."
+                      : "Your average booking advantage across completed trips this year."}
                   </p>
                 </MotionCard>
 
@@ -926,8 +929,9 @@ export default function ProDashboardPage() {
                     <CountUpNumber end={wrappedData.beatMarket} suffix="%" />
                   </h3>
                   <p className="mt-3 text-sm leading-6 text-slate-600">
-                    How often your booking decisions outperformed the broader fare
-                    environment.
+                    {wrappedLoading || wrappedData.beatMarket === 0
+                      ? "Market outperformance will appear here once enough real booking comparisons are available."
+                      : "How often your booking decisions outperformed the broader fare environment."}
                   </p>
                 </MotionCard>
               </motion.section>
@@ -954,12 +958,15 @@ export default function ProDashboardPage() {
                     </p>
 
                     <h3 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-                      You are a {wrappedData.travelerIdentity}
+                      {wrappedLoading || wrappedData.routesMonitored === 0
+                        ? "Your traveler identity will appear here"
+                        : `You are a ${wrappedData.travelerIdentity}`}
                     </h3>
 
                     <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-                      You wait, analyze, and strike at the right moment — consistently
-                      outperforming the market with sharper timing and stronger decision support.
+                      {wrappedLoading || wrappedData.routesMonitored === 0
+                        ? "As your monitoring history and booking behavior develop, Skysirv will generate a clearer identity profile here."
+                        : "You wait, analyze, and strike at the right moment — consistently outperforming the market with calm, disciplined timing."}
                     </p>
                   </div>
                 </motion.div>
