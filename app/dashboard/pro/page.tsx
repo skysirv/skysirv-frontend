@@ -1170,12 +1170,12 @@ export default function ProDashboardPage() {
                     <span>Monitoring required</span>
                   </div>
 
-                  <div className="relative h-40 overflow-hidden rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.4)_0%,rgba(2,6,23,0.65)_100%)] p-4">
+                  <div className="relative min-h-[220px] overflow-hidden rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.4)_0%,rgba(2,6,23,0.65)_100%)] p-6">
                     <div className="absolute inset-x-0 top-1/2 border-t border-dashed border-white/10" />
                     <div className="absolute inset-x-0 bottom-8 border-t border-dashed border-white/10" />
 
                     <div className="flex h-full items-center justify-center">
-                      <div className="max-w-sm text-center">
+                      <div className="max-w-md text-center">
                         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 text-slate-300 shadow-inner">
                           ✈
                         </div>
