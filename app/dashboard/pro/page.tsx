@@ -15,6 +15,7 @@ import MarketSignalsSkeleton from "@/components/dashboard/market-signals-skeleto
 
 import TravelGlobe from "@/components/intelligence-wrapped/travel-globe"
 import { toast } from "@/components/ui/Toasts/use-toast"
+import { toPng } from "html-to-image"
 
 const fadeUp = {
   initial: { opacity: 0, y: 26 },
@@ -183,6 +184,8 @@ export default function ProDashboardPage() {
   const [availableWrappedYears, setAvailableWrappedYears] = useState<number[]>([2026])
   const [wrappedSegments, setWrappedSegments] = useState<WrappedSegment[]>([])
   const [subscription, setSubscription] = useState<SessionSubscription | null>(null)
+
+  const wrappedShareCardRef = useRef<HTMLDivElement | null>(null)
 
   const isLifetimePro = subscription?.plan_id === "pro_lifetime"
 
@@ -416,6 +419,28 @@ export default function ProDashboardPage() {
     })
   }, [wrappedSegments])
 
+  async function handleDownloadWrappedImage() {
+    if (!wrappedShareCardRef.current) return
+
+    try {
+      const dataUrl = await toPng(wrappedShareCardRef.current, {
+        cacheBust: true,
+        pixelRatio: 2,
+      })
+
+      const link = document.createElement("a")
+      link.download = `skysirv-wrapped-${selectedYear}.png`
+      link.href = dataUrl
+      link.click()
+    } catch (error) {
+      console.error("Failed to download wrapped image", error)
+      toast({
+        title: "Download failed",
+        description: "Unable to generate the wrapped image right now.",
+      })
+    }
+  }
+
   return (
     <section className="min-h-screen bg-white">
       {/* Hero */}
@@ -455,7 +480,7 @@ export default function ProDashboardPage() {
                   System Status
                 </p>
                 <p className="mt-1 text-sm font-medium text-slate-900">
-                  Add routes to begin monitoringlive pricing data
+                  Add routes to begin monitoring live pricing data
                 </p>
               </div>
 
@@ -990,7 +1015,10 @@ export default function ProDashboardPage() {
                   transition={{ duration: 0.8, ease: "easeOut" }}
                   className="mt-10"
                 >
-                  <div className="mx-auto max-w-xl rounded-[2rem] border border-slate-200 bg-white p-4 shadow-[0_22px_60px_rgba(15,23,42,0.10)]">
+                  <div
+                    ref={wrappedShareCardRef}
+                    className="mx-auto max-w-xl rounded-[2rem] border border-slate-200 bg-white p-4 shadow-[0_22px_60px_rgba(15,23,42,0.10)]"
+                  >
                     <div className="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-8 text-white">
                       <motion.div
                         animate={{ x: [0, 16, 0], y: [0, -10, 0] }}
@@ -1053,6 +1081,7 @@ export default function ProDashboardPage() {
 
                 <div className="mt-8 flex justify-center">
                   <motion.button
+                    onClick={handleDownloadWrappedImage}
                     whileHover={{ y: -2, scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     transition={{ duration: 0.2 }}
