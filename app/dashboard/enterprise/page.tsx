@@ -1043,14 +1043,15 @@ export default function DashboardPage() {
               >
                 <div className="text-center">
                   <p className="text-sm font-medium uppercase tracking-[0.16em] text-slate-500">
-                    Shareable Snapshot
+                    Summary Snapshot
                   </p>
                   <h3 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-                    Share Your Intelligence
+                    Wrapped Summary
                   </h3>
                   <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
-                    A social-ready summary of how you traveled, saved, and outperformed
-                    the market this year.
+                    {wrappedLoading || wrappedData.routesMonitored === 0
+                      ? "Once wrapped data is available, this section will summarize your travel activity and intelligence highlights."
+                      : "A summary of how you traveled, saved, and outperformed the market this year."}
                   </p>
                 </div>
 
@@ -1112,8 +1113,9 @@ export default function DashboardPage() {
 
                         <div className="mt-8 border-t border-white/10 pt-6">
                           <p className="text-sm leading-7 text-slate-300">
-                            You beat the market {wrappedData.beatMarket}% of the time and
-                            saved ${wrappedData.savings.toLocaleString()} this year.
+                            {wrappedLoading || wrappedData.routesMonitored === 0
+                              ? "Your wrapped summary will appear here once enough real monitoring and travel data has been collected."
+                              : `You beat the market ${wrappedData.beatMarket}% of the time and saved $${wrappedData.savings.toLocaleString()} this year.`}
                           </p>
 
                           <p className="mt-4 text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
