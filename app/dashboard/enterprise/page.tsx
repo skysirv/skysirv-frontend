@@ -340,30 +340,12 @@ export default function DashboardPage() {
             <RouteSearch onRouteAdded={handleRouteAdded} />
           </div>
 
-          {/* Global Intelligence Signals */}
-          <div className="mb-12 grid gap-8 lg:grid-cols-2">
-            {loading ? (
-              <>
-                <OpportunitySkeleton />
-                <MarketSignalsSkeleton />
-              </>
-            ) : (
-              <>
-                <OpportunityBanner />
-                <MarketSignals />
-              </>
-            )}
-          </div>
-
-          {/* Divider */}
-          <div className="mb-10 border-t border-slate-200"></div>
-
           {/* Watchlist Intelligence Zone */}
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, delay: 0.08, ease: "easeOut" }}
-            className="relative overflow-hidden rounded-[2rem] border border-slate-200/80 bg-[linear-gradient(180deg,#f8fbff_0%,#f6f9fc_42%,#ffffff_100%)] px-5 py-8 shadow-[0_20px_60px_rgba(15,23,42,0.06)] sm:px-7 md:px-8 md:py-10"
+            className="relative mb-12 overflow-hidden rounded-[2rem] border border-slate-200/80 bg-[linear-gradient(180deg,#f8fbff_0%,#f6f9fc_42%,#ffffff_100%)] px-5 py-8 shadow-[0_20px_60px_rgba(15,23,42,0.06)] sm:px-7 md:px-8 md:py-10"
           >
             <div className="pointer-events-none absolute inset-0">
               <div className="absolute -left-20 top-0 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.10)_0%,rgba(255,255,255,0)_72%)] blur-3xl" />
@@ -448,13 +430,35 @@ export default function DashboardPage() {
                       key={index}
                       className="animate-[fadeInUp_0.35s_ease-out]"
                     >
-                      <WatchlistCard />
+                      <WatchlistCard
+                        origin={route.origin}
+                        destination={route.destination}
+                        departureDate={route.departureDate ?? "Pending"}
+                        onRemove={() => {
+                          setWatchlist((prev) => prev.filter((_, i) => i !== index))
+                        }}
+                      />
                     </div>
                   ))
                 )}
               </div>
             </div>
           </motion.div>
+
+          {/* Global Intelligence Signals */}
+          <div className="mb-12 grid gap-8 lg:grid-cols-2">
+            {loading ? (
+              <>
+                <OpportunitySkeleton />
+                <MarketSignalsSkeleton />
+              </>
+            ) : (
+              <>
+                <OpportunityBanner />
+                <MarketSignals />
+              </>
+            )}
+          </div>
 
           {/* Intelligence Wrapped Section */}
           <div className="relative mt-14 overflow-hidden rounded-[2rem] border border-slate-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_36%,#ffffff_100%)] shadow-[0_24px_70px_rgba(15,23,42,0.07)]">
