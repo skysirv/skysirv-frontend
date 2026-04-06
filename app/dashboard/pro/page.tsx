@@ -563,7 +563,14 @@ export default function ProDashboardPage() {
                       key={index}
                       className="animate-[fadeInUp_0.35s_ease-out]"
                     >
-                      <WatchlistCard />
+                      <WatchlistCard
+                        origin={route.origin}
+                        destination={route.destination}
+                        departureDate={route.departureDate ?? "Pending"}
+                        onRemove={() => {
+                          setWatchlist((prev) => prev.filter((_, i) => i !== index))
+                        }}
+                      />
                     </div>
                   ))
                 )}
