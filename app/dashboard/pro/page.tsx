@@ -15,7 +15,6 @@ import MarketSignalsSkeleton from "@/components/dashboard/market-signals-skeleto
 
 import TravelGlobe from "@/components/intelligence-wrapped/travel-globe"
 import { toast } from "@/components/ui/Toasts/use-toast"
-import { toPng } from "html-to-image"
 
 const fadeUp = {
   initial: { opacity: 0, y: 26 },
@@ -184,8 +183,6 @@ export default function ProDashboardPage() {
   const [availableWrappedYears, setAvailableWrappedYears] = useState<number[]>([2026])
   const [wrappedSegments, setWrappedSegments] = useState<WrappedSegment[]>([])
   const [subscription, setSubscription] = useState<SessionSubscription | null>(null)
-
-  const wrappedShareCardRef = useRef<HTMLDivElement | null>(null)
 
   const isLifetimePro = subscription?.plan_id === "pro_lifetime"
 
@@ -418,38 +415,6 @@ export default function ProDashboardPage() {
       return Number(a.segment_order ?? 0) - Number(b.segment_order ?? 0)
     })
   }, [wrappedSegments])
-
-  async function handleDownloadWrappedImage() {
-    if (!wrappedShareCardRef.current) return
-
-    try {
-      const node = wrappedShareCardRef.current
-
-      const dataUrl = await toPng(node, {
-        cacheBust: true,
-        pixelRatio: 1.2,
-        backgroundColor: "#ffffff",
-        style: {
-          width: "720px",
-          maxWidth: "720px",
-          padding: "20px",
-          boxSizing: "border-box",
-          overflow: "visible",
-        },
-      })
-
-      const link = document.createElement("a")
-      link.download = `skysirv-wrapped-${selectedYear}.png`
-      link.href = dataUrl
-      link.click()
-    } catch (error) {
-      console.error("Failed to download wrapped image", error)
-      toast({
-        title: "Download failed",
-        description: "Unable to generate the wrapped image right now.",
-      })
-    }
-  }
 
   return (
     <section className="min-h-screen bg-white">
@@ -1026,7 +991,6 @@ export default function ProDashboardPage() {
                   className="mt-10"
                 >
                   <div
-                    ref={wrappedShareCardRef}
                     className="mx-auto max-w-xl rounded-[2rem] border border-slate-200 bg-white p-4 shadow-[0_22px_60px_rgba(15,23,42,0.10)]"
                   >
                     <div
@@ -1090,18 +1054,6 @@ export default function ProDashboardPage() {
                     </div>
                   </div>
                 </motion.div>
-
-                <div className="mt-8 flex justify-center">
-                  <motion.button
-                    onClick={handleDownloadWrappedImage}
-                    whileHover={{ y: -2, scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    transition={{ duration: 0.2 }}
-                    className="rounded-xl bg-slate-950 px-6 py-3 text-sm font-medium text-white shadow-lg shadow-slate-900/10 transition hover:bg-slate-800"
-                  >
-                    Download Image
-                  </motion.button>
-                </div>
               </motion.section>
             </div>
           </div>
