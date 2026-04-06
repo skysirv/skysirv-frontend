@@ -847,86 +847,104 @@ export default function DashboardPage() {
                     Your smartest move this year
                   </h3>
                   <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base">
-                    One route stood out above the rest — not just because of savings,
-                    but because of timing, restraint, and sharp decision-making before
-                    the market turned.
+                    Once real monitoring and booking activity exist, this section
+                    will highlight your strongest route decision with timing and
+                    market context.
                   </p>
                 </div>
 
-                <motion.div
-                  whileHover={{ y: -4 }}
-                  transition={{ duration: 0.25 }}
-                  className="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/90 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur"
-                >
-                  <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
-                    <div className="relative p-8 sm:p-10">
-                      <div className="absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-sky-50/60" />
-                      <div className="relative">
-                        <div className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm">
-                          Best Booking of the Year
-                        </div>
-
-                        <h4 className="mt-6 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-                          {wrappedData.bestRoute.route.replace("-", " → ")}
-                        </h4>
-
-                        <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
-                          You booked before a major upward move and locked in one of the
-                          strongest timing wins in your travel profile.
-                        </p>
-
-                        <div className="mt-8 grid gap-4 sm:grid-cols-3">
-                          <MiniMetric
-                            label="Saved"
-                            value={`$${wrappedData.bestRoute.saved.toLocaleString()}`}
-                          />
-                          <MiniMetric
-                            label="Before Spike"
-                            value={wrappedData.bestRoute.beforeSpike}
-                          />
-                          <MiniMetric
-                            label="Timing Grade"
-                            value={wrappedData.bestRoute.timingGrade}
-                          />
-                        </div>
-                      </div>
+                {wrappedLoading || wrappedData.routesMonitored === 0 ? (
+                  <div className="overflow-hidden rounded-[1.75rem] border border-dashed border-slate-300 bg-white/80 p-10 text-center shadow-sm">
+                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500 shadow-inner">
+                      ✈
                     </div>
 
-                    <div className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-8 text-white sm:p-10">
-                      <motion.div
-                        animate={{ x: [0, 18, 0], y: [0, -12, 0] }}
-                        transition={{ duration: 7.5, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute right-[-20px] top-[-20px] h-40 w-40 rounded-full bg-sky-500/10 blur-3xl"
-                      />
-                      <motion.div
-                        animate={{ x: [0, -12, 0], y: [0, 16, 0] }}
-                        transition={{ duration: 8.2, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute bottom-[-30px] left-[-20px] h-44 w-44 rounded-full bg-indigo-500/10 blur-3xl"
-                      />
+                    <h4 className="text-lg font-semibold text-slate-900">
+                      No route insights yet
+                    </h4>
 
-                      <div className="relative">
-                        <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-300">
-                          Why it mattered
-                        </p>
-
-                        <div className="mt-6 space-y-5">
-                          <StoryPoint
-                            title="Price behavior"
-                            text="This route showed rising pressure before departure with a tightening discount window."
-                          />
-                          <StoryPoint
-                            title="Signal quality"
-                            text="Skysirv identified a favorable timing pocket before volatility accelerated."
-                          />
-                          <StoryPoint
-                            title="Decision outcome"
-                            text="You beat the route’s later market conditions and preserved a higher-confidence buy."
-                          />
-                        </div>
-                      </div>
-                    </div>
+                    <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-600">
+                      Once you begin tracking routes and capturing booking activity,
+                      your strongest decision story will appear here with timing
+                      insights, savings impact, and market behavior context.
+                    </p>
                   </div>
-                </motion.div>
+                ) : (
+                  <motion.div
+                    whileHover={{ y: -4 }}
+                    transition={{ duration: 0.25 }}
+                    className="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/90 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur"
+                  >
+                    <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
+                      <div className="relative p-8 sm:p-10">
+                        <div className="absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-sky-50/60" />
+                        <div className="relative">
+                          <div className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm">
+                            Best Booking of the Year
+                          </div>
+
+                          <h4 className="mt-6 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
+                            {wrappedData.bestRoute.route.replace("-", " → ")}
+                          </h4>
+
+                          <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
+                            You booked before a major upward move and locked in one of the
+                            strongest timing wins in your travel profile.
+                          </p>
+
+                          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+                            <MiniMetric
+                              label="Saved"
+                              value={`$${wrappedData.bestRoute.saved.toLocaleString()}`}
+                            />
+                            <MiniMetric
+                              label="Before Spike"
+                              value={wrappedData.bestRoute.beforeSpike}
+                            />
+                            <MiniMetric
+                              label="Timing Grade"
+                              value={wrappedData.bestRoute.timingGrade}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-8 text-white sm:p-10">
+                        <motion.div
+                          animate={{ x: [0, 18, 0], y: [0, -12, 0] }}
+                          transition={{ duration: 7.5, repeat: Infinity, ease: "easeInOut" }}
+                          className="absolute right-[-20px] top-[-20px] h-40 w-40 rounded-full bg-sky-500/10 blur-3xl"
+                        />
+                        <motion.div
+                          animate={{ x: [0, -12, 0], y: [0, 16, 0] }}
+                          transition={{ duration: 8.2, repeat: Infinity, ease: "easeInOut" }}
+                          className="absolute bottom-[-30px] left-[-20px] h-44 w-44 rounded-full bg-indigo-500/10 blur-3xl"
+                        />
+
+                        <div className="relative">
+                          <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-300">
+                            Why it mattered
+                          </p>
+
+                          <div className="mt-6 space-y-5">
+                            <StoryPoint
+                              title="Price behavior"
+                              text="This route showed rising pressure before departure with a tightening discount window."
+                            />
+                            <StoryPoint
+                              title="Signal quality"
+                              text="Skysirv identified a favorable timing pocket before volatility accelerated."
+                            />
+                            <StoryPoint
+                              title="Decision outcome"
+                              text="You beat the route’s later market conditions and preserved a higher-confidence buy."
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
               </motion.section>
 
               {/* Monitor Performance */}
@@ -1091,17 +1109,6 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 </motion.div>
-
-                <div className="mt-8 flex justify-center">
-                  <motion.button
-                    whileHover={{ y: -2, scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    transition={{ duration: 0.2 }}
-                    className="rounded-xl bg-slate-950 px-6 py-3 text-sm font-medium text-white shadow-lg shadow-slate-900/10 transition hover:bg-slate-800"
-                  >
-                    Download Image
-                  </motion.button>
-                </div>
               </motion.section>
             </div>
           </div>
@@ -1169,7 +1176,7 @@ export default function DashboardPage() {
                     </h3>
                   </div>
 
-                  <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300">
+                  <span className="rounded-full border border-sky-400/20 bg-sky-400/10 px-3 py-1 text-xs font-semibold text-emerald-300">
                     DATA PENDING
                   </span>
                 </div>

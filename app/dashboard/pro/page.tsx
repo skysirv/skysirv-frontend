@@ -1138,7 +1138,7 @@ export default function ProDashboardPage() {
                   </div>
 
                   <span className="rounded-full border border-sky-400/20 bg-sky-400/10 px-3 py-1 text-xs font-semibold text-sky-300">
-                    Waiting for data
+                    DATA PENDING
                   </span>
                 </div>
 
@@ -1149,7 +1149,7 @@ export default function ProDashboardPage() {
                     subtext="Appears after route monitoring begins"
                   />
                   <ProRouteStat
-                    label="Price Behavior™"
+                    label="Price Behavior"
                     value="Pending"
                     subtext="Waiting for enough tracked history"
                   />
@@ -1162,7 +1162,7 @@ export default function ProDashboardPage() {
 
                 <div className="mt-8">
                   <div className="mb-3 flex items-center justify-between text-xs uppercase tracking-[0.16em] text-slate-400">
-                    <span>Price Behavior™</span>
+                    <span>Price Behavior</span>
                     <span>Monitoring required</span>
                   </div>
 
