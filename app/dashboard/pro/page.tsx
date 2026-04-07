@@ -489,6 +489,56 @@ export default function ProDashboardPage() {
     })
   }
 
+  async function handleRouteRemoved(routeId: string) {
+    const token = localStorage.getItem("skysirv_token")
+
+    if (!token) {
+      toast({
+        title: "Unable to remove route",
+        description: "You must be signed in to update your watchlist.",
+      })
+      return
+    }
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/watchlist/${routeId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const data = await res.json().catch(() => null)
+
+      if (!res.ok) {
+        console.error("Failed to delete watchlist route", data)
+
+        toast({
+          title: "Remove failed",
+          description: "The route could not be removed from your watchlist.",
+        })
+        return
+      }
+
+      setWatchlist((prev) => prev.filter((item) => item.id !== routeId))
+
+      toast({
+        title: "Route removed",
+        description: "The route was removed from your Pro watchlist.",
+      })
+    } catch (error) {
+      console.error("Watchlist delete request failed", error)
+
+      toast({
+        title: "Remove failed",
+        description: "Something went wrong while removing the route.",
+      })
+    }
+  }
+
   const remainingRoutes = Math.max(0, 25 - watchlist.length)
 
   const sortedSegments = useMemo(() => {
@@ -662,9 +712,8 @@ export default function ProDashboardPage() {
                           destination={destination}
                           departureDate={departureDate}
                           onRemove={() => {
-                            setWatchlist((prev) =>
-                              prev.filter((item) => item.id !== route.id)
-                            )
+                            if (!route.id) return
+                            void handleRouteRemoved(route.id)
                           }}
                         />
                       </div>
