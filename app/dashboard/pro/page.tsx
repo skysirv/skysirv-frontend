@@ -489,6 +489,11 @@ export default function ProDashboardPage() {
 
       return [route, ...prev]
     })
+
+    // 🔄 Force refresh from backend so live data appears
+    setTimeout(() => {
+      window.location.reload()
+    }, 1500)
   }
 
   async function handleRouteRemoved(routeId: string) {

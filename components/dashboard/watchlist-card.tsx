@@ -36,12 +36,18 @@ export default function WatchlistCard({
   const hasPrice = typeof latestPrice === "number"
 
   const currentFareDisplay = hasPrice
-    ? `$${latestPrice.toLocaleString()}`
+    ? `$${latestPrice.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`
     : "—"
 
   const priceHistoryDisplay =
     typeof avgPrice === "number"
-      ? `Avg $${avgPrice.toLocaleString()}`
+      ? `Avg $${avgPrice.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`
       : "Pending"
 
   const signalDisplay =
