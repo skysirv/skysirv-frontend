@@ -4,6 +4,12 @@ interface WatchlistCardProps {
   origin?: string
   destination?: string
   departureDate?: string
+
+  // NEW — future intelligence props
+  latestPrice?: number | null
+  avgPrice?: number | null
+  priceDelta?: number | null
+
   onRemove?: () => void
 }
 
@@ -11,12 +17,43 @@ export default function WatchlistCard({
   origin = "—",
   destination = "—",
   departureDate = "Pending",
+
+  latestPrice = null,
+  avgPrice = null,
+  priceDelta = null,
+
   onRemove,
 }: WatchlistCardProps) {
 
   function handleRemoveRoute() {
     onRemove?.()
   }
+
+  // ----------------------------
+  // Derived display values
+  // ----------------------------
+
+  const hasPrice = typeof latestPrice === "number"
+
+  const currentFareDisplay = hasPrice
+    ? `$${latestPrice.toLocaleString()}`
+    : "—"
+
+  const priceHistoryDisplay =
+    typeof avgPrice === "number"
+      ? `Avg $${avgPrice.toLocaleString()}`
+      : "Pending"
+
+  const signalDisplay =
+    typeof priceDelta === "number"
+      ? priceDelta < 0
+        ? "Buy"
+        : priceDelta > 0
+          ? "Avoid"
+          : "Wait"
+      : "Pending"
+
+  // ----------------------------
 
   return (
     <div className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(15,23,42,0.12)]">
@@ -31,7 +68,7 @@ export default function WatchlistCard({
           <div>
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center rounded-full bg-sky-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-sky-700 ring-1 ring-sky-200">
-                Waiting for data
+                {hasPrice ? "Live Data" : "Waiting for data"}
               </span>
 
               <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-[11px] font-medium text-slate-600">
@@ -67,21 +104,27 @@ export default function WatchlistCard({
             <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
               Current Fare
             </p>
-            <p className="mt-1 text-base font-semibold text-slate-900">—</p>
+            <p className="mt-1 text-base font-semibold text-slate-900">
+              {currentFareDisplay}
+            </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 text-center">
             <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
               Price History
             </p>
-            <p className="mt-1 text-base font-semibold text-slate-900">Pending</p>
+            <p className="mt-1 text-base font-semibold text-slate-900">
+              {priceHistoryDisplay}
+            </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 text-center">
             <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
               Signal Status
             </p>
-            <p className="mt-1 text-base font-semibold text-slate-900">Pending</p>
+            <p className="mt-1 text-base font-semibold text-slate-900">
+              {signalDisplay}
+            </p>
           </div>
         </div>
 
@@ -93,18 +136,23 @@ export default function WatchlistCard({
             </p>
 
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              This route is saved and ready for monitoring. Pricing history,
-              route behavior, and Pro intelligence signals will appear here
-              automatically once enough real data has been collected.
+              {hasPrice
+                ? "Real pricing data is now being tracked. Price behavior and signal intelligence will continue to improve as more data is collected."
+                : "This route is saved and ready for monitoring. Pricing history, route behavior, and Pro intelligence signals will appear here automatically once enough real data has been collected."}
             </p>
 
             <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200">
-              <div className="h-full w-1/4 rounded-full bg-sky-500/60 transition-all duration-500" />
+              <div
+                className={`h-full rounded-full bg-sky-500/60 transition-all duration-500 ${hasPrice ? "w-2/3" : "w-1/4"
+                  }`}
+              />
             </div>
 
             <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
               <span>Data Readiness</span>
-              <span className="font-semibold text-slate-700">Collecting</span>
+              <span className="font-semibold text-slate-700">
+                {hasPrice ? "Active" : "Collecting"}
+              </span>
             </div>
           </div>
         </div>
@@ -122,14 +170,18 @@ export default function WatchlistCard({
             <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
               History
             </p>
-            <p className="mt-1 text-sm font-semibold text-slate-900">Building</p>
+            <p className="mt-1 text-sm font-semibold text-slate-900">
+              {hasPrice ? "Active" : "Building"}
+            </p>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 text-center">
             <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
               Signals
             </p>
-            <p className="mt-1 text-sm font-semibold text-slate-900">Pending</p>
+            <p className="mt-1 text-sm font-semibold text-slate-900">
+              {hasPrice ? "Emerging" : "Pending"}
+            </p>
           </div>
         </div>
       </div>
