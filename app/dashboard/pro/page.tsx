@@ -124,6 +124,7 @@ type WatchlistRoute = {
   last_checked_at?: string | null
   created_at?: string | null
   latest_price?: number | null
+  avg_price?: number | null
 }
 
 type WatchlistResponse =
@@ -713,6 +714,7 @@ export default function ProDashboardPage() {
                           destination={destination}
                           departureDate={departureDate}
                           latestPrice={route.latest_price ?? null}
+                          avgPrice={route.avg_price ? route.avg_price / 100 : null}
                           onRemove={() => {
                             if (!route.id) return
                             void handleRouteRemoved(route.id)
