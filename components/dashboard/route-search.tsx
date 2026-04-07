@@ -67,10 +67,15 @@ function AirportPicker({
         type="text"
         placeholder={placeholder}
         value={query}
-        onFocus={() => setOpen(true)}
+        onFocus={() => {
+          if (query.trim().length >= 2) {
+            setOpen(true)
+          }
+        }}
         onChange={(e) => {
-          onQueryChange(e.target.value)
-          setOpen(true)
+          const value = e.target.value
+          onQueryChange(value)
+          setOpen(value.trim().length >= 2)
         }}
         className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
       />
