@@ -129,11 +129,15 @@ function AirportPicker({
 }
 
 export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
+  const [tripType, setTripType] = useState<"oneway" | "roundtrip">("oneway")
+
   const [originQuery, setOriginQuery] = useState("")
   const [destinationQuery, setDestinationQuery] = useState("")
   const [selectedOrigin, setSelectedOrigin] = useState<AirportOption | null>(null)
   const [selectedDestination, setSelectedDestination] = useState<AirportOption | null>(null)
+
   const [departureDate, setDepartureDate] = useState("")
+  const [returnDate, setReturnDate] = useState("")
   const [isMonitoring, setIsMonitoring] = useState(false)
 
   async function handleMonitorRoute() {
@@ -144,6 +148,22 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
       toast({
         title: "Missing route details",
         description: "Please choose an origin, destination, and departure date.",
+      })
+      return
+    }
+
+    if (tripType === "roundtrip" && !returnDate) {
+      toast({
+        title: "Missing return date",
+        description: "Please choose a return date for this round-trip route.",
+      })
+      return
+    }
+
+    if (tripType === "roundtrip" && returnDate < departureDate) {
+      toast({
+        title: "Invalid return date",
+        description: "Return date must be on or after the departure date.",
       })
       return
     }
@@ -159,6 +179,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
       setSelectedOrigin(null)
       setSelectedDestination(null)
       setDepartureDate("")
+      setReturnDate("")
+      setTripType("oneway")
 
       return
     }
@@ -207,8 +229,11 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
       }
 
       toast({
-        title: "Route added",
-        description: "Route monitoring has started.",
+        title: tripType === "roundtrip" ? "Round-trip route added" : "Route added",
+        description:
+          tripType === "roundtrip"
+            ? "Round-trip monitoring UI is ready. Return-leg backend wiring comes next."
+            : "Route monitoring has started.",
       })
 
       setOriginQuery("")
@@ -216,6 +241,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
       setSelectedOrigin(null)
       setSelectedDestination(null)
       setDepartureDate("")
+      setReturnDate("")
+      setTripType("oneway")
     } catch (error) {
       console.error("Watchlist create request failed", error)
 
@@ -238,7 +265,34 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
         Search major airports worldwide and start monitoring airfare intelligence.
       </p>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-3">
+      <div className="mt-6 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => setTripType("oneway")}
+          className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "oneway"
+              ? "bg-slate-900 text-white"
+              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            }`}
+        >
+          One-way
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setTripType("roundtrip")}
+          className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "roundtrip"
+              ? "bg-slate-900 text-white"
+              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            }`}
+        >
+          Round-trip
+        </button>
+      </div>
+
+      <div
+        className={`mt-6 grid gap-4 ${tripType === "roundtrip" ? "md:grid-cols-4" : "md:grid-cols-3"
+          }`}
+      >
         <AirportPicker
           label="Origin"
           placeholder="Search by airport, city, or code"
@@ -283,6 +337,22 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
             className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
           />
         </div>
+
+        {tripType === "roundtrip" && (
+          <div>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              Return Date
+            </label>
+
+            <input
+              type="date"
+              value={returnDate}
+              min={departureDate || undefined}
+              onChange={(e) => setReturnDate(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+            />
+          </div>
+        )}
       </div>
 
       <button
