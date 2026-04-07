@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "@/components/ui/Toasts/use-toast"
+import { AirportOption, searchAirports } from "@/lib/airports/major-airports"
 
 type WatchlistRoute = {
   id: string
@@ -18,20 +19,122 @@ type RouteSearchProps = {
   onRouteAdded?: (route: WatchlistRoute) => void
 }
 
+type AirportPickerProps = {
+  label: string
+  placeholder: string
+  query: string
+  selectedAirport: AirportOption | null
+  onQueryChange: (value: string) => void
+  onSelect: (airport: AirportOption) => void
+  excludeCode?: string | null
+}
+
+function AirportPicker({
+  label,
+  placeholder,
+  query,
+  selectedAirport,
+  onQueryChange,
+  onSelect,
+  excludeCode,
+}: AirportPickerProps) {
+  const [open, setOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement | null>(null)
+
+  const results = useMemo(() => {
+    return searchAirports(query).filter((airport) => airport.code !== excludeCode)
+  }, [query, excludeCode])
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (!containerRef.current) return
+      if (!containerRef.current.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  return (
+    <div ref={containerRef} className="relative">
+      <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+        {label}
+      </label>
+
+      <input
+        type="text"
+        placeholder={placeholder}
+        value={query}
+        onFocus={() => setOpen(true)}
+        onChange={(e) => {
+          onQueryChange(e.target.value)
+          setOpen(true)
+        }}
+        className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+      />
+
+      {selectedAirport && (
+        <div className="mt-2 inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-medium text-sky-700">
+          {selectedAirport.city} — {selectedAirport.code}
+        </div>
+      )}
+
+      {open && (
+        <div className="absolute z-20 mt-2 max-h-72 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-2 shadow-[0_18px_45px_rgba(15,23,42,0.10)]">
+          {results.length === 0 ? (
+            <div className="px-3 py-3 text-sm text-slate-500">
+              No matching airports found.
+            </div>
+          ) : (
+            results.map((airport) => (
+              <button
+                key={airport.code}
+                type="button"
+                onClick={() => {
+                  onSelect(airport)
+                  setOpen(false)
+                }}
+                className="flex w-full items-start justify-between rounded-lg px-3 py-3 text-left transition hover:bg-slate-50"
+              >
+                <div>
+                  <div className="text-sm font-semibold text-slate-900">
+                    {airport.city} — {airport.code}
+                  </div>
+                  <div className="mt-1 text-xs text-slate-500">
+                    {airport.name}
+                  </div>
+                </div>
+
+                <div className="ml-4 text-[11px] uppercase tracking-[0.14em] text-slate-400">
+                  {airport.country}
+                </div>
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
-  const [origin, setOrigin] = useState("")
-  const [destination, setDestination] = useState("")
+  const [originQuery, setOriginQuery] = useState("")
+  const [destinationQuery, setDestinationQuery] = useState("")
+  const [selectedOrigin, setSelectedOrigin] = useState<AirportOption | null>(null)
+  const [selectedDestination, setSelectedDestination] = useState<AirportOption | null>(null)
   const [departureDate, setDepartureDate] = useState("")
   const [isMonitoring, setIsMonitoring] = useState(false)
 
   async function handleMonitorRoute() {
-    const normalizedOrigin = origin.trim().toUpperCase()
-    const normalizedDestination = destination.trim().toUpperCase()
+    const normalizedOrigin = selectedOrigin?.code?.trim().toUpperCase() ?? ""
+    const normalizedDestination = selectedDestination?.code?.trim().toUpperCase() ?? ""
 
     if (!normalizedOrigin || !normalizedDestination || !departureDate) {
       toast({
         title: "Missing route details",
-        description: "Please enter an origin, destination, and departure date.",
+        description: "Please choose an origin, destination, and departure date.",
       })
       return
     }
@@ -42,8 +145,10 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
         description: "Origin and destination cannot be the same airport.",
       })
 
-      setOrigin("")
-      setDestination("")
+      setOriginQuery("")
+      setDestinationQuery("")
+      setSelectedOrigin(null)
+      setSelectedDestination(null)
       setDepartureDate("")
 
       return
@@ -97,8 +202,10 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
         description: "Route monitoring has started.",
       })
 
-      setOrigin("")
-      setDestination("")
+      setOriginQuery("")
+      setDestinationQuery("")
+      setSelectedOrigin(null)
+      setSelectedDestination(null)
       setDepartureDate("")
     } catch (error) {
       console.error("Watchlist create request failed", error)
@@ -119,32 +226,54 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
       </h2>
 
       <p className="mt-1 text-sm text-slate-500">
-        Start monitoring airfare intelligence for a specific route.
+        Search major airports worldwide and start monitoring airfare intelligence.
       </p>
 
       <div className="mt-6 grid gap-4 md:grid-cols-3">
-        <input
-          type="text"
-          placeholder="Origin (ex: BOS)"
-          value={origin}
-          onChange={(e) => setOrigin(e.target.value)}
-          className="rounded-lg border border-slate-200 px-4 py-2 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-slate-300"
+        <AirportPicker
+          label="Origin"
+          placeholder="Search by airport, city, or code"
+          query={originQuery}
+          selectedAirport={selectedOrigin}
+          onQueryChange={(value) => {
+            setOriginQuery(value)
+            setSelectedOrigin(null)
+          }}
+          onSelect={(airport) => {
+            setSelectedOrigin(airport)
+            setOriginQuery(`${airport.city} (${airport.code})`)
+          }}
+          excludeCode={selectedDestination?.code ?? null}
         />
 
-        <input
-          type="text"
-          placeholder="Destination (ex: LHR)"
-          value={destination}
-          onChange={(e) => setDestination(e.target.value)}
-          className="rounded-lg border border-slate-200 px-4 py-2 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-slate-300"
+        <AirportPicker
+          label="Destination"
+          placeholder="Search by airport, city, or code"
+          query={destinationQuery}
+          selectedAirport={selectedDestination}
+          onQueryChange={(value) => {
+            setDestinationQuery(value)
+            setSelectedDestination(null)
+          }}
+          onSelect={(airport) => {
+            setSelectedDestination(airport)
+            setDestinationQuery(`${airport.city} (${airport.code})`)
+          }}
+          excludeCode={selectedOrigin?.code ?? null}
         />
 
-        <input
-          type="date"
-          value={departureDate}
-          onChange={(e) => setDepartureDate(e.target.value)}
-          className="rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
-        />
+        <div>
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+            Departure Date
+          </label>
+
+          <input
+            type="date"
+            value={departureDate}
+            onChange={(e) => setDepartureDate(e.target.value)}
+            className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+          />
+        </div>
       </div>
 
       <button
