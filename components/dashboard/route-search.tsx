@@ -41,6 +41,11 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
         title: "Invalid route",
         description: "Origin and destination cannot be the same airport.",
       })
+
+      setOrigin("")
+      setDestination("")
+      setDepartureDate("")
+
       return
     }
 
