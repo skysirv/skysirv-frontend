@@ -22,20 +22,86 @@ const fadeUp = {
   transition: { duration: 0.6, ease: "easeOut" as const },
 }
 
+type WatchlistRoute = {
+  id: string
+  route?: string | null
+  route_hash?: string | null
+  origin?: string | null
+  destination?: string | null
+  departure_date?: string | null
+  last_checked_at?: string | null
+  created_at?: string | null
+}
+
+type WatchlistResponse =
+  | WatchlistRoute[]
+  | {
+    watchlist?: WatchlistRoute[]
+    routes?: WatchlistRoute[]
+    data?: WatchlistRoute[]
+  }
+
 export default function FreeDashboardPage() {
   const [loading, setLoading] = useState(true)
-  const [watchlist, setWatchlist] = useState<any[]>([])
+  const [watchlist, setWatchlist] = useState<WatchlistRoute[]>([])
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false)
-      setWatchlist([])
-    }, 1000)
+    let cancelled = false
 
-    return () => clearTimeout(timer)
+    async function loadWatchlist() {
+      const token = localStorage.getItem("skysirv_token")
+
+      if (!token) {
+        if (!cancelled) {
+          setWatchlist([])
+          setLoading(false)
+        }
+        return
+      }
+
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/watchlist`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        const data: WatchlistResponse = await res.json().catch(() => [])
+
+        if (cancelled) return
+
+        const routes = Array.isArray(data)
+          ? data
+          : Array.isArray(data.watchlist)
+            ? data.watchlist
+            : Array.isArray(data.routes)
+              ? data.routes
+              : Array.isArray(data.data)
+                ? data.data
+                : []
+
+        setWatchlist(routes)
+      } catch (error) {
+        console.error("Failed to load free dashboard watchlist", error)
+
+        if (!cancelled) {
+          setWatchlist([])
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+        }
+      }
+    }
+
+    loadWatchlist()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
-  function handleRouteAdded(route: any) {
+  function handleRouteAdded(route: WatchlistRoute) {
     setWatchlist((prev) => {
       if (prev.length >= 3) {
         toast({
@@ -45,13 +111,78 @@ export default function FreeDashboardPage() {
         return prev
       }
 
+      const routeId = route.id ?? route.route_hash ?? route.route
+
+      const alreadyExists = prev.some((item) => {
+        const itemId = item.id ?? item.route_hash ?? item.route
+        return itemId && routeId && itemId === routeId
+      })
+
+      if (alreadyExists) {
+        toast({
+          title: "Route already monitored",
+          description: "That route is already in your Free watchlist.",
+        })
+        return prev
+      }
+
       toast({
         title: "Route added",
         description: "The route is now being monitored on your Free plan.",
       })
 
-      return [...prev, route]
+      return [route, ...prev]
     })
+  }
+
+  async function handleRouteRemoved(routeId: string) {
+    const token = localStorage.getItem("skysirv_token")
+
+    if (!token) {
+      toast({
+        title: "Unable to remove route",
+        description: "You must be signed in to update your watchlist.",
+      })
+      return
+    }
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/watchlist/${routeId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const data = await res.json().catch(() => null)
+
+      if (!res.ok) {
+        console.error("Failed to delete free watchlist route", data)
+
+        toast({
+          title: "Remove failed",
+          description: "The route could not be removed from your watchlist.",
+        })
+        return
+      }
+
+      setWatchlist((prev) => prev.filter((item) => item.id !== routeId))
+
+      toast({
+        title: "Route removed",
+        description: "The route was removed from your Free watchlist.",
+      })
+    } catch (error) {
+      console.error("Free watchlist delete request failed", error)
+
+      toast({
+        title: "Remove failed",
+        description: "Something went wrong while removing the route.",
+      })
+    }
   }
 
   const remainingRoutes = Math.max(0, 3 - watchlist.length)
@@ -115,7 +246,7 @@ export default function FreeDashboardPage() {
           {/* Watchlist Section */}
           <motion.section
             {...fadeUp}
-            className="mb-12 relative overflow-hidden rounded-[2rem] border border-slate-200/80 bg-[linear-gradient(180deg,#f8fbff_0%,#f6f9fc_42%,#ffffff_100%)] px-5 py-8 shadow-[0_20px_60px_rgba(15,23,42,0.06)] sm:px-7 md:px-8 md:py-10"
+            className="relative mb-12 overflow-hidden rounded-[2rem] border border-slate-200/80 bg-[linear-gradient(180deg,#f8fbff_0%,#f6f9fc_42%,#ffffff_100%)] px-5 py-8 shadow-[0_20px_60px_rgba(15,23,42,0.06)] sm:px-7 md:px-8 md:py-10"
           >
             <div className="pointer-events-none absolute inset-0">
               <div className="absolute -left-20 top-0 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.10)_0%,rgba(255,255,255,0)_72%)] blur-3xl" />
@@ -176,14 +307,33 @@ export default function FreeDashboardPage() {
                     </p>
                   </div>
                 ) : (
-                  watchlist.slice(0, 3).map((route, index) => (
-                    <div
-                      key={index}
-                      className="animate-[fadeInUp_0.35s_ease-out]"
-                    >
-                      <WatchlistCard />
-                    </div>
-                  ))
+                  watchlist.slice(0, 3).map((route, index) => {
+                    const routeCode = route.route ?? ""
+                    const [fallbackOrigin, fallbackDestination] = routeCode.includes("-")
+                      ? routeCode.split("-")
+                      : ["", ""]
+
+                    const origin = route.origin ?? fallbackOrigin ?? "—"
+                    const destination = route.destination ?? fallbackDestination ?? "—"
+                    const departureDate = route.departure_date ?? "Pending"
+
+                    return (
+                      <div
+                        key={route.id ?? route.route_hash ?? `${origin}-${destination}-${index}`}
+                        className="animate-[fadeInUp_0.35s_ease-out]"
+                      >
+                        <WatchlistCard
+                          origin={origin}
+                          destination={destination}
+                          departureDate={departureDate}
+                          onRemove={() => {
+                            if (!route.id) return
+                            void handleRouteRemoved(route.id)
+                          }}
+                        />
+                      </div>
+                    )
+                  })
                 )}
               </div>
             </div>
