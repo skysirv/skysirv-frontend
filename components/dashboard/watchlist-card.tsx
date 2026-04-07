@@ -56,7 +56,7 @@ export default function WatchlistCard({
   // ----------------------------
 
   return (
-    <div className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(15,23,42,0.12)]">
+    <div className="group relative min-h-[640px] overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(15,23,42,0.12)]">
       <div className="pointer-events-none absolute inset-0 opacity-0 transition duration-300 group-hover:opacity-100">
         <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.12)_0%,rgba(255,255,255,0)_72%)] blur-2xl" />
         <div className="absolute -left-12 bottom-0 h-32 w-32 rounded-full bg-[radial-gradient(circle,rgba(16,185,129,0.08)_0%,rgba(255,255,255,0)_72%)] blur-2xl" />
@@ -135,7 +135,7 @@ export default function WatchlistCard({
               Intelligence Status
             </p>
 
-            <p className="mt-3 min-h-[110px] text-sm leading-6 text-slate-600">
+            <p className="mt-3 min-h-[108px] text-sm leading-6 text-slate-600">
               {hasPrice
                 ? "Real pricing data is now being tracked. Price behavior and signal intelligence will continue to improve as more data is collected."
                 : "This route is saved and ready for monitoring. Pricing history, route behavior, and Pro intelligence signals will appear here automatically once enough real data has been collected."}
