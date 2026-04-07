@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { toast } from "@/components/ui/Toasts/use-toast"
 
 type WatchlistRoute = {
   id: string
@@ -24,13 +25,32 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
   const [isMonitoring, setIsMonitoring] = useState(false)
 
   async function handleMonitorRoute() {
-    if (!origin || !destination || !departureDate) {
+    const normalizedOrigin = origin.trim().toUpperCase()
+    const normalizedDestination = destination.trim().toUpperCase()
+
+    if (!normalizedOrigin || !normalizedDestination || !departureDate) {
+      toast({
+        title: "Missing route details",
+        description: "Please enter an origin, destination, and departure date.",
+      })
+      return
+    }
+
+    if (normalizedOrigin === normalizedDestination) {
+      toast({
+        title: "Invalid route",
+        description: "Origin and destination cannot be the same airport.",
+      })
       return
     }
 
     const token = localStorage.getItem("skysirv_token")
 
     if (!token) {
+      toast({
+        title: "Sign in required",
+        description: "You must be signed in to monitor a route.",
+      })
       return
     }
 
@@ -44,8 +64,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          origin: origin.trim().toUpperCase(),
-          destination: destination.trim().toUpperCase(),
+          origin: normalizedOrigin,
+          destination: normalizedDestination,
           departureDate,
         }),
       })
@@ -54,6 +74,12 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
 
       if (!res.ok) {
         console.error("Failed to create watchlist route", data)
+
+        toast({
+          title: "Could not add route",
+          description:
+            data?.error ?? "Something went wrong while starting route monitoring.",
+        })
         return
       }
 
@@ -61,11 +87,21 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
         onRouteAdded(data)
       }
 
+      toast({
+        title: "Route added",
+        description: "Route monitoring has started.",
+      })
+
       setOrigin("")
       setDestination("")
       setDepartureDate("")
     } catch (error) {
       console.error("Watchlist create request failed", error)
+
+      toast({
+        title: "Request failed",
+        description: "Something went wrong while contacting the server.",
+      })
     } finally {
       setIsMonitoring(false)
     }
@@ -87,7 +123,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
           placeholder="Origin (ex: BOS)"
           value={origin}
           onChange={(e) => setOrigin(e.target.value)}
-          className="rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+          className="rounded-lg border border-slate-200 px-4 py-2 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-slate-300"
         />
 
         <input
@@ -95,7 +131,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
           placeholder="Destination (ex: LHR)"
           value={destination}
           onChange={(e) => setDestination(e.target.value)}
-          className="rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+          className="rounded-lg border border-slate-200 px-4 py-2 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-slate-300"
         />
 
         <input
