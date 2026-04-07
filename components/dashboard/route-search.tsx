@@ -84,12 +84,6 @@ function AirportPicker({
         className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
       />
 
-      {selectedAirport && (
-        <div className="mt-2 inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-medium text-sky-700">
-          {selectedAirport.city} — {selectedAirport.code}
-        </div>
-      )}
-
       {open && (
         <div className="absolute z-20 mt-2 max-h-72 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-2 shadow-[0_18px_45px_rgba(15,23,42,0.10)]">
           {results.length === 0 ? (
@@ -270,8 +264,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
           type="button"
           onClick={() => setTripType("oneway")}
           className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "oneway"
-              ? "bg-slate-900 text-white"
-              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            ? "bg-slate-900 text-white"
+            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
         >
           One-way
@@ -281,8 +275,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
           type="button"
           onClick={() => setTripType("roundtrip")}
           className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "roundtrip"
-              ? "bg-slate-900 text-white"
-              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            ? "bg-slate-900 text-white"
+            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
         >
           Round-trip
