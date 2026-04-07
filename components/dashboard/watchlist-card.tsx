@@ -135,7 +135,7 @@ export default function WatchlistCard({
               Intelligence Status
             </p>
 
-            <p className="mt-3 min-h-[108px] text-sm leading-6 text-slate-600">
+            <p className="mt-3 min-h-[110px] text-sm leading-6 text-slate-600">
               {hasPrice
                 ? "Real pricing data is now being tracked. Price behavior and signal intelligence will continue to improve as more data is collected."
                 : "This route is saved and ready for monitoring. Pricing history, route behavior, and Pro intelligence signals will appear here automatically once enough real data has been collected."}
