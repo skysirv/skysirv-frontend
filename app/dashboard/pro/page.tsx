@@ -123,6 +123,7 @@ type WatchlistRoute = {
   departure_date?: string | null
   last_checked_at?: string | null
   created_at?: string | null
+  latest_price?: number | null
 }
 
 type WatchlistResponse =
@@ -711,6 +712,7 @@ export default function ProDashboardPage() {
                           origin={origin}
                           destination={destination}
                           departureDate={departureDate}
+                          latestPrice={route.latest_price ?? null}
                           onRemove={() => {
                             if (!route.id) return
                             void handleRouteRemoved(route.id)
