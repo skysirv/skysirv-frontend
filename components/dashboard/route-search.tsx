@@ -42,7 +42,11 @@ function AirportPicker({
   const containerRef = useRef<HTMLDivElement | null>(null)
 
   const results = useMemo(() => {
-    return searchAirports(query).filter((airport) => airport.code !== excludeCode)
+    if (query.trim().length < 2) return []
+
+    return searchAirports(query)
+      .filter((airport) => airport.code !== excludeCode)
+      .slice(0, 8)
   }, [query, excludeCode])
 
   useEffect(() => {
