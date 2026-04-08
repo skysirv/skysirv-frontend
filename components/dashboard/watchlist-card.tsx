@@ -56,12 +56,12 @@ export default function WatchlistCard({
     typeof bookingSignal === "string" ? bookingSignal.trim().toLowerCase() : null
 
   const signalDisplay =
-    normalizedBookingSignal === "buy"
-      ? "Buy"
-      : normalizedBookingSignal === "wait"
-        ? "Wait"
-        : normalizedBookingSignal === "avoid"
-          ? "Avoid"
+    normalizedBookingSignal === "buy" || normalizedBookingSignal === "cheap"
+      ? "Good Deal"
+      : normalizedBookingSignal === "wait" || normalizedBookingSignal === "neutral"
+        ? "Hold"
+        : normalizedBookingSignal === "avoid" || normalizedBookingSignal === "expensive"
+          ? "Overpriced"
           : "Pending"
 
   // ----------------------------
