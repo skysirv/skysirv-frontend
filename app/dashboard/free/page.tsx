@@ -46,6 +46,7 @@ type WatchlistResponse =
 export default function FreeDashboardPage() {
   const [loading, setLoading] = useState(true)
   const [watchlist, setWatchlist] = useState<WatchlistRoute[]>([])
+  const [watchlistFetchKey, setWatchlistFetchKey] = useState(0)
 
   useEffect(() => {
     let cancelled = false
@@ -101,7 +102,7 @@ export default function FreeDashboardPage() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [watchlistFetchKey])
 
   function handleRouteAdded(route: WatchlistRoute) {
     setWatchlist((prev) => {
@@ -136,10 +137,7 @@ export default function FreeDashboardPage() {
       return [route, ...prev]
     })
 
-    // 🔄 Force refresh so live data appears
-    setTimeout(() => {
-      window.location.reload()
-    }, 1500)
+    refreshWatchlistWithRetries()
   }
 
   async function handleRouteRemoved(routeId: string) {
@@ -190,6 +188,16 @@ export default function FreeDashboardPage() {
         description: "Something went wrong while removing the route.",
       })
     }
+  }
+
+  function refreshWatchlistWithRetries() {
+    const delays = [1500, 4000, 7000]
+
+    delays.forEach((delay) => {
+      window.setTimeout(() => {
+        setWatchlistFetchKey((prev) => prev + 1)
+      }, delay)
+    })
   }
 
   const remainingRoutes = Math.max(0, 3 - watchlist.length)

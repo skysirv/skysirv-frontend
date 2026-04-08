@@ -134,13 +134,14 @@ const defaultWrappedData: WrappedData = {
 
 const WRAPPED_YEAR_OPTIONS = [2026]
 
-export default function DashboardPage() {
+export default function EnterpriseDashboardPage() {
   const [loading, setLoading] = useState(true)
   const [wrappedLoading, setWrappedLoading] = useState(true)
   const [watchlist, setWatchlist] = useState<WatchlistRoute[]>([])
   const [wrappedData, setWrappedData] = useState<WrappedData>(defaultWrappedData)
   const [selectedYear, setSelectedYear] = useState<number>(2026)
   const [wrappedSegments, setWrappedSegments] = useState<WrappedSegment[]>([])
+  const [watchlistFetchKey, setWatchlistFetchKey] = useState(0)
 
   const intelligenceItems = [
     {
@@ -252,7 +253,7 @@ export default function DashboardPage() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [watchlistFetchKey])
 
   useEffect(() => {
     let cancelled = false
@@ -353,10 +354,7 @@ export default function DashboardPage() {
       description: "The route is now being monitored.",
     })
 
-    // 🔄 Force backend refresh so enriched data appears
-    setTimeout(() => {
-      window.location.reload()
-    }, 1500)
+    refreshWatchlistWithRetries()
   }
 
   async function handleRouteRemoved(routeId: string) {
@@ -407,6 +405,16 @@ export default function DashboardPage() {
         description: "Something went wrong while removing the route.",
       })
     }
+  }
+
+  function refreshWatchlistWithRetries() {
+    const delays = [1500, 4000, 7000]
+
+    delays.forEach((delay) => {
+      window.setTimeout(() => {
+        setWatchlistFetchKey((prev) => prev + 1)
+      }, delay)
+    })
   }
 
   const sortedSegments = useMemo(() => {
