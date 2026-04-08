@@ -683,7 +683,7 @@ export default function ProDashboardPage() {
                 </div>
               </div>
 
-              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid max-h-[1400px] gap-6 overflow-y-auto pr-2 md:grid-cols-2 xl:grid-cols-3">
                 {loading ? (
                   <>
                     <WatchlistSkeleton />
@@ -707,7 +707,7 @@ export default function ProDashboardPage() {
                     </p>
                   </div>
                 ) : (
-                  watchlist.slice(0, 6).map((route, index) => {
+                  watchlist.map((route, index) => {
                     const routeCode = route.route ?? ""
                     const [fallbackOrigin, fallbackDestination] = routeCode.includes("-")
                       ? routeCode.split("-")
