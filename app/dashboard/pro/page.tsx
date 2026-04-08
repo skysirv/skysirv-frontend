@@ -204,6 +204,7 @@ export default function ProDashboardPage() {
   const [availableWrappedYears, setAvailableWrappedYears] = useState<number[]>([2026])
   const [wrappedSegments, setWrappedSegments] = useState<WrappedSegment[]>([])
   const [subscription, setSubscription] = useState<SessionSubscription | null>(null)
+  const [watchlistFetchKey, setWatchlistFetchKey] = useState(0)
 
   const isLifetimePro = subscription?.plan_id === "pro_lifetime"
 
@@ -300,7 +301,7 @@ export default function ProDashboardPage() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [watchlistFetchKey])
 
   useEffect(() => {
     let cancelled = false
@@ -490,9 +491,9 @@ export default function ProDashboardPage() {
       return [route, ...prev]
     })
 
-    // 🔄 Force refresh from backend so live data appears
+    // 🔄 Re-fetch watchlist from backend so enriched data appears
     setTimeout(() => {
-      window.location.reload()
+      setWatchlistFetchKey((prev) => prev + 1)
     }, 1500)
   }
 
