@@ -9,6 +9,7 @@ interface WatchlistCardProps {
   latestPrice?: number | null
   avgPrice?: number | null
   priceDelta?: number | null
+  bookingSignal?: string | null
 
   onRemove?: () => void
 }
@@ -21,6 +22,7 @@ export default function WatchlistCard({
   latestPrice = null,
   avgPrice = null,
   priceDelta = null,
+  bookingSignal = null,
 
   onRemove,
 }: WatchlistCardProps) {
@@ -50,14 +52,17 @@ export default function WatchlistCard({
       })}`
       : "Pending"
 
+  const normalizedBookingSignal =
+    typeof bookingSignal === "string" ? bookingSignal.trim().toLowerCase() : null
+
   const signalDisplay =
-    typeof priceDelta === "number"
-      ? priceDelta < 0
-        ? "Buy"
-        : priceDelta > 0
+    normalizedBookingSignal === "buy"
+      ? "Buy"
+      : normalizedBookingSignal === "wait"
+        ? "Wait"
+        : normalizedBookingSignal === "avoid"
           ? "Avoid"
-          : "Wait"
-      : "Pending"
+          : "Pending"
 
   // ----------------------------
 
