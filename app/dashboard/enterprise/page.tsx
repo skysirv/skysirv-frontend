@@ -91,6 +91,27 @@ type WrappedSegment = {
   updated_at: string | null
 }
 
+type WatchlistRoute = {
+  id: string
+  route?: string | null
+  route_hash?: string | null
+  origin?: string | null
+  destination?: string | null
+  departure_date?: string | null
+  last_checked_at?: string | null
+  created_at?: string | null
+  latest_price?: number | null
+  avg_price?: number | null
+}
+
+type WatchlistResponse =
+  | WatchlistRoute[]
+  | {
+    watchlist?: WatchlistRoute[]
+    routes?: WatchlistRoute[]
+    data?: WatchlistRoute[]
+  }
+
 const defaultWrappedData: WrappedData = {
   flights: 0,
   countries: 0,
@@ -116,7 +137,7 @@ const WRAPPED_YEAR_OPTIONS = [2026]
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [wrappedLoading, setWrappedLoading] = useState(true)
-  const [watchlist, setWatchlist] = useState<any[]>([])
+  const [watchlist, setWatchlist] = useState<WatchlistRoute[]>([])
   const [wrappedData, setWrappedData] = useState<WrappedData>(defaultWrappedData)
   const [selectedYear, setSelectedYear] = useState<number>(2026)
   const [wrappedSegments, setWrappedSegments] = useState<WrappedSegment[]>([])
@@ -178,12 +199,59 @@ export default function DashboardPage() {
       : 0
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false)
-      setWatchlist([])
-    }, 1200)
+    let cancelled = false
 
-    return () => clearTimeout(timer)
+    async function loadWatchlist() {
+      const token = localStorage.getItem("skysirv_token")
+
+      if (!token) {
+        if (!cancelled) {
+          setWatchlist([])
+          setLoading(false)
+        }
+        return
+      }
+
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/watchlist`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        const data: WatchlistResponse = await res.json().catch(() => [])
+
+        if (cancelled) return
+
+        const routes = Array.isArray(data)
+          ? data
+          : Array.isArray(data.watchlist)
+            ? data.watchlist
+            : Array.isArray(data.routes)
+              ? data.routes
+              : Array.isArray(data.data)
+                ? data.data
+                : []
+
+        setWatchlist(routes)
+      } catch (error) {
+        console.error("Failed to load enterprise dashboard watchlist", error)
+
+        if (!cancelled) {
+          setWatchlist([])
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+        }
+      }
+    }
+
+    loadWatchlist()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   useEffect(() => {
@@ -277,13 +345,18 @@ export default function DashboardPage() {
     }
   }, [selectedYear])
 
-  function handleRouteAdded(route: any) {
-    setWatchlist((prev) => [...prev, route])
+  function handleRouteAdded(route: WatchlistRoute) {
+    setWatchlist((prev) => [route, ...prev])
 
     toast({
       title: "Route added",
       description: "The route is now being monitored.",
     })
+
+    // 🔄 Force backend refresh so enriched data appears
+    setTimeout(() => {
+      window.location.reload()
+    }, 1500)
   }
 
   const sortedSegments = useMemo(() => {
@@ -433,21 +506,44 @@ export default function DashboardPage() {
                     </p>
                   </div>
                 ) : (
-                  watchlist.map((route, index) => (
-                    <div
-                      key={index}
-                      className="animate-[fadeInUp_0.35s_ease-out]"
-                    >
-                      <WatchlistCard
-                        origin={route.origin}
-                        destination={route.destination}
-                        departureDate={route.departureDate ?? "Pending"}
-                        onRemove={() => {
-                          setWatchlist((prev) => prev.filter((_, i) => i !== index))
-                        }}
-                      />
-                    </div>
-                  ))
+                  watchlist.map((route, index) => {
+                    const routeCode = route.route ?? ""
+                    const [fallbackOrigin, fallbackDestination] = routeCode.includes("-")
+                      ? routeCode.split("-")
+                      : ["", ""]
+
+                    const origin = route.origin ?? fallbackOrigin ?? "—"
+                    const destination = route.destination ?? fallbackDestination ?? "—"
+                    const departureDate = route.departure_date ?? "Pending"
+
+                    return (
+                      <div
+                        key={route.id ?? route.route_hash ?? `${origin}-${destination}-${index}`}
+                        className="animate-[fadeInUp_0.35s_ease-out]"
+                      >
+                        <WatchlistCard
+                          origin={origin}
+                          destination={destination}
+                          departureDate={departureDate}
+                          latestPrice={
+                            typeof route.latest_price === "number"
+                              ? route.latest_price / 100
+                              : null
+                          }
+                          avgPrice={
+                            typeof route.avg_price === "number"
+                              ? route.avg_price / 100
+                              : null
+                          }
+                          priceDelta={null}
+                          onRemove={() => {
+                            if (!route.id) return
+                            setWatchlist((prev) => prev.filter((item) => item.id !== route.id))
+                          }}
+                        />
+                      </div>
+                    )
+                  })
                 )}
               </div>
             </div>

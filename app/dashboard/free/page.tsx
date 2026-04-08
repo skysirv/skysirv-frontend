@@ -31,6 +31,8 @@ type WatchlistRoute = {
   departure_date?: string | null
   last_checked_at?: string | null
   created_at?: string | null
+  latest_price?: number | null
+  avg_price?: number | null
 }
 
 type WatchlistResponse =
@@ -133,6 +135,11 @@ export default function FreeDashboardPage() {
 
       return [route, ...prev]
     })
+
+    // 🔄 Force refresh so live data appears
+    setTimeout(() => {
+      window.location.reload()
+    }, 1500)
   }
 
   async function handleRouteRemoved(routeId: string) {
@@ -326,6 +333,21 @@ export default function FreeDashboardPage() {
                           origin={origin}
                           destination={destination}
                           departureDate={departureDate}
+
+                          latestPrice={
+                            typeof route.latest_price === "number"
+                              ? route.latest_price / 100
+                              : null
+                          }
+
+                          avgPrice={
+                            typeof route.avg_price === "number"
+                              ? route.avg_price / 100
+                              : null
+                          }
+
+                          priceDelta={null}
+
                           onRemove={() => {
                             if (!route.id) return
                             void handleRouteRemoved(route.id)
