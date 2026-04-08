@@ -491,14 +491,7 @@ export default function ProDashboardPage() {
       return [route, ...prev]
     })
 
-    // 🔄 Re-fetch watchlist from backend so enriched data appears
-    setTimeout(() => {
-      setWatchlistFetchKey((prev) => prev + 1)
-    }, 1500)
-
-    setTimeout(() => {
-      setWatchlistFetchKey((prev) => prev + 1)
-    }, 6000)
+    refreshWatchlistWithRetries()
   }
 
   async function handleRouteRemoved(routeId: string) {
@@ -549,6 +542,16 @@ export default function ProDashboardPage() {
         description: "Something went wrong while removing the route.",
       })
     }
+  }
+
+  function refreshWatchlistWithRetries() {
+    const delays = [1500, 4000, 7000]
+
+    delays.forEach((delay) => {
+      window.setTimeout(() => {
+        setWatchlistFetchKey((prev) => prev + 1)
+      }, delay)
+    })
   }
 
   const remainingRoutes = Math.max(0, 25 - watchlist.length)
