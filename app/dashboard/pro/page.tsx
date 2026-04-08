@@ -718,8 +718,17 @@ export default function ProDashboardPage() {
                           origin={origin}
                           destination={destination}
                           departureDate={departureDate}
-                          latestPrice={route.latest_price ?? null}
-                          avgPrice={route.avg_price ? route.avg_price / 100 : null}
+                          latestPrice={
+                            Number.isFinite(Number(route.latest_price))
+                              ? Number(route.latest_price)
+                              : null
+                          }
+                          avgPrice={
+                            Number.isFinite(Number(route.avg_price))
+                              ? Number(route.avg_price) / 100
+                              : null
+                          }
+                          priceDelta={null}
                           onRemove={() => {
                             if (!route.id) return
                             void handleRouteRemoved(route.id)

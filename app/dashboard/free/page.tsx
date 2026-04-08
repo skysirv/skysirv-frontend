@@ -333,21 +333,17 @@ export default function FreeDashboardPage() {
                           origin={origin}
                           destination={destination}
                           departureDate={departureDate}
-
                           latestPrice={
-                            typeof route.latest_price === "number"
-                              ? route.latest_price / 100
+                            Number.isFinite(Number(route.latest_price))
+                              ? Number(route.latest_price)
                               : null
                           }
-
                           avgPrice={
-                            typeof route.avg_price === "number"
-                              ? route.avg_price / 100
+                            Number.isFinite(Number(route.avg_price))
+                              ? Number(route.avg_price) / 100
                               : null
                           }
-
                           priceDelta={null}
-
                           onRemove={() => {
                             if (!route.id) return
                             void handleRouteRemoved(route.id)

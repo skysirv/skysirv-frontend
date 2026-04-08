@@ -359,6 +359,56 @@ export default function DashboardPage() {
     }, 1500)
   }
 
+  async function handleRouteRemoved(routeId: string) {
+    const token = localStorage.getItem("skysirv_token")
+
+    if (!token) {
+      toast({
+        title: "Unable to remove route",
+        description: "You must be signed in to update your watchlist.",
+      })
+      return
+    }
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/watchlist/${routeId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const data = await res.json().catch(() => null)
+
+      if (!res.ok) {
+        console.error("Failed to delete enterprise watchlist route", data)
+
+        toast({
+          title: "Remove failed",
+          description: "The route could not be removed from your watchlist.",
+        })
+        return
+      }
+
+      setWatchlist((prev) => prev.filter((item) => item.id !== routeId))
+
+      toast({
+        title: "Route removed",
+        description: "The route was removed from your watchlist.",
+      })
+    } catch (error) {
+      console.error("Enterprise watchlist delete request failed", error)
+
+      toast({
+        title: "Remove failed",
+        description: "Something went wrong while removing the route.",
+      })
+    }
+  }
+
   const sortedSegments = useMemo(() => {
     return [...wrappedSegments].sort((a, b) => {
       return Number(a.segment_order ?? 0) - Number(b.segment_order ?? 0)
@@ -526,19 +576,19 @@ export default function DashboardPage() {
                           destination={destination}
                           departureDate={departureDate}
                           latestPrice={
-                            typeof route.latest_price === "number"
-                              ? route.latest_price / 100
+                            Number.isFinite(Number(route.latest_price))
+                              ? Number(route.latest_price)
                               : null
                           }
                           avgPrice={
-                            typeof route.avg_price === "number"
-                              ? route.avg_price / 100
+                            Number.isFinite(Number(route.avg_price))
+                              ? Number(route.avg_price) / 100
                               : null
                           }
                           priceDelta={null}
                           onRemove={() => {
                             if (!route.id) return
-                            setWatchlist((prev) => prev.filter((item) => item.id !== route.id))
+                            void handleRouteRemoved(route.id)
                           }}
                         />
                       </div>
