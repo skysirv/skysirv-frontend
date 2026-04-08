@@ -132,7 +132,45 @@ const defaultWrappedData: WrappedData = {
   },
 }
 
-const WRAPPED_YEAR_OPTIONS = [2026]
+const WRAPPED_START_YEAR = 2026
+
+async function fetchAvailableWrappedYears(token: string) {
+  const currentYear = new Date().getFullYear()
+
+  const candidateYears = Array.from(
+    { length: Math.max(currentYear - WRAPPED_START_YEAR + 1, 1) },
+    (_, index) => currentYear - index
+  ).filter((year) => year >= WRAPPED_START_YEAR)
+
+  const results = await Promise.all(
+    candidateYears.map(async (year) => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/intelligence/wrapped/${year}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        const data = await res.json().catch(() => null)
+
+        if (res.ok && data?.success && data?.wrapped) {
+          return year
+        }
+
+        return null
+      } catch {
+        return null
+      }
+    })
+  )
+
+  const availableYears = results.filter((year): year is number => year !== null)
+
+  return availableYears.length ? availableYears : [currentYear]
+}
 
 export default function EnterpriseDashboardPage() {
   const [loading, setLoading] = useState(true)
@@ -140,6 +178,7 @@ export default function EnterpriseDashboardPage() {
   const [watchlist, setWatchlist] = useState<WatchlistRoute[]>([])
   const [wrappedData, setWrappedData] = useState<WrappedData>(defaultWrappedData)
   const [selectedYear, setSelectedYear] = useState<number>(2026)
+  const [availableWrappedYears, setAvailableWrappedYears] = useState<number[]>([2026])
   const [wrappedSegments, setWrappedSegments] = useState<WrappedSegment[]>([])
   const [watchlistFetchKey, setWatchlistFetchKey] = useState(0)
 
@@ -254,6 +293,38 @@ export default function EnterpriseDashboardPage() {
       cancelled = true
     }
   }, [watchlistFetchKey])
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadAvailableYears() {
+      const token = localStorage.getItem("skysirv_token")
+
+      if (!token) {
+        if (cancelled) return
+        return
+      }
+
+      try {
+        const years = await fetchAvailableWrappedYears(token)
+
+        if (cancelled) return
+
+        setAvailableWrappedYears(years)
+        setSelectedYear((currentSelectedYear) => {
+          return years.includes(currentSelectedYear) ? currentSelectedYear : years[0]
+        })
+      } catch (error) {
+        console.error("Failed to load available wrapped years", error)
+      }
+    }
+
+    loadAvailableYears()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -678,7 +749,7 @@ export default function EnterpriseDashboardPage() {
                         onChange={(e) => setSelectedYear(Number(e.target.value))}
                         className="bg-transparent pr-1 text-sm font-medium text-slate-900 outline-none"
                       >
-                        {WRAPPED_YEAR_OPTIONS.map((year) => (
+                        {availableWrappedYears.map((year) => (
                           <option key={year} value={year}>
                             {year}
                           </option>
