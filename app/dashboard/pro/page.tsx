@@ -495,6 +495,10 @@ export default function ProDashboardPage() {
     setTimeout(() => {
       setWatchlistFetchKey((prev) => prev + 1)
     }, 1500)
+
+    setTimeout(() => {
+      setWatchlistFetchKey((prev) => prev + 1)
+    }, 6000)
   }
 
   async function handleRouteRemoved(routeId: string) {
