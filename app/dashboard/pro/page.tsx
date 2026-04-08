@@ -719,12 +719,12 @@ export default function ProDashboardPage() {
                           destination={destination}
                           departureDate={departureDate}
                           latestPrice={
-                            Number.isFinite(Number(route.latest_price))
+                            route.latest_price != null && Number.isFinite(Number(route.latest_price))
                               ? Number(route.latest_price)
                               : null
                           }
                           avgPrice={
-                            Number.isFinite(Number(route.avg_price))
+                            route.avg_price != null && Number.isFinite(Number(route.avg_price))
                               ? Number(route.avg_price) / 100
                               : null
                           }
