@@ -13,6 +13,15 @@ interface WatchlistCardProps {
   latestAirline?: string | null
   latestFlightNumber?: string | null
   latestCapturedAt?: string | null
+  recommendedFlights?:
+  | {
+    airline?: string | null
+    flightNumber?: string | null
+    price?: number | null
+    currency?: string | null
+    capturedAt?: string | null
+  }[]
+  | null
   volatilityIndex?: string | null
 
   onRemove?: () => void
@@ -30,6 +39,7 @@ export default function WatchlistCard({
   latestAirline = null,
   latestFlightNumber = null,
   latestCapturedAt = null,
+  recommendedFlights = null,
   volatilityIndex = null,
 
   onRemove,
@@ -218,10 +228,34 @@ export default function WatchlistCard({
             </p>
 
             <div className="mt-4 space-y-2">
-              <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
-                <span>{airlineDisplay} • {flightNumberDisplay}</span>
-                <span className="font-semibold text-slate-900">{currentFareDisplay}</span>
-              </div>
+              {recommendedFlights && recommendedFlights.length > 0 ? (
+                recommendedFlights.slice(0, 4).map((flight, index) => {
+                  const flightAirline = getAirlineDisplayName(flight.airline)
+                  const flightNumber = flight.flightNumber?.trim() || "Flight pending"
+                  const flightPrice =
+                    typeof flight.price === "number" && Number.isFinite(flight.price)
+                      ? `$${flight.price.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}`
+                      : "—"
+
+                  return (
+                    <div
+                      key={`${flight.airline ?? "airline"}-${flight.flightNumber ?? "flight"}-${index}`}
+                      className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm"
+                    >
+                      <span>{flightAirline} • {flightNumber}</span>
+                      <span className="font-semibold text-slate-900">{flightPrice}</span>
+                    </div>
+                  )
+                })
+              ) : (
+                <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
+                  <span>{airlineDisplay} • {flightNumberDisplay}</span>
+                  <span className="font-semibold text-slate-900">{currentFareDisplay}</span>
+                </div>
+              )}
             </div>
           </div>
 

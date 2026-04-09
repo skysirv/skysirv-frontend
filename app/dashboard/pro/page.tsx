@@ -756,6 +756,7 @@ export default function ProDashboardPage() {
                           latestFlightNumber={route.latest_flight_number ?? null}
                           latestCapturedAt={route.latest_captured_at ?? null}
                           volatilityIndex={route.volatility_index ?? null}
+                          recommendedFlights={route.recommended_flights ?? null}
                           onRemove={() => {
                             if (!route.id) return
                             void handleRouteRemoved(route.id)
