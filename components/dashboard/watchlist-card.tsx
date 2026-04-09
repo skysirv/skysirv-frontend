@@ -112,6 +112,15 @@ export default function WatchlistCard({
           ? "Overpriced"
           : "Pending"
 
+  const signalDisplayClass =
+    signalDisplay === "Good Deal"
+      ? "text-emerald-600"
+      : signalDisplay === "Hold"
+        ? "text-violet-600"
+        : signalDisplay === "Overpriced"
+          ? "text-rose-600"
+          : "text-slate-900"
+
   const airlineDisplay = getAirlineDisplayName(latestAirline)
 
   const flightNumberDisplay = latestFlightNumber?.trim()
@@ -195,10 +204,6 @@ export default function WatchlistCard({
             <p className="text-[11px] uppercase tracking-[0.14em] text-slate-400">
               Captured • {capturedTimeDisplay}
             </p>
-
-            <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-slate-400">
-              Monitoring begins after route tracking starts
-            </p>
           </div>
 
           <button
@@ -233,7 +238,7 @@ export default function WatchlistCard({
             <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
               Market Status
             </p>
-            <p className="mt-1 text-base font-semibold text-slate-900">
+            <p className={`mt-1 text-base font-semibold ${signalDisplayClass}`}>
               {signalDisplay}
             </p>
           </div>
