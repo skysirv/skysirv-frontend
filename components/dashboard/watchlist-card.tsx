@@ -45,6 +45,25 @@ export default function WatchlistCard({
 
   const hasPrice = typeof latestPrice === "number"
 
+  const departureDateDisplay = (() => {
+    if (!departureDate) {
+      return "Pending"
+    }
+
+    const parsed = new Date(departureDate)
+
+    if (Number.isNaN(parsed.getTime())) {
+      return departureDate
+    }
+
+    return parsed.toLocaleDateString([], {
+      weekday: "long",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
+  })()
+
   const currentFareDisplay = hasPrice
     ? `$${latestPrice.toLocaleString(undefined, {
       minimumFractionDigits: 2,
@@ -54,7 +73,7 @@ export default function WatchlistCard({
 
   const priceHistoryDisplay =
     typeof avgPrice === "number"
-      ? `Avg $${avgPrice.toLocaleString(undefined, {
+      ? `$${avgPrice.toLocaleString(undefined, {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       })}`
@@ -145,7 +164,7 @@ export default function WatchlistCard({
             </p>
 
             <p className="mt-1 text-sm text-slate-500">
-              Departure • {departureDate}
+              Departure • {departureDateDisplay}
             </p>
 
             <p className="text-xs font-medium text-slate-700">
