@@ -10,6 +10,10 @@ interface WatchlistCardProps {
   avgPrice?: number | null
   priceDelta?: number | null
   bookingSignal?: string | null
+  latestAirline?: string | null
+  latestFlightNumber?: string | null
+  latestCapturedAt?: string | null
+  volatilityIndex?: string | null
 
   onRemove?: () => void
 }
@@ -23,6 +27,10 @@ export default function WatchlistCard({
   avgPrice = null,
   priceDelta = null,
   bookingSignal = null,
+  latestAirline = null,
+  latestFlightNumber = null,
+  latestCapturedAt = null,
+  volatilityIndex = null,
 
   onRemove,
 }: WatchlistCardProps) {
@@ -64,6 +72,31 @@ export default function WatchlistCard({
           ? "Overpriced"
           : "Pending"
 
+  const airlineDisplay = latestAirline?.trim() ? latestAirline : "Airline pending"
+
+  const flightNumberDisplay = latestFlightNumber?.trim()
+    ? latestFlightNumber
+    : "Flight pending"
+
+  const capturedTimeDisplay = latestCapturedAt
+    ? (() => {
+      const parsed = new Date(latestCapturedAt)
+
+      if (Number.isNaN(parsed.getTime())) {
+        return "Capture time pending"
+      }
+
+      return parsed.toLocaleString([], {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+      })
+    })()
+    : "Capture time pending"
+
+  const volatilityDisplay =
+    volatilityIndex?.trim() ? volatilityIndex : "Pending"
+
   // ----------------------------
 
   return (
@@ -96,6 +129,14 @@ export default function WatchlistCard({
               Departure • {departureDate}
             </p>
 
+            <p className="text-xs font-medium text-slate-700">
+              {airlineDisplay} • {flightNumberDisplay}
+            </p>
+
+            <p className="text-[11px] uppercase tracking-[0.14em] text-slate-400">
+              Captured • {capturedTimeDisplay}
+            </p>
+
             <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-slate-400">
               Monitoring begins after route tracking starts
             </p>
@@ -113,7 +154,7 @@ export default function WatchlistCard({
         <div className="mt-6 grid grid-cols-3 gap-3">
           <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 text-center">
             <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
-              Current Fare
+              Observed Fare
             </p>
             <p className="mt-1 text-base font-semibold text-slate-900">
               {currentFareDisplay}
@@ -122,7 +163,7 @@ export default function WatchlistCard({
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 text-center">
             <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
-              Price History
+              Route Average
             </p>
             <p className="mt-1 text-base font-semibold text-slate-900">
               {priceHistoryDisplay}
@@ -131,10 +172,10 @@ export default function WatchlistCard({
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 text-center">
             <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
-              Signal Status
+              Market Status
             </p>
             <p className="mt-1 text-base font-semibold text-slate-900">
-              {signalDisplay}
+              {volatilityDisplay}
             </p>
           </div>
         </div>
@@ -148,8 +189,8 @@ export default function WatchlistCard({
 
             <p className="mt-3 min-h-[108px] text-sm leading-6 text-slate-600">
               {hasPrice
-                ? "Real pricing data is now being tracked. Price behavior and signal intelligence will continue to improve as more data is collected."
-                : "This route is saved and ready for monitoring. Pricing history, route behavior, and Pro intelligence signals will appear here automatically once enough real data has been collected."}
+                ? "Live fare snapshots are now being captured. This specific flight reflects current market conditions, and Skysirv™ will refine timing, volatility, and pricing intelligence as more data is collected."
+                : "This route is saved and ready for monitoring. Skysirv™ will begin capturing real fare snapshots, and intelligence layers will activate as pricing history builds."}
             </p>
 
             <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200">
@@ -191,7 +232,7 @@ export default function WatchlistCard({
               Signals
             </p>
             <p className="mt-1 text-sm font-semibold text-slate-900">
-              {hasPrice ? "Emerging" : "Pending"}
+              {volatilityDisplay}
             </p>
           </div>
         </div>
