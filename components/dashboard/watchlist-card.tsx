@@ -234,7 +234,7 @@ export default function WatchlistCard({
               Market Status
             </p>
             <p className="mt-1 text-base font-semibold text-slate-900">
-              {volatilityDisplay}
+              {signalDisplay}
             </p>
           </div>
         </div>
