@@ -238,7 +238,7 @@ export default function WatchlistCard({
             <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
               Market Status
             </p>
-            <p className={`mt-1 text-base font-semibold text-center w-full ${signalDisplayClass}`}>
+            <p className={`mt-0.5 text-base font-semibold text-center leading-tight ${signalDisplayClass}`}>
               {signalDisplay}
             </p>
           </div>
