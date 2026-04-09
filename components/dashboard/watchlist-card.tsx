@@ -39,6 +39,27 @@ export default function WatchlistCard({
     onRemove?.()
   }
 
+  function getAirlineDisplayName(code?: string | null) {
+    const normalizedCode = code?.trim().toUpperCase()
+
+    if (!normalizedCode) {
+      return "Airline pending"
+    }
+
+    const airlineNames: Record<string, string> = {
+      AA: "American Airlines",
+      AS: "Alaska Airlines",
+      UA: "United Airlines",
+      DL: "Delta Air Lines",
+      WN: "Southwest Airlines",
+      B6: "JetBlue",
+      NK: "Spirit Airlines",
+      F9: "Frontier Airlines",
+    }
+
+    return airlineNames[normalizedCode] ?? normalizedCode
+  }
+
   // ----------------------------
   // Derived display values
   // ----------------------------
@@ -91,7 +112,7 @@ export default function WatchlistCard({
           ? "Overpriced"
           : "Pending"
 
-  const airlineDisplay = latestAirline?.trim() ? latestAirline : "Airline pending"
+  const airlineDisplay = getAirlineDisplayName(latestAirline)
 
   const flightNumberDisplay = latestFlightNumber?.trim()
     ? latestFlightNumber
