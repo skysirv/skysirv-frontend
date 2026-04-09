@@ -197,11 +197,7 @@ export default function WatchlistCard({
               Departure • {departureDateDisplay}
             </p>
 
-            <p className="text-xs font-medium text-slate-700">
-              {airlineDisplay} • {flightNumberDisplay}
-            </p>
-
-            <p className="text-[11px] uppercase tracking-[0.14em] text-slate-400">
+            <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-slate-400">
               Captured • {capturedTimeDisplay}
             </p>
           </div>
@@ -215,14 +211,18 @@ export default function WatchlistCard({
         </div>
 
         {/* Monitoring Status */}
-        <div className="mt-6 grid grid-cols-3 gap-3">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 text-center">
-            <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
-              Observed Fare
+        <div className="mt-6 grid grid-cols-2 gap-3">
+          <div className="col-span-2 rounded-3xl border border-slate-200 bg-[linear-gradient(180deg,rgba(248,250,252,0.95)_0%,rgba(255,255,255,1)_100%)] p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Recommended Flights
             </p>
-            <p className="mt-1 text-base font-semibold text-slate-900">
-              {currentFareDisplay}
-            </p>
+
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
+                <span>{airlineDisplay} • {flightNumberDisplay}</span>
+                <span className="font-semibold text-slate-900">{currentFareDisplay}</span>
+              </div>
+            </div>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 text-center">

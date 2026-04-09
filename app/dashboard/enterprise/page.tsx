@@ -107,6 +107,15 @@ type WatchlistRoute = {
   latest_flight_number?: string | null
   latest_captured_at?: string | null
   volatility_index?: string | null
+  recommended_flights?:
+  | {
+    airline?: string | null
+    flightNumber?: string | null
+    price?: number | null
+    currency?: string | null
+    capturedAt?: string | null
+  }[]
+  | null
 }
 
 type WatchlistResponse =
