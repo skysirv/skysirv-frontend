@@ -94,8 +94,27 @@ export default function WatchlistCard({
     })()
     : "Capture time pending"
 
-  const volatilityDisplay =
-    volatilityIndex?.trim() ? volatilityIndex : "Pending"
+  const volatilityDisplay = (() => {
+    if (!volatilityIndex?.trim()) {
+      return "Pending"
+    }
+
+    const numericVolatility = Number(volatilityIndex)
+
+    if (!Number.isFinite(numericVolatility)) {
+      return "Pending"
+    }
+
+    if (numericVolatility < 5) {
+      return "Stable"
+    }
+
+    if (numericVolatility < 12) {
+      return "Moderate"
+    }
+
+    return "Volatile"
+  })()
 
   // ----------------------------
 
