@@ -4,8 +4,6 @@ interface WatchlistCardProps {
   origin?: string
   destination?: string
   departureDate?: string
-
-  // NEW — future intelligence props
   latestPrice?: number | null
   avgPrice?: number | null
   priceDelta?: number | null
@@ -23,7 +21,6 @@ interface WatchlistCardProps {
   }[]
   | null
   volatilityIndex?: string | null
-
   onRemove?: () => void
 }
 
@@ -31,7 +28,6 @@ export default function WatchlistCard({
   origin = "—",
   destination = "—",
   departureDate = "Pending",
-
   latestPrice = null,
   avgPrice = null,
   priceDelta = null,
@@ -41,7 +37,6 @@ export default function WatchlistCard({
   latestCapturedAt = null,
   recommendedFlights = null,
   volatilityIndex = null,
-
   onRemove,
 }: WatchlistCardProps) {
   function handleRemoveRoute() {
@@ -182,10 +177,6 @@ export default function WatchlistCard({
     return airlineReference[normalizedCode]?.name ?? normalizedCode
   }
 
-  // ----------------------------
-  // Derived display values
-  // ----------------------------
-
   const hasPrice = typeof latestPrice === "number"
 
   const departureDateDisplay = (() => {
@@ -244,10 +235,6 @@ export default function WatchlistCard({
           : "text-slate-900"
 
   const airlineDisplay = getAirlineDisplayName(latestAirline)
-
-  const flightNumberDisplay = latestFlightNumber?.trim()
-    ? latestFlightNumber
-    : "Flight pending"
 
   const capturedTimeDisplay = latestCapturedAt
     ? (() => {
@@ -352,8 +339,6 @@ export default function WatchlistCard({
     return "Volatile"
   })()
 
-  // ----------------------------
-
   return (
     <div className="group relative min-h-[640px] overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-[0_10px_30px_rgba(15,23,42,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(15,23,42,0.12)]">
       <div className="pointer-events-none absolute inset-0 opacity-0 transition duration-300 group-hover:opacity-100">
@@ -362,7 +347,6 @@ export default function WatchlistCard({
       </div>
 
       <div className="relative">
-        {/* Header */}
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -371,7 +355,7 @@ export default function WatchlistCard({
               </span>
 
               <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-[11px] font-medium text-slate-600">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
                 Monitoring
               </span>
             </div>
@@ -397,7 +381,6 @@ export default function WatchlistCard({
           </button>
         </div>
 
-        {/* Monitoring Status */}
         <div className="mt-6 grid grid-cols-2 gap-3">
           <div className="col-span-2 rounded-3xl border border-slate-200 bg-[linear-gradient(180deg,rgba(248,250,252,0.95)_0%,rgba(255,255,255,1)_100%)] p-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
@@ -408,7 +391,6 @@ export default function WatchlistCard({
               {recommendedFlightsDisplay.length > 0 ? (
                 recommendedFlightsDisplay.map((flight, index) => {
                   const flightAirline = getAirlineDisplayName(flight.airline)
-                  const flightNumber = flight.flightNumber?.trim() || "Flight pending"
                   const flightPrice =
                     typeof flight.price === "number" && Number.isFinite(flight.price)
                       ? `$${flight.price.toLocaleString(undefined, {
@@ -422,14 +404,14 @@ export default function WatchlistCard({
                       key={`${flight.airline ?? "airline"}-${flight.flightNumber ?? "flight"}-${index}`}
                       className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm"
                     >
-                      <span>{flightAirline} • {flightNumber}</span>
+                      <span>{flightAirline}</span>
                       <span className="font-semibold text-slate-900">{flightPrice}</span>
                     </div>
                   )
                 })
               ) : (
                 <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
-                  <span>{airlineDisplay} • {flightNumberDisplay}</span>
+                  <span>{airlineDisplay}</span>
                   <span className="font-semibold text-slate-900">{currentFareDisplay}</span>
                 </div>
               )}
@@ -449,41 +431,14 @@ export default function WatchlistCard({
             <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
               Market Status
             </p>
-            <p className={`mt-1 text-base font-semibold leading-tight ${signalDisplayClass} flex justify-center`}>
+            <p
+              className={`mt-1 flex justify-center text-base font-semibold leading-tight ${signalDisplayClass}`}
+            >
               {signalDisplay}
             </p>
           </div>
         </div>
 
-        {/* Intelligence Status */}
-        <div className="mt-6">
-          <div className="rounded-3xl border border-slate-200 bg-[linear-gradient(180deg,rgba(248,250,252,0.95)_0%,rgba(255,255,255,1)_100%)] p-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Intelligence Status
-            </p>
-
-            <p className="mt-3 min-h-[108px] text-sm leading-6 text-slate-600">
-              {hasPrice
-                ? "Live fare snapshots are now being captured. This specific flight reflects current market conditions, and Skysirv™ will refine timing, volatility, and pricing intelligence as more data is collected."
-                : "This route is saved and ready for monitoring. Skysirv™ will begin capturing real fare snapshots, and intelligence layers will activate as pricing history builds."}
-            </p>
-
-            <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200">
-              <div
-                className={`h-full rounded-full bg-sky-500/60 transition-all duration-500 ${hasPrice ? "w-2/3" : "w-1/4"}`}
-              />
-            </div>
-
-            <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
-              <span>Data Readiness</span>
-              <span className="font-semibold text-slate-700">
-                {hasPrice ? "Active" : "Collecting"}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Monitoring Metrics */}
         <div className="mt-6 grid grid-cols-3 gap-3">
           <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 text-center">
             <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
