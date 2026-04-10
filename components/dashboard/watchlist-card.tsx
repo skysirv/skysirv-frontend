@@ -199,18 +199,12 @@ export default function WatchlistCard({
   })()
 
   const currentFareDisplay = hasPrice
-    ? `$${latestPrice.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`
+    ? `$${Math.round(latestPrice).toLocaleString()}`
     : "—"
 
   const priceHistoryDisplay =
     typeof avgPrice === "number"
-      ? `$${avgPrice.toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })}`
+      ? `$${Math.round(avgPrice).toLocaleString()}`
       : "Pending"
 
   const normalizedBookingSignal =
@@ -393,10 +387,7 @@ export default function WatchlistCard({
                   const flightAirline = getAirlineDisplayName(flight.airline)
                   const flightPrice =
                     typeof flight.price === "number" && Number.isFinite(flight.price)
-                      ? `$${flight.price.toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}`
+                      ? `$${Math.round(flight.price).toLocaleString()}`
                       : "—"
 
                   return (
