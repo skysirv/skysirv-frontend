@@ -170,8 +170,6 @@ export default function WatchlistCard({
     WY: { name: "Oman Air", tier: "secondary" },
 
     ZH: { name: "Shenzhen Airlines", tier: "secondary" },
-    ZZ: { name: "Unknown Carrier", tier: "unknown" },
-    UNK: { name: "Unknown Carrier", tier: "unknown" },
   }
 
   function getAirlineDisplayName(code?: string | null) {
