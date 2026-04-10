@@ -44,9 +44,134 @@ export default function WatchlistCard({
 
   onRemove,
 }: WatchlistCardProps) {
-
   function handleRemoveRoute() {
     onRemove?.()
+  }
+
+  const airlineReference: Record<
+    string,
+    {
+      name: string
+      tier: "major" | "secondary" | "unknown"
+    }
+  > = {
+    AA: { name: "American Airlines", tier: "major" },
+    AC: { name: "Air Canada", tier: "major" },
+    AF: { name: "Air France", tier: "major" },
+    AH: { name: "Air Algerie", tier: "secondary" },
+    AI: { name: "Air India", tier: "major" },
+    AK: { name: "AirAsia", tier: "secondary" },
+    AM: { name: "Aeromexico", tier: "major" },
+    AS: { name: "Alaska Airlines", tier: "major" },
+    AT: { name: "Royal Air Maroc", tier: "secondary" },
+    AV: { name: "Avianca", tier: "major" },
+    AY: { name: "Finnair", tier: "major" },
+
+    B6: { name: "JetBlue", tier: "major" },
+    BA: { name: "British Airways", tier: "major" },
+    BR: { name: "EVA Air", tier: "major" },
+    BT: { name: "airBaltic", tier: "secondary" },
+
+    CA: { name: "Air China", tier: "major" },
+    CI: { name: "China Airlines", tier: "major" },
+    CM: { name: "Copa Airlines", tier: "major" },
+    CX: { name: "Cathay Pacific", tier: "major" },
+    CZ: { name: "China Southern Airlines", tier: "major" },
+
+    DE: { name: "Condor", tier: "secondary" },
+    DL: { name: "Delta", tier: "major" },
+    DY: { name: "Norwegian Air Shuttle", tier: "secondary" },
+
+    EK: { name: "Emirates", tier: "major" },
+    ET: { name: "Ethiopian Airlines", tier: "major" },
+    EW: { name: "Eurowings", tier: "secondary" },
+    EY: { name: "Etihad Airways", tier: "major" },
+
+    F9: { name: "Frontier Airlines", tier: "secondary" },
+    FD: { name: "Thai AirAsia", tier: "secondary" },
+    FJ: { name: "Fiji Airways", tier: "secondary" },
+    FM: { name: "Shanghai Airlines", tier: "secondary" },
+    FR: { name: "Ryanair", tier: "secondary" },
+
+    G4: { name: "Allegiant Air", tier: "secondary" },
+    GA: { name: "Garuda Indonesia", tier: "major" },
+    GF: { name: "Gulf Air", tier: "secondary" },
+
+    HA: { name: "Hawaiian Airlines", tier: "secondary" },
+    HV: { name: "Transavia", tier: "secondary" },
+    HU: { name: "Hainan Airlines", tier: "major" },
+
+    IB: { name: "Iberia", tier: "major" },
+
+    JL: { name: "Japan Airlines", tier: "major" },
+    JU: { name: "Air Serbia", tier: "secondary" },
+
+    KE: { name: "Korean Air", tier: "major" },
+    KL: { name: "KLM", tier: "major" },
+    KP: { name: "ASKY Airlines", tier: "secondary" },
+    KQ: { name: "Kenya Airways", tier: "secondary" },
+    KU: { name: "Kuwait Airways", tier: "secondary" },
+
+    LA: { name: "LATAM Airlines Group", tier: "major" },
+    LH: { name: "Lufthansa", tier: "major" },
+    LO: { name: "LOT Polish", tier: "major" },
+    LR: { name: "Avianca Costa Rica", tier: "secondary" },
+    LX: { name: "SWISS", tier: "major" },
+    LY: { name: "EL AL", tier: "major" },
+
+    MH: { name: "Malaysia Airlines", tier: "major" },
+    MS: { name: "Egyptair", tier: "secondary" },
+    MU: { name: "China Eastern", tier: "major" },
+
+    NH: { name: "All Nippon Airways", tier: "major" },
+    NK: { name: "Spirit Airlines", tier: "secondary" },
+    NZ: { name: "Air New Zealand", tier: "major" },
+
+    OS: { name: "Austrian Airlines", tier: "major" },
+    OU: { name: "Croatia Airlines", tier: "secondary" },
+    OZ: { name: "Asiana Airlines", tier: "major" },
+
+    PK: { name: "PIA", tier: "secondary" },
+    PR: { name: "Philippine Airlines", tier: "secondary" },
+
+    QF: { name: "Qantas", tier: "major" },
+    QR: { name: "Qatar Airways", tier: "major" },
+    QZ: { name: "Indonesia AirAsia", tier: "secondary" },
+
+    RJ: { name: "Royal Jordanian", tier: "secondary" },
+    RO: { name: "Tarom", tier: "secondary" },
+
+    SA: { name: "South African Airways", tier: "secondary" },
+    SC: { name: "Shandong Airlines", tier: "secondary" },
+    SK: { name: "SAS Scandinavian", tier: "major" },
+    SL: { name: "Thai Lion Air", tier: "secondary" },
+    SQ: { name: "Singapore Airlines", tier: "major" },
+    SU: { name: "Aeroflot", tier: "secondary" },
+    SV: { name: "Saudia", tier: "major" },
+
+    TA: { name: "Avianca El Salvador", tier: "secondary" },
+    TG: { name: "THAI Airways", tier: "major" },
+    TK: { name: "Turkish Airlines", tier: "major" },
+    TP: { name: "TAP Air Portugal", tier: "major" },
+
+    U2: { name: "easyJet", tier: "secondary" },
+    UA: { name: "United Airlines", tier: "major" },
+    UL: { name: "SriLankan Airlines", tier: "secondary" },
+
+    VA: { name: "Virgin Australia", tier: "major" },
+    VJ: { name: "Vietjet", tier: "secondary" },
+    VN: { name: "Vietnam Airlines", tier: "major" },
+    VS: { name: "Virgin Atlantic", tier: "major" },
+    VY: { name: "Vueling", tier: "secondary" },
+
+    W6: { name: "Wizz Air", tier: "secondary" },
+    WN: { name: "Southwest Airlines", tier: "major" },
+    WS: { name: "WestJet", tier: "secondary" },
+    WY: { name: "Oman Air", tier: "secondary" },
+
+    ZH: { name: "Shenzhen Airlines", tier: "secondary" },
+    ZZ: { name: "Unknown Carrier", tier: "unknown" },
+    UNK: { name: "Unknown Carrier", tier: "unknown" },
   }
 
   function getAirlineDisplayName(code?: string | null) {
@@ -56,18 +181,7 @@ export default function WatchlistCard({
       return "Airline pending"
     }
 
-    const airlineNames: Record<string, string> = {
-      AA: "American Airlines",
-      AS: "Alaska Airlines",
-      UA: "United Airlines",
-      DL: "Delta Air Lines",
-      WN: "Southwest Airlines",
-      B6: "JetBlue",
-      NK: "Spirit Airlines",
-      F9: "Frontier Airlines",
-    }
-
-    return airlineNames[normalizedCode] ?? normalizedCode
+    return airlineReference[normalizedCode]?.name ?? normalizedCode
   }
 
   // ----------------------------
@@ -153,6 +267,71 @@ export default function WatchlistCard({
     })()
     : "Capture time pending"
 
+  const recommendedFlightsDisplay = (() => {
+    if (!recommendedFlights || recommendedFlights.length === 0) {
+      return []
+    }
+
+    const sortedFlights = [...recommendedFlights].sort((a, b) => {
+      const priceA =
+        typeof a.price === "number" && Number.isFinite(a.price)
+          ? a.price
+          : Number.POSITIVE_INFINITY
+
+      const priceB =
+        typeof b.price === "number" && Number.isFinite(b.price)
+          ? b.price
+          : Number.POSITIVE_INFINITY
+
+      return priceA - priceB
+    })
+
+    const majorFlights = sortedFlights.filter((flight) => {
+      const code = flight.airline?.trim().toUpperCase() ?? ""
+      return airlineReference[code]?.tier === "major"
+    })
+
+    const secondaryFlights = sortedFlights.filter((flight) => {
+      const code = flight.airline?.trim().toUpperCase() ?? ""
+      return airlineReference[code]?.tier === "secondary"
+    })
+
+    const unknownFlights = sortedFlights.filter((flight) => {
+      const code = flight.airline?.trim().toUpperCase() ?? ""
+      return !airlineReference[code] || airlineReference[code]?.tier === "unknown"
+    })
+
+    const combined = [
+      ...majorFlights.slice(0, 2),
+      ...secondaryFlights.slice(0, 2),
+    ]
+
+    if (combined.length < 4) {
+      for (const flight of [
+        ...majorFlights.slice(2),
+        ...secondaryFlights.slice(2),
+        ...unknownFlights,
+      ]) {
+        const alreadyIncluded = combined.some(
+          (included) =>
+            included.airline === flight.airline &&
+            included.flightNumber === flight.flightNumber &&
+            included.price === flight.price
+        )
+
+        if (!alreadyIncluded) {
+          combined.push(flight)
+        }
+
+        if (combined.length >= 4) {
+          break
+        }
+      }
+    }
+
+    return combined
+  })()
+
   const volatilityDisplay = (() => {
     if (!volatilityIndex?.trim()) {
       return "Pending"
@@ -228,8 +407,8 @@ export default function WatchlistCard({
             </p>
 
             <div className="mt-4 space-y-2">
-              {recommendedFlights && recommendedFlights.length > 0 ? (
-                recommendedFlights.slice(0, 4).map((flight, index) => {
+              {recommendedFlightsDisplay.length > 0 ? (
+                recommendedFlightsDisplay.map((flight, index) => {
                   const flightAirline = getAirlineDisplayName(flight.airline)
                   const flightNumber = flight.flightNumber?.trim() || "Flight pending"
                   const flightPrice =
@@ -293,8 +472,7 @@ export default function WatchlistCard({
 
             <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200">
               <div
-                className={`h-full rounded-full bg-sky-500/60 transition-all duration-500 ${hasPrice ? "w-2/3" : "w-1/4"
-                  }`}
+                className={`h-full rounded-full bg-sky-500/60 transition-all duration-500 ${hasPrice ? "w-2/3" : "w-1/4"}`}
               />
             </div>
 
