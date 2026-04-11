@@ -210,7 +210,7 @@ export default function FlightIntelligenceModal({
                                 <button
                                     type="button"
                                     onClick={onClose}
-                                    className="ml-auto rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-500"
+                                    className="ml-auto mr-6 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-500"
                                 >
                                     ✕
                                 </button>
@@ -226,7 +226,7 @@ export default function FlightIntelligenceModal({
                                         <button
                                             type="button"
                                             onClick={onSaveFlight}
-                                            className="ml-auto rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
+                                            className="ml-auto mr-6 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
                                         >
                                             Save Flight
                                         </button>
