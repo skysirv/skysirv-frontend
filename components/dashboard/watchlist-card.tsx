@@ -180,27 +180,21 @@ export default function WatchlistCard({
   const hasPrice = typeof latestPrice === "number"
 
   const departureDateDisplay = (() => {
-    if (!departureDate) {
-      return "Pending"
-    }
+    if (!departureDate) return "Pending"
 
-    const parts = departureDate.split("-")
+    // Normalize: handle both "YYYY-MM-DD" and ISO strings
+    const raw = departureDate.split("T")[0]
 
-    if (parts.length !== 3) {
-      return departureDate
-    }
+    const parts = raw.split("-")
+    if (parts.length !== 3) return departureDate
 
     const [year, month, day] = parts.map(Number)
 
-    if (!year || !month || !day) {
-      return departureDate
-    }
+    if (!year || !month || !day) return departureDate
 
     const parsed = new Date(year, month - 1, day)
 
-    if (Number.isNaN(parsed.getTime())) {
-      return departureDate
-    }
+    if (Number.isNaN(parsed.getTime())) return departureDate
 
     return parsed.toLocaleDateString([], {
       weekday: "long",
