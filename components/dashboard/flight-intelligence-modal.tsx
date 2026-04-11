@@ -212,9 +212,9 @@ export default function FlightIntelligenceModal({
                         <button
                             type="button"
                             onClick={onClose}
-                            className="rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-500"
+                            className="rounded-full border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-400 transition hover:border-red-200 hover:bg-red-50 hover:text-red-500"
                         >
-                            Close
+                            ✕
                         </button>
                     </div>
                 </div>
