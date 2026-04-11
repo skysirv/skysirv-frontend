@@ -491,7 +491,7 @@ export default function FlightIntelligenceModal({
 
                 .skysirv-modal-scroll::-webkit-scrollbar-track {
                     background: transparent;
-                    margin: 10px 0;
+                    margin: 12px 0 20px 0;
                 }
 
                 .skysirv-modal-scroll::-webkit-scrollbar-thumb {
