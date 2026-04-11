@@ -310,80 +310,82 @@ export default function FlightIntelligenceModal({
                     </div>
                 </div>
 
-                <div className="skysirv-modal-scroll flex-1 overflow-y-auto px-6 py-6">
-                    <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                            Selected Flight
-                        </p>
-
-                        {selectedFlight ? (
-                            <div className="mt-4 flex flex-wrap gap-3">
-                                <div className="min-w-[160px] rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-center">
-                                    <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
-                                        Market Status
-                                    </p>
-                                    <p className={`mt-1 text-base font-semibold ${marketStatusClass}`}>
-                                        {marketStatusDisplay}
-                                    </p>
-                                </div>
-
-                                <div className="min-w-[140px] rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-center">
-                                    <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
-                                        Signals
-                                    </p>
-                                    <p className="mt-1 text-base font-semibold text-slate-900">
-                                        {signalDisplay}
-                                    </p>
-                                </div>
-                            </div>
-                        ) : (
-                            <p className="mt-2 text-sm text-slate-500">
-                                No flight selected
-                            </p>
-                        )}
-                    </div>
-
-                    <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-                        <div className="rounded-[1.75rem] border border-slate-200 bg-[linear-gradient(180deg,#f8fbff_0%,#ffffff_100%)] p-5">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                                Route Snapshot
+                <div className="flex-1 px-0 pb-4">
+                    <div className="skysirv-modal-scroll h-full overflow-y-auto px-6 py-6">
+                        <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                                Selected Flight
                             </p>
 
-                            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center shadow-sm">
-                                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                                        Latest Fare
-                                    </p>
-                                    <p className="mt-2 text-2xl font-semibold text-slate-950">
-                                        {formatPrice(route.latestPrice)}
-                                    </p>
-                                </div>
+                            {selectedFlight ? (
+                                <div className="mt-4 flex flex-wrap gap-3">
+                                    <div className="min-w-[160px] rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-center">
+                                        <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
+                                            Market Status
+                                        </p>
+                                        <p className={`mt-1 text-base font-semibold ${marketStatusClass}`}>
+                                            {marketStatusDisplay}
+                                        </p>
+                                    </div>
 
-                                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center shadow-sm">
-                                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                                        Route Average
-                                    </p>
-                                    <p className="mt-2 text-2xl font-semibold text-slate-950">
-                                        {formatPrice(route.avgPrice)}
-                                    </p>
+                                    <div className="min-w-[140px] rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-center">
+                                        <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
+                                            Signals
+                                        </p>
+                                        <p className="mt-1 text-base font-semibold text-slate-900">
+                                            {signalDisplay}
+                                        </p>
+                                    </div>
                                 </div>
+                            ) : (
+                                <p className="mt-2 text-sm text-slate-500">
+                                    No flight selected
+                                </p>
+                            )}
+                        </div>
 
-                                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center shadow-sm">
-                                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                                        Latest Airline
-                                    </p>
-                                    <p className="mt-2 text-base font-semibold text-slate-950">
-                                        {route.latestAirline ?? "Pending"}
-                                    </p>
-                                </div>
+                        <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+                            <div className="rounded-[1.75rem] border border-slate-200 bg-[linear-gradient(180deg,#f8fbff_0%,#ffffff_100%)] p-5">
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                                    Route Snapshot
+                                </p>
 
-                                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center shadow-sm">
-                                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                                        Captured
-                                    </p>
-                                    <p className="mt-2 text-base font-semibold text-slate-950">
-                                        {formatCapturedTime(route.latestCapturedAt)}
-                                    </p>
+                                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                                    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center shadow-sm">
+                                        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                                            Latest Fare
+                                        </p>
+                                        <p className="mt-2 text-2xl font-semibold text-slate-950">
+                                            {formatPrice(route.latestPrice)}
+                                        </p>
+                                    </div>
+
+                                    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center shadow-sm">
+                                        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                                            Route Average
+                                        </p>
+                                        <p className="mt-2 text-2xl font-semibold text-slate-950">
+                                            {formatPrice(route.avgPrice)}
+                                        </p>
+                                    </div>
+
+                                    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center shadow-sm">
+                                        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                                            Latest Airline
+                                        </p>
+                                        <p className="mt-2 text-base font-semibold text-slate-950">
+                                            {route.latestAirline ?? "Pending"}
+                                        </p>
+                                    </div>
+
+                                    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center shadow-sm">
+                                        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                                            Captured
+                                        </p>
+                                        <p className="mt-2 text-base font-semibold text-slate-950">
+                                            {formatCapturedTime(route.latestCapturedAt)}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
