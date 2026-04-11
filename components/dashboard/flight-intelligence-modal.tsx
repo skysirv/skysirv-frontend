@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
+import { getAirportByCode } from "@/lib/airports/major-airports"
 
 type RecommendedFlight = {
     airline?: string | null
@@ -87,6 +88,33 @@ export default function FlightIntelligenceModal({
 }: FlightIntelligenceModalProps) {
     const selectedFlight = flight ?? null
 
+    const originAirport = getAirportByCode(route?.origin)
+    const destinationAirport = getAirportByCode(route?.destination)
+
+    const formatAirportDisplay = (
+        airport: ReturnType<typeof getAirportByCode>
+    ) => {
+        if (!airport) return null
+
+        const locationLabel =
+            airport.country === "United States" && airport.region
+                ? `${airport.city}, ${airport.region}`
+                : `${airport.city}, ${airport.country}`
+
+        const airportLabel = airport.displayName ?? airport.name
+
+        return `${locationLabel} - ${airportLabel} (${airport.code})`
+    }
+
+    const routeLocationDisplay =
+        originAirport && destinationAirport
+            ? `${formatAirportDisplay(originAirport)} → ${formatAirportDisplay(destinationAirport)}`
+            : null
+
+    const selectedFlightSummary = selectedFlight
+        ? `${selectedFlight.airline ?? "Airline"}${selectedFlight.flightNumber ? ` ${selectedFlight.flightNumber}` : ""} • ${formatPrice(selectedFlight.price)}`
+        : null
+
     const marketStatusDisplay = (() => {
         const raw = selectedFlight?.bookingSignal?.trim().toLowerCase()
 
@@ -164,9 +192,25 @@ export default function FlightIntelligenceModal({
                                 {route.origin ?? "—"} → {route.destination ?? "—"}
                             </h2>
 
+                            {routeLocationDisplay && (
+                                <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+                                    {routeLocationDisplay}
+                                </p>
+                            )}
+
                             <p className="mt-2 text-sm text-slate-500">
                                 Departure • {formatDepartureDate(route.departureDate)}
                             </p>
+
+                            <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-slate-400">
+                                Captured • {formatCapturedTime(route.latestCapturedAt)}
+                            </p>
+
+                            {selectedFlightSummary && (
+                                <p className="mt-2 text-sm font-medium text-slate-700">
+                                    Selected Flight • {selectedFlightSummary}
+                                </p>
+                            )}
                         </div>
 
                         <button
