@@ -192,9 +192,24 @@ export default function WatchlistCard({
   const originAirport = getAirportByCode(origin)
   const destinationAirport = getAirportByCode(destination)
 
+  const formatAirportDisplay = (
+    airport: ReturnType<typeof getAirportByCode>
+  ) => {
+    if (!airport) return null
+
+    const locationLabel =
+      airport.country === "United States" && airport.region
+        ? `${airport.city}, ${airport.region}`
+        : `${airport.city}, ${airport.country}`
+
+    const airportLabel = airport.displayName ?? airport.name
+
+    return `${locationLabel} - ${airportLabel} (${airport.code})`
+  }
+
   const routeLocationDisplay =
     originAirport && destinationAirport
-      ? `${originAirport.city}, ${originAirport.country} (${originAirport.code}) → ${destinationAirport.city}, ${destinationAirport.country} (${destinationAirport.code})`
+      ? `${formatAirportDisplay(originAirport)} → ${formatAirportDisplay(destinationAirport)}`
       : null
 
   const departureDateDisplay = (() => {
