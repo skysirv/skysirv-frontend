@@ -183,7 +183,7 @@ export default function FlightIntelligenceModal({
             />
 
             <div className="relative z-[101] max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[2rem] border border-slate-200 bg-white shadow-[0_30px_100px_rgba(15,23,42,0.22)]">
-                <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 px-6 py-5 backdrop-blur">
+                <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 pl-6 pr-0 py-5 backdrop-blur">
                     <div className="flex items-start justify-between gap-4">
                         <div>
                             <div className="flex items-start justify-between gap-4">
