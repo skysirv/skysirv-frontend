@@ -184,7 +184,19 @@ export default function WatchlistCard({
       return "Pending"
     }
 
-    const parsed = new Date(departureDate)
+    const parts = departureDate.split("-")
+
+    if (parts.length !== 3) {
+      return departureDate
+    }
+
+    const [year, month, day] = parts.map(Number)
+
+    if (!year || !month || !day) {
+      return departureDate
+    }
+
+    const parsed = new Date(year, month - 1, day)
 
     if (Number.isNaN(parsed.getTime())) {
       return departureDate
