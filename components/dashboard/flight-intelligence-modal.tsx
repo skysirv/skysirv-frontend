@@ -393,7 +393,10 @@ export default function FlightIntelligenceModal({
                                 Selected Route Intelligence
                             </p>
 
-                            <div className="mt-4 rounded-[1.5rem] border border-slate-200 bg-[linear-gradient(180deg,#f8fbff_0%,#ffffff_100%)] p-4 shadow-sm">
+                            <div
+                                key={intelligenceModules[activeIntelligenceModule].id}
+                                className="mt-4 rounded-[1.5rem] border border-slate-200 bg-[linear-gradient(180deg,#f8fbff_0%,#ffffff_100%)] p-4 shadow-sm transition-all duration-300 ease-out animate-[fadeSlide_0.3s_ease]"
+                            >
                                 <div className="flex items-start justify-between gap-4">
                                     <div>
                                         <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-sky-700">
@@ -506,6 +509,17 @@ export default function FlightIntelligenceModal({
                     border: 3px solid transparent;
                     border-radius: 999px;
                     background-clip: padding-box;
+                }
+
+                @keyframes fadeSlide {
+                    from {
+                        opacity: 0;
+                        transform: translateX(8px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
                 }
             `}</style>
         </div>
