@@ -23,6 +23,13 @@ interface WatchlistCardProps {
   }[]
   | null
   volatilityIndex?: string | null
+  onOpenFlightModal?: (flight?: {
+    airline?: string | null
+    flightNumber?: string | null
+    price?: number | null
+    currency?: string | null
+    capturedAt?: string | null
+  } | null) => void
   onRemove?: () => void
 }
 
@@ -39,6 +46,7 @@ export default function WatchlistCard({
   latestCapturedAt = null,
   recommendedFlights = null,
   volatilityIndex = null,
+  onOpenFlightModal,
   onRemove,
 }: WatchlistCardProps) {
   function handleRemoveRoute() {
@@ -413,20 +421,33 @@ export default function WatchlistCard({
                       : "—"
 
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={`${flight.airline ?? "airline"}-${flight.flightNumber ?? "flight"}-${index}`}
-                      className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm"
+                      onClick={() => onOpenFlightModal?.(flight)}
+                      className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left text-sm text-slate-700 shadow-sm transition hover:border-sky-200 hover:bg-sky-50/40"
                     >
                       <span>{flightAirline}</span>
                       <span className="font-semibold text-slate-900">{flightPrice}</span>
-                    </div>
+                    </button>
                   )
                 })
               ) : (
-                <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
+                <button
+                  type="button"
+                  onClick={() =>
+                    onOpenFlightModal?.({
+                      airline: latestAirline,
+                      flightNumber: latestFlightNumber,
+                      price: latestPrice,
+                      capturedAt: latestCapturedAt,
+                    })
+                  }
+                  className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left text-sm text-slate-700 shadow-sm transition hover:border-sky-200 hover:bg-sky-50/40"
+                >
                   <span>{airlineDisplay}</span>
                   <span className="font-semibold text-slate-900">{currentFareDisplay}</span>
-                </div>
+                </button>
               )}
             </div>
           </div>

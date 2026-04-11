@@ -8,6 +8,7 @@ import RouteSearch from "@/components/dashboard/route-search"
 import OpportunityBanner from "@/components/dashboard/opportunity-banner"
 import MarketSignals from "@/components/dashboard/market-signals"
 import WatchlistCard from "@/components/dashboard/watchlist-card"
+import FlightIntelligenceModal from "@/components/dashboard/flight-intelligence-modal"
 
 import WatchlistSkeleton from "@/components/dashboard/watchlist-skeleton"
 import OpportunitySkeleton from "@/components/dashboard/opportunity-skeleton"
@@ -219,6 +220,18 @@ export default function ProDashboardPage() {
   const [wrappedSegments, setWrappedSegments] = useState<WrappedSegment[]>([])
   const [subscription, setSubscription] = useState<SessionSubscription | null>(null)
   const [watchlistFetchKey, setWatchlistFetchKey] = useState(0)
+  const [selectedFlightForModal, setSelectedFlightForModal] = useState<{
+    route: WatchlistRoute
+    flight: {
+      airline?: string | null
+      flightNumber?: string | null
+      price?: number | null
+      currency?: string | null
+      capturedAt?: string | null
+    } | null
+  } | null>(null)
+
+  const [isFlightModalOpen, setIsFlightModalOpen] = useState(false)
 
   const isLifetimePro = subscription?.plan_id === "pro_lifetime"
 
@@ -568,6 +581,23 @@ export default function ProDashboardPage() {
     })
   }
 
+  function handleOpenFlightModal(
+    route: WatchlistRoute,
+    flight?: {
+      airline?: string | null
+      flightNumber?: string | null
+      price?: number | null
+      currency?: string | null
+      capturedAt?: string | null
+    } | null
+  ) {
+    setSelectedFlightForModal({
+      route,
+      flight: flight ?? null,
+    })
+    setIsFlightModalOpen(true)
+  }
+
   const remainingRoutes = Math.max(0, 25 - watchlist.length)
 
   const sortedSegments = useMemo(() => {
@@ -757,6 +787,7 @@ export default function ProDashboardPage() {
                           latestCapturedAt={route.latest_captured_at ?? null}
                           volatilityIndex={route.volatility_index ?? null}
                           recommendedFlights={route.recommended_flights ?? null}
+                          onOpenFlightModal={(flight) => handleOpenFlightModal(route, flight)}
                           onRemove={() => {
                             if (!route.id) return
                             void handleRouteRemoved(route.id)
@@ -1436,6 +1467,14 @@ export default function ProDashboardPage() {
           </motion.section>
         </div>
       </div>
+
+      <FlightIntelligenceModal
+        isOpen={isFlightModalOpen}
+        onClose={() => setIsFlightModalOpen(false)}
+        route={selectedFlightForModal?.route ?? null}
+        flight={selectedFlightForModal?.flight ?? null}
+      />
+
     </section>
   )
 }
