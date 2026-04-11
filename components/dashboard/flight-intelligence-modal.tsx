@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { getAirportByCode } from "@/lib/airports/major-airports"
 
 type RecommendedFlight = {
@@ -149,6 +149,79 @@ export default function FlightIntelligenceModal({
         if (numericVolatility < 12) return "Moderate"
         return "Volatile"
     })()
+
+    const intelligenceModules = [
+        {
+            id: "monitor",
+            eyebrow: "Selected Route Intelligence",
+            title: "Skysirv Monitor™",
+            description:
+                "Live route tracking focused on this selected city pair, watching fare movement, timing shifts, and booking pressure.",
+        },
+        {
+            id: "signals",
+            eyebrow: "Selected Route Intelligence",
+            title: "Skysirv Signals™",
+            description:
+                "Clear signal detection for fare momentum, timing opportunities, and notable movement across the selected route.",
+        },
+        {
+            id: "price-behavior",
+            eyebrow: "Selected Route Intelligence",
+            title: "Skysirv Price Behavior™",
+            description:
+                "A focused look at how this route tends to move, settle, spike, or soften as departure approaches.",
+        },
+        {
+            id: "predict",
+            eyebrow: "Selected Route Intelligence",
+            title: "Skysirv Predict™",
+            description:
+                "Forward-looking guidance built to help estimate whether this route is more likely to rise, dip, or hold.",
+        },
+        {
+            id: "insights",
+            eyebrow: "Selected Route Intelligence",
+            title: "Skysirv Insights™",
+            description:
+                "High-value route context distilled into a premium intelligence layer for faster booking decisions.",
+        },
+        {
+            id: "route-digest",
+            eyebrow: "Selected Route Intelligence",
+            title: "Skysirv Route Digest™",
+            description:
+                "A concise route briefing that summarizes what matters most right now for this selected flight path.",
+        },
+        {
+            id: "skyscore",
+            eyebrow: "Selected Route Intelligence",
+            title: "Skyscore™",
+            description:
+                "A simple confidence indicator designed to express the overall quality of the current opportunity.",
+        },
+        {
+            id: "intelligence-engine",
+            eyebrow: "Selected Route Intelligence",
+            title: "Skysirv Intelligence Engine™",
+            description:
+                "The full intelligence layer bringing together monitoring, signals, behavior, and predictive confidence.",
+        },
+    ]
+
+    const [activeIntelligenceModule, setActiveIntelligenceModule] = useState(0)
+
+    function handlePreviousIntelligenceModule() {
+        setActiveIntelligenceModule((current) =>
+            current === 0 ? intelligenceModules.length - 1 : current - 1
+        )
+    }
+
+    function handleNextIntelligenceModule() {
+        setActiveIntelligenceModule((current) =>
+            current === intelligenceModules.length - 1 ? 0 : current + 1
+        )
+    }
 
     useEffect(() => {
         if (!isOpen) return
@@ -322,15 +395,52 @@ export default function FlightIntelligenceModal({
                                 Selected Route Intelligence
                             </p>
 
-                            <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-5">
-                                <p className="text-sm font-semibold text-slate-900">
-                                    Skysirv intelligence modules will live here
+                            <div className="mt-4 rounded-[1.5rem] border border-slate-200 bg-[linear-gradient(180deg,#f8fbff_0%,#ffffff_100%)] p-4 shadow-sm">
+                                <div className="flex items-start justify-between gap-4">
+                                    <div>
+                                        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-sky-700">
+                                            {intelligenceModules[activeIntelligenceModule].eyebrow}
+                                        </p>
+
+                                        <h3 className="mt-2 text-lg font-semibold tracking-tight text-slate-950">
+                                            {intelligenceModules[activeIntelligenceModule].title}
+                                        </h3>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={handlePreviousIntelligenceModule}
+                                            className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-500 transition hover:border-slate-300 hover:text-slate-900"
+                                            aria-label="Previous intelligence module"
+                                        >
+                                            ←
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            onClick={handleNextIntelligenceModule}
+                                            className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-500 transition hover:border-slate-300 hover:text-slate-900"
+                                            aria-label="Next intelligence module"
+                                        >
+                                            →
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <p className="mt-4 max-w-xl text-sm leading-6 text-slate-600">
+                                    {intelligenceModules[activeIntelligenceModule].description}
                                 </p>
-                                <p className="mt-2 text-sm leading-6 text-slate-600">
-                                    This modal will soon hold Skysirv Monitor™, Signals™, Price
-                                    Behavior™, Predict™, Insights™, Route Digest™, and Skyscore™
-                                    for the selected route.
-                                </p>
+
+                                <div className="mt-5 rounded-2xl border border-slate-200 bg-white px-4 py-4">
+                                    <p className="text-sm font-medium text-slate-700">
+                                        Module content area
+                                    </p>
+                                    <p className="mt-2 text-sm leading-6 text-slate-500">
+                                        This is where the live intelligence output for the active module
+                                        will render next.
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
