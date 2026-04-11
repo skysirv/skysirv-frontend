@@ -261,7 +261,7 @@ export default function FlightIntelligenceModal({
                             </p>
 
                             <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm">
+                                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center shadow-sm">
                                     <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                                         Latest Fare
                                     </p>
@@ -270,7 +270,7 @@ export default function FlightIntelligenceModal({
                                     </p>
                                 </div>
 
-                                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm">
+                                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center shadow-sm">
                                     <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                                         Route Average
                                     </p>
@@ -279,7 +279,7 @@ export default function FlightIntelligenceModal({
                                     </p>
                                 </div>
 
-                                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm">
+                                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center shadow-sm">
                                     <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                                         Latest Airline
                                     </p>
@@ -288,7 +288,7 @@ export default function FlightIntelligenceModal({
                                     </p>
                                 </div>
 
-                                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm">
+                                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center shadow-sm">
                                     <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                                         Captured
                                     </p>
