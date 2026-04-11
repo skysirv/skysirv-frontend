@@ -383,10 +383,6 @@ export default function WatchlistCard({
             <p className="mt-1 text-sm text-slate-500">
               Departure • {departureDateDisplay}
             </p>
-
-            <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-slate-400">
-              Captured • {capturedTimeDisplay}
-            </p>
           </div>
 
           <button

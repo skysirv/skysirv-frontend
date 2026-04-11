@@ -202,10 +202,6 @@ export default function FlightIntelligenceModal({
                                 Departure • {formatDepartureDate(route.departureDate)}
                             </p>
 
-                            <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-slate-400">
-                                Captured • {formatCapturedTime(route.latestCapturedAt)}
-                            </p>
-
                             {selectedFlightSummary && (
                                 <p className="mt-2 text-sm font-medium text-slate-700">
                                     Selected Flight • {selectedFlightSummary}
@@ -231,20 +227,8 @@ export default function FlightIntelligenceModal({
 
                         {selectedFlight ? (
                             <>
-                                <div className="mt-2 flex items-center justify-between text-sm">
-                                    <span className="text-slate-700">
-                                        {selectedFlight.airline ?? "Airline"}{" "}
-                                        {selectedFlight.flightNumber ?? ""}
-                                    </span>
-                                    <span className="font-semibold text-slate-900">
-                                        {typeof selectedFlight.price === "number"
-                                            ? `$${Math.round(selectedFlight.price).toLocaleString()}`
-                                            : "—"}
-                                    </span>
-                                </div>
-
-                                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                                    <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 text-center">
+                                <div className="mt-4 flex flex-wrap gap-3">
+                                    <div className="min-w-[160px] rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-center">
                                         <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
                                             Market Status
                                         </p>
@@ -253,7 +237,7 @@ export default function FlightIntelligenceModal({
                                         </p>
                                     </div>
 
-                                    <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 text-center">
+                                    <div className="min-w-[140px] rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-center">
                                         <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
                                             Signals
                                         </p>
