@@ -1,5 +1,7 @@
 "use client"
 
+import { getAirportByCode } from "@/lib/airports/major-airports"
+
 interface WatchlistCardProps {
   origin?: string
   destination?: string
@@ -178,6 +180,14 @@ export default function WatchlistCard({
   }
 
   const hasPrice = typeof latestPrice === "number"
+
+  const originAirport = getAirportByCode(origin)
+  const destinationAirport = getAirportByCode(destination)
+
+  const routeLocationDisplay =
+    originAirport && destinationAirport
+      ? `${originAirport.city}, ${originAirport.country} (${originAirport.code}) → ${destinationAirport.city}, ${destinationAirport.country} (${destinationAirport.code})`
+      : null
 
   const departureDateDisplay = (() => {
     if (!departureDate) return "Pending"
@@ -363,6 +373,12 @@ export default function WatchlistCard({
             <p className="text-xl font-semibold tracking-tight text-slate-900">
               {origin} → {destination}
             </p>
+
+            {routeLocationDisplay && (
+              <p className="mt-1 text-sm text-slate-500">
+                {routeLocationDisplay}
+              </p>
+            )}
 
             <p className="mt-1 text-sm text-slate-500">
               Departure • {departureDateDisplay}

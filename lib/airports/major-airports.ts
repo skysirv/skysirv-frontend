@@ -192,3 +192,11 @@ export function searchAirports(query: string, limit = 8): AirportOption[] {
 
     return ranked
 }
+
+export function getAirportByCode(code?: string | null): AirportOption | null {
+    if (!code) return null
+
+    const normalized = code.trim().toUpperCase()
+
+    return MAJOR_AIRPORTS.find((airport) => airport.code === normalized) ?? null
+}
