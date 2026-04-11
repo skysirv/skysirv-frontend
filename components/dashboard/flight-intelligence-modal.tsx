@@ -255,11 +255,11 @@ export default function FlightIntelligenceModal({
                 aria-hidden="true"
             />
 
-            <div className="relative z-[101] max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[2rem] border border-slate-200 bg-white shadow-[0_30px_100px_rgba(15,23,42,0.22)]">
+            <div className="relative z-[101] flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_30px_100px_rgba(15,23,42,0.22)]">
                 <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 pl-6 pr-0 py-5 backdrop-blur">
                     <div className="flex items-start justify-between gap-4">
-                        <div className="flex flex-col gap-2 w-full">
-                            <div className="flex items-start w-full">
+                        <div className="flex w-full flex-col gap-2">
+                            <div className="flex w-full items-start">
                                 <div className="flex-1">
                                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-700">
                                         Flight Intelligence
@@ -290,7 +290,7 @@ export default function FlightIntelligenceModal({
                             </div>
 
                             {selectedFlightSummary && (
-                                <div className="flex items-center w-full">
+                                <div className="flex w-full items-center">
                                     <p className="text-sm font-medium text-slate-700">
                                         Selected Flight • {selectedFlightSummary}
                                     </p>
@@ -310,34 +310,32 @@ export default function FlightIntelligenceModal({
                     </div>
                 </div>
 
-                <div className="px-6 py-6">
+                <div className="skysirv-modal-scroll flex-1 overflow-y-auto px-6 py-6">
                     <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                             Selected Flight
                         </p>
 
                         {selectedFlight ? (
-                            <>
-                                <div className="mt-4 flex flex-wrap gap-3">
-                                    <div className="min-w-[160px] rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-center">
-                                        <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
-                                            Market Status
-                                        </p>
-                                        <p className={`mt-1 text-base font-semibold ${marketStatusClass}`}>
-                                            {marketStatusDisplay}
-                                        </p>
-                                    </div>
-
-                                    <div className="min-w-[140px] rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-center">
-                                        <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
-                                            Signals
-                                        </p>
-                                        <p className="mt-1 text-base font-semibold text-slate-900">
-                                            {signalDisplay}
-                                        </p>
-                                    </div>
+                            <div className="mt-4 flex flex-wrap gap-3">
+                                <div className="min-w-[160px] rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-center">
+                                    <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
+                                        Market Status
+                                    </p>
+                                    <p className={`mt-1 text-base font-semibold ${marketStatusClass}`}>
+                                        {marketStatusDisplay}
+                                    </p>
                                 </div>
-                            </>
+
+                                <div className="min-w-[140px] rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-center">
+                                    <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
+                                        Signals
+                                    </p>
+                                    <p className="mt-1 text-base font-semibold text-slate-900">
+                                        {signalDisplay}
+                                    </p>
+                                </div>
+                            </div>
                         ) : (
                             <p className="mt-2 text-sm text-slate-500">
                                 No flight selected
@@ -480,6 +478,36 @@ export default function FlightIntelligenceModal({
                     </div>
                 </div>
             </div>
+
+            <style jsx>{`
+                .skysirv-modal-scroll {
+                    scrollbar-width: thin;
+                    scrollbar-color: rgba(15, 23, 42, 0.28) transparent;
+                }
+
+                .skysirv-modal-scroll::-webkit-scrollbar {
+                    width: 10px;
+                }
+
+                .skysirv-modal-scroll::-webkit-scrollbar-track {
+                    background: transparent;
+                    margin: 10px 0;
+                }
+
+                .skysirv-modal-scroll::-webkit-scrollbar-thumb {
+                    background: rgba(15, 23, 42, 0.22);
+                    border: 3px solid transparent;
+                    border-radius: 999px;
+                    background-clip: padding-box;
+                }
+
+                .skysirv-modal-scroll::-webkit-scrollbar-thumb:hover {
+                    background: rgba(15, 23, 42, 0.34);
+                    border: 3px solid transparent;
+                    border-radius: 999px;
+                    background-clip: padding-box;
+                }
+            `}</style>
         </div>
     )
 }
