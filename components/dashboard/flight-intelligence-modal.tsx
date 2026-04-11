@@ -205,7 +205,7 @@ export default function FlightIntelligenceModal({
                             </p>
 
                             {selectedFlightSummary && (
-                                <div className="mt-2 flex items-center justify-between">
+                                <div className="mt-2 -mr-6 flex items-center justify-between">
                                     <p className="text-sm font-medium text-slate-700">
                                         Selected Flight • {selectedFlightSummary}
                                     </p>
@@ -214,7 +214,7 @@ export default function FlightIntelligenceModal({
                                         <button
                                             type="button"
                                             onClick={onSaveFlight}
-                                            className="rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
+                                            className="mr-6 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
                                         >
                                             Save Flight
                                         </button>
