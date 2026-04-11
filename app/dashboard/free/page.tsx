@@ -366,7 +366,6 @@ export default function FreeDashboardPage() {
                               : null
                           }
                           priceDelta={null}
-                          bookingSignal={route.booking_signal ?? null}
                           latestAirline={route.latest_airline ?? null}
                           latestFlightNumber={route.latest_flight_number ?? null}
                           latestCapturedAt={route.latest_captured_at ?? null}

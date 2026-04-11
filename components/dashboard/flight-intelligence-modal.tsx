@@ -8,6 +8,8 @@ type RecommendedFlight = {
     price?: number | null
     currency?: string | null
     capturedAt?: string | null
+    bookingSignal?: string | null
+    volatilityIndex?: string | null
 }
 
 type FlightIntelligenceModalProps = {
@@ -85,6 +87,39 @@ export default function FlightIntelligenceModal({
 }: FlightIntelligenceModalProps) {
     const selectedFlight = flight ?? null
 
+    const marketStatusDisplay = (() => {
+        const raw = selectedFlight?.bookingSignal?.trim().toLowerCase()
+
+        if (!raw) return "Pending"
+
+        if (["strong buy", "buy", "cheap"].includes(raw)) return "Good Deal"
+        if (["favorable window", "fair price", "neutral", "wait"].includes(raw)) return "Fair Price"
+        if (["overpriced", "expensive"].includes(raw)) return "Overpriced"
+        if (["monitor closely"].includes(raw)) return "Watch"
+
+        return "Pending"
+    })()
+
+    const marketStatusClass =
+        marketStatusDisplay === "Good Deal"
+            ? "text-emerald-600"
+            : marketStatusDisplay === "Fair Price"
+                ? "text-slate-700"
+                : marketStatusDisplay === "Overpriced"
+                    ? "text-rose-600"
+                    : marketStatusDisplay === "Watch"
+                        ? "text-amber-600"
+                        : "text-slate-400"
+
+    const signalDisplay = (() => {
+        const numericVolatility = Number(selectedFlight?.volatilityIndex)
+
+        if (!Number.isFinite(numericVolatility)) return "Pending"
+        if (numericVolatility < 5) return "Stable"
+        if (numericVolatility < 12) return "Moderate"
+        return "Volatile"
+    })()
+
     useEffect(() => {
         if (!isOpen) return
 
@@ -151,17 +186,39 @@ export default function FlightIntelligenceModal({
                         </p>
 
                         {selectedFlight ? (
-                            <div className="mt-2 flex items-center justify-between text-sm">
-                                <span className="text-slate-700">
-                                    {selectedFlight.airline ?? "Airline"}{" "}
-                                    {selectedFlight.flightNumber ?? ""}
-                                </span>
-                                <span className="font-semibold text-slate-900">
-                                    {typeof selectedFlight.price === "number"
-                                        ? `$${Math.round(selectedFlight.price).toLocaleString()}`
-                                        : "—"}
-                                </span>
-                            </div>
+                            <>
+                                <div className="mt-2 flex items-center justify-between text-sm">
+                                    <span className="text-slate-700">
+                                        {selectedFlight.airline ?? "Airline"}{" "}
+                                        {selectedFlight.flightNumber ?? ""}
+                                    </span>
+                                    <span className="font-semibold text-slate-900">
+                                        {typeof selectedFlight.price === "number"
+                                            ? `$${Math.round(selectedFlight.price).toLocaleString()}`
+                                            : "—"}
+                                    </span>
+                                </div>
+
+                                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                                    <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 text-center">
+                                        <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
+                                            Market Status
+                                        </p>
+                                        <p className={`mt-1 text-base font-semibold ${marketStatusClass}`}>
+                                            {marketStatusDisplay}
+                                        </p>
+                                    </div>
+
+                                    <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 text-center">
+                                        <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
+                                            Signals
+                                        </p>
+                                        <p className="mt-1 text-base font-semibold text-slate-900">
+                                            {signalDisplay}
+                                        </p>
+                                    </div>
+                                </div>
+                            </>
                         ) : (
                             <p className="mt-2 text-sm text-slate-500">
                                 No flight selected

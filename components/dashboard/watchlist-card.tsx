@@ -9,7 +9,6 @@ interface WatchlistCardProps {
   latestPrice?: number | null
   avgPrice?: number | null
   priceDelta?: number | null
-  bookingSignal?: string | null
   latestAirline?: string | null
   latestFlightNumber?: string | null
   latestCapturedAt?: string | null
@@ -40,7 +39,6 @@ export default function WatchlistCard({
   latestPrice = null,
   avgPrice = null,
   priceDelta = null,
-  bookingSignal = null,
   latestAirline = null,
   latestFlightNumber = null,
   latestCapturedAt = null,
@@ -245,38 +243,6 @@ export default function WatchlistCard({
     typeof avgPrice === "number"
       ? `$${Math.round(avgPrice).toLocaleString()}`
       : "Pending"
-
-  const normalizedBookingSignal =
-    typeof bookingSignal === "string" ? bookingSignal.trim().toLowerCase() : null
-
-  const signalDisplay =
-    normalizedBookingSignal === "strong buy" ||
-      normalizedBookingSignal === "buy" ||
-      normalizedBookingSignal === "cheap"
-      ? "Good Deal"
-
-      : normalizedBookingSignal === "favorable window" ||
-        normalizedBookingSignal === "wait" ||
-        normalizedBookingSignal === "neutral"
-        ? "Hold"
-
-        : normalizedBookingSignal === "overpriced" ||
-          normalizedBookingSignal === "expensive"
-          ? "Overpriced"
-
-          : normalizedBookingSignal === "monitor closely"
-            ? "Watch"
-
-            : "Pending"
-
-  const signalDisplayClass =
-    signalDisplay === "Good Deal"
-      ? "text-emerald-600"
-      : signalDisplay === "Hold"
-        ? "text-violet-600"
-        : signalDisplay === "Overpriced"
-          ? "text-rose-600"
-          : "text-slate-900"
 
   const airlineDisplay = getAirlineDisplayName(latestAirline)
 
@@ -484,17 +450,6 @@ export default function WatchlistCard({
             </p>
             <p className="mt-1 text-base font-semibold text-slate-900">
               {priceHistoryDisplay}
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 text-center">
-            <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
-              Market Status
-            </p>
-            <p
-              className={`mt-1 flex justify-center text-base font-semibold leading-tight ${signalDisplayClass}`}
-            >
-              {signalDisplay}
             </p>
           </div>
         </div>
