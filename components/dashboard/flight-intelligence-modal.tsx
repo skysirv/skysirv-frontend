@@ -185,8 +185,8 @@ export default function FlightIntelligenceModal({
             <div className="relative z-[101] max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[2rem] border border-slate-200 bg-white shadow-[0_30px_100px_rgba(15,23,42,0.22)]">
                 <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 pl-6 pr-0 py-5 backdrop-blur">
                     <div className="flex items-start justify-between gap-4">
-                        <div>
-                            <div className="flex items-start justify-between gap-4">
+                        <div className="flex flex-col gap-2 w-full">
+                            <div className="flex items-start w-full">
                                 <div className="flex-1">
                                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-700">
                                         Flight Intelligence
@@ -210,14 +210,14 @@ export default function FlightIntelligenceModal({
                                 <button
                                     type="button"
                                     onClick={onClose}
-                                    className="rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-500"
+                                    className="ml-auto rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-500"
                                 >
                                     ✕
                                 </button>
                             </div>
 
                             {selectedFlightSummary && (
-                                <div className="mt-2 flex items-center justify-between">
+                                <div className="flex items-center w-full">
                                     <p className="text-sm font-medium text-slate-700">
                                         Selected Flight • {selectedFlightSummary}
                                     </p>
@@ -226,7 +226,7 @@ export default function FlightIntelligenceModal({
                                         <button
                                             type="button"
                                             onClick={onSaveFlight}
-                                            className="rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
+                                            className="ml-auto rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
                                         >
                                             Save Flight
                                         </button>
