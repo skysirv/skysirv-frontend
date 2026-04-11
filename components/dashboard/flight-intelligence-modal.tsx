@@ -16,6 +16,7 @@ type RecommendedFlight = {
 type FlightIntelligenceModalProps = {
     isOpen: boolean
     onClose: () => void
+    onSaveFlight?: () => void
     route: {
         id?: string | null
         origin?: string | null
@@ -83,6 +84,7 @@ function formatPrice(value?: number | null) {
 export default function FlightIntelligenceModal({
     isOpen,
     onClose,
+    onSaveFlight,
     route,
     flight,
 }: FlightIntelligenceModalProps) {
@@ -216,6 +218,16 @@ export default function FlightIntelligenceModal({
                         >
                             ✕
                         </button>
+
+                        {selectedFlight && (
+                            <button
+                                type="button"
+                                onClick={onSaveFlight}
+                                className="rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
+                            >
+                                Save Flight
+                            </button>
+                        )}
                     </div>
                 </div>
 
