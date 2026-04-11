@@ -205,20 +205,20 @@ export default function FlightIntelligenceModal({
                             </p>
 
                             {selectedFlightSummary && (
-                                <p className="mt-2 text-sm font-medium text-slate-700">
-                                    Selected Flight • {selectedFlightSummary}
-                                </p>
-                            )}
+                                <div className="mt-2 flex items-center justify-between">
+                                    <p className="text-sm font-medium text-slate-700">
+                                        Selected Flight • {selectedFlightSummary}
+                                    </p>
 
-                            {selectedFlight && (
-                                <div className="mt-4 flex justify-end">
-                                    <button
-                                        type="button"
-                                        onClick={onSaveFlight}
-                                        className="rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
-                                    >
-                                        Save Flight
-                                    </button>
+                                    {selectedFlight && (
+                                        <button
+                                            type="button"
+                                            onClick={onSaveFlight}
+                                            className="rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
+                                        >
+                                            Save Flight
+                                        </button>
+                                    )}
                                 </div>
                             )}
                         </div>
