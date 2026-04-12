@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { getAirportByCode } from "@/lib/airports/major-airports"
+import { AnimatePresence, motion } from "framer-motion"
 
 type RecommendedFlight = {
     airline?: string | null
@@ -386,56 +387,62 @@ export default function FlightIntelligenceModal({
                                 Selected Route Intelligence
                             </p>
 
-                            <div
-                                key={intelligenceModules[activeIntelligenceModule].id}
-                                className="mt-4 rounded-[1.5rem] border border-slate-200 bg-[linear-gradient(180deg,#f8fbff_0%,#ffffff_100%)] p-4 shadow-sm transition-all duration-300 ease-out animate-[fadeSlide_0.3s_ease]"
-                            >
-                                <div className="flex items-start justify-between gap-4">
-                                    <div>
-                                        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-sky-700">
-                                            {intelligenceModules[activeIntelligenceModule].eyebrow}
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={intelligenceModules[activeIntelligenceModule].id}
+                                    initial={{ opacity: 0, x: 22 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -22 }}
+                                    transition={{ duration: 0.38, ease: "easeInOut" }}
+                                    className="mt-4 rounded-[1.5rem] border border-slate-200 bg-[linear-gradient(180deg,#f8fbff_0%,#ffffff_100%)] p-4 shadow-sm"
+                                >
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div>
+                                            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-sky-700">
+                                                {intelligenceModules[activeIntelligenceModule].eyebrow}
+                                            </p>
+
+                                            <h3 className="mt-2 text-lg font-semibold tracking-tight text-slate-950">
+                                                {intelligenceModules[activeIntelligenceModule].title}
+                                            </h3>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={handlePreviousIntelligenceModule}
+                                                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-500 transition hover:border-slate-300 hover:text-slate-900"
+                                                aria-label="Previous intelligence module"
+                                            >
+                                                ←
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                onClick={handleNextIntelligenceModule}
+                                                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-500 transition hover:border-slate-300 hover:text-slate-900"
+                                                aria-label="Next intelligence module"
+                                            >
+                                                →
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <p className="mt-4 max-w-xl text-sm leading-6 text-slate-600">
+                                        {intelligenceModules[activeIntelligenceModule].description}
+                                    </p>
+
+                                    <div className="mt-5 rounded-2xl border border-slate-200 bg-white px-4 py-4">
+                                        <p className="text-sm font-medium text-slate-700">
+                                            Module content area
                                         </p>
-
-                                        <h3 className="mt-2 text-lg font-semibold tracking-tight text-slate-950">
-                                            {intelligenceModules[activeIntelligenceModule].title}
-                                        </h3>
+                                        <p className="mt-2 text-sm leading-6 text-slate-500">
+                                            This is where the live intelligence output for the active module
+                                            will render next.
+                                        </p>
                                     </div>
-
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            type="button"
-                                            onClick={handlePreviousIntelligenceModule}
-                                            className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-500 transition hover:border-slate-300 hover:text-slate-900"
-                                            aria-label="Previous intelligence module"
-                                        >
-                                            ←
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            onClick={handleNextIntelligenceModule}
-                                            className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-500 transition hover:border-slate-300 hover:text-slate-900"
-                                            aria-label="Next intelligence module"
-                                        >
-                                            →
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <p className="mt-4 max-w-xl text-sm leading-6 text-slate-600">
-                                    {intelligenceModules[activeIntelligenceModule].description}
-                                </p>
-
-                                <div className="mt-5 rounded-2xl border border-slate-200 bg-white px-4 py-4">
-                                    <p className="text-sm font-medium text-slate-700">
-                                        Module content area
-                                    </p>
-                                    <p className="mt-2 text-sm leading-6 text-slate-500">
-                                        This is where the live intelligence output for the active module
-                                        will render next.
-                                    </p>
-                                </div>
-                            </div>
+                                </motion.div>
+                            </AnimatePresence>
                         </div>
                     </div>
 
