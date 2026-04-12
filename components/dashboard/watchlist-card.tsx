@@ -444,29 +444,25 @@ export default function WatchlistCard({
 
         <div className="mt-auto pt-6">
           <div className="flex flex-col gap-3">
-            <div className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-3 text-sm text-slate-600">
+            <div className="flex w-full items-center justify-between rounded-full border border-slate-200 bg-slate-50/90 px-4 py-3 text-sm text-slate-600">
               <span className="font-medium">Route Average</span>
-              <span className="mx-2 text-slate-300">•</span>
               <span className="font-semibold text-slate-900">{priceHistoryDisplay}</span>
             </div>
 
-            <div className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-3 text-sm text-slate-600">
+            <div className="flex w-full items-center justify-between rounded-full border border-slate-200 bg-slate-50/90 px-4 py-3 text-sm text-slate-600">
               <span className="font-medium">Tracking</span>
-              <span className="mx-2 text-slate-300">•</span>
               <span className="font-semibold text-slate-900">Active</span>
             </div>
 
-            <div className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-3 text-sm text-slate-600">
+            <div className="flex w-full items-center justify-between rounded-full border border-slate-200 bg-slate-50/90 px-4 py-3 text-sm text-slate-600">
               <span className="font-medium">History</span>
-              <span className="mx-2 text-slate-300">•</span>
               <span className="font-semibold text-slate-900">
                 {hasPrice ? "Active" : "Building"}
               </span>
             </div>
 
-            <div className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-3 text-sm text-slate-600">
+            <div className="flex w-full items-center justify-between rounded-full border border-slate-200 bg-slate-50/90 px-4 py-3 text-sm text-slate-600">
               <span className="font-medium">Signals</span>
-              <span className="mx-2 text-slate-300">•</span>
               <span className="font-semibold text-slate-900">{volatilityDisplay}</span>
             </div>
           </div>
