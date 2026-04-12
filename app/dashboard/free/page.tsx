@@ -57,9 +57,24 @@ type WatchlistResponse =
     data?: WatchlistRoute[]
   }
 
+type SavedFlight = {
+  id: string
+  origin?: string | null
+  destination?: string | null
+  departure_date?: string | null
+  airline?: string | null
+  flight_number?: string | null
+  price?: number | null
+  currency?: string | null
+  saved_at?: string | null
+  latest_price?: number | null
+  status?: "active" | "completed" | null
+}
+
 export default function FreeDashboardPage() {
   const [loading, setLoading] = useState(true)
   const [watchlist, setWatchlist] = useState<WatchlistRoute[]>([])
+  const [savedFlights, setSavedFlights] = useState<SavedFlight[]>([])
   const [watchlistFetchKey, setWatchlistFetchKey] = useState(0)
 
   useEffect(() => {
@@ -215,6 +230,22 @@ export default function FreeDashboardPage() {
   }
 
   const remainingRoutes = Math.max(0, 3 - watchlist.length)
+
+  const visibleSavedFlights = savedFlights.length > 0
+    ? savedFlights
+    : [
+      {
+        id: "demo-1",
+        origin: "VVI",
+        destination: "LAX",
+        departure_date: "2026-04-25",
+        airline: "LATAM Airlines Group",
+        flight_number: "LA 2468",
+        price: 1363,
+        latest_price: 1328,
+        status: "active" as const,
+      },
+    ]
 
   return (
     <section className="min-h-screen bg-white">
@@ -380,6 +411,140 @@ export default function FreeDashboardPage() {
                     )
                   })
                 )}
+              </div>
+            </div>
+          </motion.section>
+
+          {/* Saved Flights Section */}
+          <motion.section
+            {...fadeUp}
+            className="relative mb-12 overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white px-5 py-8 shadow-[0_20px_60px_rgba(15,23,42,0.06)] sm:px-7 md:px-8 md:py-10"
+          >
+            <div className="pointer-events-none absolute inset-0">
+              <div className="absolute -right-20 top-0 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.06)_0%,rgba(255,255,255,0)_72%)] blur-3xl" />
+              <div className="absolute left-[-40px] bottom-[-30px] h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(16,185,129,0.06)_0%,rgba(255,255,255,0)_74%)] blur-3xl" />
+            </div>
+
+            <div className="relative">
+              <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div className="max-w-2xl">
+                  <div className="mb-3 inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600">
+                    Saved Flights
+                  </div>
+
+                  <h2 className="text-2xl font-semibold tracking-tight text-slate-950 md:text-3xl">
+                    Save specific flights and track them with intent
+                  </h2>
+
+                  <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600 sm:text-base">
+                    Saved flights turn route monitoring into flight-specific intelligence,
+                    making room for future fare change alerts, saved price comparisons,
+                    and completed trip history.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <CompactStat
+                    label="Saved"
+                    value={String(visibleSavedFlights.length)}
+                  />
+                  <CompactStat
+                    label="Active"
+                    value={String(
+                      visibleSavedFlights.filter(
+                        (flight) => (flight.status ?? "active") === "active"
+                      ).length
+                    )}
+                  />
+                  <CompactStat label="Completed" value="0" />
+                </div>
+              </div>
+
+              <div className="grid gap-4">
+                {visibleSavedFlights.map((flight) => {
+                  const savedPrice =
+                    typeof flight.price === "number"
+                      ? `$${Math.round(flight.price).toLocaleString()}`
+                      : "—"
+
+                  const latestTrackedPrice =
+                    typeof flight.latest_price === "number"
+                      ? `$${Math.round(flight.latest_price).toLocaleString()}`
+                      : "—"
+
+                  return (
+                    <div
+                      key={flight.id}
+                      className="rounded-[1.75rem] border border-slate-200 bg-[linear-gradient(180deg,#f8fbff_0%,#ffffff_100%)] p-5 shadow-sm"
+                    >
+                      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                        <div>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                            Saved Flight
+                          </p>
+
+                          <h3 className="mt-2 text-xl font-semibold tracking-tight text-slate-950">
+                            {flight.origin ?? "—"} → {flight.destination ?? "—"}
+                          </h3>
+
+                          <p className="mt-2 text-sm text-slate-600">
+                            {(flight.airline ?? "Airline pending")}
+                            {flight.flight_number ? ` • ${flight.flight_number}` : ""}
+                          </p>
+
+                          <p className="mt-1 text-sm text-slate-500">
+                            Departure • {flight.departure_date ?? "Pending"}
+                          </p>
+                        </div>
+
+                        <div className="flex flex-wrap gap-3">
+                          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-center shadow-sm">
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                              Saved Price
+                            </p>
+                            <p className="mt-1 text-base font-semibold text-slate-950">
+                              {savedPrice}
+                            </p>
+                          </div>
+
+                          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-center shadow-sm">
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                              Latest Price
+                            </p>
+                            <p className="mt-1 text-base font-semibold text-slate-950">
+                              {latestTrackedPrice}
+                            </p>
+                          </div>
+
+                          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-center shadow-sm">
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                              Status
+                            </p>
+                            <p className="mt-1 text-base font-semibold text-slate-950">
+                              {flight.status === "completed" ? "Completed" : "Active"}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-5 flex flex-wrap gap-3">
+                        <button
+                          type="button"
+                          className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
+                        >
+                          Open Intelligence
+                        </button>
+
+                        <button
+                          type="button"
+                          className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+                        >
+                          Mark Route Completed
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           </motion.section>
