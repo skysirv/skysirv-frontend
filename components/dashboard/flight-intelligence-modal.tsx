@@ -200,13 +200,6 @@ export default function FlightIntelligenceModal({
             description:
                 "A simple confidence indicator designed to express the overall quality of the current opportunity.",
         },
-        {
-            id: "intelligence-engine",
-            eyebrow: "Selected Route Intelligence",
-            title: "Skysirv Intelligence Engine™",
-            description:
-                "The full intelligence layer bringing together monitoring, signals, behavior, and predictive confidence.",
-        },
     ]
 
     const [activeIntelligenceModule, setActiveIntelligenceModule] = useState(0)
