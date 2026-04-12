@@ -356,7 +356,7 @@ export default function WatchlistCard({
         <div className="absolute -left-12 bottom-0 h-32 w-32 rounded-full bg-[radial-gradient(circle,rgba(16,185,129,0.08)_0%,rgba(255,255,255,0)_72%)] blur-2xl" />
       </div>
 
-      <div className="relative">
+      <div className="relative flex min-h-[592px] flex-col">
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -440,40 +440,35 @@ export default function WatchlistCard({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 text-center">
-            <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
-              Route Average
-            </p>
-            <p className="mt-1 text-base font-semibold text-slate-900">
-              {priceHistoryDisplay}
-            </p>
-          </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-3 gap-3">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 text-center">
-            <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
-              Tracking
-            </p>
-            <p className="mt-1 text-sm font-semibold text-slate-900">Active</p>
-          </div>
+        <div className="mt-auto pt-6">
+          <div className="flex flex-wrap gap-3">
+            <div className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50/90 px-4 py-2 text-sm text-slate-600">
+              <span className="font-medium">Route Average</span>
+              <span className="mx-2 text-slate-300">•</span>
+              <span className="font-semibold text-slate-900">{priceHistoryDisplay}</span>
+            </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 text-center">
-            <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
-              History
-            </p>
-            <p className="mt-1 text-sm font-semibold text-slate-900">
-              {hasPrice ? "Active" : "Building"}
-            </p>
-          </div>
+            <div className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50/90 px-4 py-2 text-sm text-slate-600">
+              <span className="font-medium">Tracking</span>
+              <span className="mx-2 text-slate-300">•</span>
+              <span className="font-semibold text-slate-900">Active</span>
+            </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 text-center">
-            <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
-              Signals
-            </p>
-            <p className="mt-1 text-sm font-semibold text-slate-900">
-              {volatilityDisplay}
-            </p>
+            <div className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50/90 px-4 py-2 text-sm text-slate-600">
+              <span className="font-medium">History</span>
+              <span className="mx-2 text-slate-300">•</span>
+              <span className="font-semibold text-slate-900">
+                {hasPrice ? "Active" : "Building"}
+              </span>
+            </div>
+
+            <div className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50/90 px-4 py-2 text-sm text-slate-600">
+              <span className="font-medium">Signals</span>
+              <span className="mx-2 text-slate-300">•</span>
+              <span className="font-semibold text-slate-900">{volatilityDisplay}</span>
+            </div>
           </div>
         </div>
       </div>
