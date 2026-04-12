@@ -204,14 +204,17 @@ export default function FlightIntelligenceModal({
     ]
 
     const [activeIntelligenceModule, setActiveIntelligenceModule] = useState(0)
+    const [direction, setDirection] = useState(1)
 
     function handlePreviousIntelligenceModule() {
+        setDirection(-1)
         setActiveIntelligenceModule((current) =>
             current === 0 ? intelligenceModules.length - 1 : current - 1
         )
     }
 
     function handleNextIntelligenceModule() {
+        setDirection(1)
         setActiveIntelligenceModule((current) =>
             current === intelligenceModules.length - 1 ? 0 : current + 1
         )
@@ -390,10 +393,10 @@ export default function FlightIntelligenceModal({
                             <AnimatePresence mode="wait">
                                 <motion.div
                                     key={intelligenceModules[activeIntelligenceModule].id}
-                                    initial={{ opacity: 0, x: 22 }}
+                                    initial={{ opacity: 0, x: direction === 1 ? 24 : -24 }}
                                     animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -22 }}
-                                    transition={{ duration: 0.38, ease: "easeInOut" }}
+                                    exit={{ opacity: 0, x: direction === 1 ? -24 : 24 }}
+                                    transition={{ duration: 0.4, ease: "easeInOut" }}
                                     className="mt-4 rounded-[1.5rem] border border-slate-200 bg-[linear-gradient(180deg,#f8fbff_0%,#ffffff_100%)] p-4 shadow-sm"
                                 >
                                     <div className="flex items-start justify-between gap-4">
