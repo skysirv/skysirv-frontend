@@ -408,6 +408,10 @@ export default function FlightIntelligenceModal({
                                             <h3 className="mt-2 text-lg font-semibold tracking-tight text-slate-950">
                                                 {intelligenceModules[activeIntelligenceModule].title}
                                             </h3>
+
+                                            <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                                                {activeIntelligenceModule + 1} / {intelligenceModules.length}
+                                            </p>
                                         </div>
 
                                         <div className="flex items-center gap-2">
