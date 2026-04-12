@@ -14,6 +14,7 @@ import OpportunitySkeleton from "@/components/dashboard/opportunity-skeleton"
 import MarketSignalsSkeleton from "@/components/dashboard/market-signals-skeleton"
 
 import { toast } from "@/components/ui/Toasts/use-toast"
+import { getAirportByCode } from "@/lib/airports/major-airports"
 
 const fadeUp = {
   initial: { opacity: 0, y: 24 },
@@ -69,6 +70,21 @@ type SavedFlight = {
   saved_at?: string | null
   latest_price?: number | null
   status?: "active" | "completed" | null
+}
+
+function formatAirportDisplay(
+  airport: ReturnType<typeof getAirportByCode>
+) {
+  if (!airport) return null
+
+  const locationLabel =
+    airport.country === "United States" && airport.region
+      ? `${airport.city}, ${airport.region}`
+      : `${airport.city}, ${airport.country}`
+
+  const airportLabel = airport.displayName ?? airport.name
+
+  return `${locationLabel} - ${airportLabel} (${airport.code})`
 }
 
 export default function FreeDashboardPage() {
@@ -472,6 +488,14 @@ export default function FreeDashboardPage() {
                       ? `$${Math.round(flight.latest_price).toLocaleString()}`
                       : "—"
 
+                  const originAirport = getAirportByCode(flight.origin)
+                  const destinationAirport = getAirportByCode(flight.destination)
+
+                  const routeLocationDisplay =
+                    originAirport && destinationAirport
+                      ? `${formatAirportDisplay(originAirport)} → ${formatAirportDisplay(destinationAirport)}`
+                      : null
+
                   return (
                     <div
                       key={flight.id}
@@ -486,6 +510,12 @@ export default function FreeDashboardPage() {
                           <h3 className="mt-2 text-xl font-semibold tracking-tight text-slate-950">
                             {flight.origin ?? "—"} → {flight.destination ?? "—"}
                           </h3>
+
+                          {routeLocationDisplay && (
+                            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
+                              {routeLocationDisplay}
+                            </p>
+                          )}
 
                           <p className="mt-2 text-sm text-slate-600">
                             {(flight.airline ?? "Airline pending")}
