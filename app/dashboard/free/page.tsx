@@ -8,13 +8,15 @@ import RouteSearch from "@/components/dashboard/route-search"
 import OpportunityBanner from "@/components/dashboard/opportunity-banner"
 import MarketSignals from "@/components/dashboard/market-signals"
 import WatchlistCard from "@/components/dashboard/watchlist-card"
+import SavedFlightCard, {
+  type SavedFlightCardData,
+} from "@/components/dashboard/saved-flight-card"
 
 import WatchlistSkeleton from "@/components/dashboard/watchlist-skeleton"
 import OpportunitySkeleton from "@/components/dashboard/opportunity-skeleton"
 import MarketSignalsSkeleton from "@/components/dashboard/market-signals-skeleton"
 
 import { toast } from "@/components/ui/Toasts/use-toast"
-import { getAirportByCode } from "@/lib/airports/major-airports"
 
 const fadeUp = {
   initial: { opacity: 0, y: 24 },
@@ -58,39 +60,10 @@ type WatchlistResponse =
     data?: WatchlistRoute[]
   }
 
-type SavedFlight = {
-  id: string
-  origin?: string | null
-  destination?: string | null
-  departure_date?: string | null
-  airline?: string | null
-  flight_number?: string | null
-  price?: number | null
-  currency?: string | null
-  saved_at?: string | null
-  latest_price?: number | null
-  status?: "active" | "completed" | null
-}
-
-function formatAirportDisplay(
-  airport: ReturnType<typeof getAirportByCode>
-) {
-  if (!airport) return null
-
-  const locationLabel =
-    airport.country === "United States" && airport.region
-      ? `${airport.city}, ${airport.region}`
-      : `${airport.city}, ${airport.country}`
-
-  const airportLabel = airport.displayName ?? airport.name
-
-  return `${locationLabel} - ${airportLabel} (${airport.code})`
-}
-
 export default function FreeDashboardPage() {
   const [loading, setLoading] = useState(true)
   const [watchlist, setWatchlist] = useState<WatchlistRoute[]>([])
-  const [savedFlights, setSavedFlights] = useState<SavedFlight[]>([])
+  const [savedFlights] = useState<SavedFlightCardData[]>([])
   const [watchlistFetchKey, setWatchlistFetchKey] = useState(0)
 
   useEffect(() => {
@@ -247,21 +220,22 @@ export default function FreeDashboardPage() {
 
   const remainingRoutes = Math.max(0, 3 - watchlist.length)
 
-  const visibleSavedFlights = savedFlights.length > 0
-    ? savedFlights
-    : [
-      {
-        id: "demo-1",
-        origin: "VVI",
-        destination: "LAX",
-        departure_date: "2026-04-25",
-        airline: "LATAM Airlines Group",
-        flight_number: "LA 2468",
-        price: 1363,
-        latest_price: 1328,
-        status: "active" as const,
-      },
-    ]
+  const visibleSavedFlights =
+    savedFlights.length > 0
+      ? savedFlights
+      : [
+        {
+          id: "demo-1",
+          origin: "VVI",
+          destination: "LAX",
+          departure_date: "2026-04-25",
+          airline: "LATAM Airlines Group",
+          flight_number: "LA 2468",
+          price: 1363,
+          latest_price: 1328,
+          status: "active" as const,
+        },
+      ]
 
   return (
     <section className="min-h-screen bg-white">
@@ -477,104 +451,12 @@ export default function FreeDashboardPage() {
               </div>
 
               <div className="grid gap-4">
-                {visibleSavedFlights.map((flight) => {
-                  const savedPrice =
-                    typeof flight.price === "number"
-                      ? `$${Math.round(flight.price).toLocaleString()}`
-                      : "—"
-
-                  const latestTrackedPrice =
-                    typeof flight.latest_price === "number"
-                      ? `$${Math.round(flight.latest_price).toLocaleString()}`
-                      : "—"
-
-                  const originAirport = getAirportByCode(flight.origin)
-                  const destinationAirport = getAirportByCode(flight.destination)
-
-                  const routeLocationDisplay =
-                    originAirport && destinationAirport
-                      ? `${formatAirportDisplay(originAirport)} → ${formatAirportDisplay(destinationAirport)}`
-                      : null
-
-                  return (
-                    <div
-                      key={flight.id}
-                      className="rounded-[1.75rem] border border-slate-200 bg-[linear-gradient(180deg,#f8fbff_0%,#ffffff_100%)] p-5 shadow-sm"
-                    >
-                      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                        <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                            Saved Flight
-                          </p>
-
-                          <h3 className="mt-2 text-xl font-semibold tracking-tight text-slate-950">
-                            {flight.origin ?? "—"} → {flight.destination ?? "—"}
-                          </h3>
-
-                          {routeLocationDisplay && (
-                            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
-                              {routeLocationDisplay}
-                            </p>
-                          )}
-
-                          <p className="mt-2 text-sm text-slate-600">
-                            {(flight.airline ?? "Airline pending")}
-                            {flight.flight_number ? ` • ${flight.flight_number}` : ""}
-                          </p>
-
-                          <p className="mt-1 text-sm text-slate-500">
-                            Departure • {flight.departure_date ?? "Pending"}
-                          </p>
-                        </div>
-
-                        <div className="flex flex-wrap gap-3">
-                          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-center shadow-sm">
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                              Saved Price
-                            </p>
-                            <p className="mt-1 text-base font-semibold text-slate-950">
-                              {savedPrice}
-                            </p>
-                          </div>
-
-                          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-center shadow-sm">
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                              Latest Price
-                            </p>
-                            <p className="mt-1 text-base font-semibold text-slate-950">
-                              {latestTrackedPrice}
-                            </p>
-                          </div>
-
-                          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-center shadow-sm">
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                              Status
-                            </p>
-                            <p className="mt-1 text-base font-semibold text-slate-950">
-                              {flight.status === "completed" ? "Completed" : "Active"}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-5 flex flex-wrap gap-3">
-                        <button
-                          type="button"
-                          className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
-                        >
-                          Open Intelligence
-                        </button>
-
-                        <button
-                          type="button"
-                          className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
-                        >
-                          Mark Route Completed
-                        </button>
-                      </div>
-                    </div>
-                  )
-                })}
+                {visibleSavedFlights.map((flight) => (
+                  <SavedFlightCard
+                    key={flight.id}
+                    flight={flight}
+                  />
+                ))}
               </div>
             </div>
           </motion.section>
