@@ -788,6 +788,54 @@ export default function EnterpriseDashboardPage() {
     }
   }
 
+  async function handleDeleteSavedFlight(flight: SavedFlightCardData) {
+    const token = localStorage.getItem("skysirv_token")
+
+    if (!token) {
+      toast({
+        title: "Sign in required",
+        description: "You must be signed in to delete saved flights.",
+      })
+      return
+    }
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/saved-flights/${flight.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const data = await res.json().catch(() => null)
+
+      if (!res.ok || !data?.success) {
+        toast({
+          title: "Delete failed",
+          description: "The saved flight could not be removed.",
+        })
+        return
+      }
+
+      setSavedFlights((prev) => prev.filter((item) => item.id !== flight.id))
+
+      toast({
+        title: "Saved flight deleted",
+        description: `${flight.origin ?? "—"} → ${flight.destination ?? "—"} was removed.`,
+      })
+    } catch (error) {
+      console.error("Failed to delete saved flight", error)
+
+      toast({
+        title: "Delete failed",
+        description: "Something went wrong while deleting the saved flight.",
+      })
+    }
+  }
+
   const sortedSegments = useMemo(() => {
     return [...wrappedSegments].sort((a, b) => {
       return Number(a.segment_order ?? 0) - Number(b.segment_order ?? 0)
@@ -1030,6 +1078,7 @@ export default function EnterpriseDashboardPage() {
                       flight={flight}
                       onOpenIntelligence={() => handleOpenSavedFlightIntelligence(flight)}
                       onMarkRouteCompleted={() => handleMarkSavedFlightCompleted(flight)}
+                      onDelete={() => handleDeleteSavedFlight(flight)}
                     />
                   ))
                 )}

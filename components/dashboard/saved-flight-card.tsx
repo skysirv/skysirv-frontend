@@ -20,6 +20,7 @@ type SavedFlightCardProps = {
     flight: SavedFlightCardData
     onOpenIntelligence?: () => void
     onMarkRouteCompleted?: () => void
+    onDelete?: () => void
 }
 
 function formatAirportDisplay(
@@ -73,7 +74,9 @@ export default function SavedFlightCard({
     flight,
     onOpenIntelligence,
     onMarkRouteCompleted,
+    onDelete,
 }: SavedFlightCardProps) {
+
     const originAirport = getAirportByCode(flight.origin)
     const destinationAirport = getAirportByCode(flight.destination)
 
@@ -155,6 +158,14 @@ export default function SavedFlightCard({
                     className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
                 >
                     Mark Route Completed
+                </button>
+
+                <button
+                    type="button"
+                    onClick={onDelete}
+                    className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
+                >
+                    Delete Saved Flight
                 </button>
             </div>
         </div>
