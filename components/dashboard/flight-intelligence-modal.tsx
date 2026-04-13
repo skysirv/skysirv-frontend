@@ -154,49 +154,42 @@ export default function FlightIntelligenceModal({
     const intelligenceModules = [
         {
             id: "monitor",
-            eyebrow: "Selected Route Intelligence",
             title: "Skysirv Monitor™",
             description:
                 "Live route tracking focused on this selected city pair, watching fare movement, timing shifts, and booking pressure.",
         },
         {
             id: "signals",
-            eyebrow: "Selected Route Intelligence",
             title: "Skysirv Signals™",
             description:
                 "Clear signal detection for fare momentum, timing opportunities, and notable movement across the selected route.",
         },
         {
             id: "price-behavior",
-            eyebrow: "Selected Route Intelligence",
             title: "Skysirv Price Behavior™",
             description:
                 "A focused look at how this route tends to move, settle, spike, or soften as departure approaches.",
         },
         {
             id: "predict",
-            eyebrow: "Selected Route Intelligence",
             title: "Skysirv Predict™",
             description:
                 "Forward-looking guidance built to help estimate whether this route is more likely to rise, dip, or hold.",
         },
         {
             id: "insights",
-            eyebrow: "Selected Route Intelligence",
             title: "Skysirv Insights™",
             description:
                 "High-value route context distilled into a premium intelligence layer for faster booking decisions.",
         },
         {
             id: "route-digest",
-            eyebrow: "Selected Route Intelligence",
             title: "Skysirv Route Digest™",
             description:
                 "A concise route briefing that summarizes what matters most right now for this selected flight path.",
         },
         {
             id: "skyscore",
-            eyebrow: "Selected Route Intelligence",
             title: "Skyscore™",
             description:
                 "A simple confidence indicator designed to express the overall quality of the current opportunity.",
@@ -401,10 +394,6 @@ export default function FlightIntelligenceModal({
                                 >
                                     <div className="flex items-start justify-between gap-4">
                                         <div>
-                                            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-sky-700">
-                                                {intelligenceModules[activeIntelligenceModule].eyebrow}
-                                            </p>
-
                                             <h3 className="mt-2 text-lg font-semibold tracking-tight text-slate-950">
                                                 {intelligenceModules[activeIntelligenceModule].title}
                                             </h3>
