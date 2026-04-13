@@ -196,6 +196,7 @@ export default function EnterpriseDashboardPage() {
   const [watchlist, setWatchlist] = useState<WatchlistRoute[]>([])
   const [savedFlights, setSavedFlights] = useState<SavedFlightCardData[]>([])
   const [wrappedData, setWrappedData] = useState<WrappedData>(defaultWrappedData)
+  const [wrappedRefreshKey, setWrappedRefreshKey] = useState(0)
   const [selectedYear, setSelectedYear] = useState<number>(2026)
   const [availableWrappedYears, setAvailableWrappedYears] = useState<number[]>([2026])
   const [wrappedSegments, setWrappedSegments] = useState<WrappedSegment[]>([])
@@ -500,7 +501,7 @@ export default function EnterpriseDashboardPage() {
       cancelled = true
       window.removeEventListener("focus", onFocus)
     }
-  }, [selectedYear])
+  }, [selectedYear, wrappedRefreshKey])
 
   function handleRouteAdded(route: WatchlistRoute) {
     setWatchlist((prev) => [route, ...prev])
@@ -770,6 +771,8 @@ export default function EnterpriseDashboardPage() {
       setSavedFlights((prev) =>
         prev.map((item) => (item.id === updatedFlight.id ? updatedFlight : item))
       )
+
+      setWrappedRefreshKey((prev) => prev + 1)
 
       toast({
         title: "Route completed",
