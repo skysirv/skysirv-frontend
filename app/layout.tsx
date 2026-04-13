@@ -8,6 +8,7 @@ import { getURL } from '@/utils/helpers';
 import { Inter } from 'next/font/google';
 import MainContentShell from '@/components/layout/MainContentShell';
 import 'styles/main.css';
+import "mapbox-gl/dist/mapbox-gl.css"
 
 const inter = Inter({
   subsets: ['latin'],

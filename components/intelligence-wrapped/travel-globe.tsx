@@ -12,24 +12,41 @@ import { motion } from "framer-motion"
 import "mapbox-gl/dist/mapbox-gl.css"
 
 type AirportNode = {
-  code: string
-  name: string
-  city: string
-  country: string
-  lat: number
-  lng: number
-  visits: number
-  layoverHours: number
-  loungeHours: number
-  flights: number
+  airportCode: string
+  lat?: number
+  lng?: number
+  name?: string
+  city?: string
+  country?: string
+  visits?: number
+  layoverHours?: number
+  loungeHours?: number
+  flights?: number
 }
 
 type RouteArc = {
-  from: string
-  to: string
+  tripId: string
+  segmentId: string
+  segmentOrder: number
+  origin: string
+  destination: string
+  airlineCode: string | null
+  flightNumber: string | null
+  status: string
+  source: string | null
+  scheduledDepartureAt: string | null
+  scheduledArrivalAt: string | null
 }
 
-export default function TravelGlobe() {
+type TravelGlobeProps = {
+  airportNodes?: AirportNode[]
+  routeArcs?: RouteArc[]
+}
+
+export default function TravelGlobe({
+  airportNodes = [],
+  routeArcs = [],
+}: TravelGlobeProps) {
   const mapRef = useRef<MapRef | null>(null)
   const interactionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -45,13 +62,13 @@ export default function TravelGlobe() {
     padding: { top: 0, bottom: 0, left: 0, right: 0 },
   })
 
-  const airports = useMemo<AirportNode[]>(() => [], [])
+  const airports = useMemo(() => airportNodes, [airportNodes])
 
-  const routes = useMemo<RouteArc[]>(() => [], [])
+  const routes = useMemo(() => routeArcs, [routeArcs])
 
   const airportMap = useMemo(() => {
     return new globalThis.Map<string, AirportNode>(
-      airports.map((airport) => [airport.code, airport] as const)
+      airports.map((airport) => [airport.airportCode, airport] as const)
     )
   }, [airports])
 
@@ -93,12 +110,14 @@ export default function TravelGlobe() {
     setSelectedAirport(airport)
     setIsInteracting(true)
 
-    mapRef.current?.flyTo({
-      center: [airport.lng, airport.lat],
-      zoom: 2.6,
-      duration: 2200,
-      essential: true,
-    })
+    if (typeof airport.lng === "number" && typeof airport.lat === "number") {
+      mapRef.current?.flyTo({
+        center: [airport.lng, airport.lat],
+        zoom: 2.6,
+        duration: 2200,
+        essential: true,
+      })
+    }
 
     if (interactionTimeoutRef.current) {
       clearTimeout(interactionTimeoutRef.current)
@@ -116,10 +135,19 @@ export default function TravelGlobe() {
 
     return routes
       .map((route, index) => {
-        const fromAirport = airportMap.get(route.from)
-        const toAirport = airportMap.get(route.to)
+        const fromAirport = airportMap.get(route.origin)
+        const toAirport = airportMap.get(route.destination)
 
-        if (!fromAirport || !toAirport) return null
+        if (
+          !fromAirport ||
+          !toAirport ||
+          typeof fromAirport.lng !== "number" ||
+          typeof fromAirport.lat !== "number" ||
+          typeof toAirport.lng !== "number" ||
+          typeof toAirport.lat !== "number"
+        ) {
+          return null
+        }
 
         const start = map.project([fromAirport.lng, fromAirport.lat])
         const end = map.project([toAirport.lng, toAirport.lat])
@@ -134,7 +162,7 @@ export default function TravelGlobe() {
         const path = `M ${start.x} ${start.y} Q ${midX} ${midY} ${end.x} ${end.y}`
 
         return {
-          id: `${route.from}-${route.to}-${index}`,
+          id: `${route.origin}-${route.destination}-${index}`,
           path,
         }
       })
@@ -179,40 +207,42 @@ export default function TravelGlobe() {
           >
             <NavigationControl position="top-right" showCompass showZoom />
 
-            {airports.map((airport, index) => (
-              <Marker
-                key={airport.code}
-                latitude={airport.lat}
-                longitude={airport.lng}
-                anchor="center"
-              >
-                <button
-                  type="button"
-                  onClick={() => handleAirportSelect(airport)}
-                  className="group relative flex h-6 w-6 items-center justify-center"
-                  aria-label={`Open airport details for ${airport.code}`}
+            {airports
+              .filter((airport) => typeof airport.lat === "number" && typeof airport.lng === "number")
+              .map((airport, index) => (
+                <Marker
+                  key={airport.airportCode}
+                  latitude={airport.lat as number}
+                  longitude={airport.lng as number}
+                  anchor="center"
                 >
-                  <motion.span
-                    animate={{
-                      scale: [1, 1.8, 1],
-                      opacity: [0.4, 0.05, 0.4],
-                    }}
-                    transition={{
-                      duration: 2.4,
-                      repeat: Infinity,
-                      delay: index * 0.18,
-                      ease: "easeInOut",
-                    }}
-                    className="absolute h-6 w-6 rounded-full bg-sky-400/60"
-                  />
+                  <button
+                    type="button"
+                    onClick={() => handleAirportSelect(airport)}
+                    className="group relative flex h-6 w-6 items-center justify-center"
+                    aria-label={`Open airport details for ${airport.airportCode}`}
+                  >
+                    <motion.span
+                      animate={{
+                        scale: [1, 1.8, 1],
+                        opacity: [0.4, 0.05, 0.4],
+                      }}
+                      transition={{
+                        duration: 2.4,
+                        repeat: Infinity,
+                        delay: index * 0.18,
+                        ease: "easeInOut",
+                      }}
+                      className="absolute h-6 w-6 rounded-full bg-sky-400/60"
+                    />
 
-                  <motion.span
-                    whileHover={{ scale: 1.2 }}
-                    className="relative block h-3.5 w-3.5 rounded-full bg-sky-600 shadow-[0_0_16px_rgba(14,165,233,0.75)] ring-4 ring-sky-200/50"
-                  />
-                </button>
-              </Marker>
-            ))}
+                    <motion.span
+                      whileHover={{ scale: 1.2 }}
+                      className="relative block h-3.5 w-3.5 rounded-full bg-sky-600 shadow-[0_0_16px_rgba(14,165,233,0.75)] ring-4 ring-sky-200/50"
+                    />
+                  </button>
+                </Marker>
+              ))}
           </Map>
 
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white via-white/60 to-transparent" />
@@ -220,7 +250,7 @@ export default function TravelGlobe() {
       </div>
 
       <motion.div
-        key={selectedAirport?.code ?? "empty"}
+        key={selectedAirport?.airportCode ?? "empty"}
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
@@ -234,13 +264,13 @@ export default function TravelGlobe() {
                   Airport Intelligence
                 </p>
                 <h3 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
-                  {selectedAirport.code}
+                  {selectedAirport.airportCode}
                 </h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  {selectedAirport.name}
+                  {selectedAirport.name ?? "Airport"}
                 </p>
                 <p className="text-sm text-slate-500">
-                  {selectedAirport.city}, {selectedAirport.country}
+                  {selectedAirport.city ?? "Unknown city"}, {selectedAirport.country ?? "Unknown country"}
                 </p>
               </div>
 
@@ -250,15 +280,15 @@ export default function TravelGlobe() {
             </div>
 
             <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              <GlobeMetric label="Visits" value={String(selectedAirport.visits)} />
-              <GlobeMetric label="Flights" value={String(selectedAirport.flights)} />
+              <GlobeMetric label="Visits" value={String(selectedAirport.visits ?? 0)} />
+              <GlobeMetric label="Flights" value={String(selectedAirport.flights ?? 0)} />
               <GlobeMetric
                 label="Layover Time"
-                value={`${selectedAirport.layoverHours.toFixed(1)} hrs`}
+                value={`${(selectedAirport.layoverHours ?? 0).toFixed(1)} hrs`}
               />
               <GlobeMetric
                 label="Lounge Time"
-                value={`${selectedAirport.loungeHours.toFixed(1)} hrs`}
+                value={`${(selectedAirport.loungeHours ?? 0).toFixed(1)} hrs`}
               />
             </div>
 
@@ -267,9 +297,9 @@ export default function TravelGlobe() {
                 Snapshot
               </p>
               <p className="mt-3 text-sm leading-7 text-slate-600">
-                {selectedAirport.code} appeared {selectedAirport.visits} times in your
-                2026 travel path, with {selectedAirport.layoverHours.toFixed(1)} total
-                hours spent in transit and {selectedAirport.loungeHours.toFixed(1)} hours
+                {selectedAirport.airportCode} appeared {selectedAirport.visits ?? 0} times in your
+                2026 travel path, with {(selectedAirport.layoverHours ?? 0).toFixed(1)} total
+                hours spent in transit and {(selectedAirport.loungeHours ?? 0).toFixed(1)} hours
                 attributed to lounge access.
               </p>
             </div>
