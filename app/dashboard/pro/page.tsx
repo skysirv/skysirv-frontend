@@ -337,6 +337,61 @@ export default function ProDashboardPage() {
   useEffect(() => {
     let cancelled = false
 
+    async function loadSavedFlights() {
+      const token = localStorage.getItem("skysirv_token")
+
+      if (!token) {
+        if (!cancelled) {
+          setSavedFlights([])
+        }
+        return
+      }
+
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/saved-flights`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        const data = await res.json().catch(() => [])
+
+        if (cancelled) return
+
+        const savedFlightsData = Array.isArray(data) ? data : []
+
+        setSavedFlights(
+          savedFlightsData.map((flight) => ({
+            ...flight,
+            price:
+              flight.price != null && Number.isFinite(Number(flight.price))
+                ? Number(flight.price) / 100
+                : null,
+            latest_price:
+              flight.price != null && Number.isFinite(Number(flight.price))
+                ? Number(flight.price) / 100
+                : null,
+          }))
+        )
+      } catch (error) {
+        console.error("Failed to load saved flights", error)
+
+        if (!cancelled) {
+          setSavedFlights([])
+        }
+      }
+    }
+
+    loadSavedFlights()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+
     async function loadSession() {
       const token = localStorage.getItem("skysirv_token")
 
@@ -602,7 +657,7 @@ export default function ProDashboardPage() {
     setIsFlightModalOpen(true)
   }
 
-  function handleSaveFlight() {
+  async function handleSaveFlight() {
     if (!selectedFlightForModal?.route) {
       toast({
         title: "No flight selected",
@@ -611,15 +666,24 @@ export default function ProDashboardPage() {
       return
     }
 
+    const token = localStorage.getItem("skysirv_token")
+
+    if (!token) {
+      toast({
+        title: "Sign in required",
+        description: "You must be signed in to save flights.",
+      })
+      return
+    }
+
     const { route, flight } = selectedFlightForModal
 
-    const savedFlight: SavedFlightCardData = {
-      id: `${route.id ?? route.route_hash ?? `${route.origin}-${route.destination}`}-${flight?.airline ?? route.latest_airline ?? "airline"}-${flight?.flightNumber ?? route.latest_flight_number ?? "flight"}-${route.departure_date ?? "date"}`,
-      origin: route.origin ?? null,
-      destination: route.destination ?? null,
-      departure_date: route.departure_date ?? null,
+    const payload = {
+      origin: route.origin ?? "",
+      destination: route.destination ?? "",
+      departureDate: route.departure_date ?? null,
       airline: flight?.airline ?? route.latest_airline ?? null,
-      flight_number: flight?.flightNumber ?? route.latest_flight_number ?? null,
+      flightNumber: flight?.flightNumber ?? route.latest_flight_number ?? null,
       price:
         typeof flight?.price === "number" && Number.isFinite(flight.price)
           ? flight.price
@@ -627,43 +691,64 @@ export default function ProDashboardPage() {
             ? Number(route.latest_price)
             : null,
       currency: flight?.currency ?? "USD",
-      saved_at: new Date().toISOString(),
-      latest_price:
-        typeof flight?.price === "number" && Number.isFinite(flight.price)
-          ? flight.price
-          : route.latest_price != null && Number.isFinite(Number(route.latest_price))
-            ? Number(route.latest_price)
-            : null,
-      status: "active",
     }
 
-    setSavedFlights((prev) => {
-      const alreadyExists = prev.some(
-        (item) =>
-          item.origin === savedFlight.origin &&
-          item.destination === savedFlight.destination &&
-          item.departure_date === savedFlight.departure_date &&
-          item.airline === savedFlight.airline &&
-          item.flight_number === savedFlight.flight_number
-      )
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/saved-flights`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      })
 
-      if (alreadyExists) {
+      const data = await res.json().catch(() => null)
+
+      if (res.status === 409) {
         toast({
           title: "Flight already saved",
           description: "That saved flight is already in your Pro dashboard.",
         })
-        return prev
+        return
       }
+
+      if (!res.ok || !data) {
+        toast({
+          title: "Save failed",
+          description: "The flight could not be saved.",
+        })
+        return
+      }
+
+      const savedFlight: SavedFlightCardData = {
+        ...data,
+        price:
+          data.price != null && Number.isFinite(Number(data.price))
+            ? Number(data.price) / 100
+            : null,
+        latest_price:
+          data.price != null && Number.isFinite(Number(data.price))
+            ? Number(data.price) / 100
+            : null,
+      }
+
+      setSavedFlights((prev) => [savedFlight, ...prev])
 
       toast({
         title: "Flight saved",
         description: "The flight was added to your saved flights section.",
       })
 
-      return [savedFlight, ...prev]
-    })
+      setIsFlightModalOpen(false)
+    } catch (error) {
+      console.error("Failed to save flight", error)
 
-    setIsFlightModalOpen(false)
+      toast({
+        title: "Save failed",
+        description: "Something went wrong while saving the flight.",
+      })
+    }
   }
 
   function handleOpenSavedFlightIntelligence(flight: SavedFlightCardData) {
