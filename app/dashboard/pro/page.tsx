@@ -8,6 +8,9 @@ import RouteSearch from "@/components/dashboard/route-search"
 import OpportunityBanner from "@/components/dashboard/opportunity-banner"
 import MarketSignals from "@/components/dashboard/market-signals"
 import WatchlistCard from "@/components/dashboard/watchlist-card"
+import SavedFlightCard, {
+  type SavedFlightCardData,
+} from "@/components/dashboard/saved-flight-card"
 import FlightIntelligenceModal from "@/components/dashboard/flight-intelligence-modal"
 
 import WatchlistSkeleton from "@/components/dashboard/watchlist-skeleton"
@@ -214,6 +217,7 @@ export default function ProDashboardPage() {
   const [loading, setLoading] = useState(true)
   const [wrappedLoading, setWrappedLoading] = useState(true)
   const [watchlist, setWatchlist] = useState<WatchlistRoute[]>([])
+  const [savedFlights, setSavedFlights] = useState<SavedFlightCardData[]>([])
   const [wrappedData, setWrappedData] = useState<WrappedData>(defaultWrappedData)
   const [selectedYear, setSelectedYear] = useState<number>(2026)
   const [availableWrappedYears, setAvailableWrappedYears] = useState<number[]>([2026])
@@ -598,6 +602,108 @@ export default function ProDashboardPage() {
     setIsFlightModalOpen(true)
   }
 
+  function handleSaveFlight() {
+    if (!selectedFlightForModal?.route) {
+      toast({
+        title: "No flight selected",
+        description: "Select a flight before saving it.",
+      })
+      return
+    }
+
+    const { route, flight } = selectedFlightForModal
+
+    const savedFlight: SavedFlightCardData = {
+      id: `${route.id ?? route.route_hash ?? `${route.origin}-${route.destination}`}-${flight?.airline ?? route.latest_airline ?? "airline"}-${flight?.flightNumber ?? route.latest_flight_number ?? "flight"}-${route.departure_date ?? "date"}`,
+      origin: route.origin ?? null,
+      destination: route.destination ?? null,
+      departure_date: route.departure_date ?? null,
+      airline: flight?.airline ?? route.latest_airline ?? null,
+      flight_number: flight?.flightNumber ?? route.latest_flight_number ?? null,
+      price:
+        typeof flight?.price === "number" && Number.isFinite(flight.price)
+          ? flight.price
+          : route.latest_price != null && Number.isFinite(Number(route.latest_price))
+            ? Number(route.latest_price)
+            : null,
+      currency: flight?.currency ?? "USD",
+      saved_at: new Date().toISOString(),
+      latest_price:
+        typeof flight?.price === "number" && Number.isFinite(flight.price)
+          ? flight.price
+          : route.latest_price != null && Number.isFinite(Number(route.latest_price))
+            ? Number(route.latest_price)
+            : null,
+      status: "active",
+    }
+
+    setSavedFlights((prev) => {
+      const alreadyExists = prev.some(
+        (item) =>
+          item.origin === savedFlight.origin &&
+          item.destination === savedFlight.destination &&
+          item.departure_date === savedFlight.departure_date &&
+          item.airline === savedFlight.airline &&
+          item.flight_number === savedFlight.flight_number
+      )
+
+      if (alreadyExists) {
+        toast({
+          title: "Flight already saved",
+          description: "That saved flight is already in your Pro dashboard.",
+        })
+        return prev
+      }
+
+      toast({
+        title: "Flight saved",
+        description: "The flight was added to your saved flights section.",
+      })
+
+      return [savedFlight, ...prev]
+    })
+
+    setIsFlightModalOpen(false)
+  }
+
+  function handleOpenSavedFlightIntelligence(flight: SavedFlightCardData) {
+    const matchingRoute =
+      watchlist.find(
+        (route) =>
+          route.origin === flight.origin &&
+          route.destination === flight.destination &&
+          route.departure_date === flight.departure_date
+      ) ?? null
+
+    if (!matchingRoute) {
+      toast({
+        title: "Route not found",
+        description: "The matching monitored route could not be found for this saved flight.",
+      })
+      return
+    }
+
+    setSelectedFlightForModal({
+      route: matchingRoute,
+      flight: {
+        airline: flight.airline ?? null,
+        flightNumber: flight.flight_number ?? null,
+        price: flight.latest_price ?? flight.price ?? null,
+        currency: flight.currency ?? "USD",
+        capturedAt: flight.saved_at ?? null,
+      },
+    })
+
+    setIsFlightModalOpen(true)
+  }
+
+  function handleMarkSavedFlightCompleted(flight: SavedFlightCardData) {
+    toast({
+      title: "Route completion coming next",
+      description: `${flight.origin ?? "—"} → ${flight.destination ?? "—"} will be wired into trip history next.`,
+    })
+  }
+
   const remainingRoutes = Math.max(0, 25 - watchlist.length)
 
   const sortedSegments = useMemo(() => {
@@ -795,6 +901,59 @@ export default function ProDashboardPage() {
                       </div>
                     )
                   })
+                )}
+              </div>
+            </div>
+          </motion.section>
+
+          {/* Saved Flights Section */}
+          <motion.section
+            {...fadeUp}
+            className="relative mb-12 overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white px-5 py-8 shadow-[0_20px_60px_rgba(15,23,42,0.06)] sm:px-7 md:px-8 md:py-10"
+          >
+            <div className="relative">
+              <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div className="max-w-2xl">
+                  <div className="mb-3 inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600 shadow-sm backdrop-blur-sm">
+                    Saved Flights
+                  </div>
+
+                  <h2 className="text-2xl font-semibold tracking-tight text-slate-950 md:text-3xl">
+                    Your saved flight decisions
+                  </h2>
+
+                  <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600 sm:text-base">
+                    Save specific flights from your intelligence modal to track price changes,
+                    trigger alerts, and build your travel history.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                {savedFlights.length === 0 ? (
+                  <div className="col-span-full overflow-hidden rounded-[1.75rem] border border-dashed border-slate-300 bg-white/75 p-10 text-center shadow-sm backdrop-blur-sm">
+                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500 shadow-inner">
+                      ✈
+                    </div>
+
+                    <h3 className="mb-2 text-lg font-semibold text-slate-900">
+                      No saved flights yet
+                    </h3>
+
+                    <p className="mx-auto max-w-md text-sm leading-6 text-slate-600">
+                      Open a flight from your watchlist and save it to start tracking
+                      that exact fare and building your intelligence history.
+                    </p>
+                  </div>
+                ) : (
+                  savedFlights.map((flight, index) => (
+                    <SavedFlightCard
+                      key={flight.id ?? `${flight.origin}-${flight.destination}-${index}`}
+                      flight={flight}
+                      onOpenIntelligence={() => handleOpenSavedFlightIntelligence(flight)}
+                      onMarkRouteCompleted={() => handleMarkSavedFlightCompleted(flight)}
+                    />
+                  ))
                 )}
               </div>
             </div>
@@ -1470,6 +1629,7 @@ export default function ProDashboardPage() {
       <FlightIntelligenceModal
         isOpen={isFlightModalOpen}
         onClose={() => setIsFlightModalOpen(false)}
+        onSaveFlight={handleSaveFlight}
         route={selectedFlightForModal?.route ?? null}
         flight={selectedFlightForModal?.flight ?? null}
       />

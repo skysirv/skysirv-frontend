@@ -11,6 +11,7 @@ import WatchlistCard from "@/components/dashboard/watchlist-card"
 import SavedFlightCard, {
   type SavedFlightCardData,
 } from "@/components/dashboard/saved-flight-card"
+import FlightIntelligenceModal from "@/components/dashboard/flight-intelligence-modal"
 
 import WatchlistSkeleton from "@/components/dashboard/watchlist-skeleton"
 import OpportunitySkeleton from "@/components/dashboard/opportunity-skeleton"
@@ -63,8 +64,19 @@ type WatchlistResponse =
 export default function FreeDashboardPage() {
   const [loading, setLoading] = useState(true)
   const [watchlist, setWatchlist] = useState<WatchlistRoute[]>([])
-  const [savedFlights] = useState<SavedFlightCardData[]>([])
+  const [savedFlights, setSavedFlights] = useState<SavedFlightCardData[]>([])
   const [watchlistFetchKey, setWatchlistFetchKey] = useState(0)
+  const [selectedFlightForModal, setSelectedFlightForModal] = useState<{
+    route: WatchlistRoute
+    flight: {
+      airline?: string | null
+      flightNumber?: string | null
+      price?: number | null
+      currency?: string | null
+      capturedAt?: string | null
+    } | null
+  } | null>(null)
+  const [isFlightModalOpen, setIsFlightModalOpen] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -215,6 +227,125 @@ export default function FreeDashboardPage() {
       window.setTimeout(() => {
         setWatchlistFetchKey((prev) => prev + 1)
       }, delay)
+    })
+  }
+
+  function handleOpenFlightModal(
+    route: WatchlistRoute,
+    flight?: {
+      airline?: string | null
+      flightNumber?: string | null
+      price?: number | null
+      currency?: string | null
+      capturedAt?: string | null
+    } | null
+  ) {
+    setSelectedFlightForModal({
+      route,
+      flight: flight ?? null,
+    })
+    setIsFlightModalOpen(true)
+  }
+
+  function handleSaveFlight() {
+    if (!selectedFlightForModal?.route) {
+      toast({
+        title: "No flight selected",
+        description: "Select a flight before saving it.",
+      })
+      return
+    }
+
+    const { route, flight } = selectedFlightForModal
+
+    const savedFlight: SavedFlightCardData = {
+      id: `${route.id ?? route.route_hash ?? `${route.origin}-${route.destination}`}-${flight?.airline ?? route.latest_airline ?? "airline"}-${flight?.flightNumber ?? route.latest_flight_number ?? "flight"}-${route.departure_date ?? "date"}`,
+      origin: route.origin ?? null,
+      destination: route.destination ?? null,
+      departure_date: route.departure_date ?? null,
+      airline: flight?.airline ?? route.latest_airline ?? null,
+      flight_number: flight?.flightNumber ?? route.latest_flight_number ?? null,
+      price:
+        typeof flight?.price === "number" && Number.isFinite(flight.price)
+          ? flight.price
+          : route.latest_price != null && Number.isFinite(Number(route.latest_price))
+            ? Number(route.latest_price)
+            : null,
+      currency: flight?.currency ?? "USD",
+      saved_at: new Date().toISOString(),
+      latest_price:
+        typeof flight?.price === "number" && Number.isFinite(flight.price)
+          ? flight.price
+          : route.latest_price != null && Number.isFinite(Number(route.latest_price))
+            ? Number(route.latest_price)
+            : null,
+      status: "active",
+    }
+
+    setSavedFlights((prev) => {
+      const alreadyExists = prev.some(
+        (item) =>
+          item.origin === savedFlight.origin &&
+          item.destination === savedFlight.destination &&
+          item.departure_date === savedFlight.departure_date &&
+          item.airline === savedFlight.airline &&
+          item.flight_number === savedFlight.flight_number
+      )
+
+      if (alreadyExists) {
+        toast({
+          title: "Flight already saved",
+          description: "That saved flight is already in your Free dashboard.",
+        })
+        return prev
+      }
+
+      toast({
+        title: "Flight saved",
+        description: "The flight was added to your saved flights section.",
+      })
+
+      return [savedFlight, ...prev]
+    })
+
+    setIsFlightModalOpen(false)
+  }
+
+  function handleOpenSavedFlightIntelligence(flight: SavedFlightCardData) {
+    const matchingRoute =
+      watchlist.find(
+        (route) =>
+          route.origin === flight.origin &&
+          route.destination === flight.destination &&
+          route.departure_date === flight.departure_date
+      ) ?? null
+
+    if (!matchingRoute) {
+      toast({
+        title: "Route not found",
+        description: "The matching monitored route could not be found for this saved flight.",
+      })
+      return
+    }
+
+    setSelectedFlightForModal({
+      route: matchingRoute,
+      flight: {
+        airline: flight.airline ?? null,
+        flightNumber: flight.flight_number ?? null,
+        price: flight.latest_price ?? flight.price ?? null,
+        currency: flight.currency ?? "USD",
+        capturedAt: flight.saved_at ?? null,
+      },
+    })
+
+    setIsFlightModalOpen(true)
+  }
+
+  function handleMarkSavedFlightCompleted(flight: SavedFlightCardData) {
+    toast({
+      title: "Route completion coming next",
+      description: `${flight.origin ?? "—"} → ${flight.destination ?? "—"} will be wired into trip history next.`,
     })
   }
 
@@ -392,6 +523,7 @@ export default function FreeDashboardPage() {
                           latestCapturedAt={route.latest_captured_at ?? null}
                           volatilityIndex={route.volatility_index ?? null}
                           recommendedFlights={route.recommended_flights ?? null}
+                          onOpenFlightModal={(flight) => handleOpenFlightModal(route, flight)}
                           onRemove={() => {
                             if (!route.id) return
                             void handleRouteRemoved(route.id)
@@ -410,53 +542,50 @@ export default function FreeDashboardPage() {
             {...fadeUp}
             className="relative mb-12 overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white px-5 py-8 shadow-[0_20px_60px_rgba(15,23,42,0.06)] sm:px-7 md:px-8 md:py-10"
           >
-            <div className="pointer-events-none absolute inset-0">
-              <div className="absolute -right-20 top-0 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.06)_0%,rgba(255,255,255,0)_72%)] blur-3xl" />
-              <div className="absolute left-[-40px] bottom-[-30px] h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(16,185,129,0.06)_0%,rgba(255,255,255,0)_74%)] blur-3xl" />
-            </div>
-
             <div className="relative">
               <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                 <div className="max-w-2xl">
-                  <div className="mb-3 inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600">
+                  <div className="mb-3 inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600 shadow-sm backdrop-blur-sm">
                     Saved Flights
                   </div>
 
                   <h2 className="text-2xl font-semibold tracking-tight text-slate-950 md:text-3xl">
-                    Save specific flights and track them with intent
+                    Your saved flight decisions
                   </h2>
 
                   <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600 sm:text-base">
-                    Saved flights turn route monitoring into flight-specific intelligence,
-                    making room for future fare change alerts, saved price comparisons,
-                    and completed trip history.
+                    Save specific flights from your intelligence modal to track price changes,
+                    trigger alerts, and build your travel history.
                   </p>
-                </div>
-
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <CompactStat
-                    label="Saved"
-                    value={String(visibleSavedFlights.length)}
-                  />
-                  <CompactStat
-                    label="Active"
-                    value={String(
-                      visibleSavedFlights.filter(
-                        (flight) => (flight.status ?? "active") === "active"
-                      ).length
-                    )}
-                  />
-                  <CompactStat label="Completed" value="0" />
                 </div>
               </div>
 
-              <div className="grid gap-4">
-                {visibleSavedFlights.map((flight) => (
-                  <SavedFlightCard
-                    key={flight.id}
-                    flight={flight}
-                  />
-                ))}
+              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                {savedFlights.length === 0 ? (
+                  <div className="col-span-full overflow-hidden rounded-[1.75rem] border border-dashed border-slate-300 bg-white/75 p-10 text-center shadow-sm backdrop-blur-sm">
+                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500 shadow-inner">
+                      ✈
+                    </div>
+
+                    <h3 className="mb-2 text-lg font-semibold text-slate-900">
+                      No saved flights yet
+                    </h3>
+
+                    <p className="mx-auto max-w-md text-sm leading-6 text-slate-600">
+                      Open a flight from your watchlist and save it to start tracking
+                      that exact fare and building your intelligence history.
+                    </p>
+                  </div>
+                ) : (
+                  savedFlights.map((flight, index) => (
+                    <SavedFlightCard
+                      key={flight.id ?? `${flight.origin}-${flight.destination}-${index}`}
+                      flight={flight}
+                      onOpenIntelligence={() => handleOpenSavedFlightIntelligence(flight)}
+                      onMarkRouteCompleted={() => handleMarkSavedFlightCompleted(flight)}
+                    />
+                  ))
+                )}
               </div>
             </div>
           </motion.section>
@@ -623,6 +752,14 @@ export default function FreeDashboardPage() {
           </motion.section>
         </div>
       </div>
+
+      <FlightIntelligenceModal
+        isOpen={isFlightModalOpen}
+        onClose={() => setIsFlightModalOpen(false)}
+        onSaveFlight={handleSaveFlight}
+        route={selectedFlightForModal?.route ?? null}
+        flight={selectedFlightForModal?.flight ?? null}
+      />
     </section>
   )
 }
