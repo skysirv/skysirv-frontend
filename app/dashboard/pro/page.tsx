@@ -782,11 +782,74 @@ export default function ProDashboardPage() {
     setIsFlightModalOpen(true)
   }
 
-  function handleMarkSavedFlightCompleted(flight: SavedFlightCardData) {
-    toast({
-      title: "Route completion coming next",
-      description: `${flight.origin ?? "—"} → ${flight.destination ?? "—"} will be wired into trip history next.`,
-    })
+  async function handleMarkSavedFlightCompleted(flight: SavedFlightCardData) {
+    const token = localStorage.getItem("skysirv_token")
+
+    if (!token) {
+      toast({
+        title: "Sign in required",
+        description: "You must be signed in to complete saved flights.",
+      })
+      return
+    }
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/saved-flights/${flight.id}/complete`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const data = await res.json().catch(() => null)
+
+      if (res.status === 409) {
+        toast({
+          title: "Already completed",
+          description: "That saved flight has already been marked completed.",
+        })
+        return
+      }
+
+      if (!res.ok || !data) {
+        toast({
+          title: "Completion failed",
+          description: "The saved flight could not be marked completed.",
+        })
+        return
+      }
+
+      const updatedFlight: SavedFlightCardData = {
+        ...data,
+        price:
+          data.price != null && Number.isFinite(Number(data.price))
+            ? Number(data.price) / 100
+            : null,
+        latest_price:
+          data.price != null && Number.isFinite(Number(data.price))
+            ? Number(data.price) / 100
+            : null,
+      }
+
+      setSavedFlights((prev) =>
+        prev.map((item) => (item.id === updatedFlight.id ? updatedFlight : item))
+      )
+
+      toast({
+        title: "Route completed",
+        description: `${flight.origin ?? "—"} → ${flight.destination ?? "—"} was added to trip history.`,
+      })
+    } catch (error) {
+      console.error("Failed to complete saved flight", error)
+
+      toast({
+        title: "Completion failed",
+        description: "Something went wrong while completing the saved flight.",
+      })
+    }
   }
 
   const remainingRoutes = Math.max(0, 25 - watchlist.length)
