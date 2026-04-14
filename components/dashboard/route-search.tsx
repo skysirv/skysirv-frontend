@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "@/components/ui/Toasts/use-toast"
 import { AirportOption, searchAirports } from "@/lib/airports/major-airports"
+import { DayPicker } from "react-day-picker"
+import "react-day-picker/dist/style.css"
 
 type WatchlistRoute = {
   id: string
@@ -123,7 +125,7 @@ function AirportPicker({
 }
 
 export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
-  const [tripType, setTripType] = useState<"oneway" | "roundtrip">("oneway")
+  const [tripType, setTripType] = useState<"oneway" | "roundtrip" | "multicity">("oneway")
 
   const [originQuery, setOriginQuery] = useState("")
   const [destinationQuery, setDestinationQuery] = useState("")
@@ -132,9 +134,19 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
 
   const [departureDate, setDepartureDate] = useState("")
   const [returnDate, setReturnDate] = useState("")
+  const [showDepartureCalendar, setShowDepartureCalendar] = useState(false)
   const [isMonitoring, setIsMonitoring] = useState(false)
 
   async function handleMonitorRoute() {
+    if (tripType === "multicity") {
+      toast({
+        title: "Multi-city coming next",
+        description:
+          "The new multi-city route mode is now visible in the UI. Segment entry and backend monitoring wiring are the next step.",
+      })
+      return
+    }
+
     const normalizedOrigin = selectedOrigin?.code?.trim().toUpperCase() ?? ""
     const normalizedDestination = selectedDestination?.code?.trim().toUpperCase() ?? ""
 
@@ -281,73 +293,147 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
         >
           Round-trip
         </button>
+
+        <button
+          type="button"
+          onClick={() => setTripType("multicity")}
+          className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "multicity"
+            ? "bg-slate-900 text-white"
+            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            }`}
+        >
+          Multi-city
+        </button>
       </div>
 
-      <div
-        className={`mt-6 grid gap-4 ${tripType === "roundtrip" ? "md:grid-cols-4" : "md:grid-cols-3"
-          }`}
-      >
-        <AirportPicker
-          label="Origin"
-          placeholder="Search by airport, city, or code"
-          query={originQuery}
-          selectedAirport={selectedOrigin}
-          onQueryChange={(value) => {
-            setOriginQuery(value)
-            setSelectedOrigin(null)
-          }}
-          onSelect={(airport) => {
-            setSelectedOrigin(airport)
-            setOriginQuery(`${airport.city} (${airport.code})`)
-          }}
-          excludeCode={selectedDestination?.code ?? null}
-        />
+      {tripType === "multicity" ? (
+        <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5">
+          <div className="text-sm font-semibold text-slate-900">
+            Multi-city route builder
+          </div>
 
-        <AirportPicker
-          label="Destination"
-          placeholder="Search by airport, city, or code"
-          query={destinationQuery}
-          selectedAirport={selectedDestination}
-          onQueryChange={(value) => {
-            setDestinationQuery(value)
-            setSelectedDestination(null)
-          }}
-          onSelect={(airport) => {
-            setSelectedDestination(airport)
-            setDestinationQuery(`${airport.city} (${airport.code})`)
-          }}
-          excludeCode={selectedOrigin?.code ?? null}
-        />
+          <p className="mt-2 text-sm text-slate-600">
+            This mode is now active in the UI. The next step is wiring leg-by-leg
+            segment entry so travelers can monitor routes like BOS → PTY → VVI.
+          </p>
 
-        <div>
-          <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-            Departure Date
-          </label>
+          <div className="mt-4 grid gap-4 md:grid-cols-3">
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                Leg 1 Origin
+              </label>
+              <div className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-400">
+                Coming next
+              </div>
+            </div>
 
-          <input
-            type="date"
-            value={departureDate}
-            onChange={(e) => setDepartureDate(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
-          />
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                Leg 1 Destination
+              </label>
+              <div className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-400">
+                Coming next
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                Leg 1 Departure Date
+              </label>
+              <div className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-400">
+                Coming next
+              </div>
+            </div>
+          </div>
         </div>
+      ) : (
+        <div
+          className={`mt-6 grid gap-4 ${tripType === "roundtrip" ? "md:grid-cols-4" : "md:grid-cols-3"
+            }`}
+        >
+          <AirportPicker
+            label="Origin"
+            placeholder="Search by airport, city, or code"
+            query={originQuery}
+            selectedAirport={selectedOrigin}
+            onQueryChange={(value) => {
+              setOriginQuery(value)
+              setSelectedOrigin(null)
+            }}
+            onSelect={(airport) => {
+              setSelectedOrigin(airport)
+              setOriginQuery(`${airport.city} (${airport.code})`)
+            }}
+            excludeCode={selectedDestination?.code ?? null}
+          />
 
-        {tripType === "roundtrip" && (
-          <div>
+          <AirportPicker
+            label="Destination"
+            placeholder="Search by airport, city, or code"
+            query={destinationQuery}
+            selectedAirport={selectedDestination}
+            onQueryChange={(value) => {
+              setDestinationQuery(value)
+              setSelectedDestination(null)
+            }}
+            onSelect={(airport) => {
+              setSelectedDestination(airport)
+              setDestinationQuery(`${airport.city} (${airport.code})`)
+            }}
+            excludeCode={selectedOrigin?.code ?? null}
+          />
+
+          <div className="relative">
             <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-              Return Date
+              Departure Date
             </label>
 
             <input
-              type="date"
-              value={returnDate}
-              min={departureDate || undefined}
-              onChange={(e) => setReturnDate(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+              type="text"
+              readOnly
+              value={departureDate}
+              placeholder="Select date"
+              onClick={() => setShowDepartureCalendar((prev) => !prev)}
+              className="w-full cursor-pointer rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
             />
+
+            {showDepartureCalendar && (
+              <div className="absolute z-30 mt-2 rounded-xl border border-slate-200 bg-white p-3 shadow-xl">
+                <DayPicker
+                  mode="single"
+                  selected={departureDate ? new Date(departureDate) : undefined}
+                  onSelect={(date) => {
+                    if (!date) return
+                    const iso = date.toISOString().split("T")[0]
+                    setDepartureDate(iso)
+                    setShowDepartureCalendar(false)
+                  }}
+                />
+              </div>
+            )}
           </div>
-        )}
-      </div>
+
+          {tripType === "roundtrip" && (
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                Return Date
+              </label>
+
+              <input
+                type="date"
+                value={returnDate}
+                min={departureDate || undefined}
+                onChange={(e) => setReturnDate(e.target.value)}
+                onClick={(e) => {
+                  // force open picker on full field click
+                  (e.target as HTMLInputElement).showPicker?.()
+                }}
+                className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       <button
         onClick={handleMonitorRoute}

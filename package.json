@@ -34,6 +34,7 @@
     "mapbox-gl": "^3.20.0",
     "next": "14.2.3",
     "react": "^18.3.1",
+    "react-day-picker": "^9.14.0",
     "react-dom": "^18.3.1",
     "react-map-gl": "^8.1.0",
     "react-merge-refs": "^2.1.1",
