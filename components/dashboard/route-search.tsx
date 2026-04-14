@@ -481,8 +481,6 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                   }}
                 />
 
-                //Multi-city leg//
-
                 <AirportPicker
                   label={`Leg ${index + 1} Destination`}
                   placeholder="Search airport"
@@ -614,8 +612,6 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
             excludeCode={selectedOrigin?.code ?? null}
           />
 
-          //Departure date//
-
           <div className="relative">
             <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
               Departure Date
@@ -667,8 +663,6 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
               </div>
             )}
           </div>
-
-          //Return date - only for round-trip//
 
           {tripType === "roundtrip" && (
             <div className="relative">
