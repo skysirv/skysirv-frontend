@@ -392,16 +392,48 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
           <div className="mt-4 space-y-4">
             {multiCitySegments.map((segment, index) => (
               <div key={index} className="grid gap-4 md:grid-cols-3">
-                <div className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600">
-                  Leg {index + 1} Origin coming next
-                </div>
+                <AirportPicker
+                  label={`Leg ${index + 1} Origin`}
+                  placeholder="Search airport"
+                  query=""
+                  selectedAirport={segment.origin}
+                  onQueryChange={() => { }}
+                  onSelect={(airport) => {
+                    const updated = [...multiCitySegments]
+                    updated[index].origin = airport
+                    setMultiCitySegments(updated)
+                  }}
+                />
 
-                <div className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600">
-                  Leg {index + 1} Destination coming next
-                </div>
+                <AirportPicker
+                  label={`Leg ${index + 1} Destination`}
+                  placeholder="Search airport"
+                  query=""
+                  selectedAirport={segment.destination}
+                  onQueryChange={() => { }}
+                  onSelect={(airport) => {
+                    const updated = [...multiCitySegments]
+                    updated[index].destination = airport
+                    setMultiCitySegments(updated)
+                  }}
+                  excludeCode={segment.origin?.code ?? null}
+                />
 
-                <div className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600">
-                  Leg {index + 1} Departure Date coming next
+                <div>
+                  <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    Leg {index + 1} Departure Date
+                  </label>
+
+                  <input
+                    type="date"
+                    value={segment.date}
+                    onChange={(e) => {
+                      const updated = [...multiCitySegments]
+                      updated[index].date = e.target.value
+                      setMultiCitySegments(updated)
+                    }}
+                    className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+                  />
                 </div>
               </div>
             ))}
