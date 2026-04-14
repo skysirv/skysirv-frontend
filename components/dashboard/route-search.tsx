@@ -452,8 +452,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
           </div>
 
           <p className="mt-2 text-sm text-slate-600">
-            This mode is now active in the UI. The next step is wiring leg-by-leg
-            segment entry so travelers can monitor routes like BOS → PTY → VVI.
+            Build a multi-city journey with stopovers along the way.
+            Track pricing across every leg — from departure to final destination.
           </p>
 
           <div className="mt-4 space-y-4">
@@ -680,10 +680,17 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                   className="absolute z-30 mt-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)] backdrop-blur-sm"
                 >
                   <DayPicker
-                    mode="single"
-                    month={parseStoredDate(returnDate)}
-                    selected={parseStoredDate(returnDate)}
-                    disabled={departureDate ? { before: new Date(departureDate) } : undefined}
+                    mode="range"
+                    month={parseStoredDate(returnDate) ?? parseStoredDate(departureDate)}
+                    selected={
+                      departureDate
+                        ? {
+                          from: parseStoredDate(departureDate),
+                          to: parseStoredDate(returnDate),
+                        }
+                        : undefined
+                    }
+                    disabled={departureDate ? { before: parseStoredDate(departureDate)! } : undefined}
                     className="text-sm"
                     classNames={{
                       day_selected: "bg-slate-900 text-white hover:bg-slate-800",
@@ -696,9 +703,10 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                       row: "flex w-full mt-1",
                       cell: "text-center text-sm p-0 relative",
                     }}
-                    onSelect={(date) => {
-                      if (!date) return
-                      const iso = formatDateForStorage(date)
+                    onSelect={(range) => {
+                      if (!range?.to) return
+
+                      const iso = formatDateForStorage(range.to)
                       setReturnDate(iso)
                       setShowReturnCalendar(false)
                     }}
