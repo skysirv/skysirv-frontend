@@ -31,6 +31,12 @@ type AirportPickerProps = {
   excludeCode?: string | null
 }
 
+type MultiCitySegment = {
+  origin: AirportOption | null
+  destination: AirportOption | null
+  date: string
+}
+
 function AirportPicker({
   label,
   placeholder,
@@ -137,6 +143,10 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
   const [showDepartureCalendar, setShowDepartureCalendar] = useState(false)
   const [showReturnCalendar, setShowReturnCalendar] = useState(false)
   const [isMonitoring, setIsMonitoring] = useState(false)
+
+  const [multiCitySegments, setMultiCitySegments] = useState<MultiCitySegment[]>([
+    { origin: null, destination: null, date: "" },
+  ])
 
   const departureCalendarRef = useRef<HTMLDivElement | null>(null)
   const returnCalendarRef = useRef<HTMLDivElement | null>(null)
@@ -338,8 +348,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
           type="button"
           onClick={() => setTripType("oneway")}
           className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "oneway"
-              ? "bg-slate-900 text-white"
-              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            ? "bg-slate-900 text-white"
+            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
         >
           One-way
@@ -349,8 +359,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
           type="button"
           onClick={() => setTripType("roundtrip")}
           className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "roundtrip"
-              ? "bg-slate-900 text-white"
-              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            ? "bg-slate-900 text-white"
+            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
         >
           Round-trip
@@ -360,8 +370,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
           type="button"
           onClick={() => setTripType("multicity")}
           className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "multicity"
-              ? "bg-slate-900 text-white"
-              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            ? "bg-slate-900 text-white"
+            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
         >
           Multi-city
@@ -379,33 +389,35 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
             segment entry so travelers can monitor routes like BOS → PTY → VVI.
           </p>
 
-          <div className="mt-4 grid gap-4 md:grid-cols-3">
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                Leg 1 Origin
-              </label>
-              <div className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-400">
-                Coming next
-              </div>
-            </div>
+          <div className="mt-4 space-y-4">
+            {multiCitySegments.map((segment, index) => (
+              <div key={index} className="grid gap-4 md:grid-cols-3">
+                <div className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600">
+                  Leg {index + 1} Origin coming next
+                </div>
 
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                Leg 1 Destination
-              </label>
-              <div className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-400">
-                Coming next
-              </div>
-            </div>
+                <div className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600">
+                  Leg {index + 1} Destination coming next
+                </div>
 
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                Leg 1 Departure Date
-              </label>
-              <div className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-400">
-                Coming next
+                <div className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600">
+                  Leg {index + 1} Departure Date coming next
+                </div>
               </div>
-            </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={() =>
+                setMultiCitySegments((prev) => [
+                  ...prev,
+                  { origin: null, destination: null, date: "" },
+                ])
+              }
+              className="text-sm font-semibold text-slate-700 hover:text-slate-900"
+            >
+              + Add another leg
+            </button>
           </div>
         </div>
       ) : (
