@@ -443,10 +443,6 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                 />
 
                 <div>
-                  <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                    Leg {index + 1} Departure Date
-                  </label>
-
                   <div className="relative">
                     <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
                       Leg {index + 1} Departure Date
