@@ -34,6 +34,8 @@ type AirportPickerProps = {
 type MultiCitySegment = {
   origin: AirportOption | null
   destination: AirportOption | null
+  originQuery: string
+  destinationQuery: string
   date: string
 }
 
@@ -143,7 +145,13 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
   const [showReturnCalendar, setShowReturnCalendar] = useState(false)
   const [isMonitoring, setIsMonitoring] = useState(false)
   const [multiCitySegments, setMultiCitySegments] = useState<MultiCitySegment[]>([
-    { origin: null, destination: null, date: "" },
+    {
+      origin: null,
+      destination: null,
+      originQuery: "",
+      destinationQuery: "",
+      date: "",
+    },
   ])
   const [multiCityCalendarIndex, setMultiCityCalendarIndex] = useState<number | null>(null)
 
@@ -165,7 +173,15 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
   }, [])
 
   function resetMultiCitySegments() {
-    setMultiCitySegments([{ origin: null, destination: null, date: "" }])
+    setMultiCitySegments([
+      {
+        origin: null,
+        destination: null,
+        originQuery: "",
+        destinationQuery: "",
+        date: "",
+      },
+    ])
   }
 
   useEffect(() => {
@@ -418,12 +434,18 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                 <AirportPicker
                   label={`Leg ${index + 1} Origin`}
                   placeholder="Search airport"
-                  query=""
+                  query={segment.originQuery}
                   selectedAirport={segment.origin}
-                  onQueryChange={() => { }}
+                  onQueryChange={(value) => {
+                    const updated = [...multiCitySegments]
+                    updated[index].originQuery = value
+                    updated[index].origin = null
+                    setMultiCitySegments(updated)
+                  }}
                   onSelect={(airport) => {
                     const updated = [...multiCitySegments]
                     updated[index].origin = airport
+                    updated[index].originQuery = `${airport.city} (${airport.code})`
                     setMultiCitySegments(updated)
                   }}
                 />
@@ -431,12 +453,18 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                 <AirportPicker
                   label={`Leg ${index + 1} Destination`}
                   placeholder="Search airport"
-                  query=""
+                  query={segment.destinationQuery}
                   selectedAirport={segment.destination}
-                  onQueryChange={() => { }}
+                  onQueryChange={(value) => {
+                    const updated = [...multiCitySegments]
+                    updated[index].destinationQuery = value
+                    updated[index].destination = null
+                    setMultiCitySegments(updated)
+                  }}
                   onSelect={(airport) => {
                     const updated = [...multiCitySegments]
                     updated[index].destination = airport
+                    updated[index].destinationQuery = `${airport.city} (${airport.code})`
                     setMultiCitySegments(updated)
                   }}
                   excludeCode={segment.origin?.code ?? null}
@@ -499,7 +527,13 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
               onClick={() =>
                 setMultiCitySegments((prev) => [
                   ...prev,
-                  { origin: null, destination: null, date: "" },
+                  {
+                    origin: null,
+                    destination: null,
+                    originQuery: "",
+                    destinationQuery: "",
+                    date: "",
+                  }
                 ])
               }
               className="text-sm font-semibold text-slate-700 hover:text-slate-900"
