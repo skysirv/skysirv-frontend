@@ -164,6 +164,10 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
+  function resetMultiCitySegments() {
+    setMultiCitySegments([{ origin: null, destination: null, date: "" }])
+  }
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (!returnCalendarRef.current) return
@@ -346,7 +350,10 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
       <div className="mt-6 flex flex-wrap gap-2">
         <button
           type="button"
-          onClick={() => setTripType("oneway")}
+          onClick={() => {
+            resetMultiCitySegments()
+            setTripType("oneway")
+          }}
           className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "oneway"
             ? "bg-slate-900 text-white"
             : "bg-slate-100 text-slate-600 hover:bg-slate-200"
@@ -357,7 +364,10 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
 
         <button
           type="button"
-          onClick={() => setTripType("roundtrip")}
+          onClick={() => {
+            resetMultiCitySegments()
+            setTripType("roundtrip")
+          }}
           className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "roundtrip"
             ? "bg-slate-900 text-white"
             : "bg-slate-100 text-slate-600 hover:bg-slate-200"
