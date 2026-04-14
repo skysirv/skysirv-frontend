@@ -95,6 +95,33 @@ type WrappedSegment = {
   updated_at: string | null
 }
 
+type GlobeAirportNode = {
+  airportCode: string
+  lat?: number
+  lng?: number
+  name?: string
+  city?: string
+  country?: string
+  visits?: number
+  layoverHours?: number
+  loungeHours?: number
+  flights?: number
+}
+
+type GlobeRouteArc = {
+  tripId: string
+  segmentId: string
+  segmentOrder: number
+  origin: string
+  destination: string
+  airlineCode: string | null
+  flightNumber: string | null
+  status: string
+  source: string | null
+  scheduledDepartureAt: string | null
+  scheduledArrivalAt: string | null
+}
+
 type WatchlistRoute = {
   id: string
   route?: string | null
@@ -200,6 +227,8 @@ export default function EnterpriseDashboardPage() {
   const [selectedYear, setSelectedYear] = useState<number>(2026)
   const [availableWrappedYears, setAvailableWrappedYears] = useState<number[]>([2026])
   const [wrappedSegments, setWrappedSegments] = useState<WrappedSegment[]>([])
+  const [globeAirportNodes, setGlobeAirportNodes] = useState<GlobeAirportNode[]>([])
+  const [globeRouteArcs, setGlobeRouteArcs] = useState<GlobeRouteArc[]>([])
   const [watchlistFetchKey, setWatchlistFetchKey] = useState(0)
   const [selectedFlightForModal, setSelectedFlightForModal] = useState<{
     route: WatchlistRoute
@@ -447,12 +476,16 @@ export default function EnterpriseDashboardPage() {
         if (!res.ok || !data?.success || !data?.wrapped) {
           setWrappedData(defaultWrappedData)
           setWrappedSegments([])
+          setGlobeAirportNodes([])
+          setGlobeRouteArcs([])
           return
         }
 
         const payload = data.wrapped.wrapped_payload_json ?? {}
         const bestRoute = payload.bestRoute ?? {}
         const segments = Array.isArray(data.segments) ? data.segments : []
+        const airportNodes = Array.isArray(data.airportNodes) ? data.airportNodes : []
+        const routeArcs = Array.isArray(data.routeArcs) ? data.routeArcs : []
 
         setWrappedData({
           flights: Number(data.wrapped.flights ?? 0),
@@ -475,12 +508,16 @@ export default function EnterpriseDashboardPage() {
         })
 
         setWrappedSegments(segments)
+        setGlobeAirportNodes(airportNodes)
+        setGlobeRouteArcs(routeArcs)
       } catch (err) {
         console.error("Wrapped load failed", err)
 
         if (!cancelled) {
           setWrappedData(defaultWrappedData)
           setWrappedSegments([])
+          setGlobeAirportNodes([])
+          setGlobeRouteArcs([])
         }
       } finally {
         if (!cancelled) {
@@ -1225,7 +1262,10 @@ export default function EnterpriseDashboardPage() {
                     </p>
                   </div>
 
-                  <TravelGlobe />
+                  <TravelGlobe
+                    airportNodes={globeAirportNodes}
+                    routeArcs={globeRouteArcs}
+                  />
                 </motion.div>
 
                 {/* Segment Intelligence */}

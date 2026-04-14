@@ -4,33 +4,6 @@ import React, { useEffect, useRef, useState } from "react"
 import { motion, useInView } from "framer-motion"
 import TravelGlobe from "@/components/intelligence-wrapped/travel-globe"
 
-type GlobeAirportNode = {
-  airportCode: string
-  lat?: number
-  lng?: number
-  name?: string
-  city?: string
-  country?: string
-  visits?: number
-  layoverHours?: number
-  loungeHours?: number
-  flights?: number
-}
-
-type GlobeRouteArc = {
-  tripId: string
-  segmentId: string
-  segmentOrder: number
-  origin: string
-  destination: string
-  airlineCode: string | null
-  flightNumber: string | null
-  status: string
-  source: string | null
-  scheduledDepartureAt: string | null
-  scheduledArrivalAt: string | null
-}
-
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
   whileInView: { opacity: 1, y: 0 },
@@ -60,8 +33,6 @@ const staggerItem = {
 }
 
 export default function IntelligenceWrappedPage() {
-  const [globeAirportNodes, setGlobeAirportNodes] = useState<GlobeAirportNode[]>([])
-  const [globeRouteArcs, setGlobeRouteArcs] = useState<GlobeRouteArc[]>([])
   const data = {
     flights: 18,
     countries: 7,
@@ -119,42 +90,6 @@ export default function IntelligenceWrappedPage() {
   ]
 
   const winRate = Math.round((data.alertsWon / data.alertsTriggered) * 100)
-
-  useEffect(() => {
-    async function loadWrapped() {
-      try {
-        const token = localStorage.getItem("skysirv_token")
-
-        if (!token) return
-
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/intelligence/wrapped/2026`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
-
-        console.log("wrapped status", res.status)
-
-        const text = await res.text()
-        console.log("wrapped raw response", text)
-
-        const json = JSON.parse(text)
-        console.log("wrapped globe payload", json)
-
-        if (!json?.success) return
-
-        setGlobeAirportNodes(json.airportNodes ?? [])
-        setGlobeRouteArcs(json.routeArcs ?? [])
-      } catch (err) {
-        console.error("Failed to load wrapped data", err)
-      }
-    }
-
-    loadWrapped()
-  }, [])
 
   return (
     <div className="relative overflow-hidden bg-white text-slate-900">
@@ -251,10 +186,7 @@ export default function IntelligenceWrappedPage() {
             </p>
           </div>
 
-          <TravelGlobe
-            airportNodes={globeAirportNodes}
-            routeArcs={globeRouteArcs}
-          />
+          <TravelGlobe />
         </motion.div>
       </section>
 
