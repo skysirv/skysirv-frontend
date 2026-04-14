@@ -135,9 +135,11 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
   const [departureDate, setDepartureDate] = useState("")
   const [returnDate, setReturnDate] = useState("")
   const [showDepartureCalendar, setShowDepartureCalendar] = useState(false)
+  const [showReturnCalendar, setShowReturnCalendar] = useState(false)
   const [isMonitoring, setIsMonitoring] = useState(false)
 
   const departureCalendarRef = useRef<HTMLDivElement | null>(null)
+  const returnCalendarRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -145,6 +147,19 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
 
       if (!departureCalendarRef.current.contains(event.target as Node)) {
         setShowDepartureCalendar(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (!returnCalendarRef.current) return
+
+      if (!returnCalendarRef.current.contains(event.target as Node)) {
+        setShowReturnCalendar(false)
       }
     }
 
@@ -202,6 +217,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
       setDepartureDate("")
       setReturnDate("")
       setTripType("oneway")
+      setShowDepartureCalendar(false)
+      setShowReturnCalendar(false)
 
       return
     }
@@ -264,6 +281,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
       setDepartureDate("")
       setReturnDate("")
       setTripType("oneway")
+      setShowDepartureCalendar(false)
+      setShowReturnCalendar(false)
     } catch (error) {
       console.error("Watchlist create request failed", error)
 
@@ -278,9 +297,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md transition-shadow hover:shadow-lg">
-      <h2 className="text-lg font-semibold text-slate-900">
-        Track a Route
-      </h2>
+      <h2 className="text-lg font-semibold text-slate-900">Track a Route</h2>
 
       <p className="mt-1 text-sm text-slate-500">
         Search major airports worldwide and start monitoring airfare intelligence.
@@ -291,8 +308,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
           type="button"
           onClick={() => setTripType("oneway")}
           className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "oneway"
-            ? "bg-slate-900 text-white"
-            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              ? "bg-slate-900 text-white"
+              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
         >
           One-way
@@ -302,8 +319,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
           type="button"
           onClick={() => setTripType("roundtrip")}
           className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "roundtrip"
-            ? "bg-slate-900 text-white"
-            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              ? "bg-slate-900 text-white"
+              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
         >
           Round-trip
@@ -313,8 +330,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
           type="button"
           onClick={() => setTripType("multicity")}
           className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "multicity"
-            ? "bg-slate-900 text-white"
-            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              ? "bg-slate-900 text-white"
+              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
         >
           Multi-city
@@ -415,7 +432,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
             {showDepartureCalendar && (
               <div
                 ref={departureCalendarRef}
-                className="absolute z-30 mt-2 rounded-xl border border-slate-200 bg-white p-3 shadow-xl"
+                className="absolute z-30 mt-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)] backdrop-blur-sm"
               >
                 <DayPicker
                   mode="single"
@@ -427,11 +444,20 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                     day: "rounded-md hover:bg-slate-100 transition",
                     head_cell: "text-xs font-semibold text-slate-500",
                     caption: "text-sm font-semibold text-slate-900",
+                    nav_button: "text-slate-600 hover:text-slate-900",
+                    table: "w-full border-collapse space-y-1",
+                    row: "flex w-full mt-1",
+                    cell: "text-center text-sm p-0 relative",
                   }}
                   onSelect={(date) => {
                     if (!date) return
                     const iso = date.toISOString().split("T")[0]
                     setDepartureDate(iso)
+
+                    if (returnDate && returnDate < iso) {
+                      setReturnDate("")
+                    }
+
                     setShowDepartureCalendar(false)
                   }}
                 />
@@ -440,22 +466,50 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
           </div>
 
           {tripType === "roundtrip" && (
-            <div>
+            <div className="relative">
               <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
                 Return Date
               </label>
 
               <input
-                type="date"
+                type="text"
+                readOnly
                 value={returnDate}
-                min={departureDate || undefined}
-                onChange={(e) => setReturnDate(e.target.value)}
-                onClick={(e) => {
-                  // force open picker on full field click
-                  (e.target as HTMLInputElement).showPicker?.()
-                }}
-                className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+                placeholder="Select date"
+                onClick={() => setShowReturnCalendar((prev) => !prev)}
+                className="w-full cursor-pointer rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
               />
+
+              {showReturnCalendar && (
+                <div
+                  ref={returnCalendarRef}
+                  className="absolute z-30 mt-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)] backdrop-blur-sm"
+                >
+                  <DayPicker
+                    mode="single"
+                    selected={returnDate ? new Date(returnDate) : undefined}
+                    disabled={departureDate ? { before: new Date(departureDate) } : undefined}
+                    className="text-sm"
+                    classNames={{
+                      day_selected: "bg-slate-900 text-white hover:bg-slate-800",
+                      day_today: "border border-slate-400",
+                      day: "rounded-md hover:bg-slate-100 transition",
+                      head_cell: "text-xs font-semibold text-slate-500",
+                      caption: "text-sm font-semibold text-slate-900",
+                      nav_button: "text-slate-600 hover:text-slate-900",
+                      table: "w-full border-collapse space-y-1",
+                      row: "flex w-full mt-1",
+                      cell: "text-center text-sm p-0 relative",
+                    }}
+                    onSelect={(date) => {
+                      if (!date) return
+                      const iso = date.toISOString().split("T")[0]
+                      setReturnDate(iso)
+                      setShowReturnCalendar(false)
+                    }}
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>
