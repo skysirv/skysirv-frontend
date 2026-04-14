@@ -137,6 +137,7 @@ export default function IntelligenceWrappedPage() {
         )
 
         const json = await res.json()
+        console.log("wrapped globe payload", json)
 
         if (!json?.success) return
 
