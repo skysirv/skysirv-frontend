@@ -132,6 +132,27 @@ function AirportPicker({
   )
 }
 
+function formatDateForStorage(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+
+  return `${year}-${month}-${day}`
+}
+
+function formatDateForDisplay(value: string): string {
+  if (!value) return ""
+
+  const [year, month, day] = value.split("-").map(Number)
+  const date = new Date(year, month - 1, day)
+
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  }).format(date)
+}
+
 export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
   const [tripType, setTripType] = useState<"oneway" | "roundtrip" | "multicity">("oneway")
 
@@ -479,7 +500,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                     <input
                       type="text"
                       readOnly
-                      value={segment.date}
+                      value={formatDateForDisplay(segment.date)}
                       placeholder="Select date"
                       onClick={() =>
                         setMultiCityCalendarIndex((prev) => (prev === index ? null : index))
@@ -506,7 +527,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                           }}
                           onSelect={(date) => {
                             if (!date) return
-                            const iso = date.toISOString().split("T")[0]
+                            const iso = formatDateForStorage(date)
 
                             const updated = [...multiCitySegments]
                             updated[index].date = iso
@@ -587,7 +608,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
             <input
               type="text"
               readOnly
-              value={departureDate}
+              value={formatDateForDisplay(departureDate)}
               placeholder="Select date"
               onClick={() => setShowDepartureCalendar((prev) => !prev)}
               className="w-full cursor-pointer rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
@@ -615,7 +636,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                   }}
                   onSelect={(date) => {
                     if (!date) return
-                    const iso = date.toISOString().split("T")[0]
+                    const iso = formatDateForStorage(date)
                     setDepartureDate(iso)
 
                     if (returnDate && returnDate < iso) {
@@ -638,7 +659,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
               <input
                 type="text"
                 readOnly
-                value={returnDate}
+                value={formatDateForDisplay(returnDate)}
                 placeholder="Select date"
                 onClick={() => setShowReturnCalendar((prev) => !prev)}
                 className="w-full cursor-pointer rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
@@ -667,7 +688,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                     }}
                     onSelect={(date) => {
                       if (!date) return
-                      const iso = date.toISOString().split("T")[0]
+                      const iso = formatDateForStorage(date)
                       setReturnDate(iso)
                       setShowReturnCalendar(false)
                     }}
