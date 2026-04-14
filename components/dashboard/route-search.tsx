@@ -167,6 +167,39 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
+  async function createWatchlistRoute({
+    token,
+    origin,
+    destination,
+    date,
+  }: {
+    token: string
+    origin: string
+    destination: string
+    date: string
+  }): Promise<WatchlistRoute> {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/watchlist`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        origin,
+        destination,
+        departureDate: date,
+      }),
+    })
+
+    const data = await res.json().catch(() => null)
+
+    if (!res.ok) {
+      throw new Error(data?.error ?? "Something went wrong while starting route monitoring.")
+    }
+
+    return data as WatchlistRoute
+  }
+
   async function handleMonitorRoute() {
     if (tripType === "multicity") {
       toast({
@@ -236,41 +269,35 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
     setIsMonitoring(true)
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/watchlist`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          origin: normalizedOrigin,
-          destination: normalizedDestination,
-          departureDate,
-        }),
+      const outboundRoute = await createWatchlistRoute({
+        token,
+        origin: normalizedOrigin,
+        destination: normalizedDestination,
+        date: departureDate,
       })
 
-      const data = await res.json().catch(() => null)
-
-      if (!res.ok) {
-        console.error("Failed to create watchlist route", data)
-
-        toast({
-          title: "Could not add route",
-          description:
-            data?.error ?? "Something went wrong while starting route monitoring.",
-        })
-        return
+      if (onRouteAdded) {
+        onRouteAdded(outboundRoute)
       }
 
-      if (onRouteAdded) {
-        onRouteAdded(data)
+      if (tripType === "roundtrip") {
+        const inboundRoute = await createWatchlistRoute({
+          token,
+          origin: normalizedDestination,
+          destination: normalizedOrigin,
+          date: returnDate,
+        })
+
+        if (onRouteAdded) {
+          onRouteAdded(inboundRoute)
+        }
       }
 
       toast({
-        title: tripType === "roundtrip" ? "Round-trip route added" : "Route added",
+        title: tripType === "roundtrip" ? "Round-trip routes added" : "Route added",
         description:
           tripType === "roundtrip"
-            ? "Round-trip monitoring UI is ready. Return-leg backend wiring comes next."
+            ? "Outbound and return monitoring have started."
             : "Route monitoring has started.",
       })
 
@@ -287,8 +314,11 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
       console.error("Watchlist create request failed", error)
 
       toast({
-        title: "Request failed",
-        description: "Something went wrong while contacting the server.",
+        title: "Could not add route",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Something went wrong while starting route monitoring.",
       })
     } finally {
       setIsMonitoring(false)
