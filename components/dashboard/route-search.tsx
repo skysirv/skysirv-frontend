@@ -205,6 +205,13 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
     ])
   }
 
+  function parseStoredDate(value: string): Date | undefined {
+    if (!value) return undefined
+
+    const [year, month, day] = value.split("-").map(Number)
+    return new Date(year, month - 1, day)
+  }
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (!returnCalendarRef.current) return
@@ -515,7 +522,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                       >
                         <DayPicker
                           mode="single"
-                          selected={segment.date ? new Date(segment.date) : undefined}
+                          selected={parseStoredDate(segment.date)}
                           className="text-sm"
                           classNames={{
                             day_selected: "bg-slate-900 text-white hover:bg-slate-800",
@@ -621,7 +628,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
               >
                 <DayPicker
                   mode="single"
-                  selected={departureDate ? new Date(departureDate) : undefined}
+                  selected={parseStoredDate(departureDate)}
                   className="text-sm"
                   classNames={{
                     day_selected: "bg-slate-900 text-white hover:bg-slate-800",
@@ -672,7 +679,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                 >
                   <DayPicker
                     mode="single"
-                    selected={returnDate ? new Date(returnDate) : undefined}
+                    selected={parseStoredDate(returnDate)}
                     disabled={departureDate ? { before: new Date(departureDate) } : undefined}
                     className="text-sm"
                     classNames={{
