@@ -136,7 +136,12 @@ export default function IntelligenceWrappedPage() {
           }
         )
 
-        const json = await res.json()
+        console.log("wrapped status", res.status)
+
+        const text = await res.text()
+        console.log("wrapped raw response", text)
+
+        const json = JSON.parse(text)
         console.log("wrapped globe payload", json)
 
         if (!json?.success) return
