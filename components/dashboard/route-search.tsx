@@ -175,6 +175,9 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
     },
   ])
   const [multiCityCalendarIndex, setMultiCityCalendarIndex] = useState<number | null>(null)
+  const [departureCalendarMonth, setDepartureCalendarMonth] = useState<Date | undefined>(undefined)
+  const [returnCalendarMonth, setReturnCalendarMonth] = useState<Date | undefined>(undefined)
+  const [multiCityCalendarMonth, setMultiCityCalendarMonth] = useState<Date | undefined>(undefined)
 
   const departureCalendarRef = useRef<HTMLDivElement | null>(null)
   const returnCalendarRef = useRef<HTMLDivElement | null>(null)
@@ -478,6 +481,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                   }}
                 />
 
+                //Multi-city leg//
+
                 <AirportPicker
                   label={`Leg ${index + 1} Destination`}
                   placeholder="Search airport"
@@ -522,7 +527,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                       >
                         <DayPicker
                           mode="single"
-                          month={parseStoredDate(segment.date)}
+                          month={multiCityCalendarMonth ?? parseStoredDate(segment.date)}
+                          onMonthChange={setMultiCityCalendarMonth}
                           selected={parseStoredDate(segment.date)}
                           className="text-sm"
                           classNames={{
@@ -608,6 +614,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
             excludeCode={selectedOrigin?.code ?? null}
           />
 
+          //Departure date//
+
           <div className="relative">
             <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
               Departure Date
@@ -629,7 +637,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
               >
                 <DayPicker
                   mode="single"
-                  month={parseStoredDate(departureDate)}
+                  month={departureCalendarMonth ?? parseStoredDate(departureDate)}
+                  onMonthChange={setDepartureCalendarMonth}
                   selected={parseStoredDate(departureDate)}
                   className="text-sm"
                   classNames={{
@@ -659,6 +668,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
             )}
           </div>
 
+          //Return date - only for round-trip//
+
           {tripType === "roundtrip" && (
             <div className="relative">
               <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
@@ -681,7 +692,12 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                 >
                   <DayPicker
                     mode="range"
-                    month={parseStoredDate(returnDate) ?? parseStoredDate(departureDate)}
+                    month={
+                      returnCalendarMonth ??
+                      parseStoredDate(returnDate) ??
+                      parseStoredDate(departureDate)
+                    }
+                    onMonthChange={setReturnCalendarMonth}
                     selected={
                       departureDate
                         ? {
