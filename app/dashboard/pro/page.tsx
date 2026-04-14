@@ -223,6 +223,9 @@ async function fetchAvailableWrappedYears(token: string) {
         )
 
         const data = await res.json().catch(() => null)
+        console.log("WRAPPED RESPONSE:", data)
+        console.log("AIRPORT NODES:", data?.airportNodes)
+        console.log("ROUTE ARCS:", data?.routeArcs)
 
         if (res.ok && data?.success && data?.wrapped) {
           return year
