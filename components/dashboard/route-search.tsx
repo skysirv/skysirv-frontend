@@ -692,6 +692,10 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                       parseStoredDate(departureDate)
                     }
                     onMonthChange={setReturnCalendarMonth}
+                    numberOfMonths={2}
+                    pagedNavigation
+                    showOutsideDays
+                    fixedWeeks
                     selected={
                       departureDate
                         ? {
@@ -703,6 +707,9 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                     disabled={departureDate ? { before: parseStoredDate(departureDate)! } : undefined}
                     className="text-sm"
                     classNames={{
+                      months: "flex flex-col gap-4 sm:flex-row sm:gap-8",
+                      month: "space-y-4",
+                      caption_label: "text-sm font-semibold text-slate-900",
                       day_selected: "bg-slate-900 text-white hover:bg-slate-800",
                       day_today: "border border-slate-400",
                       day: "rounded-md hover:bg-slate-100 transition",
