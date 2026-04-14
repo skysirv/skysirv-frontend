@@ -522,6 +522,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                       >
                         <DayPicker
                           mode="single"
+                          month={parseStoredDate(segment.date)}
                           selected={parseStoredDate(segment.date)}
                           className="text-sm"
                           classNames={{
@@ -628,6 +629,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
               >
                 <DayPicker
                   mode="single"
+                  month={parseStoredDate(departureDate)}
                   selected={parseStoredDate(departureDate)}
                   className="text-sm"
                   classNames={{
@@ -679,6 +681,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                 >
                   <DayPicker
                     mode="single"
+                    month={parseStoredDate(returnDate)}
                     selected={parseStoredDate(returnDate)}
                     disabled={departureDate ? { before: new Date(departureDate) } : undefined}
                     className="text-sm"
