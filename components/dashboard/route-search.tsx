@@ -420,6 +420,14 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                 <DayPicker
                   mode="single"
                   selected={departureDate ? new Date(departureDate) : undefined}
+                  className="text-sm"
+                  classNames={{
+                    day_selected: "bg-slate-900 text-white hover:bg-slate-800",
+                    day_today: "border border-slate-400",
+                    day: "rounded-md hover:bg-slate-100 transition",
+                    head_cell: "text-xs font-semibold text-slate-500",
+                    caption: "text-sm font-semibold text-slate-900",
+                  }}
                   onSelect={(date) => {
                     if (!date) return
                     const iso = date.toISOString().split("T")[0]
