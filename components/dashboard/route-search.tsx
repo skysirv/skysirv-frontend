@@ -137,6 +137,21 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
   const [showDepartureCalendar, setShowDepartureCalendar] = useState(false)
   const [isMonitoring, setIsMonitoring] = useState(false)
 
+  const departureCalendarRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (!departureCalendarRef.current) return
+
+      if (!departureCalendarRef.current.contains(event.target as Node)) {
+        setShowDepartureCalendar(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
   async function handleMonitorRoute() {
     if (tripType === "multicity") {
       toast({
@@ -398,7 +413,10 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
             />
 
             {showDepartureCalendar && (
-              <div className="absolute z-30 mt-2 rounded-xl border border-slate-200 bg-white p-3 shadow-xl">
+              <div
+                ref={departureCalendarRef}
+                className="absolute z-30 mt-2 rounded-xl border border-slate-200 bg-white p-3 shadow-xl"
+              >
                 <DayPicker
                   mode="single"
                   selected={departureDate ? new Date(departureDate) : undefined}
