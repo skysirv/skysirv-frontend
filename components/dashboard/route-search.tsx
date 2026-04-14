@@ -137,19 +137,19 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
   const [destinationQuery, setDestinationQuery] = useState("")
   const [selectedOrigin, setSelectedOrigin] = useState<AirportOption | null>(null)
   const [selectedDestination, setSelectedDestination] = useState<AirportOption | null>(null)
-
   const [departureDate, setDepartureDate] = useState("")
   const [returnDate, setReturnDate] = useState("")
   const [showDepartureCalendar, setShowDepartureCalendar] = useState(false)
   const [showReturnCalendar, setShowReturnCalendar] = useState(false)
   const [isMonitoring, setIsMonitoring] = useState(false)
-
   const [multiCitySegments, setMultiCitySegments] = useState<MultiCitySegment[]>([
     { origin: null, destination: null, date: "" },
   ])
+  const [multiCityCalendarIndex, setMultiCityCalendarIndex] = useState<number | null>(null)
 
   const departureCalendarRef = useRef<HTMLDivElement | null>(null)
   const returnCalendarRef = useRef<HTMLDivElement | null>(null)
+  const multiCityCalendarRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -174,6 +174,19 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
 
       if (!returnCalendarRef.current.contains(event.target as Node)) {
         setShowReturnCalendar(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (!multiCityCalendarRef.current) return
+
+      if (!multiCityCalendarRef.current.contains(event.target as Node)) {
+        setMultiCityCalendarIndex(null)
       }
     }
 
@@ -434,16 +447,53 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                     Leg {index + 1} Departure Date
                   </label>
 
-                  <input
-                    type="date"
-                    value={segment.date}
-                    onChange={(e) => {
-                      const updated = [...multiCitySegments]
-                      updated[index].date = e.target.value
-                      setMultiCitySegments(updated)
-                    }}
-                    className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
-                  />
+                  <div className="relative">
+                    <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                      Leg {index + 1} Departure Date
+                    </label>
+
+                    <input
+                      type="text"
+                      readOnly
+                      value={segment.date}
+                      placeholder="Select date"
+                      onClick={() =>
+                        setMultiCityCalendarIndex((prev) => (prev === index ? null : index))
+                      }
+                      className="w-full cursor-pointer rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+                    />
+
+                    {multiCityCalendarIndex === index && (
+                      <div
+                        ref={multiCityCalendarRef}
+                        className="absolute z-30 mt-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)]"
+                      >
+                        <DayPicker
+                          mode="single"
+                          selected={segment.date ? new Date(segment.date) : undefined}
+                          className="text-sm"
+                          classNames={{
+                            day_selected: "bg-slate-900 text-white hover:bg-slate-800",
+                            day_today: "border border-slate-400",
+                            day: "rounded-md hover:bg-slate-100 transition",
+                            head_cell: "text-xs font-semibold text-slate-500",
+                            caption: "text-sm font-semibold text-slate-900",
+                            nav_button: "text-slate-600 hover:text-slate-900",
+                          }}
+                          onSelect={(date) => {
+                            if (!date) return
+                            const iso = date.toISOString().split("T")[0]
+
+                            const updated = [...multiCitySegments]
+                            updated[index].date = iso
+                            setMultiCitySegments(updated)
+
+                            setMultiCityCalendarIndex(null)
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
