@@ -1370,49 +1370,12 @@ export default function ProDashboardPage() {
                   />
                 </motion.div>
 
-                <motion.div {...fadeUp} className="mt-14">
-                  <div className="mb-8 text-center">
-                    <p className="text-sm font-medium uppercase tracking-[0.16em] text-slate-500">
-                      Route Segment Intelligence
-                    </p>
-                    <h3 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-                      Terminal-by-terminal trip flow
-                    </h3>
-                    <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-                      Follow how you moved through each leg of your journey with terminal,
-                      gate, timing, aircraft, and cabin-level detail pulled directly from
-                      your wrapped travel history.
-                    </p>
-                  </div>
-
-                  {wrappedLoading ? (
-                    <div className="grid gap-4">
-                      <SegmentSkeleton />
-                      <SegmentSkeleton />
-                    </div>
-                  ) : sortedSegments.length === 0 ? (
-                    <div className="overflow-hidden rounded-[1.75rem] border border-dashed border-slate-300 bg-white/80 p-10 text-center shadow-sm">
-                      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500 shadow-inner">
-                        ⌁
-                      </div>
-
-                      <h4 className="text-lg font-semibold text-slate-900">
-                        No route segments available for {selectedYear}
-                      </h4>
-
-                      <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-                        Once completed trips exist for this wrapped year, your terminals,
-                        gates, aircraft, and segment flow will appear here automatically.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="grid gap-5">
-                      {sortedSegments.map((segment) => (
-                        <SegmentCard key={segment.id} segment={segment} />
-                      ))}
-                    </div>
-                  )}
-                </motion.div>
+                <SegmentIntelligencePanel
+                  wrappedLoading={wrappedLoading}
+                  selectedYear={selectedYear}
+                  sortedSegments={sortedSegments}
+                  fadeUp={fadeUp}
+                />
               </section>
 
               <motion.section
