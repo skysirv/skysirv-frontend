@@ -85,10 +85,14 @@ export default function SegmentIntelligencePanel({
                     </p>
                 </div>
             ) : (
-                <div className="grid gap-5">
-                    {sortedSegments.map((segment) => (
-                        <SegmentCard key={segment.id} segment={segment} />
-                    ))}
+                <div className="overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white/90 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
+                    <div className="max-h-[520px] overflow-y-auto">
+                        <div className="divide-y divide-slate-200">
+                            {sortedSegments.map((segment) => (
+                                <SegmentRow key={segment.id} segment={segment} />
+                            ))}
+                        </div>
+                    </div>
                 </div>
             )}
         </motion.div>
@@ -267,6 +271,34 @@ function SegmentCard({ segment }: { segment: WrappedSegment }) {
                 </div>
             </div>
         </motion.div>
+    )
+}
+
+function SegmentRow({ segment }: { segment: WrappedSegment }) {
+    const date = formatSegmentDateTime(
+        segment.actual_departure_at ?? segment.scheduled_departure_at
+    )
+
+    const route = `${segment.departure_airport_code ?? "—"} → ${segment.arrival_airport_code ?? "—"}`
+
+    const flight = [segment.airline_code, segment.flight_number]
+        .filter(Boolean)
+        .join(" ") || "—"
+
+    const aircraft = segment.aircraft_type || "—"
+
+    return (
+        <div className="flex items-center justify-between px-5 py-4 hover:bg-slate-50 transition cursor-pointer">
+            <div className="flex flex-col">
+                <p className="text-sm font-semibold text-slate-900">{route}</p>
+                <p className="text-xs text-slate-500">{date}</p>
+            </div>
+
+            <div className="hidden sm:flex flex-col items-end">
+                <p className="text-sm font-medium text-slate-700">{flight}</p>
+                <p className="text-xs text-slate-500">{aircraft}</p>
+            </div>
+        </div>
     )
 }
 
