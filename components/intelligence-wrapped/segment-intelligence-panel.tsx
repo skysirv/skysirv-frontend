@@ -110,19 +110,34 @@ export default function SegmentIntelligencePanel({
         </div>
       )}
 
+      {/* SEGMENT DETAIL MODAL */}
       {selectedSegment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
+          <div className="w-full max-w-2xl rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-[0_24px_80px_rgba(15,23,42,0.18)] sm:p-7">
 
-            <h3 className="text-lg font-semibold text-slate-900">
-              {selectedSegment.departure_airport_code ?? "—"} →{" "}
-              {selectedSegment.arrival_airport_code ?? "—"}
-            </h3>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">
+                  Segment
+                </p>
 
-            <p className="mt-2 text-sm text-slate-500">
-              Flight {selectedSegment.airline_code ?? "—"}{" "}
-              {selectedSegment.flight_number ?? ""}
-            </p>
+                <h3 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900">
+                  {selectedSegment.departure_airport_code ?? "—"} →{" "}
+                  {selectedSegment.arrival_airport_code ?? "—"}
+                </h3>
+              </div>
+
+              <div className="text-right">
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">
+                  Flight
+                </p>
+
+                <p className="mt-1 text-sm font-semibold text-slate-700">
+                  {selectedSegment.airline_code ?? "—"}{" "}
+                  {selectedSegment.flight_number ?? ""}
+                </p>
+              </div>
+            </div>
 
             <div className="mt-6 flex justify-end">
               <button
