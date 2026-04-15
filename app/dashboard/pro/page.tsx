@@ -18,6 +18,7 @@ import OpportunitySkeleton from "@/components/dashboard/opportunity-skeleton"
 import MarketSignalsSkeleton from "@/components/dashboard/market-signals-skeleton"
 
 import TravelGlobe from "@/components/intelligence-wrapped/travel-globe"
+import SegmentIntelligencePanel from "@/components/intelligence-wrapped/segment-intelligence-panel"
 import { toast } from "@/components/ui/Toasts/use-toast"
 
 const fadeUp = {
