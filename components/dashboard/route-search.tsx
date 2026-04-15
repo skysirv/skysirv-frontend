@@ -778,24 +778,24 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                     day_range_end: "bg-slate-900 text-white rounded-md",
                     day_range_middle: "bg-slate-100 text-slate-900",
                   }}
-                  onSelect={(range) => {
-                    if (!range?.from) return
+                  onSelect={(range, selectedDay) => {
+                    if (!selectedDay) return
 
-                    const fromIso = formatDateForStorage(range.from)
-                    const toIso = range.to ? formatDateForStorage(range.to) : ""
+                    const selectedIso = formatDateForStorage(selectedDay)
 
                     if (roundtripSelectionPhase === "departure") {
-                      setDepartureDate(fromIso)
+                      setDepartureDate(selectedIso)
                       setReturnDate("")
+                      setHoveredDate(undefined)
                       setRoundtripSelectionPhase("return")
-                      setRoundtripCalendarMonth(parseStoredDate(fromIso))
+                      setRoundtripCalendarMonth(parseStoredDate(selectedIso))
                       return
                     }
 
-                    if (!range.to) return
+                    if (departureDate && selectedIso < departureDate) return
 
-                    setDepartureDate(fromIso)
-                    setReturnDate(toIso)
+                    setReturnDate(selectedIso)
+                    setHoveredDate(undefined)
                     setShowRoundtripCalendar(false)
                   }}
                   onDayMouseEnter={(date) => {
