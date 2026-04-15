@@ -153,6 +153,13 @@ function formatDateForDisplay(value: string): string {
   }).format(date)
 }
 
+function parseStoredDate(value: string): Date | undefined {
+  if (!value) return undefined
+
+  const [year, month, day] = value.split("-").map(Number)
+  return new Date(year, month - 1, day)
+}
+
 export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
   const [tripType, setTripType] = useState<"oneway" | "roundtrip" | "multicity">("oneway")
 
@@ -160,13 +167,14 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
   const [destinationQuery, setDestinationQuery] = useState("")
   const [selectedOrigin, setSelectedOrigin] = useState<AirportOption | null>(null)
   const [selectedDestination, setSelectedDestination] = useState<AirportOption | null>(null)
+
   const [departureDate, setDepartureDate] = useState("")
   const [returnDate, setReturnDate] = useState("")
   const [showDepartureCalendar, setShowDepartureCalendar] = useState(false)
-  const [showReturnCalendar, setShowReturnCalendar] = useState(false)
   const [showRoundtripCalendar, setShowRoundtripCalendar] = useState(false)
   const [roundtripSelectionPhase, setRoundtripSelectionPhase] = useState<"departure" | "return">("departure")
   const [isMonitoring, setIsMonitoring] = useState(false)
+
   const [multiCitySegments, setMultiCitySegments] = useState<MultiCitySegment[]>([
     {
       origin: null,
@@ -177,12 +185,12 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
     },
   ])
   const [multiCityCalendarIndex, setMultiCityCalendarIndex] = useState<number | null>(null)
+
   const [departureCalendarMonth, setDepartureCalendarMonth] = useState<Date | undefined>(undefined)
-  const [returnCalendarMonth, setReturnCalendarMonth] = useState<Date | undefined>(undefined)
+  const [roundtripCalendarMonth, setRoundtripCalendarMonth] = useState<Date | undefined>(undefined)
   const [multiCityCalendarMonth, setMultiCityCalendarMonth] = useState<Date | undefined>(undefined)
 
   const departureCalendarRef = useRef<HTMLDivElement | null>(null)
-  const returnCalendarRef = useRef<HTMLDivElement | null>(null)
   const roundtripCalendarRef = useRef<HTMLDivElement | null>(null)
   const multiCityCalendarRef = useRef<HTMLDivElement | null>(null)
 
@@ -192,38 +200,6 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
 
       if (!departureCalendarRef.current.contains(event.target as Node)) {
         setShowDepartureCalendar(false)
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
-
-  function resetMultiCitySegments() {
-    setMultiCitySegments([
-      {
-        origin: null,
-        destination: null,
-        originQuery: "",
-        destinationQuery: "",
-        date: "",
-      },
-    ])
-  }
-
-  function parseStoredDate(value: string): Date | undefined {
-    if (!value) return undefined
-
-    const [year, month, day] = value.split("-").map(Number)
-    return new Date(year, month - 1, day)
-  }
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (!returnCalendarRef.current) return
-
-      if (!returnCalendarRef.current.contains(event.target as Node)) {
-        setShowReturnCalendar(false)
       }
     }
 
@@ -256,6 +232,20 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
+
+  function resetMultiCitySegments() {
+    setMultiCitySegments([
+      {
+        origin: null,
+        destination: null,
+        originQuery: "",
+        destinationQuery: "",
+        date: "",
+      },
+    ])
+    setMultiCityCalendarIndex(null)
+    setMultiCityCalendarMonth(undefined)
+  }
 
   async function createWatchlistRoute({
     token,
@@ -295,7 +285,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
       toast({
         title: "Multi-city coming next",
         description:
-          "The new multi-city route mode is now visible in the UI. Segment entry and backend monitoring wiring are the next step.",
+          "Multi-city segment entry is now active in the UI. Backend monitoring for each leg is the next step.",
       })
       return
     }
@@ -341,7 +331,10 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
       setReturnDate("")
       setTripType("oneway")
       setShowDepartureCalendar(false)
-      setShowReturnCalendar(false)
+      setShowRoundtripCalendar(false)
+      setRoundtripSelectionPhase("departure")
+      setDepartureCalendarMonth(undefined)
+      setRoundtripCalendarMonth(undefined)
 
       return
     }
@@ -399,7 +392,10 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
       setReturnDate("")
       setTripType("oneway")
       setShowDepartureCalendar(false)
-      setShowReturnCalendar(false)
+      setShowRoundtripCalendar(false)
+      setRoundtripSelectionPhase("departure")
+      setDepartureCalendarMonth(undefined)
+      setRoundtripCalendarMonth(undefined)
     } catch (error) {
       console.error("Watchlist create request failed", error)
 
@@ -431,8 +427,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
             setTripType("oneway")
           }}
           className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "oneway"
-            ? "bg-slate-900 text-white"
-            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              ? "bg-slate-900 text-white"
+              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
         >
           One-way
@@ -445,8 +441,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
             setTripType("roundtrip")
           }}
           className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "roundtrip"
-            ? "bg-slate-900 text-white"
-            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              ? "bg-slate-900 text-white"
+              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
         >
           Round-trip
@@ -456,8 +452,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
           type="button"
           onClick={() => setTripType("multicity")}
           className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "multicity"
-            ? "bg-slate-900 text-white"
-            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              ? "bg-slate-900 text-white"
+              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
         >
           Multi-city
@@ -471,8 +467,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
           </div>
 
           <p className="mt-2 text-sm text-slate-600">
-            Build a multi-city journey with stopovers along the way.
-            Track pricing across every leg — from departure to final destination.
+            Build a multi-city journey with stopovers along the way. Track pricing across every leg — from departure to final destination.
           </p>
 
           <div className="mt-4 space-y-4">
@@ -517,56 +512,54 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                   excludeCode={segment.origin?.code ?? null}
                 />
 
-                <div>
-                  <div className="relative">
-                    <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                      Leg {index + 1} Departure Date
-                    </label>
+                <div className="relative">
+                  <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    Leg {index + 1} Departure Date
+                  </label>
 
-                    <input
-                      type="text"
-                      readOnly
-                      value={formatDateForDisplay(segment.date)}
-                      placeholder="Select date"
-                      onClick={() =>
-                        setMultiCityCalendarIndex((prev) => (prev === index ? null : index))
-                      }
-                      className="w-full cursor-pointer rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
-                    />
+                  <input
+                    type="text"
+                    readOnly
+                    value={formatDateForDisplay(segment.date)}
+                    placeholder="Select date"
+                    onClick={() =>
+                      setMultiCityCalendarIndex((prev) => (prev === index ? null : index))
+                    }
+                    className="w-full cursor-pointer rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+                  />
 
-                    {multiCityCalendarIndex === index && (
-                      <div
-                        ref={multiCityCalendarRef}
-                        className="absolute z-30 mt-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)]"
-                      >
-                        <DayPicker
-                          mode="single"
-                          month={multiCityCalendarMonth ?? parseStoredDate(segment.date)}
-                          onMonthChange={setMultiCityCalendarMonth}
-                          selected={parseStoredDate(segment.date)}
-                          className="text-sm"
-                          classNames={{
-                            day_selected: "bg-slate-900 text-white hover:bg-slate-800",
-                            day_today: "border border-slate-400",
-                            day: "rounded-md hover:bg-slate-100 transition",
-                            head_cell: "text-xs font-semibold text-slate-500",
-                            caption: "text-sm font-semibold text-slate-900",
-                            nav_button: "text-slate-600 hover:text-slate-900",
-                          }}
-                          onSelect={(date) => {
-                            if (!date) return
-                            const iso = formatDateForStorage(date)
+                  {multiCityCalendarIndex === index && (
+                    <div
+                      ref={multiCityCalendarRef}
+                      className="absolute z-30 mt-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)]"
+                    >
+                      <DayPicker
+                        mode="single"
+                        month={multiCityCalendarMonth ?? parseStoredDate(segment.date)}
+                        onMonthChange={setMultiCityCalendarMonth}
+                        selected={parseStoredDate(segment.date)}
+                        className="text-sm"
+                        classNames={{
+                          day_selected: "bg-slate-900 text-white hover:bg-slate-800",
+                          day_today: "border border-slate-400",
+                          day: "rounded-md hover:bg-slate-100 transition",
+                          head_cell: "text-xs font-semibold text-slate-500",
+                          caption: "text-sm font-semibold text-slate-900",
+                          nav_button: "text-slate-600 hover:text-slate-900",
+                        }}
+                        onSelect={(date) => {
+                          if (!date) return
+                          const iso = formatDateForStorage(date)
 
-                            const updated = [...multiCitySegments]
-                            updated[index].date = iso
-                            setMultiCitySegments(updated)
+                          const updated = [...multiCitySegments]
+                          updated[index].date = iso
+                          setMultiCitySegments(updated)
 
-                            setMultiCityCalendarIndex(null)
-                          }}
-                        />
-                      </div>
-                    )}
-                  </div>
+                          setMultiCityCalendarIndex(null)
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -582,7 +575,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                     originQuery: "",
                     destinationQuery: "",
                     date: "",
-                  }
+                  },
                 ])
               }
               className="text-sm font-semibold text-slate-700 hover:text-slate-900"
@@ -592,157 +585,80 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
           </div>
         </div>
       ) : (
-        <div
-          className={`mt-6 grid gap-4 ${tripType === "roundtrip" ? "md:grid-cols-4" : "md:grid-cols-3"
-            }`}
-        >
-          <AirportPicker
-            label="Origin"
-            placeholder="Search by airport, city, or code"
-            query={originQuery}
-            selectedAirport={selectedOrigin}
-            onQueryChange={(value) => {
-              setOriginQuery(value)
-              setSelectedOrigin(null)
-            }}
-            onSelect={(airport) => {
-              setSelectedOrigin(airport)
-              setOriginQuery(`${airport.city} (${airport.code})`)
-            }}
-            excludeCode={selectedDestination?.code ?? null}
-          />
-
-          <AirportPicker
-            label="Destination"
-            placeholder="Search by airport, city, or code"
-            query={destinationQuery}
-            selectedAirport={selectedDestination}
-            onQueryChange={(value) => {
-              setDestinationQuery(value)
-              setSelectedDestination(null)
-            }}
-            onSelect={(airport) => {
-              setSelectedDestination(airport)
-              setDestinationQuery(`${airport.city} (${airport.code})`)
-            }}
-            excludeCode={selectedOrigin?.code ?? null}
-          />
-
-          <div className="relative">
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-              Departure Date
-            </label>
-
-            <input
-              type="text"
-              readOnly
-              value={formatDateForDisplay(departureDate)}
-              placeholder="Select date"
-              onClick={() => {
-                if (tripType === "roundtrip") {
-                  setRoundtripSelectionPhase("departure")
-                  setReturnCalendarMonth(
-                    parseStoredDate(departureDate) ?? parseStoredDate(returnDate)
-                  )
-                  setShowRoundtripCalendar(true)
-                  return
-                }
-
-                setShowDepartureCalendar((prev) => !prev)
+        <div className="relative mt-6">
+          <div
+            className={`grid gap-4 ${tripType === "roundtrip" ? "md:grid-cols-4" : "md:grid-cols-3"
+              }`}
+          >
+            <AirportPicker
+              label="Origin"
+              placeholder="Search by airport, city, or code"
+              query={originQuery}
+              selectedAirport={selectedOrigin}
+              onQueryChange={(value) => {
+                setOriginQuery(value)
+                setSelectedOrigin(null)
               }}
-              className="w-full cursor-pointer rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+              onSelect={(airport) => {
+                setSelectedOrigin(airport)
+                setOriginQuery(`${airport.city} (${airport.code})`)
+              }}
+              excludeCode={selectedDestination?.code ?? null}
             />
 
-            {showDepartureCalendar && (
-              <div
-                ref={departureCalendarRef}
-                className="absolute z-30 mt-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)] backdrop-blur-sm"
-              >
-                <DayPicker
-                  mode="single"
-                  month={departureCalendarMonth ?? parseStoredDate(departureDate)}
-                  onMonthChange={setDepartureCalendarMonth}
-                  selected={parseStoredDate(departureDate)}
-                  className="text-sm"
-                  classNames={{
-                    day_selected: "bg-slate-900 text-white hover:bg-slate-800",
-                    day_today: "border border-slate-400",
-                    day: "rounded-md hover:bg-slate-100 transition",
-                    head_cell: "text-xs font-semibold text-slate-500",
-                    caption: "text-sm font-semibold text-slate-900",
-                    nav_button: "text-slate-600 hover:text-slate-900",
-                    table: "w-full border-collapse space-y-1",
-                    row: "flex w-full mt-1",
-                    cell: "text-center text-sm p-0 relative",
-                  }}
-                  onSelect={(date) => {
-                    if (!date) return
-                    const iso = formatDateForStorage(date)
-                    setDepartureDate(iso)
+            <AirportPicker
+              label="Destination"
+              placeholder="Search by airport, city, or code"
+              query={destinationQuery}
+              selectedAirport={selectedDestination}
+              onQueryChange={(value) => {
+                setDestinationQuery(value)
+                setSelectedDestination(null)
+              }}
+              onSelect={(airport) => {
+                setSelectedDestination(airport)
+                setDestinationQuery(`${airport.city} (${airport.code})`)
+              }}
+              excludeCode={selectedOrigin?.code ?? null}
+            />
 
-                    if (returnDate && returnDate < iso) {
-                      setReturnDate("")
-                    }
-
-                    setShowDepartureCalendar(false)
-                  }}
-                />
-              </div>
-            )}
-          </div>
-
-          {tripType === "roundtrip" && (
             <div className="relative">
               <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                Return Date
+                Departure Date
               </label>
 
               <input
                 type="text"
                 readOnly
-                value={formatDateForDisplay(returnDate)}
+                value={formatDateForDisplay(departureDate)}
                 placeholder="Select date"
                 onClick={() => {
-                  setRoundtripSelectionPhase("return")
-                  setReturnCalendarMonth(
-                    parseStoredDate(returnDate) ?? parseStoredDate(departureDate)
-                  )
-                  setShowRoundtripCalendar(true)
+                  if (tripType === "roundtrip") {
+                    setRoundtripSelectionPhase("departure")
+                    setRoundtripCalendarMonth(
+                      parseStoredDate(departureDate) ?? parseStoredDate(returnDate)
+                    )
+                    setShowRoundtripCalendar(true)
+                    return
+                  }
+
+                  setShowDepartureCalendar((prev) => !prev)
                 }}
                 className="w-full cursor-pointer rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
               />
 
-              {showReturnCalendar && (
+              {showDepartureCalendar && (
                 <div
-                  ref={returnCalendarRef}
+                  ref={departureCalendarRef}
                   className="absolute z-30 mt-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)] backdrop-blur-sm"
                 >
                   <DayPicker
-                    mode="range"
-                    month={
-                      returnCalendarMonth ??
-                      parseStoredDate(returnDate) ??
-                      parseStoredDate(departureDate)
-                    }
-                    onMonthChange={setReturnCalendarMonth}
-                    numberOfMonths={2}
-                    pagedNavigation
-                    showOutsideDays
-                    fixedWeeks
-                    selected={
-                      departureDate
-                        ? {
-                          from: parseStoredDate(departureDate),
-                          to: parseStoredDate(returnDate),
-                        }
-                        : undefined
-                    }
-                    disabled={departureDate ? { before: parseStoredDate(departureDate)! } : undefined}
+                    mode="single"
+                    month={departureCalendarMonth ?? parseStoredDate(departureDate)}
+                    onMonthChange={setDepartureCalendarMonth}
+                    selected={parseStoredDate(departureDate)}
                     className="text-sm"
                     classNames={{
-                      months: "flex flex-col gap-4 sm:flex-row sm:gap-8",
-                      month: "space-y-4",
-                      caption_label: "text-sm font-semibold text-slate-900",
                       day_selected: "bg-slate-900 text-white hover:bg-slate-800",
                       day_today: "border border-slate-400",
                       day: "rounded-md hover:bg-slate-100 transition",
@@ -753,16 +669,129 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                       row: "flex w-full mt-1",
                       cell: "text-center text-sm p-0 relative",
                     }}
-                    onSelect={(range) => {
-                      if (!range?.to) return
+                    onSelect={(date) => {
+                      if (!date) return
+                      const iso = formatDateForStorage(date)
+                      setDepartureDate(iso)
 
-                      const iso = formatDateForStorage(range.to)
-                      setReturnDate(iso)
-                      setShowReturnCalendar(false)
+                      if (returnDate && returnDate < iso) {
+                        setReturnDate("")
+                      }
+
+                      setShowDepartureCalendar(false)
                     }}
                   />
                 </div>
               )}
+            </div>
+
+            {tripType === "roundtrip" && (
+              <div>
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  Return Date
+                </label>
+
+                <input
+                  type="text"
+                  readOnly
+                  value={formatDateForDisplay(returnDate)}
+                  placeholder="Select date"
+                  onClick={() => {
+                    setRoundtripSelectionPhase("return")
+                    setRoundtripCalendarMonth(
+                      parseStoredDate(departureDate) ?? parseStoredDate(returnDate)
+                    )
+                    setShowRoundtripCalendar(true)
+                  }}
+                  className="w-full cursor-pointer rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+                />
+              </div>
+            )}
+          </div>
+
+          {tripType === "roundtrip" && showRoundtripCalendar && (
+            <div
+              ref={roundtripCalendarRef}
+              className="absolute right-0 top-full z-40 mt-3"
+            >
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)] backdrop-blur-sm">
+                <div className="mb-3 flex items-center justify-between">
+                  <div className="text-sm font-semibold text-slate-900">
+                    {roundtripSelectionPhase === "departure"
+                      ? "Select departure date"
+                      : "Select return date"}
+                  </div>
+
+                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    {roundtripSelectionPhase === "departure" ? "Step 1 of 2" : "Step 2 of 2"}
+                  </div>
+                </div>
+
+                <DayPicker
+                  mode="range"
+                  month={
+                    roundtripCalendarMonth ??
+                    parseStoredDate(departureDate) ??
+                    parseStoredDate(returnDate)
+                  }
+                  onMonthChange={setRoundtripCalendarMonth}
+                  numberOfMonths={2}
+                  pagedNavigation
+                  showOutsideDays
+                  fixedWeeks
+                  selected={
+                    departureDate
+                      ? {
+                        from: parseStoredDate(departureDate),
+                        to: parseStoredDate(returnDate),
+                      }
+                      : undefined
+                  }
+                  disabled={
+                    roundtripSelectionPhase === "return" && departureDate
+                      ? { before: parseStoredDate(departureDate)! }
+                      : undefined
+                  }
+                  className="text-sm"
+                  classNames={{
+                    months: "flex flex-col gap-4 sm:flex-row sm:gap-8",
+                    month: "space-y-4",
+                    caption_label: "text-sm font-semibold text-slate-900",
+                    day_selected: "bg-slate-900 text-white hover:bg-slate-800",
+                    day_today: "border border-slate-400",
+                    day: "rounded-md hover:bg-slate-100 transition",
+                    head_cell: "text-xs font-semibold text-slate-500",
+                    caption: "text-sm font-semibold text-slate-900",
+                    nav_button: "text-slate-600 hover:text-slate-900",
+                    table: "w-full border-collapse space-y-1",
+                    row: "flex w-full mt-1",
+                    cell: "text-center text-sm p-0 relative",
+                    day_range_start: "bg-slate-900 text-white rounded-md",
+                    day_range_end: "bg-slate-900 text-white rounded-md",
+                    day_range_middle: "bg-slate-100 text-slate-900",
+                  }}
+                  onSelect={(range) => {
+                    if (!range?.from) return
+
+                    const fromIso = formatDateForStorage(range.from)
+                    const toIso = range.to ? formatDateForStorage(range.to) : ""
+
+                    if (roundtripSelectionPhase === "departure") {
+                      setDepartureDate(fromIso)
+                      setReturnDate("")
+                      setRoundtripSelectionPhase("return")
+                      setRoundtripCalendarMonth(parseStoredDate(fromIso))
+                      return
+                    }
+
+                    if (!range.to) return
+
+                    setDepartureDate(fromIso)
+                    setReturnDate(toIso)
+                    setShowRoundtripCalendar(false)
+                  }}
+                />
+              </div>
             </div>
           )}
         </div>
@@ -775,84 +804,6 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
       >
         {isMonitoring ? "Monitoring..." : "Start Monitoring"}
       </button>
-
-      {tripType === "roundtrip" && showRoundtripCalendar && (
-        <div
-          ref={roundtripCalendarRef}
-          className="relative mt-4"
-        >
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)] backdrop-blur-sm">
-            <div className="mb-3 flex items-center justify-between">
-              <div className="text-sm font-semibold text-slate-900">
-                {roundtripSelectionPhase === "departure"
-                  ? "Select departure date"
-                  : "Select return date"}
-              </div>
-
-              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                {roundtripSelectionPhase === "departure" ? "Step 1 of 2" : "Step 2 of 2"}
-              </div>
-            </div>
-
-            <DayPicker
-              mode="range"
-              month={
-                returnCalendarMonth ??
-                parseStoredDate(departureDate) ??
-                parseStoredDate(returnDate)
-              }
-              onMonthChange={setReturnCalendarMonth}
-              numberOfMonths={2}
-              pagedNavigation
-              showOutsideDays
-              fixedWeeks
-              selected={
-                departureDate
-                  ? {
-                    from: parseStoredDate(departureDate),
-                    to: parseStoredDate(returnDate),
-                  }
-                  : undefined
-              }
-              disabled={departureDate ? { before: parseStoredDate(departureDate)! } : undefined}
-              className="text-sm"
-              classNames={{
-                months: "flex flex-col gap-4 sm:flex-row sm:gap-8",
-                month: "space-y-4",
-                caption_label: "text-sm font-semibold text-slate-900",
-                day_selected: "bg-slate-900 text-white hover:bg-slate-800",
-                day_today: "border border-slate-400",
-                day: "rounded-md hover:bg-slate-100 transition",
-                head_cell: "text-xs font-semibold text-slate-500",
-                caption: "text-sm font-semibold text-slate-900",
-                nav_button: "text-slate-600 hover:text-slate-900",
-                table: "w-full border-collapse space-y-1",
-                row: "flex w-full mt-1",
-                cell: "text-center text-sm p-0 relative",
-              }}
-              onSelect={(range) => {
-                if (!range?.from) return
-
-                const fromIso = formatDateForStorage(range.from)
-                const toIso = range.to ? formatDateForStorage(range.to) : ""
-
-                if (roundtripSelectionPhase === "departure") {
-                  setDepartureDate(fromIso)
-                  setReturnDate("")
-                  setRoundtripSelectionPhase("return")
-                  return
-                }
-
-                if (!range.to) return
-
-                setDepartureDate(fromIso)
-                setReturnDate(toIso)
-                setShowRoundtripCalendar(false)
-              }}
-            />
-          </div>
-        </div>
-      )}
     </div>
   )
 }
