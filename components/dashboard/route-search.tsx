@@ -703,7 +703,10 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                     )
                     setShowRoundtripCalendar(true)
                   }}
-                  className="w-full cursor-pointer rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+                  className={`w-full cursor-pointer rounded-lg border px-4 py-2 text-sm focus:outline-none focus:ring-2 ${showRoundtripCalendar && roundtripSelectionPhase === "return"
+                    ? "border-slate-900 ring-2 ring-slate-300"
+                    : "border-slate-200 focus:ring-slate-300"
+                    }`}
                 />
               </div>
             )}
