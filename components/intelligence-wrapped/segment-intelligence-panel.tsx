@@ -288,7 +288,10 @@ function SegmentRow({ segment }: { segment: WrappedSegment }) {
     const aircraft = segment.aircraft_type || "—"
 
     return (
-        <div className="flex items-center justify-between px-5 py-4 hover:bg-slate-50 transition cursor-pointer">
+        <div
+            onClick={() => console.log("SEGMENT CLICKED:", segment)}
+            className="flex items-center justify-between px-5 py-4 hover:bg-slate-50 transition cursor-pointer"
+        >
             <div className="flex flex-col">
                 <p className="text-sm font-semibold text-slate-900">{route}</p>
                 <p className="text-xs text-slate-500">{date}</p>
