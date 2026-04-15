@@ -139,6 +139,48 @@ export default function SegmentIntelligencePanel({
               </div>
             </div>
 
+            <div className="mt-6 grid grid-cols-2 gap-4">
+
+              <div className="rounded-xl border border-slate-200 p-4">
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                  Departure Date
+                </p>
+                <p className="mt-1 text-sm font-semibold text-slate-800">
+                  {selectedSegment.scheduled_departure_at
+                    ? new Date(selectedSegment.scheduled_departure_at).toLocaleDateString()
+                    : "—"}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 p-4">
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                  Status
+                </p>
+                <p className="mt-1 text-sm font-semibold text-slate-800">
+                  {selectedSegment.status ?? "—"}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 p-4">
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                  Departure Airport
+                </p>
+                <p className="mt-1 text-sm font-semibold text-slate-800">
+                  {selectedSegment.departure_airport_code ?? "—"}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 p-4">
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                  Arrival Airport
+                </p>
+                <p className="mt-1 text-sm font-semibold text-slate-800">
+                  {selectedSegment.arrival_airport_code ?? "—"}
+                </p>
+              </div>
+
+            </div>
+
             <div className="mt-6 flex justify-end">
               <button
                 onClick={() => setSelectedSegment(null)}
