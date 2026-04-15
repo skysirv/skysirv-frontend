@@ -427,8 +427,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
             setTripType("oneway")
           }}
           className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "oneway"
-              ? "bg-slate-900 text-white"
-              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            ? "bg-slate-900 text-white"
+            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
         >
           One-way
@@ -441,8 +441,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
             setTripType("roundtrip")
           }}
           className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "roundtrip"
-              ? "bg-slate-900 text-white"
-              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            ? "bg-slate-900 text-white"
+            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
         >
           Round-trip
@@ -452,8 +452,8 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
           type="button"
           onClick={() => setTripType("multicity")}
           className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "multicity"
-              ? "bg-slate-900 text-white"
-              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            ? "bg-slate-900 text-white"
+            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
             }`}
         >
           Multi-city
@@ -737,7 +737,6 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                   onMonthChange={setRoundtripCalendarMonth}
                   numberOfMonths={2}
                   pagedNavigation
-                  showOutsideDays
                   fixedWeeks
                   selected={
                     departureDate
