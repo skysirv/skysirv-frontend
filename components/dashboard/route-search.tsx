@@ -170,6 +170,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
 
   const [departureDate, setDepartureDate] = useState("")
   const [returnDate, setReturnDate] = useState("")
+  const [hoveredDate, setHoveredDate] = useState<Date | undefined>(undefined)
   const [showDepartureCalendar, setShowDepartureCalendar] = useState(false)
   const [showRoundtripCalendar, setShowRoundtripCalendar] = useState(false)
   const [roundtripSelectionPhase, setRoundtripSelectionPhase] = useState<"departure" | "return">("departure")
@@ -745,7 +746,12 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                     departureDate
                       ? {
                         from: parseStoredDate(departureDate),
-                        to: parseStoredDate(returnDate),
+                        to:
+                          returnDate
+                            ? parseStoredDate(returnDate)
+                            : roundtripSelectionPhase === "return"
+                              ? hoveredDate
+                              : undefined,
                       }
                       : undefined
                   }
@@ -791,6 +797,11 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                     setDepartureDate(fromIso)
                     setReturnDate(toIso)
                     setShowRoundtripCalendar(false)
+                  }}
+                  onDayMouseEnter={(date) => {
+                    if (roundtripSelectionPhase === "return") {
+                      setHoveredDate(date)
+                    }
                   }}
                 />
               </div>
