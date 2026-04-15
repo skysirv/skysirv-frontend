@@ -68,9 +68,16 @@ export default function SegmentIntelligencePanel({
       </div>
 
       {wrappedLoading ? (
-        <div className="grid gap-4">
-          <SegmentSkeleton />
-          <SegmentSkeleton />
+        <div className="overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white/90 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
+          <div className="max-h-[520px] overflow-hidden">
+            <div className="divide-y divide-slate-200">
+              <SegmentRowSkeleton />
+              <SegmentRowSkeleton />
+              <SegmentRowSkeleton />
+              <SegmentRowSkeleton />
+              <SegmentRowSkeleton />
+            </div>
+          </div>
         </div>
       ) : sortedSegments.length === 0 ? (
         <div className="overflow-hidden rounded-[1.75rem] border border-dashed border-slate-300 bg-white/80 p-10 text-center shadow-sm">
@@ -344,6 +351,19 @@ function SegmentRow({
         <p className="text-sm font-medium text-slate-700">{flight}</p>
         <p className="text-xs text-slate-500">{aircraft}</p>
       </div>
+    </div>
+  )
+}
+
+function SegmentRowSkeleton() {
+  return (
+    <div className="flex items-center justify-between px-4 py-3">
+      <div className="space-y-2">
+        <div className="h-3 w-24 rounded bg-slate-200 animate-pulse" />
+        <div className="h-3 w-32 rounded bg-slate-200 animate-pulse" />
+      </div>
+
+      <div className="h-3 w-12 rounded bg-slate-200 animate-pulse" />
     </div>
   )
 }
