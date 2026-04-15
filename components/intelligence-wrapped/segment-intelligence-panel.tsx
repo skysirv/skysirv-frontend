@@ -104,9 +104,29 @@ export default function SegmentIntelligencePanel({
       )}
 
       {selectedSegment && (
-        <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-          Selected segment: {selectedSegment.departure_airport_code ?? "—"} →{" "}
-          {selectedSegment.arrival_airport_code ?? "—"}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
+
+            <h3 className="text-lg font-semibold text-slate-900">
+              {selectedSegment.departure_airport_code ?? "—"} →{" "}
+              {selectedSegment.arrival_airport_code ?? "—"}
+            </h3>
+
+            <p className="mt-2 text-sm text-slate-500">
+              Flight {selectedSegment.airline_code ?? "—"}{" "}
+              {selectedSegment.flight_number ?? ""}
+            </p>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setSelectedSegment(null)}
+                className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+              >
+                Close
+              </button>
+            </div>
+
+          </div>
         </div>
       )}
     </motion.div>
