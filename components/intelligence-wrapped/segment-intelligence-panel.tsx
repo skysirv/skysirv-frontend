@@ -179,6 +179,30 @@ export default function SegmentIntelligencePanel({
                 </p>
               </div>
 
+              <div className="rounded-xl border border-slate-200 p-4">
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                  Departure Time
+                </p>
+                <p className="mt-1 text-sm font-semibold text-slate-800">
+                  {selectedSegment.scheduled_departure_at
+                    ? new Date(selectedSegment.scheduled_departure_at).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                    : "—"}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 p-4">
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                  Terminal / Gate
+                </p>
+                <p className="mt-1 text-sm font-semibold text-slate-800">
+                  {selectedSegment.departure_terminal ?? "—"} /{" "}
+                  {selectedSegment.departure_gate ?? "—"}
+                </p>
+              </div>
+
             </div>
 
             <div className="mt-6 flex justify-end">
