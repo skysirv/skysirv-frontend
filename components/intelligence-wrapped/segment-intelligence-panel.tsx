@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import { motion } from "framer-motion"
 
 type WrappedSegment = {
@@ -51,6 +51,20 @@ export default function SegmentIntelligencePanel({
 
   const [selectedSegment, setSelectedSegment] = useState<WrappedSegment | null>(null)
 
+  const orderedSegments = useMemo(() => {
+    return [...sortedSegments].sort((a, b) => {
+      const dateA = a.scheduled_departure_at
+        ? new Date(a.scheduled_departure_at).getTime()
+        : 0
+
+      const dateB = b.scheduled_departure_at
+        ? new Date(b.scheduled_departure_at).getTime()
+        : 0
+
+      return dateA - dateB
+    })
+  }, [sortedSegments])
+
   return (
     <motion.div {...(fadeUp ?? {})} className="mt-14">
       <div className="mb-8 text-center">
@@ -79,7 +93,7 @@ export default function SegmentIntelligencePanel({
             </div>
           </div>
         </div>
-      ) : sortedSegments.length === 0 ? (
+      ) : orderedSegments.length === 0 ? (
         <div className="overflow-hidden rounded-[1.75rem] border border-dashed border-slate-300 bg-white/80 p-10 text-center shadow-sm">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500 shadow-inner">
             ⌁
@@ -98,7 +112,7 @@ export default function SegmentIntelligencePanel({
         <div className="overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white/90 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
           <div className="max-h-[520px] overflow-y-auto">
             <div className="divide-y divide-slate-200">
-              {sortedSegments.map((segment) => (
+              {orderedSegments.map((segment) => (
                 <SegmentRow
                   key={segment.id}
                   segment={segment}
