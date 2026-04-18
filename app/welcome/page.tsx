@@ -3,18 +3,18 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 
-type UserPlan = "free" | "pro" | "enterprise"
+type UserPlan = "free" | "pro" | "business"
 
 function normalizePlan(planId: string): UserPlan {
   const normalized = String(planId || "").trim().toLowerCase()
 
   if (
-    normalized === "enterprise" ||
-    normalized.startsWith("enterprise_") ||
-    normalized.startsWith("enterprise-") ||
-    normalized.includes("enterprise")
+    normalized === "business" ||
+    normalized.startsWith("business_") ||
+    normalized.startsWith("business-") ||
+    normalized.includes("business")
   ) {
-    return "enterprise"
+    return "business"
   }
 
   if (
@@ -33,8 +33,8 @@ function getDashboardPath(plan: UserPlan) {
   switch (plan) {
     case "pro":
       return "/dashboard/pro"
-    case "enterprise":
-      return "/dashboard/enterprise"
+    case "business":
+      return "/dashboard/business"
     case "free":
     default:
       return "/dashboard/free"
@@ -149,7 +149,7 @@ export default function WelcomePage() {
                 ? "Free"
                 : plan === "pro"
                   ? "Pro"
-                  : "Enterprise"}
+                  : "Business"}
             </p>
           </div>
         )}

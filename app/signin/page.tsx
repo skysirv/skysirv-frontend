@@ -102,11 +102,11 @@ export default function SignInPage() {
     }
 
     if (
-      planId === "enterprise" ||
-      planId === "enterprise_monthly" ||
-      planId === "enterprise_yearly"
+      planId === "business" ||
+      planId === "business_monthly" ||
+      planId === "business_yearly"
     ) {
-      window.location.href = "/dashboard/enterprise"
+      window.location.href = "/dashboard/business"
       return
     }
 

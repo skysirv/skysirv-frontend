@@ -90,10 +90,10 @@ export default function AccountPage() {
         return "Pro Monthly"
       case "pro_yearly":
         return "Pro Yearly"
-      case "enterprise_monthly":
-        return "Enterprise Monthly"
-      case "enterprise_yearly":
-        return "Enterprise Yearly"
+      case "business_monthly":
+        return "Business Monthly"
+      case "business_yearly":
+        return "Business Yearly"
       case "free":
       default:
         return "Free"
@@ -146,7 +146,7 @@ export default function AccountPage() {
     }
 
     if (planId === "pro_lifetime") {
-      return "Upgrade to Enterprise"
+      return "Upgrade to Business"
     }
 
     return "Manage Subscription"
@@ -213,7 +213,7 @@ export default function AccountPage() {
     }
 
     if (planId === "pro_lifetime") {
-      router.push("/choose-plan?mode=upgrade&target=enterprise")
+      router.push("/choose-plan?mode=upgrade&target=business")
       return
     }
 

@@ -864,7 +864,7 @@ export default function FreeDashboardPage() {
                 />
                 <PreviewRow
                   label="Route-level intelligence depth"
-                  value="Unlock on Pro / Enterprise"
+                  value="Unlock on Pro / Business"
                 />
               </div>
             </div>
@@ -879,7 +879,7 @@ export default function FreeDashboardPage() {
               </h3>
 
               <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-                Pro and Enterprise open up deeper forecasting, richer route
+                Pro and Business open up deeper forecasting, richer route
                 behavior analysis, stronger alerting, and full access to more of
                 the Skysirv intelligence stack.
               </p>
@@ -890,7 +890,7 @@ export default function FreeDashboardPage() {
                   description="Full Skyscore™, stronger signals, forecast visibility, and up to 25 monitored routes."
                 />
                 <UpgradeFeature
-                  title="Enterprise"
+                  title="Business"
                   description="Full intelligence engine access, enhanced analysis, broader history, and premium monitoring depth."
                 />
               </div>
@@ -942,7 +942,7 @@ export default function FreeDashboardPage() {
               />
               <LightFeatureCard
                 title="Upgrade Path"
-                stat="Pro / Enterprise"
+                stat="Pro / Business"
                 description="Unlock deeper route behavior, predictive signals, and stronger intelligence tools."
               />
             </div>

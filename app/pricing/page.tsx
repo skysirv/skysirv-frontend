@@ -31,8 +31,8 @@ export default function PricingPage() {
   }, [])
 
   const prices = useMemo(() => {
-    const monthly = { free: 0, pro: 19, enterprise: 49 }
-    const annual = { free: 0, pro: 15, enterprise: 39 }
+    const monthly = { free: 0, pro: 19, business: 49 }
+    const annual = { free: 0, pro: 15, business: 39 }
 
     return billing === "monthly" ? monthly : annual
   }, [billing])
@@ -133,7 +133,7 @@ export default function PricingPage() {
               text="Unlock stronger pricing context, signals, and predictive timing support."
             />
             <ValuePanel
-              title="Enterprise"
+              title="Business"
               text="Access the full Skysirv intelligence environment for maximum leverage."
             />
           </div>
@@ -232,9 +232,9 @@ export default function PricingPage() {
                 />
 
                 <MarketingTierCard
-                  title="Enterprise"
+                  title="Business"
                   subtitle="Full Skysirv engine"
-                  price={prices.enterprise}
+                  price={prices.business}
                   priceNote={
                     billing === "annual"
                       ? "per month billed annually"
@@ -286,7 +286,7 @@ export default function PricingPage() {
                   subtext="Timing + scoring + signals"
                 />
                 <SlateMetricCard
-                  label="Enterprise"
+                  label="Business"
                   value="Full Engine"
                   subtext="Deep intelligence access"
                 />
@@ -650,7 +650,7 @@ function PricingFooter() {
 }
 
 function DetailedPricingTableDark() {
-  const plans = ["Free", "Pro", "Enterprise"]
+  const plans = ["Free", "Pro", "Business"]
 
   const sections = [
     {

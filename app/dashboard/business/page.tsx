@@ -218,7 +218,7 @@ async function fetchAvailableWrappedYears(token: string) {
   return availableYears.length ? availableYears : [currentYear]
 }
 
-export default function EnterpriseDashboardPage() {
+export default function BusinessDashboardPage() {
   const [loading, setLoading] = useState(true)
   const [wrappedLoading, setWrappedLoading] = useState(true)
   const [watchlist, setWatchlist] = useState<WatchlistRoute[]>([])
@@ -246,7 +246,7 @@ export default function EnterpriseDashboardPage() {
   const intelligenceItems = [
     {
       title: "Skysirv Monitor™",
-      stat: "Enterprise Access",
+      stat: "Business Access",
       description:
         "Expanded route monitoring designed to support broader tracking coverage as real data begins to build.",
     },
@@ -272,7 +272,7 @@ export default function EnterpriseDashboardPage() {
       title: "Skyscore™",
       stat: "Full Access",
       description:
-        "Enterprise includes the full scoring layer once real route monitoring data supports score generation.",
+        "Business includes the full scoring layer once real route monitoring data supports score generation.",
     },
     {
       title: "Skysirv Insights™",
@@ -336,7 +336,7 @@ export default function EnterpriseDashboardPage() {
 
         setWatchlist(routes)
       } catch (error) {
-        console.error("Failed to load enterprise dashboard watchlist", error)
+        console.error("Failed to load business dashboard watchlist", error)
 
         if (!cancelled) {
           setWatchlist([])
@@ -580,7 +580,7 @@ export default function EnterpriseDashboardPage() {
       const data = await res.json().catch(() => null)
 
       if (!res.ok) {
-        console.error("Failed to delete enterprise watchlist route", data)
+        console.error("Failed to delete business watchlist route", data)
 
         toast({
           title: "Remove failed",
@@ -596,7 +596,7 @@ export default function EnterpriseDashboardPage() {
         description: "The route was removed from your watchlist.",
       })
     } catch (error) {
-      console.error("Enterprise watchlist delete request failed", error)
+      console.error("Business watchlist delete request failed", error)
 
       toast({
         title: "Remove failed",
@@ -683,7 +683,7 @@ export default function EnterpriseDashboardPage() {
       if (res.status === 409) {
         toast({
           title: "Flight already saved",
-          description: "That saved flight is already in your Enterprise dashboard.",
+          description: "That saved flight is already in your Business dashboard.",
         })
         return
       }
@@ -896,7 +896,7 @@ export default function EnterpriseDashboardPage() {
           >
             <div className="max-w-3xl">
               <div className="mb-4 inline-flex items-center rounded-full border border-sky-200 bg-white/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-sky-700 shadow-sm backdrop-blur-sm">
-                Enterprise Plan Dashboard
+                Business Plan Dashboard
               </div>
 
               <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl md:text-6xl">
@@ -965,7 +965,7 @@ export default function EnterpriseDashboardPage() {
 
                   <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600 sm:text-base">
                     Every monitored route begins as a tracked data layer. As pricing
-                    history builds, Enterprise intelligence surfaces will begin
+                    history builds, Business intelligence surfaces will begin
                     populating with richer route context and deeper monitoring detail.
                   </p>
                 </div>
@@ -1019,7 +1019,7 @@ export default function EnterpriseDashboardPage() {
 
                     <p className="mx-auto max-w-md text-sm leading-6 text-slate-600">
                       Start tracking a flight route above to begin collecting pricing
-                      history. Enterprise intelligence layers will populate
+                      history. Business intelligence layers will populate
                       automatically as real monitored data accumulates.
                     </p>
                   </div>

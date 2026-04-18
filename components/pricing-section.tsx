@@ -142,7 +142,7 @@ export default function PricingSection({
             mode={mode}
             router={router}
             highlight={false}
-            title="Enterprise"
+            title="Business"
             subtitle="Full Skysirv engine"
             price={prices.intelligence}
             priceNote={
@@ -249,7 +249,7 @@ function TierCard(props: {
 
               if (title === "Free") router.push("/choose-plan?plan=free")
               if (title === "Pro") router.push("/choose-plan?plan=pro")
-              if (title === "Enterprise") router.push("/choose-plan?plan=enterprise")
+              if (title === "Business") router.push("/choose-plan?plan=business")
 
             }}
             className={cn(

@@ -34,15 +34,15 @@ function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ")
 }
 
-function normalizePlanTier(planId?: string | null): "free" | "pro" | "enterprise" | null {
+function normalizePlanTier(planId?: string | null): "free" | "pro" | "business" | null {
   if (!planId) return null
 
   if (planId === "free") return "free"
   if (planId === "pro_lifetime" || planId === "pro_monthly" || planId === "pro_yearly") {
     return "pro"
   }
-  if (planId === "enterprise_monthly" || planId === "enterprise_yearly") {
-    return "enterprise"
+  if (planId === "business_monthly" || planId === "business_yearly") {
+    return "business"
   }
 
   return null
@@ -138,15 +138,15 @@ function ChoosePlanPageContent() {
         return
       }
 
-      if (currentPlanTier === "enterprise" && (plan === "free" || plan === "pro")) {
+      if (currentPlanTier === "business" && (plan === "free" || plan === "pro")) {
         return
       }
 
-      if (sessionSubscription?.plan_id === "pro_lifetime" && plan !== "enterprise") {
+      if (sessionSubscription?.plan_id === "pro_lifetime" && plan !== "business") {
         return
       }
 
-      if (target === "enterprise" && plan !== "enterprise") {
+      if (target === "business" && plan !== "business") {
         return
       }
     }
@@ -180,7 +180,7 @@ function ChoosePlanPageContent() {
         return
       }
 
-      if (plan === "pro" || plan === "enterprise") {
+      if (plan === "pro" || plan === "business") {
         const billingType = billing === "monthly" ? "monthly" : "yearly"
 
         const res = await fetch(
@@ -258,8 +258,8 @@ function ChoosePlanPageContent() {
     sessionLoading,
   })
 
-  const enterpriseCardState = getPlanCardState({
-    plan: "enterprise",
+  const businessCardState = getPlanCardState({
+    plan: "business",
     currentPlanTier,
     currentPlanId: sessionSubscription?.plan_id ?? null,
     isUpgradeMode,
@@ -375,7 +375,7 @@ function ChoosePlanPageContent() {
             mode={mode}
             handlePlanSelection={handlePlanSelection}
             loading={loading}
-            title="Enterprise"
+            title="Business"
             subtitle="Full Skysirv engine"
             price={prices.intelligence}
             priceNote={
@@ -384,10 +384,10 @@ function ChoosePlanPageContent() {
                 : "per month"
             }
             accent={false}
-            ctaLabel={enterpriseCardState.ctaLabel}
+            ctaLabel={businessCardState.ctaLabel}
             ctaVariant="secondary"
-            disabled={enterpriseCardState.disabled}
-            badge={enterpriseCardState.badge}
+            disabled={businessCardState.disabled}
+            badge={businessCardState.badge}
             bullets={[
               { label: "Watchlist", value: "Unlimited routes" },
               { label: "Price Behavior™", value: "Extended history" },
@@ -427,8 +427,8 @@ function ChoosePlanPageSkeleton() {
 }
 
 function getPlanCardState(args: {
-  plan: "free" | "pro" | "enterprise"
-  currentPlanTier: "free" | "pro" | "enterprise" | null
+  plan: "free" | "pro" | "business"
+  currentPlanTier: "free" | "pro" | "business" | null
   currentPlanId: string | null
   isUpgradeMode: boolean
   target: string | null
@@ -453,10 +453,10 @@ function getPlanCardState(args: {
       }
     }
 
-    if (plan === "enterprise") {
+    if (plan === "business") {
       return {
         disabled: false,
-        ctaLabel: "Upgrade to Enterprise",
+        ctaLabel: "Upgrade to Business",
         badge: undefined,
       }
     }
@@ -492,7 +492,7 @@ function getPlanCardState(args: {
     }
   }
 
-  if (currentPlanTier === "enterprise" && (plan === "free" || plan === "pro")) {
+  if (currentPlanTier === "business" && (plan === "free" || plan === "pro")) {
     return {
       disabled: true,
       ctaLabel: "Unavailable",
@@ -501,10 +501,10 @@ function getPlanCardState(args: {
   }
 
   if (currentPlanId === "pro_lifetime") {
-    if (plan === "enterprise") {
+    if (plan === "business") {
       return {
         disabled: false,
-        ctaLabel: "Upgrade to Enterprise",
+        ctaLabel: "Upgrade to Business",
         badge: "Eligible Upgrade",
       }
     }
@@ -516,7 +516,7 @@ function getPlanCardState(args: {
     }
   }
 
-  if (target === "enterprise" && plan !== "enterprise") {
+  if (target === "business" && plan !== "business") {
     return {
       disabled: true,
       ctaLabel: "Unavailable",
@@ -532,10 +532,10 @@ function getPlanCardState(args: {
     }
   }
 
-  if (plan === "enterprise") {
+  if (plan === "business") {
     return {
       disabled: false,
-      ctaLabel: "Upgrade to Enterprise",
+      ctaLabel: "Upgrade to Business",
       badge: isUpgradeMode ? "Best Value" : undefined,
     }
   }
@@ -649,7 +649,7 @@ function TierCard(props: {
 }
 
 function DetailedPricingTable() {
-  const plans = ["Free", "Pro", "Enterprise"]
+  const plans = ["Free", "Pro", "Business"]
 
   const sections = [
     {

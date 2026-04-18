@@ -65,10 +65,10 @@ export default function AdminPage() {
       return "Pro"
     }
 
-    if (user.plan === "enterprise") {
-      if (user.billing_interval === "monthly") return "Enterprise — Monthly"
-      if (user.billing_interval === "yearly") return "Enterprise — Yearly"
-      return "Enterprise"
+    if (user.plan === "business") {
+      if (user.billing_interval === "monthly") return "Business — Monthly"
+      if (user.billing_interval === "yearly") return "Business — Yearly"
+      return "Business"
     }
 
     return user.plan
@@ -83,7 +83,7 @@ export default function AdminPage() {
       return "bg-blue-100 text-blue-700"
     }
 
-    if (plan === "enterprise") {
+    if (plan === "business") {
       return "bg-indigo-100 text-indigo-700"
     }
 

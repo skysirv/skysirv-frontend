@@ -8,12 +8,12 @@ function getDashboardRoute(planId: string) {
   const normalizedPlan = String(planId || "").trim().toLowerCase()
 
   if (
-    normalizedPlan === "enterprise" ||
-    normalizedPlan.startsWith("enterprise_") ||
-    normalizedPlan.startsWith("enterprise-") ||
-    normalizedPlan.includes("enterprise")
+    normalizedPlan === "business" ||
+    normalizedPlan.startsWith("business_") ||
+    normalizedPlan.startsWith("business-") ||
+    normalizedPlan.includes("business")
   ) {
-    return "/dashboard/enterprise"
+    return "/dashboard/business"
   }
 
   if (

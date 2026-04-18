@@ -1054,7 +1054,7 @@ export default function ProDashboardPage() {
                   </h2>
 
                   <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600 sm:text-base">
-                    Pro gives you meaningful scale without the full Enterprise
+                    Pro gives you meaningful scale without the full Business
                     command center — more routes, stronger signal coverage, and
                     a more capable market-reading workflow.
                   </p>
@@ -1663,7 +1663,7 @@ export default function ProDashboardPage() {
               </h2>
               <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base">
                 Pro opens up more of the Skysirv system while holding back the
-                full Enterprise command layer. You get stronger route analysis,
+                full Business command layer. You get stronger route analysis,
                 forecast visibility, and deeper signal clarity.
               </p>
             </div>
@@ -1808,7 +1808,7 @@ export default function ProDashboardPage() {
 
                 <div className="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.07)]">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    Enterprise Difference
+                    Business Difference
                   </p>
 
                   <h3 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
@@ -1816,15 +1816,15 @@ export default function ProDashboardPage() {
                   </h3>
 
                   <p className="mt-4 text-sm leading-7 text-slate-600">
-                    Enterprise goes beyond Pro with deeper forecasting,
+                    Business goes beyond Pro with deeper forecasting,
                     enhanced summaries, broader behavioral history, and full
                     Intelligence Engine™ access.
                   </p>
 
                   <div className="mt-6 space-y-3">
-                    <UpgradeRow label="Forecast modeling" value="Enterprise only" />
-                    <UpgradeRow label="Enhanced route summaries" value="Enterprise only" />
-                    <UpgradeRow label="Full Intelligence Engine™" value="Enterprise only" />
+                    <UpgradeRow label="Forecast modeling" value="Business only" />
+                    <UpgradeRow label="Enhanced route summaries" value="Business only" />
+                    <UpgradeRow label="Full Intelligence Engine™" value="Business only" />
                   </div>
                 </div>
               </div>
