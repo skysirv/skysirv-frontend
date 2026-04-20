@@ -104,6 +104,8 @@ export default function WelcomePage() {
         if (!isMounted) return
 
         setPlan(resolvedPlan)
+        router.replace(`${getDashboardPath(resolvedPlan)}?welcome=1`)
+        return
       } catch (err: any) {
         if (!isMounted) return
         setError(err?.message || "Unable to determine your dashboard access")
@@ -121,7 +123,7 @@ export default function WelcomePage() {
   }, [router])
 
   function handleContinue() {
-    router.push(getDashboardPath(plan))
+    router.replace(`${getDashboardPath(plan)}?welcome=1`)
   }
 
   return (

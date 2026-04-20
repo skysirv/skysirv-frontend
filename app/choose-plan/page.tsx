@@ -193,7 +193,7 @@ function ChoosePlanPageContent() {
           throw new Error(data?.error || "Free plan creation failed")
         }
 
-        router.push("/welcome")
+        router.push("/dashboard/free?welcome=1")
         return
       }
 

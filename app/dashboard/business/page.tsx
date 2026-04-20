@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 import { motion, useInView } from "framer-motion"
 
 import RouteSearch from "@/components/dashboard/route-search"
@@ -12,6 +13,7 @@ import SavedFlightCard, {
   type SavedFlightCardData,
 } from "@/components/dashboard/saved-flight-card"
 import FlightIntelligenceModal from "@/components/dashboard/flight-intelligence-modal"
+import WelcomeModal from "@/components/dashboard/welcome-modal"
 
 import WatchlistSkeleton from "@/components/dashboard/watchlist-skeleton"
 import OpportunitySkeleton from "@/components/dashboard/opportunity-skeleton"
