@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 
 import RouteSearch from "@/components/dashboard/route-search"
@@ -65,7 +65,6 @@ type WatchlistResponse =
 
 export default function FreeDashboardPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [showWelcomeModal, setShowWelcomeModal] = useState(false)
 
   const [loading, setLoading] = useState(true)
@@ -141,12 +140,15 @@ export default function FreeDashboardPage() {
   }, [watchlistFetchKey])
 
   useEffect(() => {
-    const shouldShowWelcome = searchParams.get("welcome") === "1"
+    if (typeof window === "undefined") return
+
+    const params = new URLSearchParams(window.location.search)
+    const shouldShowWelcome = params.get("welcome") === "1"
 
     if (shouldShowWelcome) {
       setShowWelcomeModal(true)
     }
-  }, [searchParams])
+  }, [])
 
   useEffect(() => {
     let cancelled = false
