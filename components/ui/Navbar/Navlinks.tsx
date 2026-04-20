@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import s from './Navbar.module.css';
 import AuthModal from '@/components/auth/AuthModal';
 import AuthPanel from '@/components/auth/AuthPanel';
@@ -12,6 +13,9 @@ interface NavlinksProps {
 }
 
 export default function Navlinks({ user, isDark = false }: NavlinksProps) {
+  const pathname = usePathname();
+  const isChoosePlanPage = pathname === '/choose-plan';
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [createAccountModalOpen, setCreateAccountModalOpen] = useState(false);
@@ -133,7 +137,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
           </div>
 
           <div className="flex items-center space-x-2 md:space-x-3">
-            {isLoggedIn && isAdmin && (
+            {isLoggedIn && isAdmin && !isChoosePlanPage && (
               <Link
                 href="/admin"
                 className={`rounded-full px-3 py-2 text-sm font-medium transition ${isDark ? 'text-white hover:bg-white/10' : 'hover:bg-slate-50'
@@ -143,7 +147,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
               </Link>
             )}
 
-            {isLoggedIn && !isAdmin && (
+            {isLoggedIn && !isAdmin && !isChoosePlanPage && (
               <Link
                 href="/dashboard"
                 className={`rounded-full px-3 py-2 text-sm font-medium transition ${isDark ? 'text-white hover:bg-white/10' : 'hover:bg-slate-50'
@@ -154,18 +158,20 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
             )}
 
             {isLoggedIn ? (
-              <button
-                onClick={() => {
-                  localStorage.removeItem('skysirv_token');
-                  localStorage.removeItem('skysirv_admin');
-                  window.dispatchEvent(new Event('skysirv-auth-changed'));
-                  window.location.href = '/';
-                }}
-                className={`rounded-full px-3 py-2 text-sm font-medium transition ${isDark ? 'text-white hover:bg-white/10' : 'hover:bg-slate-50'
-                  }`}
-              >
-                Sign out
-              </button>
+              !isChoosePlanPage ? (
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('skysirv_token');
+                    localStorage.removeItem('skysirv_admin');
+                    window.dispatchEvent(new Event('skysirv-auth-changed'));
+                    window.location.href = '/';
+                  }}
+                  className={`rounded-full px-3 py-2 text-sm font-medium transition ${isDark ? 'text-white hover:bg-white/10' : 'hover:bg-slate-50'
+                    }`}
+                >
+                  Sign out
+                </button>
+              ) : null
             ) : (
               <button
                 type="button"
