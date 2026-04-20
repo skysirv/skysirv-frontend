@@ -281,15 +281,38 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
     return data as WatchlistRoute
   }
 
-  async function handleMonitorRoute() {
-    if (tripType === "multicity") {
-      toast({
-        title: "Multi-city coming next",
-        description:
-          "Multi-city segment entry is now active in the UI. Backend monitoring for each leg is the next step.",
-      })
-      return
+  async function createMultiCityWatchlist({
+    token,
+    legs,
+  }: {
+    token: string
+    legs: {
+      origin: string
+      destination: string
+      departureDate: string
+    }[]
+  }): Promise<{ success: true; legs: WatchlistRoute[] }> {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/watchlist`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        legs,
+      }),
+    })
+
+    const data = await res.json().catch(() => null)
+
+    if (!res.ok) {
+      throw new Error(data?.error ?? "Something went wrong while starting route monitoring.")
     }
+
+    return data as { success: true; legs: WatchlistRoute[] }
+  }
+
+  async function handleMonitorRoute() {
 
     const normalizedOrigin = selectedOrigin?.code?.trim().toUpperCase() ?? ""
     const normalizedDestination = selectedDestination?.code?.trim().toUpperCase() ?? ""
@@ -347,6 +370,73 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
         title: "Sign in required",
         description: "You must be signed in to monitor a route.",
       })
+      return
+    }
+
+    if (tripType === "multicity") {
+      const normalizedLegs = multiCitySegments.map((segment) => ({
+        origin: segment.origin?.code?.trim().toUpperCase() ?? "",
+        destination: segment.destination?.code?.trim().toUpperCase() ?? "",
+        departureDate: segment.date,
+      }))
+
+      const hasMissingFields = normalizedLegs.some(
+        (leg) => !leg.origin || !leg.destination || !leg.departureDate
+      )
+
+      if (hasMissingFields) {
+        toast({
+          title: "Missing multi-city details",
+          description: "Please complete origin, destination, and departure date for every leg.",
+        })
+        return
+      }
+
+      const hasInvalidLeg = normalizedLegs.some(
+        (leg) => leg.origin === leg.destination
+      )
+
+      if (hasInvalidLeg) {
+        toast({
+          title: "Invalid route",
+          description: "Origin and destination cannot be the same airport on any leg.",
+        })
+        return
+      }
+
+      setIsMonitoring(true)
+
+      try {
+        const response = await createMultiCityWatchlist({
+          token,
+          legs: normalizedLegs,
+        })
+
+        if (onRouteAdded) {
+          response.legs.forEach((route) => onRouteAdded(route))
+        }
+
+        toast({
+          title: "Multi-city route added",
+          description: "Monitoring has started across every leg of your journey.",
+        })
+
+        resetMultiCitySegments()
+        setTripType("oneway")
+      } catch (error) {
+        console.error("Multi-city watchlist create request failed", error)
+
+        toast({
+          title: "Could not add multi-city route",
+          description:
+            error instanceof Error
+              ? error.message
+              : "Something went wrong while starting multi-city monitoring.",
+        })
+      } finally {
+        setIsMonitoring(false)
+      }
+
       return
     }
 
