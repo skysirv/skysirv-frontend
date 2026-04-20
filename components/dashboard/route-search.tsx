@@ -313,56 +313,6 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
   }
 
   async function handleMonitorRoute() {
-
-    const normalizedOrigin = selectedOrigin?.code?.trim().toUpperCase() ?? ""
-    const normalizedDestination = selectedDestination?.code?.trim().toUpperCase() ?? ""
-
-    if (!normalizedOrigin || !normalizedDestination || !departureDate) {
-      toast({
-        title: "Missing route details",
-        description: "Please choose an origin, destination, and departure date.",
-      })
-      return
-    }
-
-    if (tripType === "roundtrip" && !returnDate) {
-      toast({
-        title: "Missing return date",
-        description: "Please choose a return date for this round-trip route.",
-      })
-      return
-    }
-
-    if (tripType === "roundtrip" && returnDate < departureDate) {
-      toast({
-        title: "Invalid return date",
-        description: "Return date must be on or after the departure date.",
-      })
-      return
-    }
-
-    if (normalizedOrigin === normalizedDestination) {
-      toast({
-        title: "Invalid route",
-        description: "Origin and destination cannot be the same airport.",
-      })
-
-      setOriginQuery("")
-      setDestinationQuery("")
-      setSelectedOrigin(null)
-      setSelectedDestination(null)
-      setDepartureDate("")
-      setReturnDate("")
-      setTripType("oneway")
-      setShowDepartureCalendar(false)
-      setShowRoundtripCalendar(false)
-      setRoundtripSelectionPhase("departure")
-      setDepartureCalendarMonth(undefined)
-      setRoundtripCalendarMonth(undefined)
-
-      return
-    }
-
     const token = localStorage.getItem("skysirv_token")
 
     if (!token) {
@@ -436,6 +386,55 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
       } finally {
         setIsMonitoring(false)
       }
+
+      return
+    }
+
+    const normalizedOrigin = selectedOrigin?.code?.trim().toUpperCase() ?? ""
+    const normalizedDestination = selectedDestination?.code?.trim().toUpperCase() ?? ""
+
+    if (!normalizedOrigin || !normalizedDestination || !departureDate) {
+      toast({
+        title: "Missing route details",
+        description: "Please choose an origin, destination, and departure date.",
+      })
+      return
+    }
+
+    if (tripType === "roundtrip" && !returnDate) {
+      toast({
+        title: "Missing return date",
+        description: "Please choose a return date for this round-trip route.",
+      })
+      return
+    }
+
+    if (tripType === "roundtrip" && returnDate < departureDate) {
+      toast({
+        title: "Invalid return date",
+        description: "Return date must be on or after the departure date.",
+      })
+      return
+    }
+
+    if (normalizedOrigin === normalizedDestination) {
+      toast({
+        title: "Invalid route",
+        description: "Origin and destination cannot be the same airport.",
+      })
+
+      setOriginQuery("")
+      setDestinationQuery("")
+      setSelectedOrigin(null)
+      setSelectedDestination(null)
+      setDepartureDate("")
+      setReturnDate("")
+      setTripType("oneway")
+      setShowDepartureCalendar(false)
+      setShowRoundtripCalendar(false)
+      setRoundtripSelectionPhase("departure")
+      setDepartureCalendarMonth(undefined)
+      setRoundtripCalendarMonth(undefined)
 
       return
     }
