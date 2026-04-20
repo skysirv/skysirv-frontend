@@ -111,6 +111,23 @@ function ChoosePlanPageContent() {
         }
 
         setSessionSubscription(data.subscription ?? null)
+
+        const normalizedPlan = normalizePlanTier(data.subscription?.plan_id)
+
+        if (normalizedPlan === "free") {
+          router.replace("/dashboard/free")
+          return
+        }
+
+        if (normalizedPlan === "pro") {
+          router.replace("/dashboard/pro")
+          return
+        }
+
+        if (normalizedPlan === "business") {
+          router.replace("/dashboard/business")
+          return
+        }
       } catch (err) {
         console.error("Failed to load choose-plan session:", err)
       } finally {

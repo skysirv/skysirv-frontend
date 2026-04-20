@@ -59,9 +59,15 @@ export default function DashboardPage() {
 
         if (cancelled) return
 
-        const planId = String(data?.subscription?.plan_id ?? "")
-        const dashboardRoute = getDashboardRoute(planId)
+        const subscription = data?.subscription ?? null
+        const planId = String(subscription?.plan_id ?? "").trim()
 
+        if (!subscription || !planId) {
+          router.replace("/choose-plan")
+          return
+        }
+
+        const dashboardRoute = getDashboardRoute(planId)
         router.replace(dashboardRoute)
       } catch (error) {
         console.error("Dashboard redirect failed", error)
