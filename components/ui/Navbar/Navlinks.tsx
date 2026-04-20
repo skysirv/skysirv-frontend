@@ -19,6 +19,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [createAccountModalOpen, setCreateAccountModalOpen] = useState(false);
+  const [isSessionReady, setIsSessionReady] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -31,6 +32,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
         setIsLoggedIn(false);
         setIsAdmin(false);
         localStorage.removeItem('skysirv_admin');
+        setIsSessionReady(true);
         return;
       }
 
@@ -46,6 +48,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
           setIsLoggedIn(false);
           setIsAdmin(false);
           localStorage.removeItem('skysirv_admin');
+          setIsSessionReady(true);
           return;
         }
 
@@ -57,6 +60,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
 
         setIsLoggedIn(loggedIn);
         setIsAdmin(admin);
+        setIsSessionReady(true);
 
         if (admin) {
           localStorage.setItem('skysirv_admin', 'true');
@@ -68,6 +72,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
         setIsLoggedIn(false);
         setIsAdmin(false);
         localStorage.removeItem('skysirv_admin');
+        setIsSessionReady(true);
       }
     }
 
@@ -137,52 +142,56 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
           </div>
 
           <div className="flex items-center space-x-2 md:space-x-3">
-            {isLoggedIn && isAdmin && !isChoosePlanPage && (
-              <Link
-                href="/admin"
-                className={`rounded-full px-3 py-2 text-sm font-medium transition ${isDark ? 'text-white hover:bg-white/10' : 'hover:bg-slate-50'
-                  }`}
-              >
-                Admin
-              </Link>
-            )}
+            {isSessionReady && (
+              <>
+                {isLoggedIn && isAdmin && (
+                  <Link
+                    href="/admin"
+                    className={`rounded-full px-3 py-2 text-sm font-medium transition ${isDark ? 'text-white hover:bg-white/10' : 'hover:bg-slate-50'
+                      }`}
+                  >
+                    Admin
+                  </Link>
+                )}
 
-            {isLoggedIn && !isAdmin && !isChoosePlanPage && (
-              <Link
-                href="/dashboard"
-                className={`rounded-full px-3 py-2 text-sm font-medium transition ${isDark ? 'text-white hover:bg-white/10' : 'hover:bg-slate-50'
-                  }`}
-              >
-                Dashboard
-              </Link>
-            )}
+                {isLoggedIn && !isAdmin && !isChoosePlanPage && (
+                  <Link
+                    href="/dashboard"
+                    className={`rounded-full px-3 py-2 text-sm font-medium transition ${isDark ? 'text-white hover:bg-white/10' : 'hover:bg-slate-50'
+                      }`}
+                  >
+                    Dashboard
+                  </Link>
+                )}
 
-            {isLoggedIn ? (
-              !isChoosePlanPage ? (
-                <button
-                  onClick={() => {
-                    localStorage.removeItem('skysirv_token');
-                    localStorage.removeItem('skysirv_admin');
-                    window.dispatchEvent(new Event('skysirv-auth-changed'));
-                    window.location.href = '/';
-                  }}
-                  className={`rounded-full px-3 py-2 text-sm font-medium transition ${isDark ? 'text-white hover:bg-white/10' : 'hover:bg-slate-50'
-                    }`}
-                >
-                  Sign out
-                </button>
-              ) : null
-            ) : (
-              <button
-                type="button"
-                onClick={() => setCreateAccountModalOpen(true)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${isDark
-                  ? 'bg-white text-slate-900 hover:bg-slate-200'
-                  : 'bg-slate-900 text-white hover:bg-slate-700'
-                  }`}
-              >
-                Sign in
-              </button>
+                {isLoggedIn ? (
+                  !isChoosePlanPage ? (
+                    <button
+                      onClick={() => {
+                        localStorage.removeItem('skysirv_token');
+                        localStorage.removeItem('skysirv_admin');
+                        window.dispatchEvent(new Event('skysirv-auth-changed'));
+                        window.location.href = '/';
+                      }}
+                      className={`rounded-full px-3 py-2 text-sm font-medium transition ${isDark ? 'text-white hover:bg-white/10' : 'hover:bg-slate-50'
+                        }`}
+                    >
+                      Sign out
+                    </button>
+                  ) : null
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setCreateAccountModalOpen(true)}
+                    className={`rounded-full px-4 py-2 text-sm font-semibold transition ${isDark
+                      ? 'bg-white text-slate-900 hover:bg-slate-200'
+                      : 'bg-slate-900 text-white hover:bg-slate-700'
+                      }`}
+                  >
+                    Sign in
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>
