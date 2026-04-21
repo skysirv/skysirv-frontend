@@ -36,6 +36,12 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
         return;
       }
 
+      if (!isMounted) return;
+
+      setIsLoggedIn(true);
+      setIsAdmin(localStorage.getItem('skysirv_admin') === 'true');
+      setIsSessionReady(true);
+
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/session`, {
           headers: {
