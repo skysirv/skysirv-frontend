@@ -157,7 +157,7 @@ export default function HomePage() {
                 <span>PTY → VVI</span>
                 <span>$882</span>
                 <span className="font-medium">Skyscore™ 76</span>
-                <span className="font-medium text-amber-600">WATCH</span>
+                <span className="font-medium text-red-500">OVERPRICED</span>
 
                 <span className="text-slate-300">•</span>
 
@@ -185,7 +185,7 @@ export default function HomePage() {
                 <span>MDW → EWR</span>
                 <span>$882</span>
                 <span className="font-medium">Skyscore™ 76</span>
-                <span className="font-medium text-amber-600">WATCH</span>
+                <span className="font-medium text-red-500">OVERPRICED</span>
 
                 <span className="text-slate-300">•</span>
 
