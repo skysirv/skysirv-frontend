@@ -164,7 +164,7 @@ export default function HomePage() {
                 <span>LAX → MIA</span>
                 <span>$544</span>
                 <span className="font-medium">Skyscore™ 88</span>
-                <span className="font-medium text-emerald-600">BUY</span>
+                <span className="font-medium text-emerald-600">GOOD DEAL</span>
 
                 <span className="text-slate-300">•</span>
 
@@ -178,7 +178,7 @@ export default function HomePage() {
                 <span>JFK → CDG</span>
                 <span>$631</span>
                 <span className="font-medium">Skyscore™ 82</span>
-                <span className="font-medium text-emerald-600">BUY</span>
+                <span className="font-medium text-emerald-600">GOOD DEAL</span>
 
                 <span className="text-slate-300">•</span>
 
@@ -192,7 +192,7 @@ export default function HomePage() {
                 <span>PTY → VVI</span>
                 <span>$544</span>
                 <span className="font-medium">Skyscore™ 95</span>
-                <span className="font-medium text-emerald-600">BUY</span>
+                <span className="font-medium text-emerald-600">GOOD DEAL</span>
 
                 <span className="text-slate-300">•</span>
 
@@ -206,7 +206,7 @@ export default function HomePage() {
                 <span>JFK → CDG</span>
                 <span>$631</span>
                 <span className="font-medium">Skyscore™ 82</span>
-                <span className="font-medium text-emerald-600">BUY</span>
+                <span className="font-medium text-emerald-600">GOOD DEAL</span>
               </div>
             </div>
           </motion.div>
