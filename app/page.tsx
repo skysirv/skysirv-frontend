@@ -179,9 +179,9 @@ export default function HomePage() {
                 <span>$631</span>
                 <span className="font-medium">Skyscore™ 82</span>
                 <span className="font-medium text-emerald-600">BUY</span>
-              </div>
 
-              <div className="flex items-center gap-4 px-6">
+                <span className="text-slate-300">•</span>
+
                 <span>MDW → EWR</span>
                 <span>$882</span>
                 <span className="font-medium">Skyscore™ 76</span>
