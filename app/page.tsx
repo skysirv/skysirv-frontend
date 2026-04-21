@@ -182,6 +182,7 @@ export default function HomePage() {
               </div>
 
               <div className="flex items-center gap-4 px-6">
+                <span>MDW → EWR</span>
                 <span>$882</span>
                 <span className="font-medium">Skyscore™ 76</span>
                 <span className="font-medium text-amber-600">WATCH</span>
