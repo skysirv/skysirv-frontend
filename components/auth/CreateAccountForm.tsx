@@ -108,6 +108,9 @@ export default function CreateAccountForm({
 
       const data = await response.json().catch(() => null)
 
+      console.log("CREATE ACCOUNT STATUS:", response.status)
+      console.log("CREATE ACCOUNT RESPONSE:", data)
+
       if (!response.ok) {
         throw new Error(data?.error || "Signup failed")
       }
