@@ -769,7 +769,12 @@ export default function HomePage() {
             <p className="mt-3">If you don’t see the email, check your spam folder.</p>
           </div>
         ) : (
-          <CreateAccountForm onSuccess={() => setCreateAccountSuccess(true)} />
+          <CreateAccountForm
+            onSuccess={() => {
+              console.log("CREATE ACCOUNT SUCCESS CALLBACK FIRED")
+              setCreateAccountSuccess(true)
+            }}
+          />
         )}
       </AuthModal>
     </>
