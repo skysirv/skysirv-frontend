@@ -27,10 +27,24 @@ export default function AuthModal({
   disableBackdropClose = false,
 }: AuthModalProps) {
   const [mounted, setMounted] = useState(false)
+  const [shouldRender, setShouldRender] = useState(open)
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  useEffect(() => {
+    if (open) {
+      setShouldRender(true)
+      return
+    }
+
+    const timer = window.setTimeout(() => {
+      setShouldRender(false)
+    }, 300)
+
+    return () => window.clearTimeout(timer)
+  }, [open])
 
   useEffect(() => {
     if (!open) return
@@ -61,7 +75,7 @@ export default function AuthModal({
     }
   }, [open, onClose])
 
-  if (!mounted) return null
+  if (!mounted || !shouldRender) return null
 
   return createPortal(
     <div
