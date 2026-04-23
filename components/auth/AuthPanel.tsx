@@ -54,26 +54,30 @@ export default function AuthPanel({ onSignupComplete }: AuthPanelProps) {
           </div>
         </>
       ) : signupSuccess ? (
-        <>
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-slate-900">
-              Account Created
-            </h2>
+        <div className="flex flex-col items-center justify-center py-6 text-center">
+          <img
+            src="/branding/icon/skysirv-icon-512.png"
+            alt="Skysirv"
+            className="mb-5 h-14 w-14 rounded-2xl"
+          />
 
-            <p className="mt-2 text-sm text-slate-600">
-              Thank you for creating your Skysirv account.
-            </p>
+          <h2 className="text-2xl font-bold text-slate-900">
+            Account Created
+          </h2>
 
-            <p className="mt-2 text-sm text-slate-600">
-              You should receive an activation email shortly.
-            </p>
-          </div>
+          <p className="mt-4 max-w-sm text-sm leading-6 text-slate-600">
+            You should receive an activation email shortly.
+            Please check your inbox and click the activation link to continue.
+          </p>
 
-          <div className="text-sm leading-6 text-slate-600">
-            <p>Please check your inbox and click the activation link to continue.</p>
-            <p className="mt-3">If you don’t see the email, check your spam folder.</p>
-          </div>
-        </>
+          <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
+            If you don’t see the email, check your spam folder.
+          </p>
+
+          <p className="mt-2 max-w-sm text-sm leading-6 text-slate-600">
+            Thank you for creating your Skysirv account.
+          </p>
+        </div>
       ) : (
         <>
           <div className="mb-6">
