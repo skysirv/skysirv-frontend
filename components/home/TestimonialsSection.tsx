@@ -75,12 +75,12 @@ export default function TestimonialsSection() {
   return (
     <section className="relative w-full bg-white py-24">
       <div className="mx-auto max-w-6xl px-6">
-        <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
+        <div className="mx-auto max-w-5xl px-6 text-center">
+          <h2 className="text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl">
             What users are saying
           </h2>
 
-          <p className="mt-6 text-base leading-7 text-slate-600 sm:text-lg">
+          <p className="mt-8 text-lg leading-8 text-slate-600 sm:text-xl">
             Real traveler feedback on a smarter, calmer way to track airfare.
           </p>
         </div>
