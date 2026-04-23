@@ -21,7 +21,7 @@ export default function AuthPanel({ onSignupComplete }: AuthPanelProps) {
       onSignupComplete?.()
       setMode('signin')
       setSignupSuccess(false)
-    }, 3600)
+    }, 5200)
 
     return () => window.clearTimeout(timer)
   }, [signupSuccess, onSignupComplete])
