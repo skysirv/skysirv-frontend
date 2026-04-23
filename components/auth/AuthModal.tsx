@@ -12,6 +12,7 @@ type AuthModalProps = {
   maxWidthClassName?: string
   hideCloseButton?: boolean
   headerContent?: ReactNode
+  disableBackdropClose?: boolean
 }
 
 export default function AuthModal({
@@ -23,6 +24,7 @@ export default function AuthModal({
   maxWidthClassName = "max-w-md",
   hideCloseButton = false,
   headerContent,
+  disableBackdropClose = false,
 }: AuthModalProps) {
   const [mounted, setMounted] = useState(false)
 
@@ -67,7 +69,7 @@ export default function AuthModal({
         ? "pointer-events-auto bg-black/40 backdrop-blur-sm opacity-100"
         : "pointer-events-none bg-black/0 backdrop-blur-0 opacity-0"
         }`}
-      onClick={open ? onClose : undefined}
+      onClick={open && !disableBackdropClose ? onClose : undefined}
       aria-hidden={!open}
     >
       <div

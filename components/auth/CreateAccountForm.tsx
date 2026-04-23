@@ -84,6 +84,8 @@ export default function CreateAccountForm({
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
 
+    if (loading || googleLoading) return
+
     if (password !== confirmPassword) {
       setError("Passwords do not match")
       return
@@ -228,7 +230,8 @@ export default function CreateAccountForm({
         <button
           type="submit"
           disabled={loading || googleLoading || passwordsMismatch}
-          className="w-full rounded-xl bg-slate-900 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
+          aria-busy={loading}
+          className="w-full rounded-xl bg-slate-900 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-70"
         >
           {loading ? "Creating account..." : "Create account"}
         </button>
