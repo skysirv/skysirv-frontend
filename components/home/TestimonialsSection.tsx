@@ -8,8 +8,7 @@ const testimonials = [
     handle: "@crystalac",
     date: "Apr 11, 2026",
     rating: 5,
-    image:
-      "https://unsplash.com/photos/woman-in-white-crew-neck-shirt-smiling-IF9TK5Uy-KI?auto=format&fit=crop&w=120&q=80",
+    image: "/testimonials/crystal-c.jpg",
     quote:
       "Skysirv brings a much more structured feel to airfare tracking. Instead of reacting blindly, I can actually understand what the market is doing.",
   },
@@ -18,8 +17,7 @@ const testimonials = [
     handle: "@clouisep",
     date: "Mar 20, 2026",
     rating: 5,
-    image:
-      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=120&q=80",
+    image: "/testimonials/christina-p.jpg",
     quote:
       "It feels polished, intentional, and calm. Skysirv turns fare movement into something readable instead of overwhelming.",
   },
@@ -28,8 +26,7 @@ const testimonials = [
     handle: "@tiagoc25",
     date: "Mar 23, 2026",
     rating: 5,
-    image:
-      "https://images.unsplash.com/photo-1504257432389-52343af06ae3?auto=format&fit=crop&w=120&q=80",
+    image: "/testimonials/tiago-c.jpg",
     quote:
       "A smart travel product should reduce noise and improve confidence. That’s exactly what stands out to me here.",
   },
@@ -38,8 +35,7 @@ const testimonials = [
     handle: "@cng25",
     date: "Apr 05, 2026",
     rating: 5,
-    image:
-      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80",
+    image: "/testimonials/claudia-n.jpg",
     quote:
       "Skysirv feels less like a basic search tool and more like a better decision environment for people who actually care about timing.",
   },
@@ -48,8 +44,7 @@ const testimonials = [
     handle: "@bella16",
     date: "Apr 14, 2026",
     rating: 5,
-    image:
-      "https://images.unsplash.com/photo-1504593811423-6dd665756598?auto=format&fit=crop&w=120&q=80",
+    image: "/testimonials/isabella-c.jpg",
     quote:
       "The intelligence layer is what makes it interesting. You can feel the difference between simple fare listings and something built to guide decisions.",
   },
@@ -58,8 +53,7 @@ const testimonials = [
     handle: "@sofiaguzman26",
     date: "Apr 18, 2026",
     rating: 5,
-    image:
-      "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=crop&w=120&q=80",
+    image: "/testimonials/sofia-g.jpg",
     quote:
       "Premium travel tools should feel clean, useful, and dependable. Skysirv already feels like it is moving in that direction.",
   },
@@ -67,7 +61,7 @@ const testimonials = [
 
 function StarRow({ rating }: { rating: number }) {
   return (
-    <div className="mt-3 flex items-center gap-1">
+    <div className="flex items-center gap-1">
       {Array.from({ length: rating }).map((_, index) => (
         <span key={index} className="text-sm text-amber-400">
           ★
@@ -97,7 +91,7 @@ export default function TestimonialsSection() {
               key={`${testimonial.name}-${index}`}
               whileHover={{ y: -5, boxShadow: "0 20px 50px rgba(15,23,42,0.18)" }}
               transition={{ duration: 0.22 }}
-              className="h-full rounded-[2rem] border border-slate-800/80 bg-[linear-gradient(180deg,#0b1728_0%,#0f1d31_42%,#13243b_100%)] p-6 text-white shadow-[0_20px_50px_rgba(2,6,23,0.18)]"
+              className="h-full rounded-[2rem] border border-slate-800/90 bg-[linear-gradient(180deg,#0f172a_0%,#111827_45%,#172033_100%)] p-6 text-white shadow-[0_20px_50px_rgba(2,6,23,0.18)]"
             >
               <div className="flex h-full flex-col">
                 <div className="flex items-start gap-4">
@@ -107,18 +101,25 @@ export default function TestimonialsSection() {
                     className="h-12 w-12 rounded-full object-cover"
                   />
 
-                  <div className="min-w-0">
-                    <p className="truncate text-base font-semibold text-white">
-                      {testimonial.name}
-                    </p>
-                    <p className="truncate text-sm text-slate-400">
-                      {testimonial.handle}
-                    </p>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-base font-semibold text-white">
+                          {testimonial.name}
+                        </p>
+                        <p className="truncate text-sm text-slate-400">
+                          {testimonial.handle}
+                        </p>
+                      </div>
+
+                      <div className="shrink-0">
+                        <StarRow rating={testimonial.rating} />
+                      </div>
+                    </div>
+
                     <p className="mt-2 text-sm text-slate-400">
                       {testimonial.date}
                     </p>
-
-                    <StarRow rating={testimonial.rating} />
                   </div>
                 </div>
 
