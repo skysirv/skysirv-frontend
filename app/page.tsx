@@ -126,7 +126,7 @@ export default function HomePage() {
               transition={{ delay: 0.05, duration: 0.55 }}
               className="inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-600 shadow-sm backdrop-blur"
             >
-              Premium Airfare Intelligence
+              Premium Airfare Intelligence DEBUG
             </motion.div>
 
             <h1 className="mt-8 text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl md:text-7xl">
