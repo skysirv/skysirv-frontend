@@ -89,8 +89,8 @@ export default function TestimonialsSection() {
           {testimonials.map((testimonial, index) => (
             <motion.div
               key={`${testimonial.name}-${index}`}
-              whileHover={{ y: -5, boxShadow: "0 20px 50px rgba(15,23,42,0.18)" }}
-              transition={{ duration: 0.22 }}
+              whileHover={{ y: -5 }}
+              transition={{ duration: 0.18 }}
               className="h-full rounded-[2rem] border border-slate-800/90 bg-[linear-gradient(180deg,#0f172a_0%,#111827_45%,#172033_100%)] p-6 text-white shadow-[0_20px_50px_rgba(2,6,23,0.18)]"
             >
               <div className="flex h-full flex-col">
