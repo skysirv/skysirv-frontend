@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import AuthModal from "@/components/auth/AuthModal"
 import CreateAccountForm from "@/components/auth/CreateAccountForm"
@@ -38,6 +38,18 @@ const staggerItem = {
 
 export default function HomePage() {
   const [createAccountModalOpen, setCreateAccountModalOpen] = useState(false)
+  const [createAccountSuccess, setCreateAccountSuccess] = useState(false)
+
+  useEffect(() => {
+    if (!createAccountModalOpen || !createAccountSuccess) return
+
+    const timer = window.setTimeout(() => {
+      setCreateAccountModalOpen(false)
+      setCreateAccountSuccess(false)
+    }, 2200)
+
+    return () => window.clearTimeout(timer)
+  }, [createAccountModalOpen, createAccountSuccess])
 
   const intelligenceCards = [
     {
@@ -246,7 +258,10 @@ export default function HomePage() {
             >
               <button
                 type="button"
-                onClick={() => setCreateAccountModalOpen(true)}
+                onClick={() => {
+                  setCreateAccountSuccess(false)
+                  setCreateAccountModalOpen(true)
+                }}
                 className="inline-flex h-[44px] items-center justify-center rounded-lg bg-slate-900 px-6 text-sm font-medium text-white shadow-sm transition hover:bg-slate-700"
               >
                 Start Monitoring Flights
@@ -702,7 +717,10 @@ export default function HomePage() {
                 <motion.div whileHover={{ y: -2, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <button
                     type="button"
-                    onClick={() => setCreateAccountModalOpen(true)}
+                    onClick={() => {
+                      setCreateAccountSuccess(false)
+                      setCreateAccountModalOpen(true)
+                    }}
                     className="rounded-lg bg-white px-6 py-3 text-sm font-medium text-slate-950 shadow-sm transition hover:bg-slate-200"
                   >
                     Start Monitoring Flights
@@ -716,12 +734,42 @@ export default function HomePage() {
 
       <AuthModal
         open={createAccountModalOpen}
-        onClose={() => setCreateAccountModalOpen(false)}
-        title="Create your Skysirv™ account"
-        description="Start monitoring airfare with real travel intelligence"
+        onClose={() => {
+          setCreateAccountModalOpen(false)
+          setCreateAccountSuccess(false)
+        }}
+        title={createAccountSuccess ? undefined : "Create your Skysirv™ account"}
+        description={
+          createAccountSuccess
+            ? undefined
+            : "Start monitoring airfare with real travel intelligence"
+        }
         maxWidthClassName="max-w-sm"
+        hideCloseButton={createAccountSuccess}
+        headerContent={
+          createAccountSuccess ? (
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900">
+                Account Created
+              </h2>
+              <p className="mt-2 text-sm text-slate-600">
+                Thank you for creating your Skysirv account.
+              </p>
+              <p className="mt-2 text-sm text-slate-600">
+                You should receive an activation email shortly.
+              </p>
+            </div>
+          ) : undefined
+        }
       >
-        <CreateAccountForm />
+        {createAccountSuccess ? (
+          <div className="text-sm leading-6 text-slate-600">
+            <p>Please check your inbox and click the activation link to continue.</p>
+            <p className="mt-3">If you don’t see the email, check your spam folder.</p>
+          </div>
+        ) : (
+          <CreateAccountForm onSuccess={() => setCreateAccountSuccess(true)} />
+        )}
       </AuthModal>
     </>
   )
