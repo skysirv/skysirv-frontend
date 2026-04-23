@@ -9,7 +9,7 @@ const testimonials = [
     date: "Apr 11, 2026",
     rating: 5,
     image:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80",
+      "https://unsplash.com/photos/woman-in-white-crew-neck-shirt-smiling-IF9TK5Uy-KI?auto=format&fit=crop&w=120&q=80",
     quote:
       "Skysirv brings a much more structured feel to airfare tracking. Instead of reacting blindly, I can actually understand what the market is doing.",
   },
@@ -34,7 +34,7 @@ const testimonials = [
       "A smart travel product should reduce noise and improve confidence. That’s exactly what stands out to me here.",
   },
   {
-    name: "Claudia Nino",
+    name: "Claudia N.",
     handle: "@cng25",
     date: "Apr 05, 2026",
     rating: 5,
@@ -54,7 +54,7 @@ const testimonials = [
       "The intelligence layer is what makes it interesting. You can feel the difference between simple fare listings and something built to guide decisions.",
   },
   {
-    name: "Sofia Guzman",
+    name: "Sofia G.",
     handle: "@sofiaguzman26",
     date: "Apr 18, 2026",
     rating: 5,
