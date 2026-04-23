@@ -104,7 +104,26 @@ export default function WelcomePage() {
         if (!isMounted) return
 
         setPlan(resolvedPlan)
-        router.replace(`${getDashboardPath(resolvedPlan)}?welcome=1`)
+        const gifted = new URLSearchParams(window.location.search).get("gifted")
+        const setupLifetimePro = new URLSearchParams(window.location.search).get("setupLifetimePro")
+        const inviteToken = new URLSearchParams(window.location.search).get("inviteToken")
+
+        const nextParams = new URLSearchParams()
+        nextParams.set("welcome", "1")
+
+        if (gifted === "true") {
+          nextParams.set("gifted", "true")
+        }
+
+        if (setupLifetimePro === "1") {
+          nextParams.set("setupLifetimePro", "1")
+        }
+
+        if (inviteToken) {
+          nextParams.set("inviteToken", inviteToken)
+        }
+
+        router.replace(`${getDashboardPath(resolvedPlan)}?${nextParams.toString()}`)
         return
       } catch (err: any) {
         if (!isMounted) return

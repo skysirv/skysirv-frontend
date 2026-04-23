@@ -763,10 +763,6 @@ export default function HomePage() {
           ) : undefined
         }
       >
-        <div className="mb-4 text-xs font-semibold uppercase tracking-[0.14em] text-sky-600">
-          Homepage Create Account Modal
-        </div>
-
         {createAccountSuccess ? (
           <div className="text-sm leading-6 text-slate-600">
             <p>Please check your inbox and click the activation link to continue.</p>

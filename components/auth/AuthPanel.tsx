@@ -92,7 +92,6 @@ export default function AuthPanel({ onSignupComplete }: AuthPanelProps) {
 
           <CreateAccountForm
             onSuccess={() => {
-              console.log('AUTH PANEL SIGNUP SUCCESS FIRED')
               setSignupSuccess(true)
             }}
           />

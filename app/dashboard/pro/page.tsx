@@ -249,6 +249,26 @@ async function fetchAvailableWrappedYears(token: string) {
 export default function ProDashboardPage() {
   const router = useRouter()
   const [showWelcomeModal, setShowWelcomeModal] = useState(false)
+  const [showLifetimeSetupModal, setShowLifetimeSetupModal] = useState(false)
+  const [lifetimeSetupComplete, setLifetimeSetupComplete] = useState(false)
+  const [lifetimePassword, setLifetimePassword] = useState("")
+  const [showLifetimePassword, setShowLifetimePassword] = useState(false)
+  const [lifetimeSetupLoading, setLifetimeSetupLoading] = useState(false)
+  const [lifetimeSetupError, setLifetimeSetupError] = useState("")
+
+  useEffect(() => {
+    if (!lifetimeSetupComplete) return
+
+    const timer = window.setTimeout(() => {
+      setShowLifetimeSetupModal(false)
+      setShowWelcomeModal(true)
+      setLifetimePassword("")
+      setShowLifetimePassword(false)
+      setLifetimeSetupError("")
+    }, 1200)
+
+    return () => window.clearTimeout(timer)
+  }, [lifetimeSetupComplete])
 
   const [loading, setLoading] = useState(true)
   const [wrappedLoading, setWrappedLoading] = useState(true)
@@ -277,6 +297,71 @@ export default function ProDashboardPage() {
   const [isFlightModalOpen, setIsFlightModalOpen] = useState(false)
 
   const isLifetimePro = subscription?.plan_id === "pro_lifetime"
+
+  async function handleLifetimeSetupSubmit(e: React.FormEvent) {
+    e.preventDefault()
+
+    const inviteToken = sessionStorage.getItem("skysirv_lifetime_invite_token")
+
+    if (!inviteToken) {
+      setLifetimeSetupError("Invite token missing. Please reopen your gifted access link.")
+      return
+    }
+
+    if (!lifetimePassword.trim()) {
+      setLifetimeSetupError("Please create a password.")
+      return
+    }
+
+    try {
+      setLifetimeSetupLoading(true)
+      setLifetimeSetupError("")
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/invite/activate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          token: inviteToken,
+          password: lifetimePassword,
+        }),
+      })
+
+      const data = await res.json().catch(() => null)
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Unable to finish setup.")
+      }
+
+      const loginRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: data.email,
+          password: lifetimePassword,
+        }),
+      })
+
+      const loginData = await loginRes.json().catch(() => null)
+
+      if (!loginRes.ok || !loginData?.token) {
+        throw new Error("Login failed after setup.")
+      }
+
+      localStorage.setItem("skysirv_token", loginData.token)
+      localStorage.setItem("skysirv_admin", loginData.user?.is_admin ? "true" : "false")
+
+      sessionStorage.removeItem("skysirv_lifetime_invite_token")
+      setLifetimeSetupComplete(true)
+    } catch (err: any) {
+      setLifetimeSetupError(err?.message || "Unable to finish setup.")
+    } finally {
+      setLifetimeSetupLoading(false)
+    }
+  }
 
   const proIntelligenceItems = [
     {
@@ -374,7 +459,20 @@ export default function ProDashboardPage() {
   }, [watchlistFetchKey])
 
   useEffect(() => {
-    const shouldShowWelcome = window.location.search.includes("welcome=1")
+    const params = new URLSearchParams(window.location.search)
+    const shouldShowWelcome = params.get("welcome") === "1"
+    const gifted = params.get("gifted") === "true"
+    const setupLifetimePro = params.get("setupLifetimePro") === "1"
+    const inviteToken = params.get("inviteToken")
+
+    if (inviteToken) {
+      sessionStorage.setItem("skysirv_lifetime_invite_token", inviteToken)
+    }
+
+    if (setupLifetimePro && gifted) {
+      setShowLifetimeSetupModal(true)
+      return
+    }
 
     if (shouldShowWelcome) {
       setShowWelcomeModal(true)
@@ -967,17 +1065,93 @@ export default function ProDashboardPage() {
 
   return (
     <>
+      {showLifetimeSetupModal && (
+        <div className="fixed inset-0 z-[90] bg-slate-950/35 backdrop-blur-sm" />
+      )}
+
+      {showLifetimeSetupModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
+          <div className="w-full max-w-xl rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_30px_80px_rgba(15,23,42,0.18)] sm:p-10">
+            {lifetimeSetupComplete ? (
+              <div className="flex flex-col items-center justify-center py-4 text-center">
+                <img
+                  src="/branding/icon/skysirv-icon-512.png"
+                  alt="Skysirv"
+                  className="mb-5 h-14 w-14 rounded-2xl"
+                />
+
+                <h2 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+                  Welcome to your Free Lifetime Pro Dashboard
+                </h2>
+
+                <p className="mt-4 max-w-md text-sm leading-7 text-slate-600 sm:text-base">
+                  Your gifted Lifetime Pro access is now active and your dashboard is ready.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-700">
+                  Gifted Lifetime Pro Access
+                </div>
+
+                <h2 className="mt-5 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+                  Create your password to enter your dashboard
+                </h2>
+
+                <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base">
+                  You’ve been granted complimentary Lifetime Pro access. Create your password below to finish setup and unlock your dashboard.
+                </p>
+
+                <form onSubmit={handleLifetimeSetupSubmit} className="mt-8 space-y-4">
+                  <div className="relative">
+                    <input
+                      type={showLifetimePassword ? "text" : "password"}
+                      placeholder="Create password"
+                      required
+                      value={lifetimePassword}
+                      onChange={(e) => setLifetimePassword(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-20 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setShowLifetimePassword((prev) => !prev)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-500 hover:text-slate-700"
+                    >
+                      {showLifetimePassword ? "Hide" : "Show"}
+                    </button>
+                  </div>
+
+                  {lifetimeSetupError && (
+                    <p className="text-sm text-red-500">{lifetimeSetupError}</p>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={lifetimeSetupLoading}
+                    className="w-full rounded-xl bg-slate-900 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    {lifetimeSetupLoading ? "Setting up..." : "Create Password"}
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       <WelcomeModal
         open={showWelcomeModal}
         plan="pro"
         onContinue={() => {
           setShowWelcomeModal(false)
+          setLifetimeSetupComplete(false)
           router.replace("/dashboard/pro")
         }}
       />
 
       <section
-        className={`min-h-screen bg-white transition duration-300 ${showWelcomeModal ? "pointer-events-none blur-md select-none" : ""
+        className={`min-h-screen bg-white transition duration-300 ${showWelcomeModal || showLifetimeSetupModal ? "pointer-events-none blur-md select-none" : ""
           }`}
       >
         {/* Hero */}

@@ -60,7 +60,7 @@ export default function InvitePage({ params }: { params: { token: string } }) {
         loginData.user?.is_admin ? "true" : "false"
       )
 
-      router.push("/welcome?gifted=true")
+      router.push(`/welcome?gifted=true&setupLifetimePro=1&inviteToken=${encodeURIComponent(params.token)}`)
     } catch (err: any) {
       setError(err?.message || "Unable to activate invite")
     } finally {
