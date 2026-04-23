@@ -115,6 +115,9 @@ export default function CreateAccountForm({
         throw new Error(data?.error || "Signup failed")
       }
 
+      console.log("CREATE ACCOUNT ONSUCCESS TYPE:", typeof onSuccess)
+      console.log("CREATE ACCOUNT ONSUCCESS VALUE:", onSuccess)
+
       onSuccess?.()
     } catch (err: any) {
       setError(err?.message || "Unable to create account")
