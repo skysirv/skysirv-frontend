@@ -1,7 +1,5 @@
 "use client"
 
-import { motion } from "framer-motion"
-
 const testimonials = [
   {
     name: "Crystal C.",
