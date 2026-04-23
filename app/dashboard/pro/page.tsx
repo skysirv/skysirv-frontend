@@ -354,6 +354,8 @@ export default function ProDashboardPage() {
       localStorage.setItem("skysirv_token", loginData.token)
       localStorage.setItem("skysirv_admin", loginData.user?.is_admin ? "true" : "false")
 
+      await refreshSession()
+
       sessionStorage.removeItem("skysirv_lifetime_invite_token")
       setLifetimeSetupComplete(true)
     } catch (err: any) {
@@ -534,29 +536,37 @@ export default function ProDashboardPage() {
     }
   }, [])
 
+  async function refreshSession() {
+    const token = localStorage.getItem("skysirv_token")
+
+    if (!token) return null
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/session`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      const data: SessionResponse = await res.json().catch(() => ({}))
+
+      if (res.ok) {
+        setSubscription(data.subscription ?? null)
+        return data.subscription ?? null
+      }
+    } catch (error) {
+      console.error("Failed to load pro dashboard session", error)
+    }
+
+    return null
+  }
+
   useEffect(() => {
     let cancelled = false
 
     async function loadSession() {
-      const token = localStorage.getItem("skysirv_token")
-
-      if (!token) return
-
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/session`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-
-        const data: SessionResponse = await res.json().catch(() => ({}))
-
-        if (!cancelled && res.ok) {
-          setSubscription(data.subscription ?? null)
-        }
-      } catch (error) {
-        console.error("Failed to load pro dashboard session", error)
-      }
+      if (cancelled) return
+      await refreshSession()
     }
 
     loadSession()
