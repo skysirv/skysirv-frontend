@@ -990,15 +990,17 @@ export default function ProDashboardPage() {
               className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between"
             >
               <div className="max-w-3xl">
-                <div className="mb-4 inline-flex items-center rounded-full border border-sky-200 bg-white/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-sky-700 shadow-sm backdrop-blur-sm">
-                  {isLifetimePro ? "Lifetime Pro Dashboard" : "Pro Plan Dashboard"}
-                </div>
-
-                {isLifetimePro && (
-                  <div className="mb-4 inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 shadow-sm">
-                    Gifted Lifetime Access
+                <div className="mb-4 flex flex-wrap items-center gap-3">
+                  <div className="inline-flex items-center rounded-full border border-sky-200 bg-white/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-sky-700 shadow-sm backdrop-blur-sm">
+                    {isLifetimePro ? "Lifetime Pro Dashboard" : "Pro Plan Dashboard"}
                   </div>
-                )}
+
+                  {isLifetimePro && (
+                    <div className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 shadow-sm">
+                      Gifted Lifetime Access
+                    </div>
+                  )}
+                </div>
 
                 <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl md:text-6xl">
                   A sharper intelligence solution for more serious travelers
