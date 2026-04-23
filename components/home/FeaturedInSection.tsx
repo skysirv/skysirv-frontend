@@ -18,13 +18,12 @@ export default function FeaturedInSection() {
 
   return (
     <section className="relative w-full overflow-hidden bg-white py-20">
-      <div className="mx-auto max-w-6xl px-6 text-center">
-
-        <h2 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
+      <div className="mx-auto max-w-5xl px-6 text-center">
+        <h2 className="text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl">
           Featured in
         </h2>
 
-        <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
+        <p className="mt-8 text-lg leading-8 text-slate-600 sm:text-xl">
           Skysirv™ is proud to be featured across respected travel, technology, and business media. We are your go-to source for the best flight intelligence and insights.
         </p>
       </div>
