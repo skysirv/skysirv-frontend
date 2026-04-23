@@ -6,7 +6,11 @@ import SignInForm from './SignInForm'
 
 type AuthMode = 'signin' | 'signup'
 
-export default function AuthPanel() {
+type AuthPanelProps = {
+  onSignupComplete?: () => void
+}
+
+export default function AuthPanel({ onSignupComplete }: AuthPanelProps) {
   const [mode, setMode] = useState<AuthMode>('signin')
   const [signupSuccess, setSignupSuccess] = useState(false)
 
@@ -14,12 +18,13 @@ export default function AuthPanel() {
     if (!signupSuccess) return
 
     const timer = window.setTimeout(() => {
+      onSignupComplete?.()
       setMode('signin')
       setSignupSuccess(false)
-    }, 2200)
+    }, 3600)
 
     return () => window.clearTimeout(timer)
-  }, [signupSuccess])
+  }, [signupSuccess, onSignupComplete])
 
   return (
     <div>

@@ -207,8 +207,9 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
         open={createAccountModalOpen}
         onClose={() => setCreateAccountModalOpen(false)}
         maxWidthClassName="max-w-sm"
+        disableBackdropClose={true}
       >
-        <AuthPanel />
+        <AuthPanel onSignupComplete={() => setCreateAccountModalOpen(false)} />
       </AuthModal>
     </>
   );
