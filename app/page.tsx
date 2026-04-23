@@ -5,6 +5,7 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import AuthModal from "@/components/auth/AuthModal"
 import CreateAccountForm from "@/components/auth/CreateAccountForm"
+import TestimonialsSection from "@/components/home/TestimonialsSection"
 import FeaturedInSection from "@/components/home/FeaturedInSection"
 
 const fadeUp = {
@@ -659,6 +660,7 @@ export default function HomePage() {
         </motion.div>
       </motion.section>
 
+      <TestimonialsSection />
       <FeaturedInSection />
 
       {/* CTA Bridge */}
