@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { getAuthToken } from "@/utils/auth-storage"
 
 type UserPlan = "free" | "pro" | "business"
 
@@ -88,7 +89,7 @@ export default function WelcomePage() {
     }
 
     async function loadPlan() {
-      const token = localStorage.getItem("skysirv_token")
+      const token = getAuthToken()
 
       if (!token) {
         router.push("/signin")

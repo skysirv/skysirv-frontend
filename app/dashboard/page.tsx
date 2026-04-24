@@ -3,6 +3,7 @@
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
+import { getAuthToken } from "@/utils/auth-storage"
 
 function getDashboardRoute(planId: string) {
   const normalizedPlan = String(planId || "").trim().toLowerCase()
@@ -35,8 +36,7 @@ export default function DashboardPage() {
     let cancelled = false
 
     async function routeUserToDashboard() {
-      const token = localStorage.getItem("skysirv_token")
-
+      const token = getAuthToken()
       if (!token) {
         router.replace("/")
         return

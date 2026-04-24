@@ -5,6 +5,7 @@ import { toast } from "@/components/ui/Toasts/use-toast"
 import { AirportOption, searchAirports } from "@/lib/airports/major-airports"
 import { DayPicker } from "react-day-picker"
 import "react-day-picker/dist/style.css"
+import { getAuthToken } from "@/utils/auth-storage"
 
 type WatchlistRoute = {
   id: string
@@ -313,7 +314,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
   }
 
   async function handleMonitorRoute() {
-    const token = localStorage.getItem("skysirv_token")
+    const token = getAuthToken()
 
     if (!token) {
       toast({

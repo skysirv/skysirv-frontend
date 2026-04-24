@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import { getAuthToken } from "@/utils/auth-storage"
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
@@ -103,7 +104,7 @@ export default function AdminPage() {
   }
 
   async function deleteUser(userId: string) {
-    const token = localStorage.getItem("skysirv_token")
+    const token = getAuthToken()
 
     const res = await fetch(`${API_BASE_URL}/api/admin/users/${userId}`, {
       method: "DELETE",
@@ -120,7 +121,7 @@ export default function AdminPage() {
   }
 
   useEffect(() => {
-    const token = localStorage.getItem("skysirv_token")
+    const token = getAuthToken()
 
     if (!token) {
       router.push("/")
@@ -559,7 +560,7 @@ export default function AdminPage() {
                   return
                 }
 
-                const token = localStorage.getItem("skysirv_token")
+                const token = getAuthToken()
 
                 const res = await fetch(`${API_BASE_URL}/api/admin/invite-user`, {
                   method: "POST",
@@ -694,7 +695,7 @@ export default function AdminPage() {
 
                   if (!confirmed) return
 
-                  const token = localStorage.getItem("skysirv_token")
+                  const token = getAuthToken()
 
                   const res = await fetch(
                     `${API_BASE_URL}/api/admin/beta-applications/${selectedBetaApplication.id}/approve`,
@@ -751,7 +752,7 @@ export default function AdminPage() {
 
                   if (!confirmed) return
 
-                  const token = localStorage.getItem("skysirv_token")
+                  const token = getAuthToken()
 
                   const res = await fetch(
                     `${API_BASE_URL}/api/admin/beta-applications/${selectedBetaApplication.id}/reject`,

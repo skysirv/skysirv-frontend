@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { getAuthToken, setAuthToken } from "@/utils/auth-storage"
 
 type Billing = "monthly" | "annual"
 
@@ -79,7 +80,7 @@ function ChoosePlanPageContent() {
 
     if (!tokenFromUrl) return
 
-    localStorage.setItem("skysirv_token", tokenFromUrl)
+    setAuthToken(tokenFromUrl)
 
     params.delete("token")
     const nextQuery = params.toString()
@@ -90,7 +91,7 @@ function ChoosePlanPageContent() {
 
   useEffect(() => {
     async function loadSession() {
-      const token = localStorage.getItem("skysirv_token")
+      const token = getAuthToken()
 
       if (!token) {
         setSessionLoading(false)
@@ -139,7 +140,7 @@ function ChoosePlanPageContent() {
   }, [])
 
   async function handlePlanSelection(plan: string) {
-    const token = localStorage.getItem("skysirv_token")
+    const token = getAuthToken()
 
     if (!token) {
       router.push("/signin")

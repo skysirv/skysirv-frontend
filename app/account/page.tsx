@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { toast } from "@/components/ui/Toasts/use-toast"
 import { useRouter } from "next/navigation"
+import { getAuthToken } from "@/utils/auth-storage"
 
 type SessionUser = {
   id: string
@@ -43,7 +44,7 @@ export default function AccountPage() {
   useEffect(() => {
     async function loadSession() {
       try {
-        const token = localStorage.getItem("skysirv_token")
+        const token = getAuthToken()
 
         if (!token) {
           setLoading(false)

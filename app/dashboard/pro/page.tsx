@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { motion, useInView } from "framer-motion"
+import { getAuthToken } from "@/utils/auth-storage"
 
 import RouteSearch from "@/components/dashboard/route-search"
 import OpportunityBanner from "@/components/dashboard/opportunity-banner"
@@ -408,7 +409,7 @@ export default function ProDashboardPage() {
     let cancelled = false
 
     async function loadWatchlist() {
-      const token = localStorage.getItem("skysirv_token")
+      const token = getAuthToken()
 
       if (!token) {
         if (!cancelled) {
@@ -485,7 +486,7 @@ export default function ProDashboardPage() {
     let cancelled = false
 
     async function loadSavedFlights() {
-      const token = localStorage.getItem("skysirv_token")
+      const token = getAuthToken()
 
       if (!token) {
         if (!cancelled) {
@@ -537,7 +538,7 @@ export default function ProDashboardPage() {
   }, [])
 
   async function refreshSession() {
-    const token = localStorage.getItem("skysirv_token")
+    const token = getAuthToken()
 
     if (!token) return null
 
@@ -580,7 +581,7 @@ export default function ProDashboardPage() {
     let cancelled = false
 
     async function loadAvailableYears() {
-      const token = localStorage.getItem("skysirv_token")
+      const token = getAuthToken()
 
       if (!token) {
         if (cancelled) return
@@ -612,7 +613,7 @@ export default function ProDashboardPage() {
     let cancelled = false
 
     async function loadWrapped(year: number) {
-      const token = localStorage.getItem("skysirv_token")
+      const token = getAuthToken()
 
       if (!token) {
         if (cancelled) return
@@ -744,7 +745,7 @@ export default function ProDashboardPage() {
   }
 
   async function handleRouteRemoved(routeId: string) {
-    const token = localStorage.getItem("skysirv_token")
+    const token = getAuthToken()
 
     if (!token) {
       toast({
@@ -829,7 +830,7 @@ export default function ProDashboardPage() {
       return
     }
 
-    const token = localStorage.getItem("skysirv_token")
+    const token = getAuthToken()
 
     if (!token) {
       toast({
@@ -946,7 +947,7 @@ export default function ProDashboardPage() {
   }
 
   async function handleMarkSavedFlightCompleted(flight: SavedFlightCardData) {
-    const token = localStorage.getItem("skysirv_token")
+    const token = getAuthToken()
 
     if (!token) {
       toast({
@@ -1018,7 +1019,7 @@ export default function ProDashboardPage() {
   }
 
   async function handleDeleteSavedFlight(flight: SavedFlightCardData) {
-    const token = localStorage.getItem("skysirv_token")
+    const token = getAuthToken()
 
     if (!token) {
       toast({

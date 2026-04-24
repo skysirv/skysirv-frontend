@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
+import { getAuthToken } from "@/utils/auth-storage"
 
 import RouteSearch from "@/components/dashboard/route-search"
 import OpportunityBanner from "@/components/dashboard/opportunity-banner"
@@ -87,7 +88,7 @@ export default function FreeDashboardPage() {
     let cancelled = false
 
     async function loadWatchlist() {
-      const token = localStorage.getItem("skysirv_token")
+      const token = getAuthToken()
 
       if (!token) {
         if (!cancelled) {
@@ -154,7 +155,7 @@ export default function FreeDashboardPage() {
     let cancelled = false
 
     async function loadSavedFlights() {
-      const token = localStorage.getItem("skysirv_token")
+      const token = getAuthToken()
 
       if (!token) {
         if (!cancelled) {
@@ -242,7 +243,7 @@ export default function FreeDashboardPage() {
   }
 
   async function handleRouteRemoved(routeId: string) {
-    const token = localStorage.getItem("skysirv_token")
+    const token = getAuthToken()
 
     if (!token) {
       toast({
@@ -327,7 +328,7 @@ export default function FreeDashboardPage() {
       return
     }
 
-    const token = localStorage.getItem("skysirv_token")
+    const token = getAuthToken()
 
     if (!token) {
       toast({
@@ -444,7 +445,7 @@ export default function FreeDashboardPage() {
   }
 
   async function handleMarkSavedFlightCompleted(flight: SavedFlightCardData) {
-    const token = localStorage.getItem("skysirv_token")
+    const token = getAuthToken()
 
     if (!token) {
       toast({
@@ -514,7 +515,7 @@ export default function FreeDashboardPage() {
   }
 
   async function handleDeleteSavedFlight(flight: SavedFlightCardData) {
-    const token = localStorage.getItem("skysirv_token")
+    const token = getAuthToken()
 
     if (!token) {
       toast({
