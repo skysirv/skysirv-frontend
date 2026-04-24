@@ -96,7 +96,8 @@ export default function SignInForm() {
     if (
       planId === "pro" ||
       planId === "pro_monthly" ||
-      planId === "pro_yearly"
+      planId === "pro_yearly" ||
+      planId === "pro_lifetime"
     ) {
       window.location.href = "/dashboard/pro"
       return
