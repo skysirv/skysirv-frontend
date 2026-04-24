@@ -23,10 +23,14 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
   const [createAccountModalOpen, setCreateAccountModalOpen] = useState(false);
   const [isSessionReady, setIsSessionReady] = useState(false);
 
-  function signOutAndReturnHome() {
+  function clearAuthSession() {
     localStorage.removeItem('skysirv_token');
     localStorage.removeItem('skysirv_admin');
     localStorage.removeItem('skysirv_last_activity');
+  }
+
+  function signOutAndReturnHome() {
+    clearAuthSession();
     window.dispatchEvent(new Event('skysirv-auth-changed'));
     window.location.href = '/';
   }
@@ -47,6 +51,10 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
       }, SESSION_TIMEOUT_MS);
     }
 
+    function handleBeforeUnload() {
+      clearAuthSession();
+    }
+
     async function checkSession() {
       const token = localStorage.getItem('skysirv_token');
 
@@ -54,8 +62,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
         if (!isMounted) return;
         setIsLoggedIn(false);
         setIsAdmin(false);
-        localStorage.removeItem('skysirv_admin');
-        localStorage.removeItem('skysirv_last_activity');
+        clearAuthSession();
         setIsSessionReady(true);
         return;
       }
@@ -90,9 +97,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
           if (!isMounted) return;
           setIsLoggedIn(false);
           setIsAdmin(false);
-          localStorage.removeItem('skysirv_token');
-          localStorage.removeItem('skysirv_admin');
-          localStorage.removeItem('skysirv_last_activity');
+          clearAuthSession();
           setIsSessionReady(true);
           return;
         }
@@ -116,9 +121,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
         if (!isMounted) return;
         setIsLoggedIn(false);
         setIsAdmin(false);
-        localStorage.removeItem('skysirv_token');
-        localStorage.removeItem('skysirv_admin');
-        localStorage.removeItem('skysirv_last_activity');
+        clearAuthSession();
         setIsSessionReady(true);
       }
     }
@@ -130,7 +133,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
     const handleStorage = () => checkSession();
     const handleAuthChanged = () => checkSession();
 
-    const activityEvents = ['mousemove', 'keydown', 'click', 'scroll'];
+    const activityEvents = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
 
     activityEvents.forEach((event) => {
       window.addEventListener(event, resetInactivityTimer);
@@ -138,6 +141,8 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
 
     window.addEventListener('focus', handleFocus);
     window.addEventListener('storage', handleStorage);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('pagehide', handleBeforeUnload);
     window.addEventListener('skysirv-auth-changed', handleAuthChanged as EventListener);
 
     return () => {
@@ -153,6 +158,8 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
 
       window.removeEventListener('focus', handleFocus);
       window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('pagehide', handleBeforeUnload);
       window.removeEventListener('skysirv-auth-changed', handleAuthChanged as EventListener);
     };
   }, []);
@@ -187,31 +194,19 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
               className={`flex items-center gap-6 text-sm font-semibold ${isDark ? 'text-white/70' : 'text-slate-600'
                 }`}
             >
-              <Link
-                href="/pricing"
-                className={`transition ${isDark ? 'hover:text-white' : 'hover:text-slate-900'}`}
-              >
+              <Link href="/pricing" className={`transition ${isDark ? 'hover:text-white' : 'hover:text-slate-900'}`}>
                 Pricing
               </Link>
 
-              <Link
-                href="/booking"
-                className={`transition ${isDark ? 'hover:text-white' : 'hover:text-slate-900'}`}
-              >
+              <Link href="/booking" className={`transition ${isDark ? 'hover:text-white' : 'hover:text-slate-900'}`}>
                 Booking
               </Link>
 
-              <Link
-                href="/flight-attendant"
-                className={`transition ${isDark ? 'hover:text-white' : 'hover:text-slate-900'}`}
-              >
+              <Link href="/flight-attendant" className={`transition ${isDark ? 'hover:text-white' : 'hover:text-slate-900'}`}>
                 Skysirv Flight Attendant™
               </Link>
 
-              <Link
-                href="/beta"
-                className={`transition ${isDark ? 'hover:text-white' : 'hover:text-slate-900'}`}
-              >
+              <Link href="/beta" className={`transition ${isDark ? 'hover:text-white' : 'hover:text-slate-900'}`}>
                 Skysirv™ Beta
               </Link>
             </div>
