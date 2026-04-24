@@ -7,6 +7,10 @@ export default function InvitePage({ params }: { params: { token: string } }) {
   const router = useRouter()
 
   useEffect(() => {
+    localStorage.removeItem("skysirv_token")
+    localStorage.removeItem("skysirv_admin")
+    window.dispatchEvent(new Event("skysirv-auth-changed"))
+
     router.replace(
       `/dashboard/pro?welcome=1&gifted=true&setupLifetimePro=1&inviteToken=${encodeURIComponent(params.token)}`
     )
