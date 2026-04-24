@@ -51,10 +51,6 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
       }, SESSION_TIMEOUT_MS);
     }
 
-    function handleBeforeUnload() {
-      clearAuthSession();
-    }
-
     async function checkSession() {
       const token = localStorage.getItem('skysirv_token');
 
@@ -141,8 +137,6 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
 
     window.addEventListener('focus', handleFocus);
     window.addEventListener('storage', handleStorage);
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    window.addEventListener('pagehide', handleBeforeUnload);
     window.addEventListener('skysirv-auth-changed', handleAuthChanged as EventListener);
 
     return () => {
@@ -158,8 +152,6 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
 
       window.removeEventListener('focus', handleFocus);
       window.removeEventListener('storage', handleStorage);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      window.removeEventListener('pagehide', handleBeforeUnload);
       window.removeEventListener('skysirv-auth-changed', handleAuthChanged as EventListener);
     };
   }, []);
