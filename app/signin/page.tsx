@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { setAuthAdmin, setAuthToken } from "@/utils/auth-storage"
 
 declare global {
   interface Window {
@@ -137,8 +138,8 @@ export default function SignInPage() {
         throw new Error(data?.error || "Login failed")
       }
 
-      localStorage.setItem("skysirv_token", data.token)
-      localStorage.setItem("skysirv_admin", data.user?.is_admin ? "true" : "false")
+      setAuthToken(data.token)
+      setAuthAdmin(data.user?.is_admin === true)
 
       await routeUserAfterAuth(data.token, data.user?.is_admin === true)
     } catch (err: any) {

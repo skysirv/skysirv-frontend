@@ -2,13 +2,13 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { clearAuthSession } from "@/utils/auth-storage"
 
 export default function InvitePage({ params }: { params: { token: string } }) {
   const router = useRouter()
 
   useEffect(() => {
-    localStorage.removeItem("skysirv_token")
-    localStorage.removeItem("skysirv_admin")
+    clearAuthSession()
     window.dispatchEvent(new Event("skysirv-auth-changed"))
 
     router.replace(

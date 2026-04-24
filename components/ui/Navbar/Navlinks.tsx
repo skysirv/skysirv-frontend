@@ -6,13 +6,20 @@ import { usePathname } from 'next/navigation';
 import s from './Navbar.module.css';
 import AuthModal from '@/components/auth/AuthModal';
 import AuthPanel from '@/components/auth/AuthPanel';
+import {
+  AUTH_LAST_ACTIVITY_KEY,
+  clearAuthSession,
+  getAuthAdmin,
+  getAuthToken,
+  setAuthAdmin,
+} from '@/utils/auth-storage';
 
 interface NavlinksProps {
   user?: any;
   isDark?: boolean;
 }
 
-const SESSION_TIMEOUT_MS = 5 * 60 * 1000;
+const SESSION_TIMEOUT_MS = 30 * 60 * 1000;
 
 export default function Navlinks({ user, isDark = false }: NavlinksProps) {
   const pathname = usePathname();
@@ -23,10 +30,9 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
   const [createAccountModalOpen, setCreateAccountModalOpen] = useState(false);
   const [isSessionReady, setIsSessionReady] = useState(false);
 
-  function clearAuthSession() {
-    localStorage.removeItem('skysirv_token');
-    localStorage.removeItem('skysirv_admin');
-    localStorage.removeItem('skysirv_last_activity');
+  function signOutSilently() {
+    clearAuthSession();
+    window.dispatchEvent(new Event('skysirv-auth-changed'));
   }
 
   function signOutAndReturnHome() {
@@ -40,19 +46,23 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
     let inactivityTimer: ReturnType<typeof setTimeout> | null = null;
 
     function resetInactivityTimer() {
-      localStorage.setItem('skysirv_last_activity', Date.now().toString());
+      const token = getAuthToken();
+
+      if (!token) return;
+
+      sessionStorage.setItem(AUTH_LAST_ACTIVITY_KEY, Date.now().toString());
 
       if (inactivityTimer) {
         clearTimeout(inactivityTimer);
       }
 
       inactivityTimer = setTimeout(() => {
-        signOutAndReturnHome();
+        signOutSilently();
       }, SESSION_TIMEOUT_MS);
     }
 
     async function checkSession() {
-      const token = localStorage.getItem('skysirv_token');
+      const token = getAuthToken();
 
       if (!token) {
         if (!isMounted) return;
@@ -63,7 +73,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
         return;
       }
 
-      const lastActivity = localStorage.getItem('skysirv_last_activity');
+      const lastActivity = sessionStorage.getItem(AUTH_LAST_ACTIVITY_KEY);
 
       if (lastActivity) {
         const inactiveFor = Date.now() - Number(lastActivity);
@@ -72,14 +82,14 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
           signOutAndReturnHome();
           return;
         }
-      } else {
-        localStorage.setItem('skysirv_last_activity', Date.now().toString());
       }
+
+      resetInactivityTimer();
 
       if (!isMounted) return;
 
       setIsLoggedIn(true);
-      setIsAdmin(localStorage.getItem('skysirv_admin') === 'true');
+      setIsAdmin(getAuthAdmin() === 'true');
       setIsSessionReady(true);
 
       try {
@@ -107,12 +117,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
         setIsLoggedIn(loggedIn);
         setIsAdmin(admin);
         setIsSessionReady(true);
-
-        if (admin) {
-          localStorage.setItem('skysirv_admin', 'true');
-        } else {
-          localStorage.removeItem('skysirv_admin');
-        }
+        setAuthAdmin(admin);
       } catch {
         if (!isMounted) return;
         setIsLoggedIn(false);
@@ -123,7 +128,6 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
     }
 
     checkSession();
-    resetInactivityTimer();
 
     const handleFocus = () => checkSession();
     const handleStorage = () => checkSession();
@@ -169,11 +173,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
             <Link href="/" className={s.logo} aria-label="Skysirv" style={{ marginLeft: '-22px' }}>
               <span style={{ display: 'flex', alignItems: 'center', height: '40px' }}>
                 <img
-                  src={
-                    isDark
-                      ? '/branding/logo/skysirv-logo-white.svg'
-                      : '/branding/logo/skysirv-logo.svg'
-                  }
+                  src={isDark ? '/branding/logo/skysirv-logo-white.svg' : '/branding/logo/skysirv-logo.svg'}
                   alt="Skysirv"
                   style={{ width: '180px', height: 'auto', display: 'block' }}
                 />
@@ -194,7 +194,10 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
                 Booking
               </Link>
 
-              <Link href="/flight-attendant" className={`transition ${isDark ? 'hover:text-white' : 'hover:text-slate-900'}`}>
+              <Link
+                href="/flight-attendant"
+                className={`transition ${isDark ? 'hover:text-white' : 'hover:text-slate-900'}`}
+              >
                 Skysirv Flight Attendant™
               </Link>
 

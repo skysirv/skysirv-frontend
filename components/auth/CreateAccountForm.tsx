@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
+import { setAuthAdmin, setAuthToken } from "@/utils/auth-storage"
 
 declare global {
   interface Window {
@@ -147,8 +148,8 @@ export default function CreateAccountForm({
         throw new Error(data?.error || "Google sign-up failed")
       }
 
-      localStorage.setItem("skysirv_token", data.token)
-      localStorage.setItem("skysirv_admin", data.user?.is_admin ? "true" : "false")
+      setAuthToken(data.token)
+      setAuthAdmin(data.user?.is_admin === true)
 
       window.location.href = "/choose-plan"
     } catch (err: any) {
