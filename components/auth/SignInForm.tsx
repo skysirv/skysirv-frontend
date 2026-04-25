@@ -20,6 +20,7 @@ export default function SignInForm() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
+  const [googleButtonReady, setGoogleButtonReady] = useState(false)
 
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID) {
@@ -57,6 +58,8 @@ export default function SignInForm() {
         logo_alignment: "left",
         width: 320
       })
+
+      setGoogleButtonReady(true)
     }
 
     initializeGoogle()
@@ -237,8 +240,16 @@ export default function SignInForm() {
         <div className="h-px flex-1 bg-slate-200"></div>
       </div>
 
-      <div className="flex w-full justify-center">
-        <div ref={googleButtonRef} />
+      <div className="relative flex h-[56px] w-full justify-center">
+        {!googleButtonReady && GOOGLE_CLIENT_ID && (
+          <div className="absolute h-[56px] w-[320px] rounded-xl border border-slate-200 bg-slate-50" />
+        )}
+
+        <div
+          ref={googleButtonRef}
+          className={`h-[56px] w-[320px] overflow-hidden transition-opacity duration-200 ${googleButtonReady ? "opacity-100" : "opacity-0"
+            }`}
+        />
       </div>
 
       {googleLoading && (
