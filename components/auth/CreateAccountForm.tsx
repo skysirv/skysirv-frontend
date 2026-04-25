@@ -29,6 +29,7 @@ export default function CreateAccountForm({
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
+  const [googleButtonReady, setGoogleButtonReady] = useState(false)
 
   const hasStartedConfirming = confirmPassword.length > 0
   const passwordsMatch = hasStartedConfirming && password === confirmPassword
@@ -77,6 +78,8 @@ export default function CreateAccountForm({
         logo_alignment: "left",
         width: 320,
       })
+
+      setGoogleButtonReady(true)
     }
 
     initializeGoogle()
@@ -245,8 +248,16 @@ export default function CreateAccountForm({
       </div>
 
       <div className="min-h-[84px]">
-        <div className="flex w-full justify-center">
-          <div ref={googleButtonRef} className="min-h-[44px] w-[320px]" />
+        <div className="relative flex h-[44px] w-full justify-center">
+          {!googleButtonReady && GOOGLE_CLIENT_ID && (
+            <div className="absolute h-[44px] w-[320px] rounded-full border border-slate-200 bg-slate-50" />
+          )}
+
+          <div
+            ref={googleButtonRef}
+            className={`h-[44px] w-[320px] transition-opacity duration-200 ${googleButtonReady ? "opacity-100" : "opacity-0"
+              }`}
+          />
         </div>
 
         {googleLoading && (
