@@ -61,7 +61,7 @@ export default function AuthModal({
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key === "Escape" && !disableBackdropClose) {
         onClose()
       }
     }
@@ -73,7 +73,7 @@ export default function AuthModal({
       document.body.style.paddingRight = originalPaddingRight
       window.removeEventListener("keydown", handleKeyDown)
     }
-  }, [open, onClose])
+  }, [open, onClose, disableBackdropClose])
 
   if (!mounted || !shouldRender) return null
 

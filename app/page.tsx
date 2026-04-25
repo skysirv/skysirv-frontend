@@ -745,7 +745,7 @@ export default function HomePage() {
             : "Start monitoring airfare with real travel intelligence"
         }
         maxWidthClassName="max-w-sm"
-        disableBackdropClose={true}
+        disableBackdropClose={createAccountSuccess}
         hideCloseButton={createAccountSuccess}
         headerContent={
           createAccountSuccess ? (
