@@ -5,6 +5,7 @@ import Link from "next/link"
 import { toast } from "@/components/ui/Toasts/use-toast"
 import { useRouter } from "next/navigation"
 import { getAuthToken } from "@/utils/auth-storage"
+import FeedbackModal from "@/components/feedback/FeedbackModal"
 
 type SessionUser = {
   id: string
@@ -36,6 +37,7 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(true)
   const [sessionUser, setSessionUser] = useState<SessionUser | null>(null)
   const [subscription, setSubscription] = useState<SessionSubscription | null>(null)
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false)
 
   const [preferredAirports, setPreferredAirports] = useState("")
   const [preferredTravelTimes, setPreferredTravelTimes] = useState("")
@@ -244,6 +246,15 @@ export default function AccountPage() {
     })
   }
 
+  function handleSubmitFeedback(payload: { rating: number; message: string }) {
+    console.log("Feedback submitted:", payload)
+
+    toast({
+      title: "Feedback received",
+      description: "Thank you for helping improve Skysirv.",
+    })
+  }
+
   return (
     <main className="min-h-screen bg-white px-6 py-10">
       <div className="mx-auto max-w-4xl">
@@ -275,6 +286,28 @@ export default function AccountPage() {
           </div>
         ) : (
           <div className="space-y-6">
+            {/* Feedback */}
+            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md transition-shadow hover:shadow-lg">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-900">
+                    Share Feedback
+                  </h2>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Tell us what is working, what feels confusing, or what would make Skysirv better.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setFeedbackModalOpen(true)}
+                  className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
+                >
+                  Give Feedback
+                </button>
+              </div>
+            </section>
+
             {/* Account */}
             <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md hover:shadow-lg transition-shadow">
               <div className="mb-6">
@@ -458,6 +491,11 @@ export default function AccountPage() {
           </div>
         )}
       </div>
+      <FeedbackModal
+        open={feedbackModalOpen}
+        onClose={() => setFeedbackModalOpen(false)}
+        onSubmit={handleSubmitFeedback}
+      />
     </main>
   )
 }
