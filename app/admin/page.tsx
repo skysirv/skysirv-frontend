@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { getAuthToken } from "@/utils/auth-storage"
+import { toast } from "@/components/ui/Toasts/use-toast"
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
@@ -135,7 +136,11 @@ export default function AdminPage() {
     if (res.ok) {
       setUsers((prev) => prev.filter((u) => u.id !== userId))
     } else {
-      alert("Failed to delete user")
+      toast({
+        title: "Failed to delete user",
+        description: "Please try again in a moment.",
+        variant: "destructive",
+      })
     }
   }
 
@@ -145,7 +150,11 @@ export default function AdminPage() {
     const token = getAuthToken()
 
     if (!token) {
-      alert("Missing admin session")
+      toast({
+        title: "Missing admin session",
+        description: "Please log in again.",
+        variant: "destructive",
+      })
       return
     }
 
@@ -187,13 +196,20 @@ export default function AdminPage() {
         )
       )
 
-      alert("Response sent successfully")
+      toast({
+        title: "Response sent",
+        description: "Your feedback response email was sent successfully.",
+      })
 
       setFeedbackResponseModalOpen(false)
       setSelectedFeedback(null)
       setFeedbackResponseMessage("")
     } catch (error: any) {
-      alert(error?.message || "Failed to send response")
+      toast({
+        title: "Failed to send response",
+        description: error?.message || "Please try again in a moment.",
+        variant: "destructive",
+      })
     } finally {
       setFeedbackResponseSending(false)
     }
@@ -203,7 +219,11 @@ export default function AdminPage() {
     const token = getAuthToken()
 
     if (!token) {
-      alert("Missing admin session")
+      toast({
+        title: "Missing admin session",
+        description: "Please sign in again.",
+        variant: "destructive",
+      })
       return
     }
 
@@ -244,9 +264,12 @@ export default function AdminPage() {
         )
       )
 
-      console.log("Feedback marked as testimonial")
     } catch (error: any) {
-      alert(error?.message || "Failed to mark feedback as testimonial")
+      toast({
+        title: "Failed to mark testimonial",
+        description: error?.message || "Please try again in a moment.",
+        variant: "destructive",
+      })
     }
   }
 
@@ -254,7 +277,11 @@ export default function AdminPage() {
     const token = getAuthToken()
 
     if (!token) {
-      alert("Missing admin session")
+      toast({
+        title: "Missing admin session",
+        description: "Please sign in again.",
+        variant: "destructive",
+      })
       return
     }
 
@@ -295,9 +322,12 @@ export default function AdminPage() {
         )
       )
 
-      console.log("Feedback removed from testimonials")
     } catch (error: any) {
-      alert(error?.message || "Failed to remove testimonial")
+      toast({
+        title: "Failed to remove testimonial",
+        description: error?.message || "Please try again in a moment.",
+        variant: "destructive",
+      })
     }
   }
 
@@ -849,7 +879,11 @@ export default function AdminPage() {
                 const email = emailInput.value.trim()
 
                 if (!email) {
-                  alert("Please enter an email")
+                  toast({
+                    title: "Email required",
+                    description: "Please enter an email address before sending an invite.",
+                    variant: "destructive",
+                  })
                   return
                 }
 
@@ -867,10 +901,17 @@ export default function AdminPage() {
                 const data = await res.json()
 
                 if (res.ok) {
-                  alert("Invite sent successfully")
+                  toast({
+                    title: "Invite sent",
+                    description: "The Lifetime Pro invitation was sent successfully.",
+                  })
                   emailInput.value = ""
                 } else {
-                  alert(data.error || "Failed to send invite")
+                  toast({
+                    title: "Failed to send invite",
+                    description: data.error || "Please try again in a moment.",
+                    variant: "destructive",
+                  })
                 }
               }}
               className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
@@ -1022,11 +1063,18 @@ export default function AdminPage() {
                       prev ? { ...prev, status: "approved" } : prev
                     )
 
-                    alert("Application approved + invite created")
+                    toast({
+                      title: "Application approved",
+                      description: "The beta application was approved and the invite was created.",
+                    })
                     setBetaReviewModalOpen(false)
                     setSelectedBetaApplication(null)
                   } else {
-                    alert("Failed to approve")
+                    toast({
+                      title: "Failed to approve",
+                      description: "Please try again in a moment.",
+                      variant: "destructive",
+                    })
                   }
                 }}
                 disabled={selectedBetaApplication.status !== "pending"}
@@ -1071,7 +1119,11 @@ export default function AdminPage() {
                     setBetaReviewModalOpen(false)
                     setSelectedBetaApplication(null)
                   } else {
-                    alert("Failed to reject")
+                    toast({
+                      title: "Failed to reject",
+                      description: "Please try again in a moment.",
+                      variant: "destructive",
+                    })
                   }
                 }}
                 disabled={selectedBetaApplication.status !== "pending"}

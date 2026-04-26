@@ -226,14 +226,14 @@ export default function AccountPage() {
     }
 
     toast({
-      title: "Coming soon",
+      title: "Subscription management is not connected yet",
       description: "Stripe Customer Portal will be connected here soon."
     })
   }
 
   function handleChangePassword() {
     toast({
-      title: "Coming soon",
+      title: "Password updates are not available yet",
       description: "Password change flow will be added here next."
     })
   }

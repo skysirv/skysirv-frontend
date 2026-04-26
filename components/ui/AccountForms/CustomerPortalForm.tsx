@@ -14,10 +14,10 @@ type Product = Tables<'products'>;
 
 type SubscriptionWithPriceAndProduct = Subscription & {
   prices:
-    | (Price & {
-        products: Product | null;
-      })
-    | null;
+  | (Price & {
+    products: Product | null;
+  })
+  | null;
 };
 
 interface Props {
@@ -69,7 +69,7 @@ export default function CustomerPortalForm({ subscription }: Props) {
         {subscription ? (
           `${subscriptionPrice}/${subscription?.prices?.interval}`
         ) : (
-          <Link href="/">Choose your plan</Link>
+          <Link href="/choose-plan">Choose your plan</Link>
         )}
       </div>
     </Card>

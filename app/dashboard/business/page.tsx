@@ -488,9 +488,6 @@ export default function BusinessDashboardPage() {
         )
 
         const data = await res.json().catch(() => null)
-        console.log("WRAPPED RESPONSE:", data)
-        console.log("AIRPORT NODES:", data?.airportNodes)
-        console.log("ROUTE ARCS:", data?.routeArcs)
 
         if (cancelled) return
 

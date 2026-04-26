@@ -771,7 +771,6 @@ export default function HomePage() {
         ) : (
           <CreateAccountForm
             onSuccess={() => {
-              console.log("CREATE ACCOUNT SUCCESS CALLBACK FIRED")
               setCreateAccountSuccess(true)
             }}
           />

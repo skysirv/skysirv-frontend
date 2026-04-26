@@ -432,7 +432,6 @@ function SegmentRow({
   return (
     <div
       onClick={() => {
-        console.log("SEGMENT CLICKED:", segment)
         onSelect(segment)
       }}
       className="flex items-center justify-between px-5 py-4 hover:bg-slate-50 transition cursor-pointer"
