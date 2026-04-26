@@ -24,7 +24,7 @@ export default function FlightAttendantPage() {
   }, [])
 
   return (
-    <section className="relative -mt-32 overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 pt-64 text-white">
+    <section className="relative -mt-16 overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 pt-64 text-white">
       <div className="pointer-events-none absolute inset-0">
         <motion.div
           animate={{ opacity: [0.16, 0.28, 0.16], scale: [1, 1.04, 1] }}
