@@ -244,7 +244,7 @@ export default function AdminPage() {
         )
       )
 
-      alert("Feedback marked as testimonial")
+      console.log("Feedback marked as testimonial")
     } catch (error: any) {
       alert(error?.message || "Failed to mark feedback as testimonial")
     }
