@@ -49,7 +49,7 @@ export default function Footer() {
               </li>
 
               <li>
-                <Link href="/ai-assistant" className="transition hover:text-slate-400">
+                <Link href="/flight-attendant" className="transition hover:text-slate-400">
                   Skysirv Flight Attendant™
                 </Link>
               </li>

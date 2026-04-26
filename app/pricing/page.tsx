@@ -584,7 +584,7 @@ function PricingFooter() {
             </li>
 
             <li>
-              <Link href="/ai-assistant" className="transition hover:text-white">
+              <Link href="/flight-attendant" className="transition hover:text-white">
                 Skysirv Flight Attendant™
               </Link>
             </li>

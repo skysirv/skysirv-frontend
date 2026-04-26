@@ -6,315 +6,315 @@ import { motion } from "framer-motion"
 
 export default function BookingPage() {
 
-    useEffect(() => {
-        const originalBackground = document.body.style.background
-        const originalBackgroundColor = document.body.style.backgroundColor
+  useEffect(() => {
+    const originalBackground = document.body.style.background
+    const originalBackgroundColor = document.body.style.backgroundColor
 
-        document.body.style.background =
-            "linear-gradient(to bottom, rgb(2 6 23), rgb(2 6 23), rgb(15 23 42))"
-        document.body.style.backgroundColor = "rgb(2 6 23)"
+    document.body.style.background =
+      "linear-gradient(to bottom, rgb(2 6 23), rgb(2 6 23), rgb(15 23 42))"
+    document.body.style.backgroundColor = "rgb(2 6 23)"
 
-        return () => {
-            document.body.style.background = originalBackground
-            document.body.style.backgroundColor = originalBackgroundColor
-        }
-    }, [])
+    return () => {
+      document.body.style.background = originalBackground
+      document.body.style.backgroundColor = originalBackgroundColor
+    }
+  }, [])
 
-    return (
-        <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 pt-32 text-white">
-            <div className="pointer-events-none absolute inset-0">
-                <motion.div
-                    animate={{ opacity: [0.14, 0.24, 0.14], scale: [1, 1.03, 1] }}
-                    transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.16),transparent_38%)]"
+  return (
+    <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 pt-32 text-white">
+      <div className="pointer-events-none absolute inset-0">
+        <motion.div
+          animate={{ opacity: [0.14, 0.24, 0.14], scale: [1, 1.03, 1] }}
+          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.16),transparent_38%)]"
+        />
+        <motion.div
+          animate={{ x: [0, 20, 0], y: [0, -16, 0] }}
+          transition={{ duration: 8.4, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute right-[-40px] top-[-10px] h-72 w-72 rounded-full bg-sky-500/10 blur-3xl"
+        />
+        <motion.div
+          animate={{ x: [0, -18, 0], y: [0, 20, 0] }}
+          transition={{ duration: 9.1, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-[-40px] left-[-20px] h-80 w-80 rounded-full bg-indigo-500/10 blur-3xl"
+        />
+      </div>
+
+      <div className="relative mx-auto flex max-w-7xl flex-col px-6 pb-12 pt-8 sm:px-8 sm:pb-14 sm:pt-10 lg:px-12">
+        <div className="mx-auto max-w-5xl text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-300 backdrop-blur-sm"
+          >
+            Coming soon to Skysirv™
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 22 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05, duration: 0.7, ease: "easeOut" }}
+            className="mt-8 text-5xl font-bold leading-[1.08] tracking-tight text-white sm:text-6xl md:text-7xl"
+          >
+            Booking built on
+            fare intelligence, not guesswork
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.12, duration: 0.6, ease: "easeOut" }}
+            className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-300 sm:text-xl"
+          >
+            Skysirv™ Booking is planned as the execution layer for travelers who
+            want to move from route monitoring into smarter booking decisions
+            with more timing clarity, better context, and less noise.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18, duration: 0.55, ease: "easeOut" }}
+            className="mt-10 flex flex-wrap items-center justify-center gap-3"
+          >
+            <PreviewPill label="Timing-aware booking flow" />
+            <PreviewPill label="Intelligence-backed fare context" />
+            <PreviewPill label="Premium travel focus" />
+          </motion.div>
+        </div>
+
+        <div className="mx-auto mt-16 grid max-w-6xl gap-6 lg:grid-cols-3">
+          <PreviewCard
+            eyebrow="Step 1"
+            title="Search with context"
+            text="Booking is expected to begin with route-aware search, giving travelers more than raw fares by surfacing signal, timing, and pricing structure around each option."
+          />
+
+          <PreviewCard
+            eyebrow="Step 2"
+            title="Understand the moment"
+            text="Instead of forcing rushed decisions, the experience is intended to help users see whether a fare looks calm, aggressive, rising, or worth watching a little longer."
+          />
+
+          <PreviewCard
+            eyebrow="Step 3"
+            title="Book with more confidence"
+            text="The long-term goal is a smoother path from monitoring to action, so travelers can move on opportunities with a clearer sense of why now may be the right time."
+          />
+        </div>
+
+        <div className="mx-auto mt-16 max-w-6xl">
+          <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-[0_30px_80px_rgba(2,6,23,0.45)] backdrop-blur-sm sm:p-10">
+            <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+              <div>
+                <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+                  Early preview
+                </div>
+
+                <h2 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                  A future booking layer designed to feel calmer, sharper, and more disciplined.
+                </h2>
+
+                <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
+                  Please pardon the appearance while the full Skysirv™ Booking
+                  experience is being shaped. Over time, this area is expected to
+                  connect monitoring, pricing behavior, and booking execution into
+                  one cleaner decision workflow.
+                </p>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FeatureBlock
+                  title="Live price context"
+                  text="More than fare listings alone."
                 />
-                <motion.div
-                    animate={{ x: [0, 20, 0], y: [0, -16, 0] }}
-                    transition={{ duration: 8.4, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute right-[-40px] top-[-10px] h-72 w-72 rounded-full bg-sky-500/10 blur-3xl"
+                <FeatureBlock
+                  title="Signal-driven timing"
+                  text="Better context around when to act."
                 />
-                <motion.div
-                    animate={{ x: [0, -18, 0], y: [0, 20, 0] }}
-                    transition={{ duration: 9.1, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute bottom-[-40px] left-[-20px] h-80 w-80 rounded-full bg-indigo-500/10 blur-3xl"
+                <FeatureBlock
+                  title="Premium cabin focus"
+                  text="Built with high-value trips in mind."
                 />
+                <FeatureBlock
+                  title="Seamless workflow"
+                  text="From watching to booking in one system."
+                />
+              </div>
             </div>
+          </div>
+        </div>
 
-            <div className="relative mx-auto flex max-w-7xl flex-col px-6 pb-12 pt-8 sm:px-8 sm:pb-14 sm:pt-10 lg:px-12">
-                <div className="mx-auto max-w-5xl text-center">
-                    <motion.div
-                        initial={{ opacity: 0, y: 16 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, ease: "easeOut" }}
-                        className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-300 backdrop-blur-sm"
-                    >
-                        Coming soon to Skysirv™
-                    </motion.div>
+        <div className="mx-auto mt-16 max-w-4xl pb-8 text-center">
+          <p className="text-sm uppercase tracking-[0.16em] text-slate-400">
+            Coming in the months ahead
+          </p>
 
-                    <motion.h1
-                        initial={{ opacity: 0, y: 22 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.05, duration: 0.7, ease: "easeOut" }}
-                        className="mt-8 text-5xl font-bold leading-[1.08] tracking-tight text-white sm:text-6xl md:text-7xl"
-                    >
-                        Booking built on
-                        fare intelligence, not guesswork
-                    </motion.h1>
+          <h3 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            Skysirv™ Booking will turn intelligence into action.
+          </h3>
 
-                    <motion.p
-                        initial={{ opacity: 0, y: 18 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.12, duration: 0.6, ease: "easeOut" }}
-                        className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-300 sm:text-xl"
-                    >
-                        Skysirv™ Booking is planned as the execution layer for travelers who
-                        want to move from route monitoring into smarter booking decisions
-                        with more timing clarity, better context, and less noise.
-                    </motion.p>
+          <p className="mx-auto mt-5 max-w-3xl text-base leading-8 text-slate-300 sm:text-lg">
+            In the meantime, this preview is here to show the direction: a smarter
+            booking layer built to help travelers move with more confidence when
+            the market presents the right opportunity.
+          </p>
+        </div>
 
-                    <motion.div
-                        initial={{ opacity: 0, y: 14 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.18, duration: 0.55, ease: "easeOut" }}
-                        className="mt-10 flex flex-wrap items-center justify-center gap-3"
-                    >
-                        <PreviewPill label="Timing-aware booking flow" />
-                        <PreviewPill label="Intelligence-backed fare context" />
-                        <PreviewPill label="Premium travel focus" />
-                    </motion.div>
-                </div>
-
-                <div className="mx-auto mt-16 grid max-w-6xl gap-6 lg:grid-cols-3">
-                    <PreviewCard
-                        eyebrow="Step 1"
-                        title="Search with context"
-                        text="Booking is expected to begin with route-aware search, giving travelers more than raw fares by surfacing signal, timing, and pricing structure around each option."
-                    />
-
-                    <PreviewCard
-                        eyebrow="Step 2"
-                        title="Understand the moment"
-                        text="Instead of forcing rushed decisions, the experience is intended to help users see whether a fare looks calm, aggressive, rising, or worth watching a little longer."
-                    />
-
-                    <PreviewCard
-                        eyebrow="Step 3"
-                        title="Book with more confidence"
-                        text="The long-term goal is a smoother path from monitoring to action, so travelers can move on opportunities with a clearer sense of why now may be the right time."
-                    />
-                </div>
-
-                <div className="mx-auto mt-16 max-w-6xl">
-                    <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-[0_30px_80px_rgba(2,6,23,0.45)] backdrop-blur-sm sm:p-10">
-                        <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-                            <div>
-                                <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
-                                    Early preview
-                                </div>
-
-                                <h2 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                                    A future booking layer designed to feel calmer, sharper, and more disciplined.
-                                </h2>
-
-                                <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-                                    Please pardon the appearance while the full Skysirv™ Booking
-                                    experience is being shaped. Over time, this area is expected to
-                                    connect monitoring, pricing behavior, and booking execution into
-                                    one cleaner decision workflow.
-                                </p>
-                            </div>
-
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <FeatureBlock
-                                    title="Live price context"
-                                    text="More than fare listings alone."
-                                />
-                                <FeatureBlock
-                                    title="Signal-driven timing"
-                                    text="Better context around when to act."
-                                />
-                                <FeatureBlock
-                                    title="Premium cabin focus"
-                                    text="Built with high-value trips in mind."
-                                />
-                                <FeatureBlock
-                                    title="Seamless workflow"
-                                    text="From watching to booking in one system."
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="mx-auto mt-16 max-w-4xl pb-8 text-center">
-                    <p className="text-sm uppercase tracking-[0.16em] text-slate-400">
-                        Coming in the months ahead
-                    </p>
-
-                    <h3 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                        Skysirv™ Booking will turn intelligence into action.
-                    </h3>
-
-                    <p className="mx-auto mt-5 max-w-3xl text-base leading-8 text-slate-300 sm:text-lg">
-                        In the meantime, this preview is here to show the direction: a smarter
-                        booking layer built to help travelers move with more confidence when
-                        the market presents the right opportunity.
-                    </p>
-                </div>
-
-                <BookingFooter />
-            </div>
-        </section>
-    )
+        <BookingFooter />
+      </div>
+    </section>
+  )
 }
 
 function PreviewPill({ label }: { label: string }) {
-    return (
-        <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 backdrop-blur-sm">
-            {label}
-        </div>
-    )
+  return (
+    <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 backdrop-blur-sm">
+      {label}
+    </div>
+  )
 }
 
 function PreviewCard({
-    eyebrow,
-    title,
-    text,
+  eyebrow,
+  title,
+  text,
 }: {
-    eyebrow: string
-    title: string
-    text: string
+  eyebrow: string
+  title: string
+  text: string
 }) {
-    return (
-        <motion.div
-            whileHover={{ y: -4 }}
-            transition={{ duration: 0.22 }}
-            className="rounded-[1.75rem] border border-white/10 bg-white/5 p-7 backdrop-blur-sm"
-        >
-            <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
-                {eyebrow}
-            </p>
-            <h3 className="mt-3 text-2xl font-bold text-white">{title}</h3>
-            <p className="mt-4 text-sm leading-7 text-slate-300">{text}</p>
-        </motion.div>
-    )
+  return (
+    <motion.div
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.22 }}
+      className="rounded-[1.75rem] border border-white/10 bg-white/5 p-7 backdrop-blur-sm"
+    >
+      <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+        {eyebrow}
+      </p>
+      <h3 className="mt-3 text-2xl font-bold text-white">{title}</h3>
+      <p className="mt-4 text-sm leading-7 text-slate-300">{text}</p>
+    </motion.div>
+  )
 }
 
 function FeatureBlock({
-    title,
-    text,
+  title,
+  text,
 }: {
-    title: string
-    text: string
+  title: string
+  text: string
 }) {
-    return (
-        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
-            <p className="text-base font-semibold text-white">{title}</p>
-            <p className="mt-2 text-sm leading-6 text-slate-400">{text}</p>
-        </div>
-    )
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+      <p className="text-base font-semibold text-white">{title}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-400">{text}</p>
+    </div>
+  )
 }
 
 function BookingFooter() {
-    return (
-        <div className="mx-auto max-w-6xl px-6 pt-8 pb-6 text-center md:max-w-4xl md:text-left">
-            <div className="grid grid-cols-1 gap-12 md:grid-cols-4 md:justify-items-center md:text-center">
-                {/* Brand */}
-                <div className="flex max-w-xs flex-col justify-start text-center md:text-left">
-                    <Link
-                        href="/"
-                        className="text-xl font-bold leading-none text-white transition hover:text-slate-300"
-                    >
-                        Skysirv™
-                    </Link>
+  return (
+    <div className="mx-auto max-w-6xl px-6 pt-8 pb-6 text-center md:max-w-4xl md:text-left">
+      <div className="grid grid-cols-1 gap-12 md:grid-cols-4 md:justify-items-center md:text-center">
+        {/* Brand */}
+        <div className="flex max-w-xs flex-col justify-start text-center md:text-left">
+          <Link
+            href="/"
+            className="text-xl font-bold leading-none text-white transition hover:text-slate-300"
+          >
+            Skysirv™
+          </Link>
 
-                    <p className="mt-4 text-sm leading-6 text-slate-400">
-                        Flight intelligence that helps travelers understand pricing and
-                        book with more confidence.
-                    </p>
-                </div>
-
-                {/* Products */}
-                <div className="text-center md:text-left">
-                    <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white">
-                        Products
-                    </h3>
-
-                    <ul className="mt-4 space-y-3 text-sm text-slate-400">
-                        <li>
-                            <Link href="/pricing" className="transition hover:text-white">
-                                Pricing
-                            </Link>
-                        </li>
-
-                        <li>
-                            <Link href="/booking" className="transition hover:text-white">
-                                Booking
-                            </Link>
-                        </li>
-
-                        <li>
-                            <Link href="/ai-assistant" className="transition hover:text-white">
-                                Skysirv Flight Attendant™
-                            </Link>
-                        </li>
-                    </ul>
-                </div>
-
-                {/* Company */}
-                <div className="text-center md:text-left">
-                    <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white">
-                        Company
-                    </h3>
-
-                    <ul className="mt-4 space-y-3 text-sm text-slate-400">
-                        <li>
-                            <Link href="/about" className="transition hover:text-white">
-                                About
-                            </Link>
-                        </li>
-
-                        <li>
-                            <Link href="/beta" className="transition hover:text-white">
-                                Skysirv™ Beta
-                            </Link>
-                        </li>
-                    </ul>
-                </div>
-
-                {/* Legal */}
-                <div className="text-center md:text-left">
-                    <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white">
-                        Legal
-                    </h3>
-
-                    <ul className="mt-4 space-y-3 text-sm text-slate-400">
-                        <li>
-                            <Link href="/privacy" className="transition hover:text-white">
-                                Privacy
-                            </Link>
-                        </li>
-
-                        <li>
-                            <Link href="/terms" className="transition hover:text-white">
-                                Terms
-                            </Link>
-                        </li>
-
-                        <li>
-                            <Link href="/refund-policy" className="transition hover:text-white">
-                                Refund Policy
-                            </Link>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div className="mt-12 pt-6 text-center">
-                <p className="text-sm text-slate-300">
-                    &copy; {new Date().getFullYear()} Skysirv™. All rights reserved.
-                </p>
-            </div>
+          <p className="mt-4 text-sm leading-6 text-slate-400">
+            Flight intelligence that helps travelers understand pricing and
+            book with more confidence.
+          </p>
         </div>
-    )
+
+        {/* Products */}
+        <div className="text-center md:text-left">
+          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white">
+            Products
+          </h3>
+
+          <ul className="mt-4 space-y-3 text-sm text-slate-400">
+            <li>
+              <Link href="/pricing" className="transition hover:text-white">
+                Pricing
+              </Link>
+            </li>
+
+            <li>
+              <Link href="/booking" className="transition hover:text-white">
+                Booking
+              </Link>
+            </li>
+
+            <li>
+              <Link href="/flight-attendant" className="transition hover:text-white">
+                Skysirv Flight Attendant™
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        {/* Company */}
+        <div className="text-center md:text-left">
+          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white">
+            Company
+          </h3>
+
+          <ul className="mt-4 space-y-3 text-sm text-slate-400">
+            <li>
+              <Link href="/about" className="transition hover:text-white">
+                About
+              </Link>
+            </li>
+
+            <li>
+              <Link href="/beta" className="transition hover:text-white">
+                Skysirv™ Beta
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        {/* Legal */}
+        <div className="text-center md:text-left">
+          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white">
+            Legal
+          </h3>
+
+          <ul className="mt-4 space-y-3 text-sm text-slate-400">
+            <li>
+              <Link href="/privacy" className="transition hover:text-white">
+                Privacy
+              </Link>
+            </li>
+
+            <li>
+              <Link href="/terms" className="transition hover:text-white">
+                Terms
+              </Link>
+            </li>
+
+            <li>
+              <Link href="/refund-policy" className="transition hover:text-white">
+                Refund Policy
+              </Link>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="mt-12 pt-6 text-center">
+        <p className="text-sm text-slate-300">
+          &copy; {new Date().getFullYear()} Skysirv™. All rights reserved.
+        </p>
+      </div>
+    </div>
+  )
 }
