@@ -8,9 +8,10 @@ type AuthMode = 'signin' | 'signup'
 
 type AuthPanelProps = {
   onSignupComplete?: () => void
+  onSigninComplete?: () => void
 }
 
-export default function AuthPanel({ onSignupComplete }: AuthPanelProps) {
+export default function AuthPanel({ onSignupComplete, onSigninComplete }: AuthPanelProps) {
   const [mode, setMode] = useState<AuthMode>('signin')
   const [signupSuccess, setSignupSuccess] = useState(false)
 
@@ -40,7 +41,11 @@ export default function AuthPanel({ onSignupComplete }: AuthPanelProps) {
             </p>
           </div>
 
-          <SignInForm />
+          <SignInForm
+            onSuccess={() => {
+              onSigninComplete?.()
+            }}
+          />
 
           <div className="mt-6 text-center text-sm text-slate-600">
             Don&apos;t have an account?{' '}

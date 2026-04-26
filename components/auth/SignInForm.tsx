@@ -12,7 +12,19 @@ declare global {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""
 
-export default function SignInForm() {
+type SignInSuccessPayload = {
+  token: string
+  user: {
+    is_admin?: boolean
+    [key: string]: any
+  }
+}
+
+type SignInFormProps = {
+  onSuccess?: (payload: SignInSuccessPayload) => void
+}
+
+export default function SignInForm({ onSuccess }: SignInFormProps) {
   const googleButtonRef = useRef<HTMLDivElement | null>(null)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -118,6 +130,23 @@ export default function SignInForm() {
     window.location.href = "/dashboard"
   }
 
+  async function finishAuth(data: any) {
+    setAuthToken(data.token)
+    setAuthAdmin(data.user?.is_admin === true)
+
+    window.dispatchEvent(new Event("skysirv-auth-changed"))
+
+    if (onSuccess) {
+      onSuccess({
+        token: data.token,
+        user: data.user
+      })
+      return
+    }
+
+    await routeUserAfterAuth(data.token, data.user?.is_admin === true)
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
@@ -142,10 +171,7 @@ export default function SignInForm() {
         throw new Error(data?.error || "Login failed")
       }
 
-      setAuthToken(data.token)
-      setAuthAdmin(data.user?.is_admin === true)
-
-      await routeUserAfterAuth(data.token, data.user?.is_admin === true)
+      await finishAuth(data)
     } catch (err: any) {
       setError(err?.message || "Invalid email or password")
     } finally {
@@ -180,10 +206,7 @@ export default function SignInForm() {
         throw new Error(data?.error || "Google sign-in failed")
       }
 
-      setAuthToken(data.token)
-      setAuthAdmin(data.user?.is_admin === true)
-
-      await routeUserAfterAuth(data.token, data.user?.is_admin === true)
+      await finishAuth(data)
     } catch (err: any) {
       setError(err?.message || "Unable to continue with Google")
       setGoogleLoading(false)

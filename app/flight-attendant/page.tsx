@@ -4,6 +4,8 @@ import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 import type { FormEvent, MutableRefObject } from "react"
 import { motion } from "framer-motion"
+import AuthModal from "@/components/auth/AuthModal"
+import AuthPanel from "@/components/auth/AuthPanel"
 import { getAuthToken } from "@/utils/auth-storage"
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
@@ -38,6 +40,7 @@ export default function FlightAttendantPage() {
   const [chatInput, setChatInput] = useState("")
   const [chatLoading, setChatLoading] = useState(false)
   const [authRequired, setAuthRequired] = useState(false)
+  const [authModalOpen, setAuthModalOpen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -245,6 +248,7 @@ export default function FlightAttendantPage() {
               messagesEndRef={messagesEndRef}
               onInputChange={setChatInput}
               onSubmit={handleSendFlightAttendantMessage}
+              onOpenAuthModal={() => setAuthModalOpen(true)}
             />
           </motion.div>
         </div>
@@ -435,6 +439,23 @@ export default function FlightAttendantPage() {
       </div>
 
       <FlightAttendantFooter />
+
+      <AuthModal
+        open={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        maxWidthClassName="max-w-sm"
+        disableBackdropClose={false}
+      >
+        <AuthPanel
+          onSigninComplete={() => {
+            setAuthModalOpen(false)
+            setAuthRequired(false)
+          }}
+          onSignupComplete={() => {
+            setAuthModalOpen(false)
+          }}
+        />
+      </AuthModal>
     </section>
   )
 }
@@ -447,6 +468,7 @@ function FlightAttendantChatPanel({
   messagesEndRef,
   onInputChange,
   onSubmit,
+  onOpenAuthModal,
 }: {
   messages: FlightAttendantMessage[]
   input: string
@@ -455,6 +477,7 @@ function FlightAttendantChatPanel({
   messagesEndRef: MutableRefObject<HTMLDivElement | null>
   onInputChange: (value: string) => void
   onSubmit: (event: FormEvent<HTMLFormElement>) => void
+  onOpenAuthModal: () => void
 }) {
   return (
     <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/85 shadow-[0_30px_80px_rgba(2,6,23,0.48)] backdrop-blur-sm">
@@ -506,12 +529,13 @@ function FlightAttendantChatPanel({
               Sign in to send live messages and connect future answers to your Skysirv account.
             </p>
 
-            <Link
-              href="/signin"
+            <button
+              type="button"
+              onClick={onOpenAuthModal}
               className="inline-flex shrink-0 items-center justify-center rounded-full bg-white px-4 py-2 text-xs font-semibold text-slate-950 transition hover:bg-slate-200"
             >
               Sign in
-            </Link>
+            </button>
           </div>
         </div>
       )}
