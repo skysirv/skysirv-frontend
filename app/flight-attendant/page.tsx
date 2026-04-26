@@ -31,7 +31,7 @@ export default function FlightAttendantPage() {
         <div className="absolute bottom-[-40px] left-[-20px] h-80 w-80 rounded-full bg-indigo-500/10 blur-3xl" />
       </div>
 
-      <div className="relative mx-auto max-w-7xl px-6 pb-20 pt-8 sm:px-8 sm:pb-24 sm:pt-10 lg:px-12">
+      <div className="relative mx-auto max-w-7xl px-6 pb-20 pt-0 sm:px-8 sm:pb-24 sm:pt-0 lg:px-12">
         {/* HERO */}
         <div className="mx-auto max-w-4xl text-center">
           <motion.div
