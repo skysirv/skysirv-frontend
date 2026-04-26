@@ -10,7 +10,11 @@ export default function Navbar() {
   const lastScrollY = useRef(0);
 
   const pathname = usePathname();
-  const isDark = pathname === '/pricing' || pathname === '/booking' || pathname === '/beta';
+  const isDark =
+    pathname === '/pricing' ||
+    pathname === '/booking' ||
+    pathname === '/beta' ||
+    pathname === '/flight-attendant';
 
   useEffect(() => {
     const handleScroll = () => {
