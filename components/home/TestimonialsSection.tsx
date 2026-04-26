@@ -115,7 +115,9 @@ export default function TestimonialsSection() {
   }, [])
 
   const testimonials =
-    liveTestimonials.length > 0 ? liveTestimonials : fallbackTestimonials
+    liveTestimonials.length > 0
+      ? [...liveTestimonials, ...fallbackTestimonials].slice(0, 6)
+      : fallbackTestimonials
 
   return (
     <section className="relative w-full bg-white py-24">
@@ -161,7 +163,13 @@ export default function TestimonialsSection() {
                     </div>
 
                     <p className="mt-2 text-sm text-slate-400">
-                      {testimonial.date}
+                      {new Date(testimonial.date).toString() !== "Invalid Date"
+                        ? new Date(testimonial.date).toLocaleDateString(undefined, {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })
+                        : testimonial.date}
                     </p>
                   </div>
                 </div>
