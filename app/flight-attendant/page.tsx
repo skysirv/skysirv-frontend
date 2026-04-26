@@ -24,7 +24,7 @@ export default function FlightAttendantPage() {
   }, [])
 
   return (
-    <section className="relative min-h-screen overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 pt-32 text-white">
+    <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 pt-32 text-white">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.16),transparent_38%)]" />
         <div className="absolute right-[-40px] top-[-20px] h-72 w-72 rounded-full bg-sky-500/10 blur-3xl" />
@@ -392,10 +392,100 @@ function FlightAttendantComparisonTable() {
 
 function SimpleDarkFooter() {
   return (
-    <div className="mx-auto max-w-6xl px-6 py-16 text-center">
-      <p className="text-sm text-slate-400">
-        &copy; {new Date().getFullYear()} Skysirv™. All rights reserved.
-      </p>
+    <div className="mx-auto max-w-6xl px-6 py-16 text-center md:max-w-4xl md:text-left">
+      <div className="grid grid-cols-1 gap-12 md:grid-cols-4 md:justify-items-center md:text-center">
+        <div className="flex max-w-xs flex-col justify-start text-center md:text-left">
+          <Link
+            href="/"
+            className="text-xl font-bold leading-none text-white transition hover:text-slate-300"
+          >
+            Skysirv™
+          </Link>
+
+          <p className="mt-4 text-sm leading-6 text-slate-400">
+            Flight intelligence that helps travelers understand pricing and
+            book with more confidence.
+          </p>
+        </div>
+
+        <div className="text-center md:text-left">
+          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white">
+            Products
+          </h3>
+
+          <ul className="mt-4 space-y-3 text-sm text-slate-400">
+            <li>
+              <Link href="/pricing" className="transition hover:text-white">
+                Pricing
+              </Link>
+            </li>
+
+            <li>
+              <Link href="/booking" className="transition hover:text-white">
+                Booking
+              </Link>
+            </li>
+
+            <li>
+              <Link href="/flight-attendant" className="transition hover:text-white">
+                Skysirv Flight Attendant™
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        <div className="text-center md:text-left">
+          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white">
+            Company
+          </h3>
+
+          <ul className="mt-4 space-y-3 text-sm text-slate-400">
+            <li>
+              <Link href="/about" className="transition hover:text-white">
+                About
+              </Link>
+            </li>
+
+            <li>
+              <Link href="/beta" className="transition hover:text-white">
+                Skysirv™ Beta
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        <div className="text-center md:text-left">
+          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white">
+            Legal
+          </h3>
+
+          <ul className="mt-4 space-y-3 text-sm text-slate-400">
+            <li>
+              <Link href="/privacy" className="transition hover:text-white">
+                Privacy
+              </Link>
+            </li>
+
+            <li>
+              <Link href="/terms" className="transition hover:text-white">
+                Terms
+              </Link>
+            </li>
+
+            <li>
+              <Link href="/refund-policy" className="transition hover:text-white">
+                Refund Policy
+              </Link>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="mt-12 pt-6 text-center">
+        <p className="text-sm text-slate-300">
+          &copy; {new Date().getFullYear()} Skysirv™. All rights reserved.
+        </p>
+      </div>
     </div>
   )
 }
