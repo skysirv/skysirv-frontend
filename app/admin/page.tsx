@@ -250,6 +250,57 @@ export default function AdminPage() {
     }
   }
 
+  async function removeFeedbackAsTestimonial(feedback: UserFeedback) {
+    const token = getAuthToken()
+
+    if (!token) {
+      alert("Missing admin session")
+      return
+    }
+
+    const confirmed = window.confirm(
+      `Remove this feedback from homepage testimonials?`
+    )
+
+    if (!confirmed) return
+
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/api/admin/feedback/${feedback.id}/remove-testimonial`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+
+      const data = await res.json().catch(() => null)
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Failed to remove testimonial")
+      }
+
+      const updatedFeedback = data.feedback
+
+      setUserFeedback((prev) =>
+        prev.map((item) =>
+          item.id === feedback.id
+            ? {
+              ...item,
+              usedAsTestimonial: updatedFeedback.used_as_testimonial,
+              testimonialApprovedAt: updatedFeedback.testimonial_approved_at
+            }
+            : item
+        )
+      )
+
+      console.log("Feedback removed from testimonials")
+    } catch (error: any) {
+      alert(error?.message || "Failed to remove testimonial")
+    }
+  }
+
   useEffect(() => {
     const token = getAuthToken()
 
@@ -747,14 +798,23 @@ export default function AdminPage() {
                           Respond
                         </button>
 
-                        <button
-                          type="button"
-                          disabled={feedback.usedAsTestimonial}
-                          onClick={() => markFeedbackAsTestimonial(feedback)}
-                          className="rounded-md bg-slate-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          {feedback.usedAsTestimonial ? "Added" : "Use as Testimonial"}
-                        </button>
+                        {feedback.usedAsTestimonial ? (
+                          <button
+                            type="button"
+                            onClick={() => removeFeedbackAsTestimonial(feedback)}
+                            className="rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-100"
+                          >
+                            Remove Testimonial
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => markFeedbackAsTestimonial(feedback)}
+                            className="rounded-md bg-slate-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-slate-700"
+                          >
+                            Use as Testimonial
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
