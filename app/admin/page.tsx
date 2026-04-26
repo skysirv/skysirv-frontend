@@ -32,6 +32,20 @@ type BetaApplication = {
   created_at: string
 }
 
+type UserFeedback = {
+  id: string
+  userId: string | null
+  email: string | null
+  rating: number
+  message: string
+  status: string
+  adminResponse: string | null
+  respondedAt: string | null
+  usedAsTestimonial: boolean
+  testimonialApprovedAt: string | null
+  createdAt: string
+}
+
 export default function AdminPage() {
   const router = useRouter()
 
@@ -43,6 +57,7 @@ export default function AdminPage() {
   const [telemetry, setTelemetry] = useState<any>(null)
   const [activityLoaded, setActivityLoaded] = useState(false)
   const [betaApplications, setBetaApplications] = useState<BetaApplication[]>([])
+  const [userFeedback, setUserFeedback] = useState<UserFeedback[]>([])
   const [betaReviewModalOpen, setBetaReviewModalOpen] = useState(false)
   const [selectedBetaApplication, setSelectedBetaApplication] = useState<BetaApplication | null>(null)
 
@@ -207,6 +222,16 @@ export default function AdminPage() {
         eventSource = new EventSource(
           `${API_BASE_URL}/api/admin/activity-stream?token=${token}`
         )
+
+        fetch(`${API_BASE_URL}/api/admin/feedback`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            setUserFeedback(data.feedback || [])
+          })
 
         eventSource.onmessage = (event) => {
           try {
@@ -534,8 +559,100 @@ export default function AdminPage() {
 
       <section className="mt-10">
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-md transition-shadow hover:shadow-lg">
+          <div className="mb-6 flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-lg font-semibold">User Feedback</h2>
+
+              <p className="mt-1 text-sm text-slate-500">
+                Review beta feedback, respond to users, and flag strong messages for homepage testimonials.
+              </p>
+            </div>
+
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+              {userFeedback.length} total
+            </span>
+          </div>
+
+          <div className="max-h-[360px] overflow-y-auto pr-2">
+            {userFeedback.length === 0 ? (
+              <div className="rounded-lg border border-slate-100 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
+                No user feedback submitted yet.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {userFeedback.map((feedback) => (
+                  <div
+                    key={feedback.id}
+                    className="rounded-xl border border-slate-100 bg-slate-50 p-4"
+                  >
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-sm font-semibold text-slate-900">
+                            {feedback.email || "Unknown user"}
+                          </p>
+
+                          <span className="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-amber-600">
+                            {"★".repeat(feedback.rating)}
+                            {"☆".repeat(5 - feedback.rating)}
+                          </span>
+
+                          <span className="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-slate-500">
+                            {feedback.status}
+                          </span>
+
+                          {feedback.usedAsTestimonial && (
+                            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+                              Testimonial
+                            </span>
+                          )}
+                        </div>
+
+                        <p className="mt-2 text-sm leading-6 text-slate-700">
+                          {feedback.message}
+                        </p>
+
+                        <p className="mt-2 text-xs text-slate-400">
+                          {feedback.createdAt
+                            ? new Date(feedback.createdAt).toLocaleString()
+                            : "-"}
+                        </p>
+                      </div>
+
+                      <div className="flex shrink-0 flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            alert("Response email workflow will be wired next.")
+                          }}
+                          className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                        >
+                          Respond
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            alert("Homepage testimonial workflow will be wired next.")
+                          }}
+                          className="rounded-md bg-slate-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-slate-700"
+                        >
+                          Use as Testimonial
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-md transition-shadow hover:shadow-lg">
           <h2 className="mb-2 text-lg font-semibold">
-            Free Lifeime Pro Subscription
+            Free Lifetime Pro Subscription
           </h2>
 
           <p className="mb-6 text-sm text-slate-500">
