@@ -136,7 +136,7 @@ export default function TestimonialsSection() {
           {testimonials.map((testimonial, index) => (
             <div
               key={testimonial.id || `${testimonial.name}-${index}`}
-              className="h-full rounded-[2rem] border border-slate-800/90 bg-[linear-gradient(180deg,#0f172a_0%,#111827_45%,#172033_100%)] p-6 text-white shadow-[0_24px_60px_rgba(2,6,23,0.18)] transition-shadow duration-200 hover:shadow-[0_24px_70px_rgba(2,6,23,0.22)]"
+              className="h-full rounded-[2rem] border border-slate-200 bg-white p-6 text-slate-900 shadow-md transition-shadow duration-200 hover:shadow-lg"
             >
               <div className="flex h-full flex-col">
                 <div className="flex items-start gap-4">
@@ -149,10 +149,10 @@ export default function TestimonialsSection() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="truncate text-base font-semibold text-white">
+                        <p className="truncate text-base font-semibold text-slate-900">
                           {testimonial.name}
                         </p>
-                        <p className="truncate text-sm text-slate-400">
+                        <p className="truncate text-sm text-slate-500">
                           {testimonial.handle}
                         </p>
                       </div>
@@ -162,7 +162,7 @@ export default function TestimonialsSection() {
                       </div>
                     </div>
 
-                    <p className="mt-2 text-sm text-slate-400">
+                    <p className="mt-2 text-sm text-slate-500">
                       {new Date(testimonial.date).toString() !== "Invalid Date"
                         ? new Date(testimonial.date).toLocaleDateString(undefined, {
                           month: "short",
