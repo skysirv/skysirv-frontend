@@ -199,6 +199,57 @@ export default function AdminPage() {
     }
   }
 
+  async function markFeedbackAsTestimonial(feedback: UserFeedback) {
+    const token = getAuthToken()
+
+    if (!token) {
+      alert("Missing admin session")
+      return
+    }
+
+    const confirmed = window.confirm(
+      `Use this feedback from ${feedback.email || "unknown user"} as a homepage testimonial?`
+    )
+
+    if (!confirmed) return
+
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/api/admin/feedback/${feedback.id}/testimonial`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+
+      const data = await res.json().catch(() => null)
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Failed to mark feedback as testimonial")
+      }
+
+      const updatedFeedback = data.feedback
+
+      setUserFeedback((prev) =>
+        prev.map((item) =>
+          item.id === feedback.id
+            ? {
+              ...item,
+              usedAsTestimonial: updatedFeedback.used_as_testimonial,
+              testimonialApprovedAt: updatedFeedback.testimonial_approved_at
+            }
+            : item
+        )
+      )
+
+      alert("Feedback marked as testimonial")
+    } catch (error: any) {
+      alert(error?.message || "Failed to mark feedback as testimonial")
+    }
+  }
+
   useEffect(() => {
     const token = getAuthToken()
 
@@ -698,12 +749,11 @@ export default function AdminPage() {
 
                         <button
                           type="button"
-                          onClick={() => {
-                            alert("Homepage testimonial workflow will be wired next.")
-                          }}
-                          className="rounded-md bg-slate-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-slate-700"
+                          disabled={feedback.usedAsTestimonial}
+                          onClick={() => markFeedbackAsTestimonial(feedback)}
+                          className="rounded-md bg-slate-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                          Use as Testimonial
+                          {feedback.usedAsTestimonial ? "Added" : "Use as Testimonial"}
                         </button>
                       </div>
                     </div>
