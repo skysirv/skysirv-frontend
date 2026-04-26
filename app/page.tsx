@@ -675,7 +675,8 @@ export default function HomePage() {
         </motion.div>
       </motion.section>
 
-      <TestimonialsSection />
+      {/* TEMP DIAGNOSTIC: Testimonials disabled to isolate tab-resume black flash */}
+      {/* <TestimonialsSection /> */}
       <FeaturedInSection />
 
       {/* CTA Bridge */}
