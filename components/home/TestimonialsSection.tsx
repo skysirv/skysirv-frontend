@@ -140,11 +140,12 @@ export default function TestimonialsSection() {
             >
               <div className="flex h-full flex-col">
                 <div className="flex items-start gap-4">
-                  <img
-                    src={testimonial.image}
-                    alt={testimonial.name}
-                    className="h-12 w-12 rounded-full object-cover"
-                  />
+                  <div
+                    aria-hidden="true"
+                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-600"
+                  >
+                    {testimonial.name.charAt(0)}
+                  </div>
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-3">
