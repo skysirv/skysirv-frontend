@@ -14,7 +14,7 @@ export default function FlightAttendantPage() {
     const originalBackgroundColor = document.body.style.backgroundColor
 
     document.body.style.background =
-      "linear-gradient(to bottom, rgb(2 6 23), rgb(2 6 23), rgb(15 23 42))"
+      "radial-gradient(circle at top, rgba(56,189,248,0.16), transparent 38%), linear-gradient(to bottom, rgb(2 6 23), rgb(2 6 23), rgb(15 23 42))"
     document.body.style.backgroundColor = "rgb(2 6 23)"
 
     return () => {
@@ -24,7 +24,7 @@ export default function FlightAttendantPage() {
   }, [])
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 pt-32 text-white">
+    <section className="relative overflow-hidden bg-transparent pt-32 text-white">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.16),transparent_38%)]" />
         <div className="absolute right-[-40px] top-[-20px] h-72 w-72 rounded-full bg-sky-500/10 blur-3xl" />
