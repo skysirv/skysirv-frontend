@@ -120,8 +120,8 @@ export default function TestimonialsSection() {
       : fallbackTestimonials
 
   return (
-    <section className="relative w-full bg-white py-24">
-      <div className="mx-auto max-w-6xl px-6">
+    <section className="relative isolate w-full overflow-hidden bg-white py-24">
+      <div className="relative z-10 mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-5xl px-6 text-center">
           <h2 className="text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl">
             What users are saying
@@ -136,7 +136,7 @@ export default function TestimonialsSection() {
           {testimonials.map((testimonial, index) => (
             <div
               key={testimonial.id || `${testimonial.name}-${index}`}
-              className="h-full rounded-[2rem] border border-slate-800/90 bg-[linear-gradient(180deg,#0f172a_0%,#111827_45%,#172033_100%)] p-6 text-white shadow-[0_24px_60px_rgba(2,6,23,0.18)] transition-transform duration-200 hover:-translate-y-1"
+              className="h-full rounded-[2rem] border border-slate-800/90 bg-[linear-gradient(180deg,#0f172a_0%,#111827_45%,#172033_100%)] p-6 text-white shadow-[0_24px_60px_rgba(2,6,23,0.18)] transition-shadow duration-200 hover:shadow-[0_24px_70px_rgba(2,6,23,0.22)]"
             >
               <div className="flex h-full flex-col">
                 <div className="flex items-start gap-4">
