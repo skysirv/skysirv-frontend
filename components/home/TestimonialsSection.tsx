@@ -4,66 +4,66 @@ import { useEffect, useState } from "react"
 
 type Testimonial = {
   id?: string
+  title?: string
   name: string
   handle: string
   date: string
   rating: number
-  image: string
   quote: string
 }
 
 const fallbackTestimonials: Testimonial[] = [
   {
+    title: "Structured Airfare Tracking",
     name: "Crystal C.",
     handle: "@crystalac",
     date: "Apr 11, 2026",
     rating: 5,
-    image: "/testimonials/crystal-c.jpg",
     quote:
       "Skysirv brings a much more structured feel to airfare tracking. Instead of reacting blindly, I can actually understand what the market is doing.",
   },
   {
+    title: "Intentional Travel Intelligence",
     name: "Christina P.",
     handle: "@clouisep",
     date: "Mar 20, 2026",
     rating: 5,
-    image: "/testimonials/christina-p.jpg",
     quote:
       "It feels polished, intentional, and calm. Skysirv turns fare movement into something readable instead of overwhelming.",
   },
   {
+    title: "Confidence in Booking",
     name: "Tiago C.",
     handle: "@tiagoc25",
     date: "Mar 23, 2026",
     rating: 5,
-    image: "/testimonials/tiago-c.jpg",
     quote:
       "A smart travel product should reduce noise and improve confidence. That’s exactly what stands out to me here.",
   },
   {
+    title: "Smarter Travel Decisions",
     name: "Claudia N.",
     handle: "@cng25",
     date: "Apr 05, 2026",
     rating: 5,
-    image: "/testimonials/claudia-n.jpg",
     quote:
       "Skysirv feels less like a basic search tool and more like a better decision environment for people who actually care about timing.",
   },
   {
+    title: "Clean, Useful, and Dependable",
     name: "Isabella C.",
     handle: "@bella16",
     date: "Apr 14, 2026",
     rating: 5,
-    image: "/testimonials/isabella-c.jpg",
     quote:
       "The intelligence layer is what makes it interesting. You can feel the difference between simple fare listings and something built to guide decisions.",
   },
   {
+    title: "Premium Travel Experience",
     name: "Sofia G.",
     handle: "@sofiaguzman26",
     date: "Apr 18, 2026",
     rating: 5,
-    image: "/testimonials/sofia-g.jpg",
     quote:
       "Premium travel tools should feel clean, useful, and dependable. Skysirv already feels like it is moving in that direction.",
   },
@@ -136,46 +136,33 @@ export default function TestimonialsSection() {
           {testimonials.map((testimonial, index) => (
             <div
               key={testimonial.id || `${testimonial.name}-${index}`}
-              className="h-full rounded-[2rem] border border-slate-200 bg-white p-6 text-slate-900 shadow-md transition-shadow duration-200 hover:shadow-lg"
+              className="h-full rounded-[1.5rem] border border-white/10 bg-slate-950 p-6 text-white shadow-[0_18px_45px_rgba(15,23,42,0.14)] transition-shadow duration-200 hover:shadow-[0_22px_55px_rgba(15,23,42,0.18)]"
             >
               <div className="flex h-full flex-col">
-                <div className="flex items-start gap-4">
-                  <div
-                    aria-hidden="true"
-                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-600"
-                  >
-                    {testimonial.name.charAt(0)}
-                  </div>
+                <div>
+                  <h3 className="text-lg font-semibold tracking-tight text-white">
+                    {testimonial.title || "Skysirv Beta Feedback"}
+                  </h3>
 
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="truncate text-base font-semibold text-slate-900">
-                          {testimonial.name}
-                        </p>
-                        <p className="truncate text-sm text-slate-500">
-                          {testimonial.handle}
-                        </p>
-                      </div>
+                  <p className="mt-2 text-sm text-slate-400">
+                    {new Date(testimonial.date).toString() !== "Invalid Date"
+                      ? new Date(testimonial.date).toLocaleDateString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })
+                      : testimonial.date}{" "}
+                    · {testimonial.name}
+                  </p>
 
-                      <div className="shrink-0">
-                        <StarRow rating={testimonial.rating} />
-                      </div>
-                    </div>
-
-                    <p className="mt-2 text-sm text-slate-500">
-                      {new Date(testimonial.date).toString() !== "Invalid Date"
-                        ? new Date(testimonial.date).toLocaleDateString(undefined, {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })
-                        : testimonial.date}
-                    </p>
+                  <div className="mt-3">
+                    <StarRow rating={testimonial.rating} />
                   </div>
                 </div>
 
-                <p className="mt-6 text-sm leading-7 text-slate-500 sm:text-base">
+                <div className="my-6 border-t border-dashed border-white/10" />
+
+                <p className="text-sm leading-7 text-slate-300 sm:text-base">
                   {testimonial.quote}
                 </p>
               </div>
