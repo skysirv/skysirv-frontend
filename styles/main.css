@@ -28,7 +28,9 @@ body {
     'Helvetica', sans-serif;
   text-rendering: optimizeLegibility;
   -moz-osx-font-smoothing: grayscale;
-  @apply text-white bg-zinc-800 antialiased;
+  background: #ffffff;
+  color: #0f172a;
+  @apply antialiased;
 }
 
 body {

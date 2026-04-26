@@ -62,7 +62,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
       </head>
 
       <body
-        className={`${inter.className} min-h-screen bg-white text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100`}
+        className={`${inter.className} min-h-screen bg-white text-slate-900`}
       >
         <Script
           src="https://accounts.google.com/gsi/client"
