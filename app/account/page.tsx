@@ -246,13 +246,40 @@ export default function AccountPage() {
     })
   }
 
-  function handleSubmitFeedback(payload: { rating: number; message: string }) {
-    console.log("Feedback submitted:", payload)
+  async function handleSubmitFeedback(payload: { rating: number; message: string }) {
+    try {
+      const token = getAuthToken()
 
-    toast({
-      title: "Feedback received",
-      description: "Thank you for helping improve Skysirv.",
-    })
+      if (!token) {
+        throw new Error("You must be signed in to submit feedback.")
+      }
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/feedback`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      })
+
+      const data = await res.json().catch(() => null)
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Unable to submit feedback")
+      }
+
+      toast({
+        title: "Feedback received",
+        description: "Thank you for helping improve Skysirv.",
+      })
+    } catch (error: any) {
+      toast({
+        title: "Feedback not sent",
+        description: error?.message || "Please try again in a moment.",
+        variant: "destructive",
+      })
+    }
   }
 
   return (
