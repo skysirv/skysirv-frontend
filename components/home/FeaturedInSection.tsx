@@ -1,7 +1,5 @@
 "use client"
 
-import { motion } from "framer-motion"
-
 const featuredInItems = [
   "TechCrunch",
   "Forbes",
@@ -17,7 +15,7 @@ export default function FeaturedInSection() {
   const repeatedItems = [...featuredInItems, ...featuredInItems]
 
   return (
-    <section className="relative w-full overflow-hidden bg-white py-20">
+    <section className="relative isolate w-full overflow-hidden bg-white py-20">
       <div className="mx-auto max-w-5xl px-6 text-center">
         <h2 className="text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl">
           Featured in
@@ -33,11 +31,7 @@ export default function FeaturedInSection() {
           <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-20 bg-gradient-to-r from-white to-transparent" />
           <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-20 bg-gradient-to-l from-white to-transparent" />
 
-          <motion.div
-            animate={{ x: ["0%", "-50%"] }}
-            transition={{ duration: 44, repeat: Infinity, ease: "linear" }}
-            className="flex w-max items-center gap-4"
-          >
+          <div className="featured-in-track flex w-max items-center gap-4">
             {repeatedItems.map((item, index) => (
               <div
                 key={`${item}-${index}`}
@@ -46,7 +40,7 @@ export default function FeaturedInSection() {
                 {item}
               </div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

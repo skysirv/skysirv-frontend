@@ -76,6 +76,21 @@ p a {
   animation: ticker 60s linear infinite;
 }
 
+@keyframes featuredInScroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.featured-in-track {
+  animation: featuredInScroll 44s linear infinite;
+  backface-visibility: hidden;
+}
+
 @keyframes fadeInUp {
   from {
     opacity: 0;

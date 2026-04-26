@@ -73,7 +73,7 @@ function StarRow({ rating }: { rating: number }) {
   return (
     <div className="flex items-center gap-1">
       {Array.from({ length: rating }).map((_, index) => (
-        <span key={index} className="text-sm text-amber-400">
+        <span key={index} className="text-sm text-amber-500">
           ★
         </span>
       ))}
@@ -174,7 +174,7 @@ export default function TestimonialsSection() {
                   </div>
                 </div>
 
-                <p className="mt-6 text-sm leading-7 text-slate-300 sm:text-base">
+                <p className="mt-6 text-sm leading-7 text-slate-500 sm:text-base">
                   {testimonial.quote}
                 </p>
               </div>
