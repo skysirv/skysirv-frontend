@@ -1,6 +1,18 @@
 "use client"
 
-const testimonials = [
+import { useEffect, useState } from "react"
+
+type Testimonial = {
+  id?: string
+  name: string
+  handle: string
+  date: string
+  rating: number
+  image: string
+  quote: string
+}
+
+const fallbackTestimonials: Testimonial[] = [
   {
     name: "Crystal C.",
     handle: "@crystalac",
@@ -70,6 +82,41 @@ function StarRow({ rating }: { rating: number }) {
 }
 
 export default function TestimonialsSection() {
+  const [liveTestimonials, setLiveTestimonials] = useState<Testimonial[]>([])
+
+  useEffect(() => {
+    let mounted = true
+
+    async function loadTestimonials() {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/testimonials`
+        )
+
+        const data = await res.json().catch(() => null)
+
+        if (!res.ok || !Array.isArray(data?.testimonials)) {
+          return
+        }
+
+        if (mounted) {
+          setLiveTestimonials(data.testimonials)
+        }
+      } catch {
+        // Keep fallback testimonials if the live request fails.
+      }
+    }
+
+    loadTestimonials()
+
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  const testimonials =
+    liveTestimonials.length > 0 ? liveTestimonials : fallbackTestimonials
+
   return (
     <section className="relative w-full bg-white py-24">
       <div className="mx-auto max-w-6xl px-6">
@@ -86,7 +133,7 @@ export default function TestimonialsSection() {
         <div className="mt-14 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {testimonials.map((testimonial, index) => (
             <div
-              key={`${testimonial.name}-${index}`}
+              key={testimonial.id || `${testimonial.name}-${index}`}
               className="h-full rounded-[2rem] border border-slate-800/90 bg-[linear-gradient(180deg,#0f172a_0%,#111827_45%,#172033_100%)] p-6 text-white shadow-[0_24px_60px_rgba(2,6,23,0.18)] transition-transform duration-200 hover:-translate-y-1"
             >
               <div className="flex h-full flex-col">
