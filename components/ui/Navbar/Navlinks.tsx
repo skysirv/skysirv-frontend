@@ -258,9 +258,13 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
                   onClick={() => setAccountMenuOpen((current) => !current)}
                   aria-label="Open account menu"
                   aria-expanded={accountMenuOpen}
-                  className={`flex h-10 w-10 items-center justify-center rounded-full border transition ${isDark
-                    ? 'border-white/15 bg-white/10 text-white hover:bg-white/15'
-                    : 'border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100'
+                  className={`flex h-10 w-10 items-center justify-center rounded-full border transition ${isLoggedIn
+                    ? isDark
+                      ? 'border-white/20 bg-white text-slate-950 hover:bg-slate-200'
+                      : 'border-slate-900 bg-slate-900 text-white hover:bg-slate-700'
+                    : isDark
+                      ? 'border-white/15 bg-white/10 text-white hover:bg-white/15'
+                      : 'border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100'
                     }`}
                 >
                   <svg
