@@ -605,17 +605,6 @@ export default function FreeDashboardPage() {
                   that powers Skysirv.
                 </p>
               </div>
-
-              <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-                <div className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur-sm">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    Free Access
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-slate-900">
-                    Monitoring up to 3 routes
-                  </p>
-                </div>
-              </div>
             </motion.div>
           </div>
         </div>
