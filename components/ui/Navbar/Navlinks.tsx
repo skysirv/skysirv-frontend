@@ -300,7 +300,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
                       <button
                         type="button"
                         onClick={openSigninModal}
-                        className={`block w-full px-4 py-2.5 text-left font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
+                        className={`block w-full px-4 py-2.5 text-right font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
                           }`}
                       >
                         Sign In
@@ -343,7 +343,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
                         <button
                           type="button"
                           onClick={signOutAndReturnHome}
-                          className={`block w-full px-4 py-2.5 text-left font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
+                          className={`block w-full px-4 py-2.5 text-right font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
                             }`}
                         >
                           Sign Out
