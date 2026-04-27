@@ -215,12 +215,12 @@ export default function BetaPage() {
                 <motion.div
                   key={benefit}
                   variants={staggerItem}
-                  className="rounded-[1.75rem] border border-white/10 bg-white/5 p-6 shadow-[0_20px_60px_rgba(2,6,23,0.28)] backdrop-blur-sm"
+                  className="flex min-h-[190px] flex-col items-center justify-center rounded-[1.75rem] border border-white/10 bg-white/5 p-6 text-center shadow-[0_20px_60px_rgba(2,6,23,0.28)] backdrop-blur-sm"
                 >
                   <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-sky-300/20 bg-sky-400/10 text-sky-200">
                     ✦
                   </div>
-                  <p className="text-sm leading-7 text-slate-300">{benefit}</p>
+                  <p className="max-w-xs text-sm leading-7 text-slate-300">{benefit}</p>
                 </motion.div>
               ))}
             </motion.div>
@@ -228,7 +228,7 @@ export default function BetaPage() {
 
           {/* INTELLIGENCE LAYER */}
           <div className="mx-auto mt-16 max-w-6xl">
-            <motion.div {...fadeUp} className="max-w-3xl">
+            <motion.div {...fadeUp} className="mx-auto max-w-3xl text-center">
               <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
                 Intelligence layer
               </p>
@@ -237,7 +237,7 @@ export default function BetaPage() {
                 The proprietary systems behind the platform
               </h2>
 
-              <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
+              <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
                 Skysirv™ is being built as more than a single feature. The beta
                 gives early users access to the first connected layers of an
                 airfare intelligence system designed to work in synchrony.
@@ -255,23 +255,19 @@ export default function BetaPage() {
                 <motion.div
                   key={item.title}
                   variants={staggerItem}
-                  className="group h-full rounded-[1.75rem] border border-white/10 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 p-7 shadow-[0_25px_60px_rgba(2,6,23,0.35)]"
+                  className="group flex min-h-[260px] flex-col items-center justify-center rounded-[1.75rem] border border-white/10 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 p-7 text-center shadow-[0_25px_60px_rgba(2,6,23,0.35)]"
                 >
-                  <div className="flex h-full flex-col justify-between">
-                    <div>
-                      <div className="inline-flex items-center rounded-full border border-sky-300/20 bg-sky-400/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-sky-200">
-                        Beta Access
-                      </div>
-
-                      <h3 className="mt-5 text-lg font-semibold text-white">
-                        {item.title}
-                      </h3>
-
-                      <p className="mt-4 text-sm leading-7 text-slate-300">
-                        {item.description}
-                      </p>
-                    </div>
+                  <div className="inline-flex items-center rounded-full border border-sky-300/20 bg-sky-400/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-sky-200">
+                    Beta Access
                   </div>
+
+                  <h3 className="mt-5 text-lg font-semibold text-white">
+                    {item.title}
+                  </h3>
+
+                  <p className="mt-4 max-w-xs text-sm leading-7 text-slate-300">
+                    {item.description}
+                  </p>
                 </motion.div>
               ))}
             </motion.div>
@@ -324,7 +320,7 @@ export default function BetaPage() {
                   />
 
                   <div className="relative">
-                    <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-300">
+                    <p className="text-center text-xs font-medium uppercase tracking-[0.16em] text-slate-300">
                       Beta philosophy
                     </p>
 
@@ -410,7 +406,7 @@ function BetaPill({ label }: { label: string }) {
 
 function FeaturePill({ label }: { label: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-slate-300 backdrop-blur-sm">
+    <div className="flex min-h-[64px] items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center text-sm font-medium leading-6 text-slate-300 backdrop-blur-sm">
       {label}
     </div>
   )
@@ -418,9 +414,9 @@ function FeaturePill({ label }: { label: string }) {
 
 function StoryPoint({ title, text }: { title: string; text: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+    <div className="flex min-h-[120px] flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/5 p-4 text-center backdrop-blur-sm">
       <p className="text-sm font-semibold text-white">{title}</p>
-      <p className="mt-2 text-sm leading-6 text-slate-300">{text}</p>
+      <p className="mt-2 max-w-sm text-sm leading-6 text-slate-300">{text}</p>
     </div>
   )
 }

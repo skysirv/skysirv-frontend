@@ -360,6 +360,7 @@ function ChoosePlanPageContent() {
               { label: "Skyscore™", value: "Preview only" },
               { label: "Skysirv Signals™", value: "Limited alerts" },
               { label: "Monitoring", value: "Standard cadence" },
+              { label: "AI Intelligence", value: "Limited Access" },
             ]}
           />
 
@@ -386,6 +387,7 @@ function ChoosePlanPageContent() {
               { label: "Skyscore™", value: "Full intelligence scoring" },
               { label: "Skysirv Signals™", value: "Smart drop detection" },
               { label: "Skysirv Predict™", value: "Forecast signals" },
+              { label: "AI Intelligence", value: "Standard Access" },
             ]}
           />
 
@@ -412,6 +414,7 @@ function ChoosePlanPageContent() {
               { label: "Skysirv Predict™", value: "Forecast modeling" },
               { label: "Skysirv Insights™", value: "Advanced analysis" },
               { label: "Intelligence Engine™", value: "Full system access" },
+              { label: "AI Intelligence", value: "Advanced Access" },
             ]}
           />
         </div>

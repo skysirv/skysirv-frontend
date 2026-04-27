@@ -127,7 +127,7 @@ export default function BookingPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <FeatureBlock
                   title="Live price context"
-                  text="More than fare listings alone."
+                  text="See fares with smarter market insight."
                 />
                 <FeatureBlock
                   title="Signal-driven timing"
@@ -208,9 +208,9 @@ function FeatureBlock({
   text: string
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+    <div className="flex min-h-[120px] flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] p-5 text-center">
       <p className="text-base font-semibold text-white">{title}</p>
-      <p className="mt-2 text-sm leading-6 text-slate-400">{text}</p>
+      <p className="mt-2 max-w-xs text-sm leading-6 text-slate-400">{text}</p>
     </div>
   )
 }

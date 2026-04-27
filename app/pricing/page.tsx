@@ -205,6 +205,7 @@ export default function PricingPage() {
                     { label: "Skyscore™", value: "Preview only" },
                     { label: "Skysirv Signals™", value: "Limited alerts" },
                     { label: "Monitoring", value: "Standard cadence" },
+                    { label: "AI Intelligence", value: "Limited Access" },
                   ]}
                 />
 
@@ -228,6 +229,7 @@ export default function PricingPage() {
                     { label: "Skyscore™", value: "Full intelligence scoring" },
                     { label: "Skysirv Signals™", value: "Smart drop detection" },
                     { label: "Skysirv Predict™", value: "Forecast signals" },
+                    { label: "AI Intelligence", value: "Standard Access" },
                   ]}
                 />
 
@@ -251,6 +253,7 @@ export default function PricingPage() {
                     { label: "Skysirv Predict™", value: "Forecast modeling" },
                     { label: "Skysirv Insights™", value: "Advanced analysis" },
                     { label: "Intelligence Engine™", value: "Full system access" },
+                    { label: "AI Intelligence", value: "Advanced Access" },
                   ]}
                 />
               </div>
@@ -278,7 +281,7 @@ export default function PricingPage() {
                 <SlateMetricCard
                   label="Free"
                   value="Entry"
-                  subtext="Basic route visibility"
+                  subtext="Basic route tracking visibility"
                 />
                 <SlateMetricCard
                   label="Pro"
@@ -398,10 +401,10 @@ function ValuePanel({
     <motion.div
       whileHover={{ y: -4 }}
       transition={{ duration: 0.22 }}
-      className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm"
+      className="flex h-full flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/5 p-6 text-center backdrop-blur-sm"
     >
       <h3 className="text-xl font-bold text-white">{title}</h3>
-      <p className="mt-3 text-sm leading-7 text-slate-300">{text}</p>
+      <p className="mt-3 max-w-sm text-sm leading-7 text-slate-300">{text}</p>
     </motion.div>
   )
 }
@@ -516,12 +519,14 @@ function SlateMetricCard({
   subtext: string
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+    <div className="flex min-h-[132px] flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/5 p-4 text-center">
       <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-400">
         {label}
       </p>
-      <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
-      <p className="mt-1 text-xs text-slate-400">{subtext}</p>
+      <p className="mt-2 text-xl font-semibold leading-tight text-white">
+        {value}
+      </p>
+      <p className="mt-2 text-xs leading-5 text-slate-400">{subtext}</p>
     </div>
   )
 }
@@ -537,14 +542,13 @@ function SlateFeatureCard({
     <motion.div
       whileHover={{ y: -4 }}
       transition={{ duration: 0.22 }}
-      className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm"
+      className="flex min-h-[210px] flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/5 p-6 text-center backdrop-blur-sm"
     >
       <h3 className="text-xl font-bold text-white">{title}</h3>
-      <p className="mt-3 text-sm leading-7 text-slate-300">{text}</p>
+      <p className="mt-3 max-w-xs text-sm leading-7 text-slate-300">{text}</p>
     </motion.div>
   )
 }
-
 function PricingFooter() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-16 text-center md:max-w-4xl md:text-left">
@@ -722,6 +726,10 @@ function DetailedPricingTableDark() {
     {
       title: "Advanced Intelligence",
       rows: [
+        {
+          label: "AI Intelligence",
+          values: ["Limited Access", "Standard Access", "Advanced Access"],
+        },
         { label: "Trend analysis", values: ["—", "Standard", "Advanced"] },
         {
           label: "Volatility insights",
@@ -744,12 +752,12 @@ function DetailedPricingTableDark() {
   ]
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="mx-auto max-w-6xl text-center">
       <h3 className="text-5xl font-semibold text-white">
         Full feature breakdown
       </h3>
 
-      <p className="mt-2 text-lg text-slate-400">
+      <p className="mx-auto mt-2 max-w-3xl text-lg text-slate-400">
         Compare Skysirv™ intelligence capabilities across all plans
       </p>
 

@@ -1,49 +1,14 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useRef, useState } from "react"
-import type { FormEvent, MutableRefObject } from "react"
+import { useEffect } from "react"
 import { motion } from "framer-motion"
-import AuthModal from "@/components/auth/AuthModal"
-import AuthPanel from "@/components/auth/AuthPanel"
-import { getAuthToken } from "@/utils/auth-storage"
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
-
-type FlightAttendantMessage = {
-  id: string
-  role: "assistant" | "user"
-  label: string
-  text: string
-}
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ")
 }
 
-function createMessageId() {
-  return `${Date.now()}-${Math.random().toString(16).slice(2)}`
-}
-
-const initialMessages: FlightAttendantMessage[] = [
-  {
-    id: "welcome-1",
-    role: "assistant",
-    label: "Skysirv Flight Attendant™",
-    text:
-      "Hi, I’m Lucy, your Skysirv Flight Attendant. Ask me about airfare timing, route behavior, fare signals, or how Skysirv helps you make smarter booking decisions.",
-  },
-]
-
 export default function FlightAttendantPage() {
-  const [messages, setMessages] = useState<FlightAttendantMessage[]>(initialMessages)
-  const [chatInput, setChatInput] = useState("")
-  const [chatLoading, setChatLoading] = useState(false)
-  const [assistantTyping, setAssistantTyping] = useState(false)
-  const [authRequired, setAuthRequired] = useState(false)
-  const [authModalOpen, setAuthModalOpen] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement | null>(null)
-
   useEffect(() => {
     const originalBackground = document.body.style.background
     const originalBackgroundColor = document.body.style.backgroundColor
@@ -57,152 +22,6 @@ export default function FlightAttendantPage() {
       document.body.style.backgroundColor = originalBackgroundColor
     }
   }, [])
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" })
-  }, [messages, chatLoading])
-
-  async function typeAssistantReply(messageId: string, fullText: string) {
-    setAssistantTyping(true)
-
-    const chunks = fullText.split(/(\s+)/)
-
-    await new Promise<void>((resolve) => {
-      let index = 0
-
-      const timer = window.setInterval(() => {
-        index += 1
-
-        setMessages((prev) =>
-          prev.map((message) =>
-            message.id === messageId
-              ? {
-                ...message,
-                text: chunks.slice(0, index).join(""),
-              }
-              : message
-          )
-        )
-
-        if (index >= chunks.length) {
-          window.clearInterval(timer)
-          resolve()
-        }
-      }, 22)
-    })
-
-    setAssistantTyping(false)
-  }
-
-  async function handleSendFlightAttendantMessage(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-
-    const message = chatInput.trim()
-
-    if (!message || chatLoading || assistantTyping) return
-
-    const token = getAuthToken()
-
-    const userMessage: FlightAttendantMessage = {
-      id: createMessageId(),
-      role: "user",
-      label: "Traveler",
-      text: message,
-    }
-
-    setMessages((prev) => [...prev, userMessage])
-    setChatInput("")
-    setAuthRequired(false)
-
-    if (!token) {
-      setAuthRequired(true)
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: createMessageId(),
-          role: "assistant",
-          label: "Skysirv Flight Attendant™",
-          text:
-            "Please sign in to use the live Flight Attendant. This keeps Skysirv intelligence secure and allows future answers to connect with your routes, watchlist, and travel history.",
-        },
-      ])
-
-      return
-    }
-
-    if (!API_BASE_URL) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: createMessageId(),
-          role: "assistant",
-          label: "Skysirv Flight Attendant™",
-          text:
-            "The Flight Attendant is not configured yet. Please try again once the API connection is available.",
-        },
-      ])
-
-      return
-    }
-
-    setChatLoading(true)
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/flight-attendant/chat`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          message,
-          messages: [...messages, userMessage].slice(-10).map((item) => ({
-            role: item.role,
-            content: item.text,
-          })),
-        }),
-      })
-
-      const data = await response.json().catch(() => null)
-
-      if (!response.ok) {
-        throw new Error(data?.error || "Unable to reach Skysirv Flight Attendant")
-      }
-
-      const assistantMessageId = createMessageId()
-      const assistantReply =
-        data?.reply || "I’m here, but I could not generate a response."
-
-      setChatLoading(false)
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: assistantMessageId,
-          role: "assistant",
-          label: "Skysirv Flight Attendant™",
-          text: "",
-        },
-      ])
-
-      await typeAssistantReply(assistantMessageId, assistantReply)
-    } catch (error: any) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: createMessageId(),
-          role: "assistant",
-          label: "Skysirv Flight Attendant™",
-          text:
-            error?.message ||
-            "Something went wrong while contacting the Flight Attendant. Please try again.",
-        },
-      ])
-    } finally {
-      setChatLoading(false)
-    }
-  }
 
   return (
     <section className="relative -mt-32 overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 pt-32 text-white">
@@ -226,8 +45,8 @@ export default function FlightAttendantPage() {
 
       <div className="relative mx-auto max-w-7xl px-6 pb-20 pt-8 sm:px-8 sm:pb-24 sm:pt-10 lg:px-12">
         {/* HERO */}
-        <div className="grid items-center gap-10 lg:grid-cols-[0.92fr_1.08fr]">
-          <div className="text-center lg:text-left">
+        <div className="mx-auto max-w-5xl text-center">
+          <div>
             <motion.div
               initial={{ opacity: 0, y: 18, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -243,75 +62,57 @@ export default function FlightAttendantPage() {
               transition={{ delay: 0.06, duration: 0.72, ease: "easeOut" }}
               className="mt-8 text-5xl font-bold leading-[1.08] tracking-tight text-white sm:text-6xl md:text-7xl"
             >
-              Ask your AI travel companion
-              <span className="block">before you book</span>
+              Your AI travel companion
+              <span className="block">inside Skysirv</span>
             </motion.h1>
 
             <motion.p
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.14, duration: 0.62, ease: "easeOut" }}
-              className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-300 sm:text-xl lg:mx-0"
+              className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-300 sm:text-xl"
             >
-              Skysirv Flight Attendant™ helps travelers understand route behavior,
-              interpret fare signals, compare options, and make calmer booking decisions
-              with intelligence connected directly to the Skysirv platform.
+              Skysirv's Lucy is the conversational AI intelligence layer being built to help travelers understand route behavior, fare signals,
+              Skyscore™, watchlists, and booking confidence.
             </motion.p>
 
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.58, ease: "easeOut" }}
-              className="mt-10 flex flex-wrap items-center justify-center gap-3 lg:justify-start"
+              className="mt-10 flex flex-wrap items-center justify-center gap-3"
             >
-              <MarketingPill label="Route-aware guidance" />
-              <MarketingPill label="Fare signal interpretation" />
-              <MarketingPill label="Personalized travel intelligence" />
+              <MarketingPill label="Built for flight decisions" />
+              <MarketingPill label="Dashboard-aware by plan" />
+              <MarketingPill label="Powered by Skysirv intelligence" />
             </motion.div>
 
-            <motion.p
+            <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.24, duration: 0.58, ease: "easeOut" }}
-              className="mt-6 text-sm leading-6 text-slate-400"
+              transition={{ delay: 0.26, duration: 0.58, ease: "easeOut" }}
+              className="mt-12 text-center"
             >
-              Visitors can preview the assistant. Sign in to send live messages and unlock
-              the authenticated Flight Attendant experience.
-            </motion.p>
+              <h2 className="text-3xl font-bold tracking-tight text-white sm:text-5xl">
+                3 Layers of AI Intelligence
+              </h2>
+            </motion.div>
           </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 24, scale: 0.985 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ delay: 0.16, duration: 0.72, ease: "easeOut" }}
-          >
-            <FlightAttendantChatPanel
-              messages={messages}
-              input={chatInput}
-              loading={chatLoading}
-              assistantTyping={assistantTyping}
-              authRequired={authRequired}
-              messagesEndRef={messagesEndRef}
-              onInputChange={setChatInput}
-              onSubmit={handleSendFlightAttendantMessage}
-              onOpenAuthModal={() => setAuthModalOpen(true)}
-            />
-          </motion.div>
         </div>
 
         {/* VALUE STRIP */}
         <div className="mx-auto mt-14 grid max-w-6xl gap-4 md:grid-cols-3">
           <ValuePanel
-            title="Route-aware"
-            text="Designed to understand monitored routes, pricing behavior, and fare movement over time."
+            title="Limited AI"
+            text="Free users get basic guidance for understanding Skysirv, starter monitoring, plan features, and simple fare intelligence concepts."
           />
           <ValuePanel
-            title="Signal-driven"
-            text="Built to explain Skyscore™, fare alerts, route volatility, and booking timing."
+            title="Standard AI"
+            text="Pro users get a more capable assistant for route timing, Skyscore™, watchlist signals, and booking confidence."
           />
           <ValuePanel
-            title="Personalized"
-            text="A future AI layer shaped around your watchlist, preferences, and travel decisions."
+            title="Advanced AI"
+            text="Business users get the deepest assistant layer for premium intelligence, saved flights, route behavior, and advanced decision support."
           />
         </div>
 
@@ -325,20 +126,20 @@ export default function FlightAttendantPage() {
                 </div>
 
                 <h2 className="mt-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">
-                  Ask better travel questions. Get answers grounded in your routes.
+                  Built to explain the why behind your flight decisions.
                 </h2>
 
                 <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-                  Most AI assistants can explain general travel concepts. Skysirv
-                  Flight Attendant™ is designed to understand your monitored routes,
-                  pricing history, Skyscore™, watchlist behavior, and booking timing
-                  signals inside Skysirv.
+                  Most travel tools show prices. Skysirv is being built to
+                  interpret pricing behavior over time. Lucy sits on top of that
+                  intelligence layer to help explain route movement, booking
+                  timing, alert meaning, and decision confidence.
                 </p>
 
                 <div className="mt-8 grid gap-4 sm:grid-cols-3">
                   <SlateMetricCard
-                    label="Context"
-                    value="Route-aware"
+                    label="Route"
+                    value="Aware"
                     subtext="Connected to monitored routes"
                   />
                   <SlateMetricCard
@@ -356,25 +157,25 @@ export default function FlightAttendantPage() {
 
               <div className="rounded-[1.75rem] border border-white/10 bg-slate-950/80 p-7 shadow-[0_20px_60px_rgba(2,6,23,0.35)]">
                 <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
-                  How it will evolve
+                  Where Lucy lives
                 </p>
 
                 <h3 className="mt-4 text-3xl font-bold tracking-tight text-white">
-                  From chat assistant to Skysirv-aware intelligence companion.
+                  Inside your dashboard, right where decisions happen.
                 </h3>
 
                 <div className="mt-6 space-y-3">
                   <DarkInsightRow
-                    label="Today"
-                    text="The Flight Attendant can answer authenticated user questions through Skysirv’s backend."
+                    label="Visitors"
+                    text="Public site visitors can use a lightweight Lucy bubble for basic Skysirv information, plan guidance, and account creation help."
                   />
                   <DarkInsightRow
-                    label="Next"
-                    text="It will receive route, watchlist, pricing, and saved flight context from Skysirv."
+                    label="Dashboard users"
+                    text="Signed-in users get Lucy directly inside their dashboard, tailored to Free, Pro, or Business access."
                   />
                   <DarkInsightRow
-                    label="Future"
-                    text="It will help explain alerts, summarize route behavior, and guide booking decisions."
+                    label="Future intelligence"
+                    text="Lucy will become more Skysirv-aware as route history, watchlists, saved flights, preferences, and alerts are connected."
                   />
                 </div>
               </div>
@@ -395,8 +196,9 @@ export default function FlightAttendantPage() {
 
             <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
               Skysirv Flight Attendant™ is being designed to sit on top of the
-              Skysirv intelligence engine — helping travelers understand the why
-              behind price movement, route timing, alerts, and booking confidence.
+              Skysirv Intelligence Engine™ — helping travelers understand price
+              movement, timing signals, route behavior, alerts, and confidence
+              before they book.
             </p>
 
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
@@ -421,19 +223,19 @@ export default function FlightAttendantPage() {
           <div className="grid gap-4 sm:grid-cols-2">
             <SlateFeatureCard
               title="Explains"
-              text="Translates fare movement into plain-language travel guidance."
+              text="Translates fare movement and route signals into plain-language guidance."
             />
             <SlateFeatureCard
               title="Compares"
-              text="Helps evaluate routes, timing, and future booking options."
+              text="Helps evaluate timing, routes, plan features, and future booking options."
             />
             <SlateFeatureCard
               title="Personalizes"
-              text="Built around your monitored routes and travel preferences."
+              text="Designed to learn from your monitored routes, saved flights, and travel preferences."
             />
             <SlateFeatureCard
               title="Guides"
-              text="Supports calmer, more confident flight decisions."
+              text="Supports calmer, more confident booking decisions through Skysirv intelligence."
             />
           </div>
         </div>
@@ -456,12 +258,13 @@ export default function FlightAttendantPage() {
 
             <div className="relative mx-auto max-w-3xl">
               <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-                The next layer of Skysirv intelligence is coming.
+                Meet Lucy inside your Skysirv dashboard.
               </h2>
 
               <p className="mt-6 text-lg leading-8 text-slate-300">
-                Skysirv Flight Attendant™ will bring conversational guidance to
-                route monitoring, price behavior, alerts, and future booking decisions.
+                Skysirv Flight Attendant™ brings conversational guidance to
+                route monitoring, price behavior, alerts, Skyscore™, and future
+                booking decisions.
               </p>
 
               <div className="mt-8 flex flex-wrap justify-center gap-4">
@@ -485,134 +288,7 @@ export default function FlightAttendantPage() {
       </div>
 
       <FlightAttendantFooter />
-
-      <AuthModal
-        open={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-        maxWidthClassName="max-w-sm"
-        disableBackdropClose={false}
-      >
-        <AuthPanel
-          onSigninComplete={() => {
-            setAuthModalOpen(false)
-            setAuthRequired(false)
-          }}
-          onSignupComplete={() => {
-            setAuthModalOpen(false)
-          }}
-        />
-      </AuthModal>
     </section>
-  )
-}
-
-function FlightAttendantChatPanel({
-  messages,
-  input,
-  loading,
-  assistantTyping,
-  authRequired,
-  messagesEndRef,
-  onInputChange,
-  onSubmit,
-  onOpenAuthModal,
-}: {
-  messages: FlightAttendantMessage[]
-  input: string
-  loading: boolean
-  assistantTyping: boolean
-  authRequired: boolean
-  messagesEndRef: MutableRefObject<HTMLDivElement | null>
-  onInputChange: (value: string) => void
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void
-  onOpenAuthModal: () => void
-}) {
-  return (
-    <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/85 shadow-[0_30px_80px_rgba(2,6,23,0.48)] backdrop-blur-sm">
-      <div className="border-b border-white/10 bg-white/[0.04] px-6 py-4">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
-              Live Flight Attendant
-            </p>
-            <p className="mt-1 text-sm text-slate-300">
-              Ask about routes, fares, timing, and booking confidence.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300">
-            <span className="h-2 w-2 rounded-full bg-emerald-300" />
-            Online
-          </div>
-        </div>
-      </div>
-
-      <div className="h-[430px] overflow-y-auto px-6 py-5">
-        <div className="space-y-4">
-          {messages.map((message) => (
-            <AssistantBubble
-              key={message.id}
-              label={message.label}
-              text={message.text}
-              align={message.role === "user" ? "right" : "left"}
-            />
-          ))}
-
-          {loading && (
-            <AssistantBubble
-              label="Skysirv Flight Attendant™"
-              text="Thinking through your travel question..."
-              align="left"
-            />
-          )}
-
-          <div ref={messagesEndRef} />
-        </div>
-      </div>
-
-      {authRequired && (
-        <div className="border-t border-white/10 bg-sky-400/10 px-6 py-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm leading-6 text-sky-100">
-              Sign in to send live messages and connect future answers to your Skysirv account.
-            </p>
-
-            <button
-              type="button"
-              onClick={onOpenAuthModal}
-              className="inline-flex shrink-0 items-center justify-center rounded-full bg-white px-4 py-2 text-xs font-semibold text-slate-950 transition hover:bg-slate-200"
-            >
-              Sign in
-            </button>
-          </div>
-        </div>
-      )}
-
-      <form onSubmit={onSubmit} className="border-t border-white/10 bg-white/[0.03] p-4">
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <input
-            type="text"
-            value={input}
-            onChange={(event) => onInputChange(event.target.value)}
-            placeholder="Ask: Should I book now or wait?"
-            className="min-h-[48px] flex-1 rounded-xl border border-white/10 bg-white/[0.06] px-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-sky-300/40 focus:ring-2 focus:ring-sky-300/10"
-          />
-
-          <button
-            type="submit"
-            disabled={loading || assistantTyping || !input.trim()}
-            className="inline-flex min-h-[48px] items-center justify-center rounded-xl bg-white px-5 text-sm font-semibold text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {loading ? "Thinking..." : assistantTyping ? "Typing..." : "Send"}
-          </button>
-        </div>
-
-        <p className="mt-3 text-xs leading-5 text-slate-500">
-          Live answers require sign-in. Future versions will connect directly to your routes,
-          watchlist, saved flights, and Skysirv intelligence.
-        </p>
-      </form>
-    </div>
   )
 }
 
@@ -632,9 +308,9 @@ function ValuePanel({
   text: string
 }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+    <div className="flex h-full flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/5 p-6 text-center backdrop-blur-sm">
       <h3 className="text-xl font-bold text-white">{title}</h3>
-      <p className="mt-3 text-sm leading-7 text-slate-300">{text}</p>
+      <p className="mt-3 max-w-sm text-sm leading-7 text-slate-300">{text}</p>
     </div>
   )
 }
@@ -649,12 +325,12 @@ function SlateMetricCard({
   subtext: string
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+    <div className="flex min-h-[156px] flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/5 p-4 text-center">
       <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-400">
         {label}
       </p>
-      <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
-      <p className="mt-1 text-xs text-slate-400">{subtext}</p>
+      <p className="mt-2 text-xl font-semibold leading-tight text-white">{value}</p>
+      <p className="mt-2 text-center text-xs leading-5 text-slate-400">{subtext}</p>
     </div>
   )
 }
@@ -667,9 +343,9 @@ function SlateFeatureCard({
   text: string
 }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+    <div className="flex min-h-[210px] flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/5 p-6 text-center backdrop-blur-sm">
       <h3 className="text-xl font-bold text-white">{title}</h3>
-      <p className="mt-3 text-sm leading-7 text-slate-300">{text}</p>
+      <p className="mt-3 max-w-xs text-sm leading-7 text-slate-300">{text}</p>
     </div>
   )
 }
@@ -687,41 +363,6 @@ function DarkInsightRow({
         {label}
       </p>
       <p className="mt-2 text-sm leading-6 text-slate-300">{text}</p>
-    </div>
-  )
-}
-
-function AssistantBubble({
-  label,
-  text,
-  align,
-}: {
-  label: string
-  text: string
-  align: "left" | "right"
-}) {
-  return (
-    <div
-      className={cn(
-        "flex",
-        align === "right" ? "justify-end" : "justify-start"
-      )}
-    >
-      <div
-        className={cn(
-          "max-w-[88%] rounded-2xl border px-4 py-3",
-          align === "right"
-            ? "border-sky-400/20 bg-sky-400/10"
-            : "border-white/10 bg-white/[0.04]"
-        )}
-      >
-        <p className="mb-1 text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
-          {label}
-        </p>
-        <p className="whitespace-pre-line text-sm leading-6 text-slate-300">
-          {text}
-        </p>
-      </div>
     </div>
   )
 }
@@ -767,11 +408,11 @@ function FlightAttendantComparisonTable() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <h3 className="text-5xl font-semibold text-white">
+      <h3 className="text-center text-5xl font-semibold text-white">
         ChatGPT vs. Skysirv Flight Attendant™
       </h3>
 
-      <p className="mt-3 max-w-3xl text-lg leading-8 text-slate-400">
+      <p className="mx-auto mt-3 max-w-3xl text-center text-lg leading-8 text-slate-400">
         ChatGPT is a powerful general assistant. Skysirv Flight Attendant™ is
         being designed as a specialized travel intelligence assistant connected
         to the Skysirv platform.
