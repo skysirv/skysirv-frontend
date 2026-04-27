@@ -264,7 +264,13 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
         maxWidthClassName="max-w-sm"
         disableBackdropClose={false}
       >
-        <AuthPanel onSignupComplete={() => setCreateAccountModalOpen(false)} />
+        <AuthPanel
+          onSigninComplete={() => {
+            setCreateAccountModalOpen(false)
+            window.dispatchEvent(new Event('skysirv-auth-changed'))
+          }}
+          onSignupComplete={() => setCreateAccountModalOpen(false)}
+        />
       </AuthModal>
     </>
   );
