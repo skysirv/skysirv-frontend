@@ -291,7 +291,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
 
                 {accountMenuOpen && (
                   <div
-                    className={`absolute right-0 top-12 z-50 w-48 overflow-hidden rounded-2xl border py-2 text-sm shadow-[0_18px_50px_rgba(15,23,42,0.18)] ${isDark
+                    className={`absolute right-0 top-12 z-50 w-36 overflow-hidden rounded-2xl border py-2 text-sm shadow-[0_18px_50px_rgba(15,23,42,0.18)] ${isDark
                       ? 'border-white/10 bg-slate-950 text-white'
                       : 'border-slate-200 bg-white text-slate-800'
                       }`}
@@ -300,7 +300,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
                       <button
                         type="button"
                         onClick={openSigninModal}
-                        className={`block w-full px-4 py-2.5 text-right font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
+                        className={`block w-full px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
                           }`}
                       >
                         Sign In
@@ -311,7 +311,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
                           <Link
                             href="/admin"
                             onClick={() => setAccountMenuOpen(false)}
-                            className={`block px-4 py-2.5 font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
+                            className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
                               }`}
                           >
                             Admin
@@ -322,7 +322,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
                           <Link
                             href={DASHBOARD_HREF}
                             onClick={() => setAccountMenuOpen(false)}
-                            className={`block px-4 py-2.5 font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
+                            className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
                               }`}
                           >
                             Dashboard
@@ -332,7 +332,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
                         <Link
                           href={ACCOUNT_HREF}
                           onClick={() => setAccountMenuOpen(false)}
-                          className={`block px-4 py-2.5 font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
+                          className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
                             }`}
                         >
                           Account
@@ -343,7 +343,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
                         <button
                           type="button"
                           onClick={signOutAndReturnHome}
-                          className={`block w-full px-4 py-2.5 text-right font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
+                          className={`block w-full px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
                             }`}
                         >
                           Sign Out
