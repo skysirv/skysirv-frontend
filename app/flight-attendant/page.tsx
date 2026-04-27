@@ -31,7 +31,7 @@ const initialMessages: FlightAttendantMessage[] = [
     role: "assistant",
     label: "Skysirv Flight Attendant™",
     text:
-      "Hi, I’m your Skysirv Flight Attendant. Ask me about airfare timing, route behavior, fare signals, or how Skysirv helps you make smarter booking decisions.",
+      "Hi, I’m Lucy, your Skysirv Flight Attendant. Ask me about airfare timing, route behavior, fare signals, or how Skysirv helps you make smarter booking decisions.",
   },
 ]
 
@@ -124,6 +124,10 @@ export default function FlightAttendantPage() {
         },
         body: JSON.stringify({
           message,
+          messages: [...messages, userMessage].slice(-10).map((item) => ({
+            role: item.role,
+            content: item.text,
+          })),
         }),
       })
 
@@ -670,7 +674,9 @@ function AssistantBubble({
         <p className="mb-1 text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
           {label}
         </p>
-        <p className="text-sm leading-6 text-slate-300">{text}</p>
+        <p className="whitespace-pre-line text-sm leading-6 text-slate-300">
+          {text}
+        </p>
       </div>
     </div>
   )
