@@ -39,6 +39,7 @@ export default function FlightAttendantPage() {
   const [messages, setMessages] = useState<FlightAttendantMessage[]>(initialMessages)
   const [chatInput, setChatInput] = useState("")
   const [chatLoading, setChatLoading] = useState(false)
+  const [assistantTyping, setAssistantTyping] = useState(false)
   const [authRequired, setAuthRequired] = useState(false)
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
@@ -61,12 +62,44 @@ export default function FlightAttendantPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" })
   }, [messages, chatLoading])
 
+  async function typeAssistantReply(messageId: string, fullText: string) {
+    setAssistantTyping(true)
+
+    const chunks = fullText.split(/(\s+)/)
+
+    await new Promise<void>((resolve) => {
+      let index = 0
+
+      const timer = window.setInterval(() => {
+        index += 1
+
+        setMessages((prev) =>
+          prev.map((message) =>
+            message.id === messageId
+              ? {
+                ...message,
+                text: chunks.slice(0, index).join(""),
+              }
+              : message
+          )
+        )
+
+        if (index >= chunks.length) {
+          window.clearInterval(timer)
+          resolve()
+        }
+      }, 22)
+    })
+
+    setAssistantTyping(false)
+  }
+
   async function handleSendFlightAttendantMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     const message = chatInput.trim()
 
-    if (!message || chatLoading) return
+    if (!message || chatLoading || assistantTyping) return
 
     const token = getAuthToken()
 
@@ -137,15 +170,23 @@ export default function FlightAttendantPage() {
         throw new Error(data?.error || "Unable to reach Skysirv Flight Attendant")
       }
 
+      const assistantMessageId = createMessageId()
+      const assistantReply =
+        data?.reply || "I’m here, but I could not generate a response."
+
+      setChatLoading(false)
+
       setMessages((prev) => [
         ...prev,
         {
-          id: createMessageId(),
+          id: assistantMessageId,
           role: "assistant",
           label: "Skysirv Flight Attendant™",
-          text: data?.reply || "I’m here, but I could not generate a response.",
+          text: "",
         },
       ])
+
+      await typeAssistantReply(assistantMessageId, assistantReply)
     } catch (error: any) {
       setMessages((prev) => [
         ...prev,
@@ -248,6 +289,7 @@ export default function FlightAttendantPage() {
               messages={messages}
               input={chatInput}
               loading={chatLoading}
+              assistantTyping={assistantTyping}
               authRequired={authRequired}
               messagesEndRef={messagesEndRef}
               onInputChange={setChatInput}
@@ -468,6 +510,7 @@ function FlightAttendantChatPanel({
   messages,
   input,
   loading,
+  assistantTyping,
   authRequired,
   messagesEndRef,
   onInputChange,
@@ -477,6 +520,7 @@ function FlightAttendantChatPanel({
   messages: FlightAttendantMessage[]
   input: string
   loading: boolean
+  assistantTyping: boolean
   authRequired: boolean
   messagesEndRef: MutableRefObject<HTMLDivElement | null>
   onInputChange: (value: string) => void
@@ -556,10 +600,10 @@ function FlightAttendantChatPanel({
 
           <button
             type="submit"
-            disabled={loading || !input.trim()}
+            disabled={loading || assistantTyping || !input.trim()}
             className="inline-flex min-h-[48px] items-center justify-center rounded-xl bg-white px-5 text-sm font-semibold text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loading ? "Sending..." : "Send"}
+            {loading ? "Thinking..." : assistantTyping ? "Typing..." : "Send"}
           </button>
         </div>
 
