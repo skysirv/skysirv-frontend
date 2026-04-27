@@ -15,6 +15,7 @@ import SavedFlightCard, {
 } from "@/components/dashboard/saved-flight-card"
 import FlightIntelligenceModal from "@/components/dashboard/flight-intelligence-modal"
 import WelcomeModal from "@/components/dashboard/welcome-modal"
+import DashboardFlightAttendant from "@/components/flight-attendant/DashboardFlightAttendant"
 
 import WatchlistSkeleton from "@/components/dashboard/watchlist-skeleton"
 import OpportunitySkeleton from "@/components/dashboard/opportunity-skeleton"
@@ -913,13 +914,13 @@ export default function BusinessDashboardPage() {
           }`}
       >
         {/* Cinematic Hero */}
-        <div className="relative overflow-hidden bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_48%,#ffffff_100%)]">
-          <div className="relative mx-auto max-w-7xl px-6 pb-16 pt-6 md:pb-24 md:pt-10">
+        <div className="relative z-20 overflow-visible bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_48%,#ffffff_100%)]">
+          <div className="relative mx-auto max-w-7xl px-6 pb-8 pt-6 md:pb-0 md:pt-10">
             <motion.div
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, ease: "easeOut" }}
-              className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between"
+              className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between"
             >
               <div className="max-w-3xl">
                 <div className="mb-4 inline-flex items-center rounded-full border border-sky-200 bg-white/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-sky-700 shadow-sm backdrop-blur-sm">
@@ -935,6 +936,16 @@ export default function BusinessDashboardPage() {
                   a fuller intelligence layer designed to surface richer route context
                   as real data begins to accumulate.
                 </p>
+              </div>
+
+              <div className="w-full max-w-md lg:ml-auto">
+                {!showWelcomeModal && (
+                  <DashboardFlightAttendant
+                    tier="business"
+                    placement="inline"
+                    defaultOpen
+                  />
+                )}
               </div>
             </motion.div>
           </div>

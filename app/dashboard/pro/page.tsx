@@ -15,6 +15,7 @@ import SavedFlightCard, {
 } from "@/components/dashboard/saved-flight-card"
 import FlightIntelligenceModal from "@/components/dashboard/flight-intelligence-modal"
 import WelcomeModal from "@/components/dashboard/welcome-modal"
+import DashboardFlightAttendant from "@/components/flight-attendant/DashboardFlightAttendant"
 
 import WatchlistSkeleton from "@/components/dashboard/watchlist-skeleton"
 import OpportunitySkeleton from "@/components/dashboard/opportunity-skeleton"
@@ -1163,13 +1164,13 @@ export default function ProDashboardPage() {
           }`}
       >
         {/* Hero */}
-        <div className="relative overflow-hidden bg-[linear-gradient(180deg,#ffffff_0%,#f7fbff_42%,#ffffff_100%)]">
-          <div className="relative mx-auto max-w-7xl px-6 pb-16 pt-6 md:pb-24 md:pt-10">
+        <div className="relative z-20 overflow-visible bg-[linear-gradient(180deg,#ffffff_0%,#f7fbff_42%,#ffffff_100%)]">
+          <div className="relative mx-auto max-w-7xl px-6 pb-8 pt-6 md:pb-6 md:pt-10">
             <motion.div
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, ease: "easeOut" }}
-              className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between"
+              className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between"
             >
               <div className="max-w-3xl">
                 <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -1194,11 +1195,21 @@ export default function ProDashboardPage() {
                   travelers who want richer insight as real route data begins to build.
                 </p>
               </div>
+
+              <div className="w-full max-w-md lg:ml-auto lg:translate-y-[112px]">
+                {!showWelcomeModal && !showLifetimeSetupModal && (
+                  <DashboardFlightAttendant
+                    tier="pro"
+                    placement="inline"
+                    defaultOpen
+                  />
+                )}
+              </div>
             </motion.div>
 
             <motion.div
               {...fadeUp}
-              className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3 lg:max-w-xl"
+              className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-3 lg:max-w-xl"
             >
               <HeroStat
                 label={"Watchlist\nCapacity"}
@@ -1217,7 +1228,7 @@ export default function ProDashboardPage() {
         </div>
 
         {/* Main Content */}
-        <div className="px-6 py-10 md:py-14">
+        <div className="relative z-10 px-6 py-6 md:py-8">
           <div className="mx-auto max-w-7xl">
             {/* Route Search */}
             <div className="mb-10">
