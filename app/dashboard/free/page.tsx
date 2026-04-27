@@ -564,23 +564,6 @@ export default function FreeDashboardPage() {
 
   const remainingRoutes = Math.max(0, 3 - watchlist.length)
 
-  const visibleSavedFlights =
-    savedFlights.length > 0
-      ? savedFlights
-      : [
-        {
-          id: "demo-1",
-          origin: "VVI",
-          destination: "LAX",
-          departure_date: "2026-04-25",
-          airline: "LATAM Airlines Group",
-          flight_number: "LA 2468",
-          price: 1363,
-          latest_price: 1328,
-          status: "active" as const,
-        },
-      ]
-
   function handleDismissWelcomeModal() {
     setShowWelcomeModal(false)
     router.replace("/dashboard/free")
@@ -632,13 +615,6 @@ export default function FreeDashboardPage() {
                     Monitoring up to 3 routes
                   </p>
                 </div>
-
-                <Link
-                  href="/account"
-                  className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-3 text-sm font-medium text-white shadow-[0_10px_30px_rgba(15,23,42,0.16)] transition hover:bg-slate-800"
-                >
-                  Account Settings
-                </Link>
               </div>
             </motion.div>
           </div>
