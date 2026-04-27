@@ -368,6 +368,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
           onSigninComplete={() => {
             setCreateAccountModalOpen(false);
             window.dispatchEvent(new Event('skysirv-auth-changed'));
+            window.location.href = DASHBOARD_HREF;
           }}
           onSignupComplete={() => setCreateAccountModalOpen(false)}
         />
