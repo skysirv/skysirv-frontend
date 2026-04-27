@@ -936,24 +936,6 @@ export default function BusinessDashboardPage() {
                   as real data begins to accumulate.
                 </p>
               </div>
-
-              <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-                <div className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur-sm">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    System Status
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-slate-900">
-                    Pending
-                  </p>
-                </div>
-
-                <Link
-                  href="/account"
-                  className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-3 text-sm font-medium text-white shadow-[0_10px_30px_rgba(15,23,42,0.16)] transition hover:bg-slate-800"
-                >
-                  Account Settings
-                </Link>
-              </div>
             </motion.div>
           </div>
         </div>
