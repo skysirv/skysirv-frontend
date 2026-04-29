@@ -62,6 +62,14 @@ function createMessageId() {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`
 }
 
+function sanitizeLucyText(text: string) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/__(.*?)__/g, "$1")
+    .replace(/^\s{0,3}#{1,6}\s+/gm, "")
+    .trim()
+}
+
 export default function DashboardFlightAttendant({
   tier,
   placement = "floating",
@@ -284,13 +292,7 @@ export default function DashboardFlightAttendant({
                   />
                 ))}
 
-                {chatLoading && (
-                  <AssistantBubble
-                    label="Lucy"
-                    text="Thinking through your travel question..."
-                    align="left"
-                  />
-                )}
+                {chatLoading && <ThinkingDotsBubble />}
 
                 <div ref={messagesEndRef} />
               </div>
@@ -388,6 +390,8 @@ function AssistantBubble({
   text: string
   align: "left" | "right"
 }) {
+  const cleanText = sanitizeLucyText(text)
+
   return (
     <div
       className={cn(
@@ -407,8 +411,32 @@ function AssistantBubble({
           {label}
         </p>
         <p className="whitespace-pre-line text-sm leading-6 text-slate-300">
-          {text}
+          {cleanText}
         </p>
+      </div>
+    </div>
+  )
+}
+
+function ThinkingDotsBubble() {
+  return (
+    <div className="flex justify-start">
+      <div className="max-w-[86%] rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+          Lucy
+        </p>
+
+        <div className="flex items-center gap-1.5 py-1">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-slate-400" />
+          <span
+            className="h-2 w-2 animate-pulse rounded-full bg-slate-400"
+            style={{ animationDelay: "120ms" }}
+          />
+          <span
+            className="h-2 w-2 animate-pulse rounded-full bg-slate-400"
+            style={{ animationDelay: "240ms" }}
+          />
+        </div>
       </div>
     </div>
   )
