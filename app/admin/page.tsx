@@ -347,9 +347,29 @@ export default function AdminPage() {
         Authorization: `Bearer ${token}`
       }
     })
-      .then((res) => res.json())
+      .then(async (res) => {
+        const data = await res.json().catch(() => null)
+
+        if (!res.ok) {
+          console.error("Admin session check failed", {
+            status: res.status,
+            data,
+          })
+
+          router.push("/")
+          return null
+        }
+
+        return data
+      })
       .then((data) => {
+        if (!data) return
+
         if (!data?.user || data.user.is_admin !== true) {
+          console.error("Admin session rejected", {
+            user: data?.user,
+          })
+
           router.push("/")
           return
         }
