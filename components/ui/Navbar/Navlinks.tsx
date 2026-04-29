@@ -399,12 +399,16 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
         <AuthPanel
           onSigninComplete={async (payload) => {
             setCreateAccountModalOpen(false);
-            window.dispatchEvent(new Event('skysirv-auth-changed'));
 
             if (payload.user?.is_admin === true) {
-              window.location.href = '/admin';
+              setIsLoggedIn(true);
+              setIsAdmin(true);
+              setAuthAdmin(true);
+              window.location.assign('/admin');
               return;
             }
+
+            window.dispatchEvent(new Event('skysirv-auth-changed'));
 
             try {
               const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/session`, {
