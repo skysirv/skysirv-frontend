@@ -21,8 +21,37 @@ interface NavlinksProps {
 
 const SESSION_TIMEOUT_MS = 30 * 60 * 1000;
 
-const DASHBOARD_HREF = '/dashboard';
 const ACCOUNT_HREF = '/account';
+
+function getDashboardHrefFromPlan(planId?: string | null) {
+  if (!planId) return '/choose-plan'
+
+  if (planId === 'free') {
+    return '/dashboard/free'
+  }
+
+  if (
+    planId === 'pro' ||
+    planId === 'pro_monthly' ||
+    planId === 'pro_yearly' ||
+    planId === 'pro_lifetime'
+  ) {
+    return '/dashboard/pro'
+  }
+
+  if (
+    planId === 'business' ||
+    planId === 'business_monthly' ||
+    planId === 'business_yearly' ||
+    planId === 'enterprise' ||
+    planId === 'enterprise_monthly' ||
+    planId === 'enterprise_yearly'
+  ) {
+    return '/dashboard/business'
+  }
+
+  return '/choose-plan'
+}
 
 export default function Navlinks({ user, isDark = false }: NavlinksProps) {
   const pathname = usePathname();
@@ -35,6 +64,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
   const [createAccountModalOpen, setCreateAccountModalOpen] = useState(false);
   const [isSessionReady, setIsSessionReady] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [dashboardHref, setDashboardHref] = useState('/choose-plan');
 
   function signOutSilently() {
     clearAuthSession();
@@ -125,11 +155,13 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
         const data = await res.json();
         const loggedIn = !!data.user?.id;
         const admin = data.user?.is_admin === true;
+        const nextDashboardHref = getDashboardHrefFromPlan(data.subscription?.plan_id);
 
         if (!isMounted) return;
 
         setIsLoggedIn(loggedIn);
         setIsAdmin(admin);
+        setDashboardHref(nextDashboardHref);
         setIsSessionReady(true);
         setAuthAdmin(admin);
       } catch {
@@ -320,7 +352,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
 
                         {!isChoosePlanPage && (
                           <Link
-                            href={DASHBOARD_HREF}
+                            href={dashboardHref}
                             onClick={() => setAccountMenuOpen(false)}
                             className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
                               }`}
@@ -365,10 +397,33 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
         disableBackdropClose={false}
       >
         <AuthPanel
-          onSigninComplete={() => {
+          onSigninComplete={async (payload) => {
             setCreateAccountModalOpen(false);
             window.dispatchEvent(new Event('skysirv-auth-changed'));
-            window.location.href = DASHBOARD_HREF;
+
+            if (payload.user?.is_admin === true) {
+              window.location.href = '/admin';
+              return;
+            }
+
+            try {
+              const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/session`, {
+                headers: {
+                  Authorization: `Bearer ${payload.token}`,
+                },
+              });
+
+              const data = await res.json().catch(() => null);
+
+              if (!res.ok || !data?.user) {
+                window.location.href = '/choose-plan';
+                return;
+              }
+
+              window.location.href = getDashboardHrefFromPlan(data.subscription?.plan_id);
+            } catch {
+              window.location.href = '/choose-plan';
+            }
           }}
           onSignupComplete={() => setCreateAccountModalOpen(false)}
         />

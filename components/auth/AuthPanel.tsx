@@ -6,9 +6,17 @@ import SignInForm from './SignInForm'
 
 type AuthMode = 'signin' | 'signup'
 
+type AuthSuccessPayload = {
+  token: string
+  user: {
+    is_admin?: boolean
+    [key: string]: any
+  }
+}
+
 type AuthPanelProps = {
   onSignupComplete?: () => void
-  onSigninComplete?: () => void
+  onSigninComplete?: (payload: AuthSuccessPayload) => void
 }
 
 export default function AuthPanel({ onSignupComplete, onSigninComplete }: AuthPanelProps) {
@@ -42,8 +50,8 @@ export default function AuthPanel({ onSignupComplete, onSigninComplete }: AuthPa
           </div>
 
           <SignInForm
-            onSuccess={() => {
-              onSigninComplete?.()
+            onSuccess={(payload) => {
+              onSigninComplete?.(payload)
             }}
           />
 
