@@ -398,22 +398,22 @@ export default function HomePage() {
       {/* Intelligence Preview Section */}
       <motion.section
         {...fadeUp}
-        className="relative w-full overflow-hidden bg-white py-24"
+        className="relative w-full overflow-hidden bg-slate-950 py-24"
       >
         <div className="pointer-events-none absolute inset-0">
           <motion.div
             animate={{ opacity: [0.08, 0.18, 0.08] }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(56,189,248,0.08),transparent_42%)]"
+            className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(56,189,248,0.18),transparent_45%)]"
           />
         </div>
 
         <div className="relative mx-auto max-w-5xl px-6 text-center">
-          <h2 className="text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl">
+          <h2 className="text-5xl font-bold tracking-tight text-white sm:text-6xl">
             Intelligence Preview
           </h2>
 
-          <p className="mt-8 text-lg leading-8 text-slate-600 sm:text-xl">
+          <p className="mt-8 text-lg leading-8 text-slate-300 sm:text-xl">
             A live snapshot of the Skysirv™ intelligence engine. Monitor price behavior,
             track fare trends, and evaluate real-time opportunity signals before booking.
           </p>
@@ -429,39 +429,43 @@ export default function HomePage() {
           {/* LEFT COLUMN */}
           <motion.div
             variants={staggerItem}
-            className="grid h-[540px] gap-6"
+            className="grid h-auto gap-6 lg:h-[620px]"
             style={{ gridTemplateRows: "1fr 1fr" }}
           >
             <PreviewCard
-              route="MIA → LAX"
+              route="BOS → LAX"
               subtitle="30-Day Average: $420"
               metricLabel="SKYSCORE™"
               metricValue="80"
               metricColor="text-emerald-500"
               footerLabel="Trend"
               footerValue="down"
+              backgroundImage="/images/stock/bos-lax-card.jpg"
+              textTheme="light"
               lines={[
                 { label: "Current Price", value: "$350" },
               ]}
             />
 
             <PreviewCard
-              route="PTY → VVI"
-              subtitle="30-Day Average: $689"
+              route="BOS → MIA"
+              subtitle="30-Day Average: $285"
               metricLabel="SKYSCORE™"
               metricValue="82"
-              metricColor="text-emerald-500"
+              metricColor="text-emerald-300"
               footerLabel="Trend"
-              footerValue="stable"
+              footerValue="down"
+              backgroundImage="/images/stock/bos-mia-card.jpg"
+              textTheme="light"
               lines={[
-                { label: "Current Price", value: "$631" },
+                { label: "Current Price", value: "$214" },
               ]}
             />
           </motion.div>
 
           {/* RIGHT COLUMN */}
-          <motion.div variants={staggerItem} className="h-[540px]">
-            <div className="flex h-full flex-col overflow-hidden rounded-[2rem] border border-slate-200/80 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-[0_20px_60px_rgba(15,23,42,0.16)]">
+          <motion.div variants={staggerItem} className="h-auto lg:h-[620px]">
+            <div className="flex h-full flex-col rounded-[2rem] border border-slate-200/80 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-[0_20px_60px_rgba(15,23,42,0.16)]">
               <p className="text-xs font-medium tracking-[0.16em] text-slate-300 uppercase">
                 Opportunity signal
               </p>
@@ -470,15 +474,15 @@ export default function HomePage() {
                 <div className="flex items-start justify-between gap-6">
                   <div>
                     <h3 className="text-2xl font-semibold text-white">
-                      Boston → Paris
+                      BOS → MIA
                     </h3>
 
                     <p className="mt-2 text-sm text-slate-300">
-                      Price: <span className="font-medium text-white">$412</span>
+                      Price: <span className="font-medium text-white">$214</span>
                     </p>
 
                     <p className="mt-1 text-sm text-slate-400">
-                      ↓ $138 vs 30-day average
+                      ↓ $71 vs 30-day average
                     </p>
                   </div>
 
@@ -488,7 +492,7 @@ export default function HomePage() {
                     </p>
 
                     <p className="mt-1 text-4xl font-semibold text-emerald-400">
-                      87
+                      82
                     </p>
 
                     <p className="mt-2 text-xs font-medium text-emerald-300">
@@ -499,14 +503,60 @@ export default function HomePage() {
               </div>
 
               <div className="mt-5 grid flex-1 gap-3">
-                <DarkInsightRow
-                  label="Snapshot"
-                  text="Market conditions are pricing below recent baseline with a stronger opportunity profile."
-                />
-                <DarkInsightRow
-                  label="Why it matters"
-                  text="This is the kind of route signal Skysirv™ is built to surface before the market shifts back."
-                />
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+                  <p className="text-xs font-medium tracking-[0.14em] text-slate-400 uppercase">
+                    Snapshot
+                  </p>
+
+                  <p className="mt-2 text-sm leading-6 text-slate-300">
+                    BOS → MIA is pricing below its recent baseline with a stronger opportunity profile.
+                  </p>
+
+                  <div className="mt-4 grid grid-cols-3 gap-2">
+                    <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                      <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">
+                        Current
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-white">$214</p>
+                    </div>
+
+                    <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                      <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">
+                        Avg
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-white">$285</p>
+                    </div>
+
+                    <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                      <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">
+                        Delta
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-emerald-300">-$71</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+                  <p className="text-xs font-medium tracking-[0.14em] text-slate-400 uppercase">
+                    Why it matters
+                  </p>
+
+                  <p className="mt-2 text-sm leading-6 text-slate-300">
+                    This route is showing a cleaner booking window than its recent average, giving travelers a stronger reason to monitor or book before fares normalize.
+                  </p>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300">
+                      Buy window
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-slate-300">
+                      Below average
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-slate-300">
+                      Strong signal
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -516,7 +566,7 @@ export default function HomePage() {
       {/* Skysirv Intelligence */}
       <motion.section
         {...fadeUp}
-        className="relative w-full bg-white py-24"
+        className="relative w-full bg-white pt-24 pb-10"
       >
         <div className="mx-auto max-w-5xl px-6 text-center">
           <h2 className="text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl">
@@ -524,7 +574,7 @@ export default function HomePage() {
           </h2>
 
           <p className="mt-8 text-lg leading-8 text-slate-600 sm:text-xl">
-            Built like a system — not a landing page.
+            Built like a system — not a landing page, across all devices.
           </p>
         </div>
 
@@ -547,10 +597,21 @@ export default function HomePage() {
         </motion.div>
       </motion.section>
 
+      {/* Skysirv Intelligence Graphic */}
+      <section className="relative w-full overflow-hidden bg-white py-0">
+        <div className="mx-auto max-w-7xl px-6">
+          <img
+            src="/images/stock/skysirv-intelligence-graphic.png"
+            alt="Skysirv intelligence dashboard ecosystem"
+            className="mx-auto w-full max-w-6xl object-contain"
+          />
+        </div>
+      </section>
+
       {/* Dark contrast section */}
       <motion.section
         {...fadeUp}
-        className="relative w-full bg-white py-24"
+        className="relative w-full bg-white pt-10 pb-24"
       >
         <div className="mx-auto max-w-6xl px-6">
           <div className="relative overflow-hidden rounded-[2rem] bg-slate-950 px-6 py-12 text-white shadow-[0_25px_70px_rgba(15,23,42,0.18)] sm:px-8 sm:py-14 lg:px-10 lg:py-16">
@@ -613,14 +674,22 @@ export default function HomePage() {
       {/* How Skysirv Works */}
       <motion.section
         {...fadeUp}
-        className="relative w-full bg-white py-24"
+        className="relative w-full overflow-hidden bg-slate-950 py-24"
       >
-        <div className="mx-auto max-w-5xl px-6 text-center">
-          <h2 className="text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl">
+        <div className="pointer-events-none absolute inset-0">
+          <motion.div
+            animate={{ opacity: [0.12, 0.24, 0.12], scale: [1, 1.04, 1] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.18),transparent_42%)]"
+          />
+        </div>
+
+        <div className="relative mx-auto max-w-5xl px-6 text-center">
+          <h2 className="text-5xl font-bold tracking-tight text-white sm:text-6xl">
             A disciplined airfare intelligence pipeline
           </h2>
 
-          <p className="mt-8 text-lg leading-8 text-slate-600 sm:text-xl">
+          <p className="mt-8 text-lg leading-8 text-slate-300 sm:text-xl">
             How it works — Skysirv™ continuously monitors airfare markets, evaluates price behavior,
             and surfaces meaningful opportunity signals through a structured
             intelligence engine.
@@ -632,7 +701,7 @@ export default function HomePage() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, amount: 0.12 }}
-          className="mx-auto mt-16 grid max-w-6xl gap-6 px-6 md:grid-cols-3"
+          className="relative mx-auto mt-16 grid max-w-6xl gap-6 px-6 md:grid-cols-3"
         >
           <motion.div variants={staggerItem}>
             <StepCard
@@ -883,6 +952,8 @@ function PreviewCard({
   footerLabel,
   footerValue,
   badge,
+  backgroundImage,
+  textTheme,
   lines,
 }: {
   route: string
@@ -893,65 +964,110 @@ function PreviewCard({
   footerLabel?: string
   footerValue?: string
   badge?: string
+  backgroundImage?: string
+  textTheme?: "dark" | "light"
   lines: { label: string; value: string; muted?: boolean }[]
 }) {
+  const isLightText = textTheme === "light"
+
+  const overlayClass = isLightText
+    ? "bg-slate-950/34"
+    : "bg-white/28"
+
+  const titleClass = isLightText
+    ? "text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.45)]"
+    : "text-black"
+
+  const subtitleClass = isLightText
+    ? "text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.45)]"
+    : "text-black"
+
+  const labelClass = isLightText
+    ? "text-white/85 drop-shadow-[0_2px_10px_rgba(0,0,0,0.45)]"
+    : "text-black"
+
+  const bodyClass = isLightText
+    ? "text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.45)]"
+    : "text-black"
+
   return (
     <motion.div
       whileHover={{ y: -5, boxShadow: "0 20px 50px rgba(15,23,42,0.09)" }}
       transition={{ duration: 0.22 }}
-      className="flex h-full flex-col justify-between rounded-3xl border border-slate-200 bg-white p-6 shadow-md transition-shadow"
+      className="relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-md transition-shadow"
     >
-      <div className="flex items-start justify-between gap-6">
-        <div>
-          <h3 className="text-2xl font-semibold text-slate-900">
-            {route}
-          </h3>
+      {backgroundImage ? (
+        <>
+          <div
+            className="pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat opacity-100 brightness-[0.78] saturate-[0.90]"
+            style={{ backgroundImage: `url('${backgroundImage}')` }}
+          />
 
-          {subtitle ? (
-            <p className="mt-1 text-sm text-slate-500">
-              {subtitle}
+          <div
+            className="pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat opacity-100 blur-[10px] [mask-image:linear-gradient(to_top,black_0%,black_5%,transparent_50%)]"
+            style={{ backgroundImage: `url('${backgroundImage}')` }}
+          />
+
+          <div className={`pointer-events-none absolute inset-0 ${overlayClass}`} />
+        </>
+      ) : null}
+
+      <div className="relative z-10 flex h-full flex-col justify-between">
+        <div className="flex items-start justify-between gap-6">
+          <div>
+            <h3 className={`text-2xl font-bold ${titleClass}`}>
+              {route}
+            </h3>
+
+            {subtitle ? (
+              <p className={`mt-1 text-sm font-bold ${subtitleClass}`}>
+                {subtitle}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="text-right">
+            <p className={`text-xs font-bold tracking-wide ${labelClass}`}>
+              {metricLabel}
+            </p>
+
+            <p className={`mt-1 text-4xl font-bold ${metricColor}`}>
+              {metricValue}
+            </p>
+
+            {badge ? (
+              <p className="mt-2 text-xs font-medium text-emerald">
+                {badge}
+              </p>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="mt-8 w-fit min-w-[240px] space-y-3">
+          {lines.map((line) => (
+            <p
+              key={`${line.label}-${line.value}`}
+              className={`font-bold ${bodyClass}`}
+            >
+              {line.value ? (
+                <>
+                  {line.label}:{" "}
+                  <span className={`font-bold ${bodyClass}`}>
+                    {line.value}
+                  </span>
+                </>
+              ) : (
+                line.label
+              )}
+            </p>
+          ))}
+
+          {footerLabel && footerValue ? (
+            <p className={`font-bold ${bodyClass}`}>
+              {footerLabel}: {footerValue}
             </p>
           ) : null}
         </div>
-
-        <div className="text-right">
-          <p className="text-xs font-semibold tracking-wide text-slate-400">
-            {metricLabel}
-          </p>
-
-          <p className={`mt-1 text-4xl font-semibold ${metricColor}`}>
-            {metricValue}
-          </p>
-
-          {badge ? (
-            <p className="mt-2 text-xs font-medium text-emerald-700">
-              {badge}
-            </p>
-          ) : null}
-        </div>
-      </div>
-
-      <div className="mt-8 space-y-3 text-slate-700">
-        {lines.map((line) => (
-          <p
-            key={`${line.label}-${line.value}`}
-            className={line.muted ? "text-slate-500" : ""}
-          >
-            {line.value ? (
-              <>
-                {line.label}: <span className="font-medium">{line.value}</span>
-              </>
-            ) : (
-              line.label
-            )}
-          </p>
-        ))}
-
-        {footerLabel && footerValue ? (
-          <p className="text-slate-500">
-            {footerLabel}: {footerValue}
-          </p>
-        ) : null}
       </div>
     </motion.div>
   )
@@ -972,8 +1088,8 @@ function IntelligenceCard({
       transition={{ duration: 0.22 }}
       className="h-full rounded-3xl border border-slate-200 bg-white p-6 shadow-md transition-shadow"
     >
-      <div className="flex h-full flex-col">
-        <div className="flex min-h-[84px] items-start gap-3">
+      <div className="flex h-full min-h-[210px] flex-col">
+        <div className="flex min-h-[88px] items-start gap-3">
           <motion.span
             animate={{ scale: [1, 1.3, 1], opacity: [0.55, 1, 0.55] }}
             transition={{
@@ -985,12 +1101,12 @@ function IntelligenceCard({
             className="mt-1 block h-2.5 w-2.5 shrink-0 rounded-full bg-sky-600 shadow-[0_0_14px_rgba(14,165,233,0.45)]"
           />
 
-          <h3 className="text-[1.95rem] leading-tight font-bold text-slate-900 sm:text-xl">
+          <h3 className="text-xl font-bold leading-tight text-slate-900">
             {title}
           </h3>
         </div>
 
-        <p className="mt-3 text-sm leading-relaxed text-slate-600">
+        <p className="text-sm leading-relaxed text-slate-600">
           {text}
         </p>
       </div>
@@ -1034,23 +1150,23 @@ function StepCard({
 }) {
   return (
     <motion.div
-      whileHover={{ y: -5, boxShadow: "0 20px 50px rgba(15,23,42,0.09)" }}
+      whileHover={{ y: -5, boxShadow: "0 20px 50px rgba(2,6,23,0.38)" }}
       transition={{ duration: 0.22 }}
-      className="h-full rounded-3xl border border-slate-200 bg-white p-6 shadow-md transition-shadow"
+      className="h-full rounded-3xl border border-white/10 bg-white/5 p-6 shadow-[0_20px_50px_rgba(2,6,23,0.28)] backdrop-blur-sm transition-shadow"
     >
       <p className="text-xs uppercase tracking-wide text-slate-400">
         {step}
       </p>
 
-      <h3 className="mt-3 text-xl font-bold text-slate-900">
+      <h3 className="mt-3 text-xl font-bold text-white">
         {title}
       </h3>
 
-      <p className="mt-4 text-sm leading-relaxed text-slate-600">
+      <p className="mt-4 text-sm leading-relaxed text-slate-300">
         {text}
       </p>
 
-      <ul className="mt-6 space-y-2 text-sm text-slate-600">
+      <ul className="mt-6 space-y-2 text-sm text-slate-300">
         {bullets.map((bullet) => (
           <li key={bullet}>• {bullet}</li>
         ))}

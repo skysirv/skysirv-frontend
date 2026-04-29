@@ -8,6 +8,7 @@ import { getURL } from '@/utils/helpers';
 import { Inter } from 'next/font/google';
 import MainContentShell from '@/components/layout/MainContentShell';
 import BackToTop from '@/components/ui/back-to-top';
+import VisitorFlightAttendantBubble from '@/components/flight-attendant/VisitorFlightAttendantBubble';
 import 'styles/main.css';
 import "mapbox-gl/dist/mapbox-gl.css"
 
@@ -74,6 +75,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
         <MainContentShell>{children}</MainContentShell>
 
         <Footer />
+        <VisitorFlightAttendantBubble />
         <BackToTop />
 
         <Suspense>
