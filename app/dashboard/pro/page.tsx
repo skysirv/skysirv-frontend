@@ -1,28 +1,22 @@
 "use client"
 
-import React, { useEffect, useMemo, useRef, useState } from "react"
-import Link from "next/link"
+import React, { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { motion, useInView } from "framer-motion"
 import { getAuthToken } from "@/utils/auth-storage"
 
 import RouteSearch from "@/components/dashboard/route-search"
-import OpportunityBanner from "@/components/dashboard/opportunity-banner"
-import MarketSignals from "@/components/dashboard/market-signals"
-import WatchlistCard from "@/components/dashboard/watchlist-card"
-import SavedFlightCard, {
-  type SavedFlightCardData,
-} from "@/components/dashboard/saved-flight-card"
+import type { SavedFlightCardData } from "@/components/dashboard/saved-flight-card"
 import FlightIntelligenceModal from "@/components/dashboard/flight-intelligence-modal"
 import WelcomeModal from "@/components/dashboard/welcome-modal"
-import DashboardFlightAttendant from "@/components/flight-attendant/DashboardFlightAttendant"
+import ProDashboardHero from "@/components/dashboard/pro/pro-dashboard-hero"
+import ProWatchlistSection from "@/components/dashboard/pro/pro-watchlist-section"
+import ProSavedFlightsSection from "@/components/dashboard/pro/pro-saved-flights-section"
+import ProCapabilityStats from "@/components/dashboard/pro/pro-capability-stats"
+import ProGlobalIntelligence from "@/components/dashboard/pro/pro-global-intelligence"
+import ProIntelligenceWrappedSection from "@/components/dashboard/pro/pro-intelligence-wrapped-section"
+import ProStackSection from "@/components/dashboard/pro/pro-stack-section"
+import ProMarketView from "@/components/dashboard/pro/pro-market-view"
 
-import WatchlistSkeleton from "@/components/dashboard/watchlist-skeleton"
-import OpportunitySkeleton from "@/components/dashboard/opportunity-skeleton"
-import MarketSignalsSkeleton from "@/components/dashboard/market-signals-skeleton"
-
-import TravelGlobe from "@/components/intelligence-wrapped/travel-globe"
-import SegmentIntelligencePanel from "@/components/intelligence-wrapped/segment-intelligence-panel"
 import { toast } from "@/components/ui/Toasts/use-toast"
 
 const fadeUp = {
@@ -85,15 +79,7 @@ type WrappedData = {
   avgSavings: number
   beatMarket: number
   routesMonitored: number
-  alertsTriggered: number
-  alertsWon: number
   travelerIdentity: string
-  bestRoute: {
-    route: string
-    saved: number
-    beforeSpike: string
-    timingGrade: string
-  }
 }
 
 type WrappedSegment = {
@@ -194,15 +180,7 @@ const defaultWrappedData: WrappedData = {
   avgSavings: 0,
   beatMarket: 0,
   routesMonitored: 0,
-  alertsTriggered: 0,
-  alertsWon: 0,
   travelerIdentity: "Smart Traveler",
-  bestRoute: {
-    route: "—",
-    saved: 0,
-    beforeSpike: "—",
-    timingGrade: "—",
-  },
 }
 
 const WRAPPED_START_YEAR = 2026
@@ -363,45 +341,6 @@ export default function ProDashboardPage() {
       setLifetimeSetupLoading(false)
     }
   }
-
-  const proIntelligenceItems = [
-    {
-      title: "Skysirv Monitor™",
-      stat: "25 route capacity",
-      description:
-        "High-frequency route monitoring designed for travelers with a more active booking strategy.",
-    },
-    {
-      title: "Skysirv Signals™",
-      stat: "Smart drop detection",
-      description:
-        "Stronger signal visibility with more actionable fare timing and booking opportunity awareness.",
-    },
-    {
-      title: "Skysirv Price Behavior™",
-      stat: "30–90 day analysis",
-      description:
-        "Expanded lookback windows to understand pricing direction, route pressure, and volatility patterns.",
-    },
-    {
-      title: "Skysirv Predict™",
-      stat: "Forecast signals",
-      description:
-        "Forward-looking guidance designed to help you avoid weak timing and identify stronger buy windows.",
-    },
-    {
-      title: "Skyscore™",
-      stat: "Full intelligence scoring",
-      description:
-        "A complete scoring layer that reflects booking quality, timing confidence, and decision discipline.",
-    },
-    {
-      title: "Skysirv Route Digest™",
-      stat: "Included",
-      description:
-        "A richer route summary layer with digest-style intelligence across your monitored activity.",
-    },
-  ]
 
   useEffect(() => {
     let cancelled = false
@@ -647,8 +586,6 @@ export default function ProDashboardPage() {
           return
         }
 
-        const payload = data.wrapped.wrapped_payload_json ?? {}
-        const bestRoute = payload.bestRoute ?? {}
         const segments = Array.isArray(data.segments) ? data.segments : []
         const airportNodes = Array.isArray(data.airportNodes) ? data.airportNodes : []
         const routeArcs = Array.isArray(data.routeArcs) ? data.routeArcs : []
@@ -662,15 +599,7 @@ export default function ProDashboardPage() {
           avgSavings: Number(data.wrapped.avg_savings ?? 0),
           beatMarket: Number(data.wrapped.beat_market_pct ?? 0),
           routesMonitored: Number(data.wrapped.routes_monitored ?? 0),
-          alertsTriggered: Number(data.wrapped.alerts_triggered ?? 0),
-          alertsWon: Number(data.wrapped.alerts_won ?? 0),
           travelerIdentity: data.wrapped.traveler_identity ?? "Smart Traveler",
-          bestRoute: {
-            route: bestRoute.route ?? "—",
-            saved: Number(bestRoute.saved ?? 0),
-            beforeSpike: bestRoute.beforeSpike ?? "—",
-            timingGrade: bestRoute.timingGrade ?? "—",
-          },
         })
 
         setWrappedSegments(segments)
@@ -1163,69 +1092,15 @@ export default function ProDashboardPage() {
         className={`min-h-screen bg-white transition duration-300 ${showWelcomeModal || showLifetimeSetupModal ? "pointer-events-none blur-md select-none" : ""
           }`}
       >
-        {/* Hero */}
-        <div className="relative z-20 overflow-visible bg-[linear-gradient(180deg,#ffffff_0%,#f7fbff_42%,#ffffff_100%)]">
-          <div className="relative mx-auto max-w-7xl px-6 pb-8 pt-6 md:pb-6 md:pt-10">
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, ease: "easeOut" }}
-              className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between"
-            >
-              <div className="max-w-3xl">
-                <div className="mb-4 flex flex-wrap items-center gap-3">
-                  <div className="inline-flex items-center rounded-full border border-sky-200 bg-white/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.22em] text-sky-700 shadow-sm backdrop-blur-sm">
-                    {isLifetimePro ? "Lifetime Pro Dashboard" : "Pro Plan Dashboard"}
-                  </div>
-
-                  {isLifetimePro && (
-                    <div className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700 shadow-sm">
-                      Gifted Lifetime Access
-                    </div>
-                  )}
-                </div>
-
-                <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl md:text-6xl">
-                  A sharper intelligence solution for more serious travelers
-                </h1>
-
-                <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
-                  Pro unlocks deeper route behavior, stronger signal visibility,
-                  full Skyscore™ access, and a more capable dashboard designed for
-                  travelers who want richer insight as real route data begins to build.
-                </p>
-              </div>
-
-              <div className="w-full max-w-md lg:ml-auto lg:translate-y-[112px]">
-                {!showWelcomeModal && !showLifetimeSetupModal && (
-                  <DashboardFlightAttendant
-                    tier="pro"
-                    placement="inline"
-                    defaultOpen
-                  />
-                )}
-              </div>
-            </motion.div>
-
-            <motion.div
-              {...fadeUp}
-              className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-3 lg:max-w-xl"
-            >
-              <HeroStat
-                label={"Watchlist\nCapacity"}
-                value={loading ? "—" : `${watchlist.length}/25`}
-              />
-              <HeroStat
-                label={"Routes\nRemaining"}
-                value={loading ? "—" : String(remainingRoutes)}
-              />
-              <HeroStat
-                label={"Access\nTier"}
-                value={isLifetimePro ? "Lifetime Pro" : "Pro"}
-              />
-            </motion.div>
-          </div>
-        </div>
+        <ProDashboardHero
+          loading={loading}
+          watchlistCount={watchlist.length}
+          remainingRoutes={remainingRoutes}
+          isLifetimePro={isLifetimePro}
+          showWelcomeModal={showWelcomeModal}
+          showLifetimeSetupModal={showLifetimeSetupModal}
+          fadeUp={fadeUp}
+        />
 
         {/* Main Content */}
         <div className="relative z-10 px-6 py-6 md:py-8">
@@ -1235,804 +1110,55 @@ export default function ProDashboardPage() {
               <RouteSearch onRouteAdded={handleRouteAdded} />
             </div>
 
-            {/* Watchlist Zone */}
-            <motion.section
-              {...fadeUp}
-              className="relative mb-12 overflow-hidden rounded-[2rem] border border-slate-200/80 bg-[linear-gradient(180deg,#f8fbff_0%,#f6f9fc_42%,#ffffff_100%)] px-5 py-8 shadow-[0_20px_60px_rgba(15,23,42,0.06)] sm:px-7 md:px-8 md:py-10"
-            >
-              <div className="pointer-events-none absolute inset-0">
-                <div className="absolute -left-20 top-0 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.10)_0%,rgba(255,255,255,0)_72%)] blur-3xl" />
-                <div className="absolute right-[-60px] top-[-20px] h-52 w-52 rounded-full bg-[radial-gradient(circle,rgba(16,185,129,0.08)_0%,rgba(255,255,255,0)_74%)] blur-3xl" />
-              </div>
-
-              <div className="relative">
-                <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-                  <div className="max-w-2xl">
-                    <div className="mb-3 inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600 shadow-sm backdrop-blur-sm">
-                      Pro Watchlist Intelligence
-                    </div>
-
-                    <h2 className="text-2xl font-semibold tracking-tight text-slate-950 md:text-3xl">
-                      Expand your monitored decision layer
-                    </h2>
-
-                    <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600 sm:text-base">
-                      Pro gives you meaningful scale without the full Business
-                      command center — more routes, stronger signal coverage, and
-                      a more capable market-reading workflow.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                    <CompactStat
-                      label="Tracked"
-                      value={loading ? "—" : String(watchlist.length)}
-                    />
-                    <CompactStat
-                      label="Remaining"
-                      value={loading ? "—" : String(remainingRoutes)}
-                    />
-                    <CompactStat label="Tier" value={isLifetimePro ? "Lifetime Pro" : "Pro"} />
-                  </div>
-                </div>
-
-                <div className="grid max-h-[1400px] gap-6 overflow-y-auto pr-2 md:grid-cols-2 xl:grid-cols-3">
-                  {loading ? (
-                    <>
-                      <WatchlistSkeleton />
-                      <WatchlistSkeleton />
-                      <WatchlistSkeleton />
-                    </>
-                  ) : watchlist.length === 0 ? (
-                    <div className="col-span-full overflow-hidden rounded-[1.75rem] border border-dashed border-slate-300 bg-white/75 p-10 text-center shadow-sm backdrop-blur-sm">
-                      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500 shadow-inner">
-                        ✈
-                      </div>
-
-                      <h3 className="mb-2 text-lg font-semibold text-slate-900">
-                        No Pro routes monitored yet
-                      </h3>
-
-                      <p className="mx-auto max-w-md text-sm leading-6 text-slate-600">
-                        Add routes above to begin monitoring pricing activity. As your
-                        tracked routes collect real data, Pro intelligence layers will
-                        begin populating automatically.
-                      </p>
-                    </div>
-                  ) : (
-                    watchlist.map((route, index) => {
-                      const routeCode = route.route ?? ""
-                      const [fallbackOrigin, fallbackDestination] = routeCode.includes("-")
-                        ? routeCode.split("-")
-                        : ["", ""]
-
-                      const origin = route.origin ?? fallbackOrigin ?? "—"
-                      const destination = route.destination ?? fallbackDestination ?? "—"
-                      const departureDate = route.departure_date ?? "Pending"
-
-                      return (
-                        <div
-                          key={route.id ?? route.route_hash ?? `${origin}-${destination}-${index}`}
-                          className="animate-[fadeInUp_0.35s_ease-out]"
-                        >
-                          <WatchlistCard
-                            origin={origin}
-                            destination={destination}
-                            departureDate={departureDate}
-                            latestPrice={
-                              route.latest_price != null && Number.isFinite(Number(route.latest_price))
-                                ? Number(route.latest_price)
-                                : null
-                            }
-                            avgPrice={
-                              route.avg_price != null && Number.isFinite(Number(route.avg_price))
-                                ? Number(route.avg_price) / 100
-                                : null
-                            }
-                            priceDelta={null}
-                            latestAirline={route.latest_airline ?? null}
-                            latestFlightNumber={route.latest_flight_number ?? null}
-                            latestCapturedAt={route.latest_captured_at ?? null}
-                            volatilityIndex={route.volatility_index ?? null}
-                            recommendedFlights={route.recommended_flights ?? null}
-                            onOpenFlightModal={(flight) => handleOpenFlightModal(route, flight)}
-                            onRemove={() => {
-                              if (!route.id) return
-                              void handleRouteRemoved(route.id)
-                            }}
-                          />
-                        </div>
-                      )
-                    })
-                  )}
-                </div>
-              </div>
-            </motion.section>
-
-            {/* Saved Flights Section */}
-            <motion.section
-              {...fadeUp}
-              className="relative mb-12 overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white px-5 py-8 shadow-[0_20px_60px_rgba(15,23,42,0.06)] sm:px-7 md:px-8 md:py-10"
-            >
-              <div className="relative">
-                <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-                  <div className="max-w-2xl">
-                    <div className="mb-3 inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600 shadow-sm backdrop-blur-sm">
-                      Saved Flights
-                    </div>
-
-                    <h2 className="text-2xl font-semibold tracking-tight text-slate-950 md:text-3xl">
-                      Your saved flight decisions
-                    </h2>
-
-                    <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600 sm:text-base">
-                      Save specific flights from your intelligence modal to track price changes,
-                      trigger alerts, and build your travel history.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                  {savedFlights.length === 0 ? (
-                    <div className="col-span-full overflow-hidden rounded-[1.75rem] border border-dashed border-slate-300 bg-white/75 p-10 text-center shadow-sm backdrop-blur-sm">
-                      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500 shadow-inner">
-                        ✈
-                      </div>
-
-                      <h3 className="mb-2 text-lg font-semibold text-slate-900">
-                        No saved flights yet
-                      </h3>
-
-                      <p className="mx-auto max-w-md text-sm leading-6 text-slate-600">
-                        Open a flight from your watchlist and save it to start tracking
-                        that exact fare and building your intelligence history.
-                      </p>
-                    </div>
-                  ) : (
-                    savedFlights.map((flight, index) => (
-                      <SavedFlightCard
-                        key={flight.id ?? `${flight.origin}-${flight.destination}-${index}`}
-                        flight={flight}
-                        onOpenIntelligence={() => handleOpenSavedFlightIntelligence(flight)}
-                        onMarkRouteCompleted={() => handleMarkSavedFlightCompleted(flight)}
-                        onDelete={() => handleDeleteSavedFlight(flight)}
-                      />
-                    ))
-                  )}
-                </div>
-              </div>
-            </motion.section>
-
-            {/* Pro Capability Stats */}
-            <motion.section
-              {...fadeUp}
-              className="mb-12 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
-            >
-              <InfoCard
-                label="Price Behavior™"
-                value="30–90 Day Window"
-                description="Pro supports deeper historical monitoring windows once your tracked routes begin collecting enough data."
-              />
-              <InfoCard
-                label="Skysirv Signals™"
-                value="Pro Access"
-                description="Signal visibility becomes available as monitored routes build real pricing history over time."
-              />
-              <InfoCard
-                label="Skyscore™"
-                value="Included"
-                description="Pro includes full scoring access when enough real monitoring data exists to generate it."
-              />
-              <InfoCard
-                label="Forecast Visibility"
-                value="Available"
-                description="Forward-looking guidance appears once monitored routes have enough live data to support it."
-              />
-            </motion.section>
-
-            {/* Global Intelligence Signals */}
-            <div className="mb-12 grid gap-8 lg:grid-cols-2">
-              {loading ? (
-                <>
-                  <OpportunitySkeleton />
-                  <MarketSignalsSkeleton />
-                </>
-              ) : (
-                <>
-                  <OpportunityBanner />
-                  <MarketSignals />
-                </>
-              )}
-            </div>
-
-            {/* Intelligence Wrapped Section */}
-            <div className="relative mt-14 overflow-hidden rounded-[2rem] border border-slate-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_36%,#ffffff_100%)] shadow-[0_24px_70px_rgba(15,23,42,0.07)]">
-              <div className="pointer-events-none absolute inset-0">
-                <motion.div
-                  animate={{ x: [0, 30, 0], y: [0, 20, 0] }}
-                  transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute left-[-80px] top-16 h-72 w-72 rounded-full bg-sky-100/70 blur-3xl"
-                />
-                <motion.div
-                  animate={{ x: [0, -30, 0], y: [0, -20, 0] }}
-                  transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute right-[-100px] top-40 h-80 w-80 rounded-full bg-indigo-100/60 blur-3xl"
-                />
-                <motion.div
-                  animate={{ x: [0, 20, 0], y: [0, -25, 0] }}
-                  transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute bottom-20 left-1/3 h-72 w-72 rounded-full bg-cyan-100/50 blur-3xl"
-                />
-                <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,rgba(255,255,255,0)_0%,rgba(148,163,184,0.28)_50%,rgba(255,255,255,0)_100%)]" />
-              </div>
-
-              <div className="relative px-6 py-10 md:px-8 md:py-12">
-                <section className="relative mx-auto max-w-6xl pb-16 pt-2 sm:pt-4">
-                  <motion.div
-                    initial={{ opacity: 0, y: 28 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.2 }}
-                    transition={{ duration: 0.75, ease: "easeOut" }}
-                    className="mx-auto max-w-4xl text-center"
-                  >
-                    <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-                      <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.98 }}
-                        whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                        viewport={{ once: true, amount: 0.2 }}
-                        transition={{ delay: 0.05, duration: 0.55 }}
-                        className="inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-600 shadow-sm backdrop-blur"
-                      >
-                        {selectedYear} Annual Intelligence Report
-                      </motion.div>
-
-                      <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-2 shadow-sm backdrop-blur">
-                        <label
-                          htmlFor="wrapped-year"
-                          className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500"
-                        >
-                          Year
-                        </label>
-
-                        <select
-                          id="wrapped-year"
-                          value={selectedYear}
-                          onChange={(e) => setSelectedYear(Number(e.target.value))}
-                          className="bg-transparent pr-1 text-sm font-medium text-slate-900 outline-none"
-                        >
-                          {availableWrappedYears.map((year: number) => (
-                            <option key={year} value={year}>
-                              {year}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    <h2 className="mt-8 text-4xl font-bold tracking-tight text-slate-950 sm:text-6xl">
-                      Your Skysirv Intelligence Wrapped™
-                    </h2>
-
-                    <motion.p
-                      initial={{ opacity: 0, y: 18 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, amount: 0.2 }}
-                      transition={{ delay: 0.18, duration: 0.6 }}
-                      className="mx-auto mt-6 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg"
-                    >
-                      You didn’t just travel. You tracked smarter, booked sharper,
-                      and outperformed the market with confidence.
-                    </motion.p>
-                  </motion.div>
-
-                  <motion.div
-                    variants={staggerContainer}
-                    initial="hidden"
-                    whileInView="show"
-                    viewport={{ once: true, amount: 0.15 }}
-                    className="mt-14 grid grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-6"
-                  >
-                    <motion.div variants={staggerItem}>
-                      <Stat label="Flights" value={wrappedLoading ? "—" : wrappedData.flights} />
-                    </motion.div>
-
-                    <motion.div variants={staggerItem}>
-                      <Stat label="Countries" value={wrappedLoading ? "—" : wrappedData.countries} />
-                    </motion.div>
-
-                    <motion.div variants={staggerItem}>
-                      <Stat label="Distance" value={wrappedLoading ? "—" : wrappedData.distance} />
-                    </motion.div>
-
-                    <motion.div variants={staggerItem}>
-                      <Stat
-                        label="Routes Monitored"
-                        value={wrappedLoading ? "—" : wrappedData.routesMonitored}
-                      />
-                    </motion.div>
-                  </motion.div>
-
-                  <motion.div {...fadeUp} className="mt-12">
-                    <div className="mb-6 text-center">
-                      <p className="text-sm font-medium uppercase tracking-[0.16em] text-slate-500">
-                        Travel Footprint
-                      </p>
-                      <h3 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-                        Explore your year on the globe
-                      </h3>
-                      <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-                        Every glowing point marks an airport you passed through during the
-                        year. Click a destination to reveal your visit count, layover time,
-                        and airport intelligence snapshot.
-                      </p>
-                    </div>
-
-                    <TravelGlobe
-                      airportNodes={globeAirportNodes}
-                      routeArcs={globeRouteArcs}
-                    />
-                  </motion.div>
-
-                  <SegmentIntelligencePanel
-                    wrappedLoading={wrappedLoading}
-                    selectedYear={selectedYear}
-                    sortedSegments={sortedSegments}
-                    fadeUp={fadeUp}
-                  />
-                </section>
-
-                <motion.section
-                  {...fadeUp}
-                  className="relative mx-auto max-w-4xl py-2"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-200 to-slate-200" />
-                    <motion.div
-                      animate={{ scale: [1, 1.18, 1] }}
-                      transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
-                      className="h-2.5 w-2.5 rounded-full bg-sky-600 shadow-[0_0_18px_rgba(14,165,233,0.45)]"
-                    />
-                    <div className="h-px flex-1 bg-gradient-to-l from-transparent via-slate-200 to-slate-200" />
-                  </div>
-
-                  <p className="mx-auto mt-5 max-w-2xl text-center text-sm leading-7 text-slate-500 sm:text-base">
-                    This year, you didn’t just fly. You moved through the market with
-                    better timing, better signals, and better decisions.
-                  </p>
-                </motion.section>
-
-                <motion.section
-                  {...fadeUp}
-                  transition={{ duration: 0.8, ease: "easeOut" }}
-                  className="relative mx-auto max-w-5xl py-10 sm:py-14"
-                >
-                  <motion.div
-                    whileHover={{ y: -4 }}
-                    transition={{ duration: 0.25 }}
-                    className="relative overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/90 p-8 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur sm:p-12"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br from-sky-50 via-white to-indigo-50" />
-                    <div className="absolute right-[-50px] top-[-50px] h-40 w-40 rounded-full bg-sky-200/40 blur-3xl" />
-                    <div className="absolute bottom-[-70px] left-[-30px] h-44 w-44 rounded-full bg-indigo-200/30 blur-3xl" />
-
-                    <div className="relative grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-                      <div>
-                        <p className="text-sm font-medium uppercase tracking-[0.16em] text-slate-500">
-                          Annual Skyscore™
-                        </p>
-
-                        <h3 className="mt-4 text-5xl font-bold tracking-tight text-slate-950 sm:text-6xl">
-                          <CountUpNumber end={wrappedData.skyscore} />
-                        </h3>
-
-                        <p className="mt-3 text-lg font-semibold text-emerald-600">
-                          {wrappedLoading || wrappedData.skyscore === 0 ? "Awaiting score data" : "Pro Intelligence Traveler"}
-                        </p>
-
-                        <p className="mt-5 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
-                          {wrappedLoading || wrappedData.skyscore === 0
-                            ? "Your annual score and booking profile will appear here once enough real monitoring and wrapped travel data exists."
-                            : "Your booking behavior consistently landed in high-confidence territory, with strong timing discipline and above-market decision quality throughout the year."}
-                        </p>
-                      </div>
-
-                      <div className="flex justify-center lg:justify-end">
-                        <div className="relative flex h-64 w-64 items-center justify-center rounded-full">
-                          <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
-                            className="absolute inset-0 rounded-full border border-sky-200/70"
-                          />
-
-                          <motion.div
-                            animate={{ rotate: -360 }}
-                            transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
-                            className="absolute inset-4 rounded-full border border-indigo-200/70"
-                          />
-
-                          <motion.div
-                            animate={{ scale: [1, 1.04, 1] }}
-                            transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-                            className="absolute inset-8 rounded-full bg-gradient-to-br from-white via-sky-50 to-indigo-50 shadow-[0_18px_45px_rgba(15,23,42,0.10)]"
-                          />
-
-                          <motion.div
-                            animate={{ opacity: [0.45, 0.8, 0.45] }}
-                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                            className="absolute inset-10 rounded-full bg-sky-100/40 blur-md"
-                          />
-
-                          <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            whileInView={{ scale: 1, opacity: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.7, ease: "easeOut" }}
-                            className="relative z-10 text-center"
-                          >
-                            <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-500">
-                              Score
-                            </p>
-                            <p className="mt-2 text-6xl font-bold tracking-tight text-slate-950">
-                              <CountUpNumber end={wrappedData.skyscore} />
-                            </p>
-                          </motion.div>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                </motion.section>
-
-                <motion.section
-                  {...fadeUp}
-                  transition={{ delay: 0.05, duration: 0.75, ease: "easeOut" }}
-                  className="mx-auto grid max-w-6xl gap-6 py-12 sm:grid-cols-3 sm:py-16"
-                >
-                  <MotionCard>
-                    <p className="text-sm text-slate-500">Total Saved</p>
-                    <h3 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-                      $<CountUpNumber end={wrappedData.savings} />
-                    </h3>
-                    <p className="mt-3 text-sm leading-6 text-slate-600">
-                      {wrappedLoading || wrappedData.savings === 0
-                        ? "Savings totals will appear here once monitored bookings and wrapped travel data are available."
-                        : "Estimated savings captured through smarter timing and monitored opportunities."}
-                    </p>
-                  </MotionCard>
-
-                  <MotionCard>
-                    <p className="text-sm text-slate-500">Avg / Flight</p>
-                    <h3 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-                      $<CountUpNumber end={wrappedData.avgSavings} />
-                    </h3>
-                    <p className="mt-3 text-sm leading-6 text-slate-600">
-                      {wrappedLoading || wrappedData.avgSavings === 0
-                        ? "Average per-flight savings will appear once enough completed trip data exists."
-                        : "Your average booking advantage across completed trips this year."}
-                    </p>
-                  </MotionCard>
-
-                  <MotionCard>
-                    <p className="text-sm text-slate-500">Beat Market</p>
-                    <h3 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-                      <CountUpNumber end={wrappedData.beatMarket} suffix="%" />
-                    </h3>
-                    <p className="mt-3 text-sm leading-6 text-slate-600">
-                      {wrappedLoading || wrappedData.beatMarket === 0
-                        ? "Market outperformance will appear here once enough real booking comparisons are available."
-                        : "How often your booking decisions outperformed the broader fare environment."}
-                    </p>
-                  </MotionCard>
-                </motion.section>
-
-                <motion.section
-                  {...fadeUp}
-                  transition={{ delay: 0.12, duration: 0.8, ease: "easeOut" }}
-                  className="mx-auto max-w-4xl px-0 py-16 sm:py-20"
-                >
-                  <motion.div
-                    whileHover={{ y: -4 }}
-                    transition={{ duration: 0.25 }}
-                    className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-10 text-center text-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]"
-                  >
-                    <motion.div
-                      animate={{ opacity: [0.2, 0.5, 0.2], scale: [1, 1.06, 1] }}
-                      transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
-                      className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.18),transparent_38%)]"
-                    />
-
-                    <div className="relative">
-                      <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-300">
-                        Traveler Identity
-                      </p>
-
-                      <h3 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-                        {wrappedLoading || wrappedData.routesMonitored === 0
-                          ? "Your traveler identity will appear here"
-                          : `You are a ${wrappedData.travelerIdentity}`}
-                      </h3>
-
-                      <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-                        {wrappedLoading || wrappedData.routesMonitored === 0
-                          ? "As your monitoring history and booking behavior develop, Skysirv will generate a clearer identity profile here."
-                          : "You wait, analyze, and strike at the right moment — consistently outperforming the market with calm, disciplined timing."}
-                      </p>
-                    </div>
-                  </motion.div>
-                </motion.section>
-
-                <motion.section
-                  {...fadeUp}
-                  transition={{ delay: 0.15, duration: 0.8, ease: "easeOut" }}
-                  className="mx-auto max-w-3xl px-0 pb-6 pt-8"
-                >
-                  <div className="text-center">
-                    <p className="text-sm font-medium uppercase tracking-[0.16em] text-slate-500">
-                      Summary Snapshot
-                    </p>
-                    <h3 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-                      Wrapped Summary
-                    </h3>
-                    <p className="mx-auto mt-4 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
-                      {wrappedLoading || wrappedData.routesMonitored === 0
-                        ? "Once wrapped data is available, this section will summarize your travel activity and intelligence highlights."
-                        : "A summary of how you traveled, saved, and outperformed the market this year."}
-                    </p>
-                  </div>
-
-                  <motion.div
-                    initial={{ opacity: 0, y: 36, scale: 0.97 }}
-                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                    viewport={{ once: true, amount: 0.25 }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
-                    className="mt-10"
-                  >
-                    <div
-                      className="mx-auto max-w-xl rounded-[2rem] border border-slate-200 bg-white p-4 shadow-[0_22px_60px_rgba(15,23,42,0.10)]"
-                    >
-                      <div
-                        className="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-8 text-white"
-                      >
-                        <motion.div
-                          animate={{ x: [0, 16, 0], y: [0, -10, 0] }}
-                          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-                          className="absolute right-[-16px] top-[-16px] h-36 w-36 rounded-full bg-sky-500/10 blur-3xl"
-                        />
-                        <motion.div
-                          animate={{ x: [0, -12, 0], y: [0, 14, 0] }}
-                          transition={{ duration: 8.5, repeat: Infinity, ease: "easeInOut" }}
-                          className="absolute bottom-[-20px] left-[-10px] h-36 w-36 rounded-full bg-indigo-500/10 blur-3xl"
-                        />
-
-                        <div className="relative">
-                          <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-300">
-                            Skysirv Intelligence Wrapped™
-                          </p>
-
-                          <div className="mt-8 grid grid-cols-2 gap-6">
-                            <div>
-                              <p className="text-sm text-slate-400">Skyscore™</p>
-                              <h2 className="mt-2 text-5xl font-bold">
-                                <CountUpNumber end={wrappedData.skyscore} />
-                              </h2>
-                            </div>
-
-                            <div>
-                              <p className="text-sm text-slate-400">Beat Market</p>
-                              <h2 className="mt-2 text-5xl font-bold">
-                                <CountUpNumber end={wrappedData.beatMarket} suffix="%" />
-                              </h2>
-                            </div>
-                          </div>
-
-                          <div className="mt-7 flex flex-wrap gap-2">
-                            <SharePill label="Flights" value={String(wrappedData.flights)} />
-                            <SharePill
-                              label="Saved"
-                              value={`$${wrappedData.savings.toLocaleString()}`}
-                            />
-                            <SharePill
-                              label="Routes"
-                              value={String(wrappedData.routesMonitored)}
-                            />
-                          </div>
-
-                          <div className="mt-8 border-t border-white/10 pt-6">
-                            <p className="text-sm leading-7 text-slate-300">
-                              {wrappedLoading || wrappedData.routesMonitored === 0
-                                ? "Your wrapped summary will appear here once enough real monitoring and travel data has been collected."
-                                : `You beat the market ${wrappedData.beatMarket}% of the time and saved $${wrappedData.savings.toLocaleString()} this year.`}
-                            </p>
-
-                            <p className="mt-4 text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
-                              Powered by Skysirv Intelligence™
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                </motion.section>
-              </div>
-            </div>
-
-            {/* Pro Stack */}
-            <motion.section {...fadeUp} className="mx-auto mt-14 max-w-7xl">
-              <div className="mb-8 max-w-2xl">
-                <p className="text-sm font-medium uppercase tracking-[0.16em] text-slate-500">
-                  Pro Intelligence Layer
-                </p>
-                <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-                  A more capable stack for better timing
-                </h2>
-                <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base">
-                  Pro opens up more of the Skysirv system while holding back the
-                  full Business command layer. You get stronger route analysis,
-                  forecast visibility, and deeper signal clarity.
-                </p>
-              </div>
-
-              <motion.div
-                variants={staggerContainer}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true, amount: 0.15 }}
-                className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3"
-              >
-                {proIntelligenceItems.map((item) => (
-                  <motion.div key={item.title} variants={staggerItem}>
-                    <DarkWrappedCard>
-                      <div className="flex h-full flex-col justify-between">
-                        <div>
-                          <p className="text-sm font-semibold text-white">
-                            {item.title}
-                          </p>
-
-                          <p className="mt-4 text-sm font-medium text-sky-200">
-                            {item.stat}
-                          </p>
-
-                          <p className="mt-3 text-sm leading-6 text-slate-300">
-                            {item.description}
-                          </p>
-                        </div>
-
-                        <div className="mt-6 inline-flex w-fit items-center rounded-full border border-sky-400/20 bg-sky-400/10 px-3 py-1 text-xs font-medium text-sky-300">
-                          Pro Access
-                        </div>
-                      </div>
-                    </DarkWrappedCard>
-                  </motion.div>
-                ))}
-              </motion.div>
-            </motion.section>
-
-            {/* Pro Market View */}
-            <motion.section {...fadeUp} className="mt-14">
-              <div className="mb-8 max-w-3xl">
-                <p className="text-sm font-medium uppercase tracking-[0.16em] text-slate-500">
-                  Pro Market View
-                </p>
-                <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-                  Better visibility once monitoring begins
-                </h2>
-                <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base">
-                  Pro is designed to surface deeper price behavior, stronger route
-                  context, and more actionable monitoring visibility — but those
-                  intelligence layers only appear after you begin tracking routes.
-                </p>
-              </div>
-
-              <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-                <div className="overflow-hidden rounded-[2rem] border border-slate-800/90 bg-[linear-gradient(180deg,#0b1728_0%,#0f1d31_42%,#13243b_100%)] p-6 shadow-[0_30px_80px_rgba(2,6,23,0.22)]">
-                  <div className="mb-6 flex items-center justify-between">
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                        Route Intelligence Preview
-                      </p>
-                      <h3 className="mt-2 text-2xl font-semibold text-white">
-                        No monitored route data yet
-                      </h3>
-                    </div>
-
-                    <span className="rounded-full border border-sky-400/20 bg-sky-400/10 px-3 py-1 text-xs font-semibold text-sky-300">
-                      DATA PENDING
-                    </span>
-                  </div>
-
-                  <div className="grid gap-4 sm:grid-cols-3">
-                    <ProRouteStat
-                      label="Current Fare"
-                      value="—"
-                      subtext="Appears after route monitoring begins"
-                    />
-                    <ProRouteStat
-                      label="Price Behavior"
-                      value="Pending"
-                      subtext="Waiting for enough tracked history"
-                    />
-                    <ProRouteStat
-                      label="Signal Status"
-                      value="Pending"
-                      subtext="Signals appear after monitoring begins"
-                    />
-                  </div>
-
-                  <div className="mt-8">
-                    <div className="mb-3 flex items-center justify-between text-xs uppercase tracking-[0.16em] text-slate-400">
-                      <span>Price Behavior</span>
-                      <span>Monitoring required</span>
-                    </div>
-
-                    <div className="relative min-h-[220px] overflow-hidden rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.4)_0%,rgba(2,6,23,0.65)_100%)] p-6">
-                      <div className="absolute inset-x-0 top-1/2 border-t border-dashed border-white/10" />
-                      <div className="absolute inset-x-0 bottom-8 border-t border-dashed border-white/10" />
-
-                      <div className="flex h-full items-center justify-center">
-                        <div className="max-w-md text-center">
-                          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 text-slate-300 shadow-inner">
-                            ✈
-                          </div>
-                          <p className="text-sm font-semibold text-white">
-                            No chart data available yet
-                          </p>
-                          <p className="mt-2 text-sm leading-6 text-slate-400">
-                            Once you add routes and monitoring begins, this area
-                            will populate with real pricing behavior from your
-                            tracked activity.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid gap-6">
-                  <div className="rounded-[2rem] border border-slate-800/90 bg-[linear-gradient(180deg,#0b1728_0%,#0f1d31_42%,#13243b_100%)] p-6 shadow-[0_30px_80px_rgba(2,6,23,0.20)]">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                      Signal Feed
-                    </p>
-
-                    <div className="mt-5 rounded-[1.5rem] border border-dashed border-white/10 bg-slate-950/20 p-6 text-center">
-                      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 text-slate-300 shadow-inner">
-                        ⌁
-                      </div>
-
-                      <h3 className="text-lg font-semibold text-white">
-                        No signals available yet
-                      </h3>
-
-                      <p className="mt-3 text-sm leading-6 text-slate-300">
-                        Pro signals are generated from real monitored route behavior.
-                        Once your tracked routes begin collecting enough pricing data,
-                        this feed will populate automatically.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="rounded-[2rem] border border-slate-200/80 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.07)]">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                      Business Difference
-                    </p>
-
-                    <h3 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
-                      Need the full command layer?
-                    </h3>
-
-                    <p className="mt-4 text-sm leading-7 text-slate-600">
-                      Business goes beyond Pro with deeper forecasting,
-                      enhanced summaries, broader behavioral history, and full
-                      Intelligence Engine™ access.
-                    </p>
-
-                    <div className="mt-6 space-y-3">
-                      <UpgradeRow label="Forecast modeling" value="Business only" />
-                      <UpgradeRow label="Enhanced route summaries" value="Business only" />
-                      <UpgradeRow label="Full Intelligence Engine™" value="Business only" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.section>
+            <ProWatchlistSection
+              loading={loading}
+              watchlist={watchlist}
+              remainingRoutes={remainingRoutes}
+              isLifetimePro={isLifetimePro}
+              fadeUp={fadeUp}
+              onOpenFlightModal={handleOpenFlightModal}
+              onRemoveRoute={(routeId) => {
+                void handleRouteRemoved(routeId)
+              }}
+            />
+
+            <ProSavedFlightsSection
+              savedFlights={savedFlights}
+              fadeUp={fadeUp}
+              onOpenSavedFlightIntelligence={handleOpenSavedFlightIntelligence}
+              onMarkSavedFlightCompleted={(flight) => {
+                void handleMarkSavedFlightCompleted(flight)
+              }}
+              onDeleteSavedFlight={(flight) => {
+                void handleDeleteSavedFlight(flight)
+              }}
+            />
+
+            <ProCapabilityStats fadeUp={fadeUp} />
+
+            <ProGlobalIntelligence loading={loading} />
+
+            <ProIntelligenceWrappedSection
+              wrappedLoading={wrappedLoading}
+              wrappedData={wrappedData}
+              selectedYear={selectedYear}
+              availableWrappedYears={availableWrappedYears}
+              setSelectedYear={setSelectedYear}
+              sortedSegments={sortedSegments}
+              globeAirportNodes={globeAirportNodes}
+              globeRouteArcs={globeRouteArcs}
+              fadeUp={fadeUp}
+              staggerContainer={staggerContainer}
+              staggerItem={staggerItem}
+            />
+
+            <ProStackSection
+              fadeUp={fadeUp}
+              staggerContainer={staggerContainer}
+              staggerItem={staggerItem}
+            />
+
+            <ProMarketView fadeUp={fadeUp} />
           </div>
         </div>
 
@@ -2045,188 +1171,5 @@ export default function ProDashboardPage() {
         />
       </section>
     </>
-  )
-}
-
-function HeroStat({
-  label,
-  value,
-}: {
-  label: string
-  value: string
-}) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white/85 px-4 py-4 text-center shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur-sm">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 whitespace-pre-line">
-        {label}
-      </p>
-      <p className="mt-2 text-2xl font-semibold text-slate-950">{value}</p>
-    </div>
-  )
-}
-
-function InfoCard({
-  label,
-  value,
-  description,
-}: {
-  label: string
-  value: string
-  description: string
-}) {
-  return (
-    <motion.div
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.22 }}
-      className="rounded-2xl border border-slate-200/80 bg-white/90 p-6 shadow-[0_12px_35px_rgba(15,23,42,0.05)]"
-    >
-      <p className="text-sm text-slate-500">{label}</p>
-      <p className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
-        {value}
-      </p>
-      <p className="mt-3 text-sm leading-6 text-slate-600">{description}</p>
-    </motion.div>
-  )
-}
-
-function CompactStat({
-  label,
-  value,
-}: {
-  label: string
-  value: string
-}) {
-  return (
-    <div className="rounded-2xl border border-white/70 bg-white/75 px-4 py-3 shadow-sm backdrop-blur-sm">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-        {label}
-      </p>
-      <p className="mt-1 text-lg font-semibold text-slate-900">{value}</p>
-    </div>
-  )
-}
-
-function Stat({ label, value }: { label: string; value: React.ReactNode }) {
-  const isStringValue = typeof value === "string"
-
-  return (
-    <motion.div
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.22 }}
-      className="rounded-2xl border border-slate-200/80 bg-white/85 p-6 shadow-[0_12px_35px_rgba(15,23,42,0.05)] backdrop-blur"
-    >
-      <p className="text-sm text-slate-500">{label}</p>
-      <p className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-        {isStringValue ? value : <CountUpNumber end={Number(value)} />}
-      </p>
-    </motion.div>
-  )
-}
-
-function MotionCard({ children }: { children: React.ReactNode }) {
-  return (
-    <motion.div
-      whileHover={{ y: -5, boxShadow: "0 20px 50px rgba(15,23,42,0.09)" }}
-      transition={{ duration: 0.22 }}
-      className="group h-full rounded-[1.75rem] border border-slate-200/80 bg-white/90 p-8 shadow-[0_14px_40px_rgba(15,23,42,0.06)] backdrop-blur"
-    >
-      {children}
-    </motion.div>
-  )
-}
-
-function DarkWrappedCard({ children }: { children: React.ReactNode }) {
-  return (
-    <motion.div
-      whileHover={{ y: -5 }}
-      transition={{ duration: 0.22 }}
-      className="group h-full rounded-[1.75rem] border border-slate-800/90 bg-[linear-gradient(180deg,#0b1728_0%,#0f1d31_42%,#13243b_100%)] p-8 shadow-[0_20px_50px_rgba(2,6,23,0.16)]"
-    >
-      {children}
-    </motion.div>
-  )
-}
-
-function ProRouteStat({
-  label,
-  value,
-  subtext,
-}: {
-  label: string
-  value: string
-  subtext: string
-}) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-slate-950/20 p-4">
-      <p className="text-[11px] uppercase tracking-[0.16em] text-slate-400">
-        {label}
-      </p>
-      <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
-      <p className="mt-1 text-xs text-slate-400">{subtext}</p>
-    </div>
-  )
-}
-
-function UpgradeRow({
-  label,
-  value,
-}: {
-  label: string
-  value: string
-}) {
-  return (
-    <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-      <span className="text-sm font-medium text-slate-600">{label}</span>
-      <span className="text-sm font-semibold text-slate-900">{value}</span>
-    </div>
-  )
-}
-
-function CountUpNumber({
-  end,
-  duration = 1400,
-  suffix = "",
-}: {
-  end: number
-  duration?: number
-  suffix?: string
-}) {
-  const ref = useRef<HTMLSpanElement | null>(null)
-  const isInView = useInView(ref, { once: true, margin: "-50px" })
-  const [value, setValue] = useState(0)
-
-  useEffect(() => {
-    if (!isInView) return
-
-    let startTimestamp: number | null = null
-
-    const step = (timestamp: number) => {
-      if (!startTimestamp) startTimestamp = timestamp
-      const progress = Math.min((timestamp - startTimestamp) / duration, 1)
-      const eased = 1 - Math.pow(1 - progress, 3)
-      setValue(Math.round(end * eased))
-
-      if (progress < 1) {
-        window.requestAnimationFrame(step)
-      }
-    }
-
-    window.requestAnimationFrame(step)
-  }, [duration, end, isInView])
-
-  return (
-    <span ref={ref}>
-      {value.toLocaleString()}
-      {suffix}
-    </span>
-  )
-}
-
-function SharePill({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-200 backdrop-blur-sm">
-      <span className="text-slate-400">{label}</span>{" "}
-      <span className="font-medium text-white">{value}</span>
-    </div>
   )
 }
