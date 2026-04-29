@@ -350,7 +350,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
                           </Link>
                         )}
 
-                        {!isChoosePlanPage && (
+                        {!isAdmin && !isChoosePlanPage && (
                           <Link
                             href={dashboardHref}
                             onClick={() => setAccountMenuOpen(false)}
@@ -361,14 +361,16 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
                           </Link>
                         )}
 
-                        <Link
-                          href={ACCOUNT_HREF}
-                          onClick={() => setAccountMenuOpen(false)}
-                          className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
-                            }`}
-                        >
-                          Account
-                        </Link>
+                        {!isAdmin && (
+                          <Link
+                            href={ACCOUNT_HREF}
+                            onClick={() => setAccountMenuOpen(false)}
+                            className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
+                              }`}
+                          >
+                            Account
+                          </Link>
+                        )}
 
                         <div className={`my-1 h-px ${isDark ? 'bg-white/10' : 'bg-slate-100'}`} />
 
