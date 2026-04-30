@@ -4,7 +4,6 @@ import { useEffect } from "react"
 import { notFound } from "next/navigation"
 import DashboardFlightAttendant from "@/components/flight-attendant/DashboardFlightAttendant"
 import RouteSearch from "@/components/dashboard/route-search"
-import BusinessLabSection from "@/components/dashboard/lab/business-lab-section"
 
 export default function BusinessDashboardLabPage() {
   if (process.env.NODE_ENV === "production") {
@@ -54,13 +53,7 @@ export default function BusinessDashboardLabPage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-6 pb-10">
-        <BusinessLabSection
-          eyebrow="Route Monitoring"
-          title="Track a Route"
-          description="Start monitoring one-way, round-trip, or multi-city airfare behavior using Skysirv’s route intelligence system."
-        >
-          <RouteSearch theme="dark" />
-        </BusinessLabSection>
+        <RouteSearch theme="dark" />
       </section>
     </main>
   )
