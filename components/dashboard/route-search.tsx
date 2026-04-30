@@ -1,5 +1,6 @@
 "use client"
 
+import type React from "react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "@/components/ui/Toasts/use-toast"
 import { AirportOption, searchAirports } from "@/lib/airports/major-airports"
@@ -18,8 +19,11 @@ type WatchlistRoute = {
   created_at?: string | null
 }
 
+type RouteSearchTheme = "light" | "dark"
+
 type RouteSearchProps = {
   onRouteAdded?: (route: WatchlistRoute) => void
+  theme?: RouteSearchTheme
 }
 
 type AirportPickerProps = {
@@ -30,6 +34,11 @@ type AirportPickerProps = {
   onQueryChange: (value: string) => void
   onSelect: (airport: AirportOption) => void
   excludeCode?: string | null
+  inputClassName?: string
+  labelClassName?: string
+  dropdownClassName?: string
+  dropdownItemClassName?: string
+  dropdownMetaClassName?: string
 }
 
 type MultiCitySegment = {
@@ -48,6 +57,11 @@ function AirportPicker({
   onQueryChange,
   onSelect,
   excludeCode,
+  inputClassName,
+  labelClassName,
+  dropdownClassName,
+  dropdownItemClassName,
+  dropdownMetaClassName,
 }: AirportPickerProps) {
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -74,7 +88,7 @@ function AirportPicker({
 
   return (
     <div ref={containerRef} className="relative">
-      <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+      <label className={labelClassName ?? "mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500"}>
         {label}
       </label>
 
@@ -92,13 +106,21 @@ function AirportPicker({
           onQueryChange(value)
           setOpen(value.trim().length >= 2)
         }}
-        className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+        className={
+          inputClassName ??
+          "w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+        }
       />
 
       {open && (
-        <div className="absolute z-20 mt-2 max-h-72 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-2 shadow-[0_18px_45px_rgba(15,23,42,0.10)]">
+        <div
+          className={
+            dropdownClassName ??
+            "absolute z-20 mt-2 max-h-72 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-2 shadow-[0_18px_45px_rgba(15,23,42,0.10)]"
+          }
+        >
           {results.length === 0 ? (
-            <div className="px-3 py-3 text-sm text-slate-500">
+            <div className={dropdownMetaClassName ?? "px-3 py-3 text-sm text-slate-500"}>
               No matching airports found.
             </div>
           ) : (
@@ -110,18 +132,33 @@ function AirportPicker({
                   onSelect(airport)
                   setOpen(false)
                 }}
-                className="flex w-full items-start justify-between rounded-lg px-3 py-3 text-left transition hover:bg-slate-50"
+                className={
+                  dropdownItemClassName ??
+                  "flex w-full items-start justify-between rounded-lg px-3 py-3 text-left transition hover:bg-slate-50"
+                }
               >
                 <div>
-                  <div className="text-sm font-semibold text-slate-900">
+                  <div
+                    className={
+                      dropdownMetaClassName
+                        ? "text-sm font-semibold text-white"
+                        : "text-sm font-semibold text-slate-900"
+                    }
+                  >
                     {airport.city} — {airport.code}
                   </div>
-                  <div className="mt-1 text-xs text-slate-500">
+                  <div className={dropdownMetaClassName ?? "mt-1 text-xs text-slate-500"}>
                     {airport.name}
                   </div>
                 </div>
 
-                <div className="ml-4 text-[11px] uppercase tracking-[0.14em] text-slate-400">
+                <div
+                  className={
+                    dropdownMetaClassName
+                      ? "ml-4 text-[11px] uppercase tracking-[0.14em] text-slate-500"
+                      : "ml-4 text-[11px] uppercase tracking-[0.14em] text-slate-400"
+                  }
+                >
                   {airport.country}
                 </div>
               </button>
@@ -161,7 +198,115 @@ function parseStoredDate(value: string): Date | undefined {
   return new Date(year, month - 1, day)
 }
 
-export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
+export default function RouteSearch({
+  onRouteAdded,
+  theme = "light",
+}: RouteSearchProps) {
+  const isDark = theme === "dark"
+
+  const cardClassName = isDark
+    ? "rounded-2xl border border-white/10 bg-slate-950/50 p-6 shadow-md transition-shadow hover:shadow-lg"
+    : "rounded-2xl border border-slate-200 bg-white p-6 shadow-md transition-shadow hover:shadow-lg"
+
+  const titleClassName = isDark
+    ? "text-lg font-semibold text-white"
+    : "text-lg font-semibold text-slate-900"
+
+  const descriptionClassName = isDark
+    ? "mt-1 text-sm text-slate-400"
+    : "mt-1 text-sm text-slate-500"
+
+  const inactiveTabClassName = isDark
+    ? "bg-white/[0.06] text-slate-300 hover:bg-white/[0.1]"
+    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+
+  const activeTabClassName = isDark
+    ? "bg-white text-slate-950"
+    : "bg-slate-900 text-white"
+
+  const labelClassName = isDark
+    ? "mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500"
+    : "mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500"
+
+  const inputClassName = isDark
+    ? "w-full rounded-lg border border-white/10 bg-white/[0.06] px-4 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-300/20"
+    : "w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+
+  const readOnlyInputClassName = isDark
+    ? "w-full cursor-pointer rounded-lg border border-white/10 bg-white/[0.06] px-4 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-300/20"
+    : "w-full cursor-pointer rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+
+  const dropdownClassName = isDark
+    ? "absolute z-20 mt-2 max-h-72 w-full overflow-y-auto rounded-xl border border-white/10 bg-slate-950 p-2 shadow-[0_18px_45px_rgba(0,0,0,0.35)]"
+    : undefined
+
+  const dropdownItemClassName = isDark
+    ? "flex w-full items-start justify-between rounded-lg px-3 py-3 text-left transition hover:bg-white/[0.06]"
+    : undefined
+
+  const dropdownMetaClassName = isDark
+    ? "mt-1 text-xs text-slate-400"
+    : undefined
+
+  const singleDateCalendarClassName = isDark
+    ? "absolute z-30 mt-2 rounded-2xl border border-white/10 bg-slate-950 p-4 text-slate-200 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm"
+    : "absolute z-30 mt-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)] backdrop-blur-sm"
+
+  const rangeCalendarPanelClassName = isDark
+    ? "rounded-2xl border border-white/10 bg-slate-950 p-4 text-slate-200 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm"
+    : "rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)] backdrop-blur-sm"
+
+  const calendarTitleClassName = isDark
+    ? "text-sm font-semibold text-white"
+    : "text-sm font-semibold text-slate-900"
+
+  const calendarStepClassName = isDark
+    ? "text-xs font-semibold uppercase tracking-[0.14em] text-slate-500"
+    : "text-xs font-semibold uppercase tracking-[0.14em] text-slate-500"
+
+  const multiCityBuilderClassName = isDark
+    ? "mt-6 rounded-2xl border border-dashed border-white/10 bg-white/[0.04] p-5"
+    : "mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5"
+
+  const multiCityTitleClassName = isDark
+    ? "text-sm font-semibold text-white"
+    : "text-sm font-semibold text-slate-900"
+
+  const multiCityDescriptionClassName = isDark
+    ? "mt-2 text-sm text-slate-400"
+    : "mt-2 text-sm text-slate-600"
+
+  const addLegButtonClassName = isDark
+    ? "text-sm font-semibold text-cyan-200 hover:text-white"
+    : "text-sm font-semibold text-slate-700 hover:text-slate-900"
+
+  const calendarDayPickerClassNames = {
+    day_selected: isDark
+      ? "bg-white text-slate-950 hover:bg-slate-200"
+      : "bg-slate-900 text-white hover:bg-slate-800",
+    day_today: isDark
+      ? "border border-cyan-300/40"
+      : "border border-slate-400",
+    day: isDark
+      ? "rounded-md text-slate-200 hover:bg-white/[0.08] transition"
+      : "rounded-md hover:bg-slate-100 transition",
+    head_cell: isDark
+      ? "text-xs font-semibold text-slate-500"
+      : "text-xs font-semibold text-slate-500",
+    caption: isDark
+      ? "text-sm font-semibold text-white"
+      : "text-sm font-semibold text-slate-900",
+    caption_label: isDark
+      ? "text-sm font-semibold text-white"
+      : "text-sm font-semibold text-slate-900",
+    nav_button: isDark
+      ? "text-slate-400 hover:text-white"
+      : "text-slate-600 hover:text-slate-900",
+    table: "w-full border-collapse space-y-1",
+    row: "flex w-full mt-1",
+    cell: "text-center text-sm p-0 relative",
+  }
+
   const [tripType, setTripType] = useState<"oneway" | "roundtrip" | "multicity">("oneway")
 
   const [originQuery, setOriginQuery] = useState("")
@@ -503,10 +648,10 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md transition-shadow hover:shadow-lg">
-      <h2 className="text-lg font-semibold text-slate-900">Track a Route</h2>
+    <div className={cardClassName}>
+      <h2 className={titleClassName}>Track a Route</h2>
 
-      <p className="mt-1 text-sm text-slate-500">
+      <p className={descriptionClassName}>
         Search major airports worldwide and start monitoring airfare intelligence.
       </p>
 
@@ -517,9 +662,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
             resetMultiCitySegments()
             setTripType("oneway")
           }}
-          className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "oneway"
-            ? "bg-slate-900 text-white"
-            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+          className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "oneway" ? activeTabClassName : inactiveTabClassName
             }`}
         >
           One-way
@@ -531,9 +674,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
             resetMultiCitySegments()
             setTripType("roundtrip")
           }}
-          className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "roundtrip"
-            ? "bg-slate-900 text-white"
-            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+          className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "roundtrip" ? activeTabClassName : inactiveTabClassName
             }`}
         >
           Round-trip
@@ -542,9 +683,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
         <button
           type="button"
           onClick={() => setTripType("multicity")}
-          className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "multicity"
-            ? "bg-slate-900 text-white"
-            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+          className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "multicity" ? activeTabClassName : inactiveTabClassName
             }`}
         >
           Multi-city
@@ -552,12 +691,12 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
       </div>
 
       {tripType === "multicity" ? (
-        <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5">
-          <div className="text-sm font-semibold text-slate-900">
+        <div className={multiCityBuilderClassName}>
+          <div className={multiCityTitleClassName}>
             Multi-city route builder
           </div>
 
-          <p className="mt-2 text-sm text-slate-600">
+          <p className={multiCityDescriptionClassName}>
             Build a multi-city journey with stopovers along the way. Track pricing across every leg — from departure to final destination.
           </p>
 
@@ -581,6 +720,11 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                     updated[index].originQuery = `${airport.city} (${airport.code})`
                     setMultiCitySegments(updated)
                   }}
+                  inputClassName={inputClassName}
+                  labelClassName={labelClassName}
+                  dropdownClassName={dropdownClassName}
+                  dropdownItemClassName={dropdownItemClassName}
+                  dropdownMetaClassName={dropdownMetaClassName}
                 />
 
                 <AirportPicker
@@ -600,6 +744,11 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                     updated[index].destinationQuery = `${airport.city} (${airport.code})`
                     setMultiCitySegments(updated)
                   }}
+                  inputClassName={inputClassName}
+                  labelClassName={labelClassName}
+                  dropdownClassName={dropdownClassName}
+                  dropdownItemClassName={dropdownItemClassName}
+                  dropdownMetaClassName={dropdownMetaClassName}
                   excludeCode={segment.origin?.code ?? null}
                 />
 
@@ -616,13 +765,13 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                     onClick={() =>
                       setMultiCityCalendarIndex((prev) => (prev === index ? null : index))
                     }
-                    className="w-full cursor-pointer rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+                    className={readOnlyInputClassName}
                   />
 
                   {multiCityCalendarIndex === index && (
                     <div
                       ref={multiCityCalendarRef}
-                      className="absolute z-30 mt-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)]"
+                      className={singleDateCalendarClassName}
                     >
                       <DayPicker
                         mode="single"
@@ -630,14 +779,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                         onMonthChange={setMultiCityCalendarMonth}
                         selected={parseStoredDate(segment.date)}
                         className="text-sm"
-                        classNames={{
-                          day_selected: "bg-slate-900 text-white hover:bg-slate-800",
-                          day_today: "border border-slate-400",
-                          day: "rounded-md hover:bg-slate-100 transition",
-                          head_cell: "text-xs font-semibold text-slate-500",
-                          caption: "text-sm font-semibold text-slate-900",
-                          nav_button: "text-slate-600 hover:text-slate-900",
-                        }}
+                        classNames={calendarDayPickerClassNames}
                         onSelect={(date) => {
                           if (!date) return
                           const iso = formatDateForStorage(date)
@@ -669,7 +811,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                   },
                 ])
               }
-              className="text-sm font-semibold text-slate-700 hover:text-slate-900"
+              className={addLegButtonClassName}
             >
               + Add another leg
             </button>
@@ -694,6 +836,11 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                 setSelectedOrigin(airport)
                 setOriginQuery(`${airport.city} (${airport.code})`)
               }}
+              inputClassName={inputClassName}
+              labelClassName={labelClassName}
+              dropdownClassName={dropdownClassName}
+              dropdownItemClassName={dropdownItemClassName}
+              dropdownMetaClassName={dropdownMetaClassName}
               excludeCode={selectedDestination?.code ?? null}
             />
 
@@ -710,6 +857,11 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                 setSelectedDestination(airport)
                 setDestinationQuery(`${airport.city} (${airport.code})`)
               }}
+              inputClassName={inputClassName}
+              labelClassName={labelClassName}
+              dropdownClassName={dropdownClassName}
+              dropdownItemClassName={dropdownItemClassName}
+              dropdownMetaClassName={dropdownMetaClassName}
               excludeCode={selectedOrigin?.code ?? null}
             />
 
@@ -735,13 +887,13 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
 
                   setShowDepartureCalendar((prev) => !prev)
                 }}
-                className="w-full cursor-pointer rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+                className={readOnlyInputClassName}
               />
 
               {showDepartureCalendar && (
                 <div
                   ref={departureCalendarRef}
-                  className="absolute z-30 mt-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)] backdrop-blur-sm"
+                  className={singleDateCalendarClassName}
                 >
                   <DayPicker
                     mode="single"
@@ -749,17 +901,7 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                     onMonthChange={setDepartureCalendarMonth}
                     selected={parseStoredDate(departureDate)}
                     className="text-sm"
-                    classNames={{
-                      day_selected: "bg-slate-900 text-white hover:bg-slate-800",
-                      day_today: "border border-slate-400",
-                      day: "rounded-md hover:bg-slate-100 transition",
-                      head_cell: "text-xs font-semibold text-slate-500",
-                      caption: "text-sm font-semibold text-slate-900",
-                      nav_button: "text-slate-600 hover:text-slate-900",
-                      table: "w-full border-collapse space-y-1",
-                      row: "flex w-full mt-1",
-                      cell: "text-center text-sm p-0 relative",
-                    }}
+                    classNames={calendarDayPickerClassNames}
                     onSelect={(date) => {
                       if (!date) return
                       const iso = formatDateForStorage(date)
@@ -794,10 +936,13 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                     )
                     setShowRoundtripCalendar(true)
                   }}
-                  className={`w-full cursor-pointer rounded-lg border px-4 py-2 text-sm focus:outline-none focus:ring-2 ${showRoundtripCalendar && roundtripSelectionPhase === "return"
-                    ? "border-slate-900 ring-2 ring-slate-300"
-                    : "border-slate-200 focus:ring-slate-300"
-                    }`}
+                  className={
+                    showRoundtripCalendar && roundtripSelectionPhase === "return"
+                      ? isDark
+                        ? `${readOnlyInputClassName} border-cyan-300/40 ring-2 ring-cyan-300/20`
+                        : "w-full cursor-pointer rounded-lg border border-slate-900 px-4 py-2 text-sm outline-none ring-2 ring-slate-300"
+                      : readOnlyInputClassName
+                  }
                 />
               </div>
             )}
@@ -808,21 +953,29 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
               ref={roundtripCalendarRef}
               className="absolute right-0 top-full z-40 mt-3"
             >
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)] backdrop-blur-sm">
+              <div className={rangeCalendarPanelClassName}>
                 <div className="mb-3 flex items-center justify-between">
-                  <div className="text-sm font-semibold text-slate-900">
+                  <div className={calendarTitleClassName}>
                     {roundtripSelectionPhase === "departure"
                       ? "Select departure date"
                       : "Select return date"}
                   </div>
 
-                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  <div className={calendarStepClassName}>
                     {roundtripSelectionPhase === "departure" ? "Step 1 of 2" : "Step 2 of 2"}
                   </div>
                 </div>
 
                 <DayPicker
                   mode="range"
+                  style={
+                    isDark
+                      ? ({
+                        "--rdp-accent-color": "#2563eb",
+                        "--rdp-accent-background-color": "rgba(255, 255, 255, 0.07)",
+                      } as React.CSSProperties)
+                      : undefined
+                  }
                   month={
                     roundtripCalendarMonth ??
                     parseStoredDate(departureDate) ??
@@ -852,21 +1005,21 @@ export default function RouteSearch({ onRouteAdded }: RouteSearchProps) {
                   }
                   className="text-sm"
                   classNames={{
+                    ...calendarDayPickerClassNames,
                     months: "flex flex-col gap-4 sm:flex-row sm:gap-8",
                     month: "space-y-4",
-                    caption_label: "text-sm font-semibold text-slate-900",
-                    day_selected: "bg-slate-900 text-white hover:bg-slate-800",
-                    day_today: "border border-slate-400",
-                    day: "rounded-md hover:bg-slate-100 transition",
-                    head_cell: "text-xs font-semibold text-slate-500",
-                    caption: "text-sm font-semibold text-slate-900",
-                    nav_button: "text-slate-600 hover:text-slate-900",
-                    table: "w-full border-collapse space-y-1",
-                    row: "flex w-full mt-1",
-                    cell: "text-center text-sm p-0 relative",
-                    day_range_start: "bg-slate-900 text-white rounded-md",
-                    day_range_end: "bg-slate-900 text-white rounded-md",
-                    day_range_middle: "bg-slate-100 text-slate-900",
+                    day_selected: isDark
+                      ? "!bg-transparent !text-slate-200"
+                      : "bg-slate-900 text-white hover:bg-slate-800",
+                    day_range_start: isDark
+                      ? "!bg-blue-600 !text-white rounded-md"
+                      : "bg-slate-900 text-white rounded-md",
+                    day_range_end: isDark
+                      ? "!bg-blue-600 !text-white rounded-md"
+                      : "bg-slate-900 text-white rounded-md",
+                    day_range_middle: isDark
+                      ? "!bg-white/[0.07] !text-slate-200"
+                      : "bg-slate-100 text-slate-900",
                   }}
                   onSelect={(range, selectedDay) => {
                     if (!selectedDay) return
