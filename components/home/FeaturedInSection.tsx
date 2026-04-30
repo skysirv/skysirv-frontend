@@ -1,14 +1,14 @@
 "use client"
 
 const featuredInItems = [
-  "TechCrunch",
-  "Forbes",
-  "The Points Guy",
-  "Condé Nast Traveler",
-  "Travel + Leisure",
-  "PhocusWire",
-  "Skift",
-  "Business Insider",
+  "Skysirv",
+  "Skysirv",
+  "Skysirv",
+  "Skysirv",
+  "Skysirv",
+  "Skysirv",
+  "Skysirv",
+  "Skysirv",
 ]
 
 export default function FeaturedInSection() {

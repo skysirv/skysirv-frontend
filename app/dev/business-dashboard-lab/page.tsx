@@ -4,6 +4,8 @@ import { useEffect } from "react"
 import { notFound } from "next/navigation"
 import DashboardFlightAttendant from "@/components/flight-attendant/DashboardFlightAttendant"
 import RouteSearch from "@/components/dashboard/route-search"
+import BusinessWatchlistIntelligenceLab from "@/components/dashboard/lab/business-watchlist-intelligence-lab"
+import BusinessSavedRoutesLab from "@/components/dashboard/lab/business-saved-routes-lab"
 
 export default function BusinessDashboardLabPage() {
   if (process.env.NODE_ENV === "production") {
@@ -55,6 +57,10 @@ export default function BusinessDashboardLabPage() {
       <section className="mx-auto max-w-7xl px-6 pb-10">
         <RouteSearch theme="dark" />
       </section>
+
+      <BusinessWatchlistIntelligenceLab />
+
+      <BusinessSavedRoutesLab />
     </main>
   )
 }
