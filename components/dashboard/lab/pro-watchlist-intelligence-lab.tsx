@@ -4,49 +4,44 @@ import { useState } from "react"
 
 const monitoredRoutes = [
   {
-    route: "LAX → SIN",
-    status: "Live Data",
-    airports: "Los Angeles Intl Airport → Singapore Changi Airport",
-    date: "Departure · May 26, 2026",
-    routeAverage: "$989",
-    tracking: "Active",
-    history: "Active",
-    signal: "Volatile",
-    recommendedFlights: [
-      { airline: "EVA Air", price: "$868" },
-      { airline: "Air Canada", price: "$1,022" },
-      { airline: "Asiana Airlines", price: "$1,092" },
-      { airline: "JX", price: "$918" },
-    ],
-  },
-  {
-    route: "MIA → LAX",
-    status: "Live Data",
-    airports: "Miami Intl Airport → Los Angeles Intl Airport",
-    date: "Departure · May 20, 2026",
-    routeAverage: "$377",
-    tracking: "Active",
-    history: "Active",
-    signal: "Volatile",
-    recommendedFlights: [
-      { airline: "American Airlines", price: "$387" },
-      { airline: "Spirit Airlines", price: "$229" },
-    ],
-  },
-  {
     route: "BOS → MIA",
-    status: "Building",
+    status: "Live Data",
     airports: "Boston Logan Intl Airport → Miami Intl Airport",
-    date: "Departure · May 8, 2026",
-    routeAverage: "$262",
+    date: "Departure · Apr 30, 2026",
+    routeAverage: "$224",
+    tracking: "Active",
+    history: "Active",
+    signal: "Good Deal",
+    recommendedFlights: [{ airline: "American Airlines", price: "$186" }],
+  },
+  {
+    route: "BOS → PTY",
+    status: "Live Data",
+    airports: "Boston Logan Intl Airport → Tocumen Intl Airport",
+    date: "Departure · May 12, 2026",
+    routeAverage: "$438",
+    tracking: "Active",
+    history: "Active",
+    signal: "Watch",
+    recommendedFlights: [
+      { airline: "Copa Airlines", price: "$412" },
+      { airline: "Avianca", price: "$447" },
+    ],
+  },
+  {
+    route: "MIA → VVI",
+    status: "Building",
+    airports: "Miami Intl Airport → Viru Viru Intl Airport",
+    date: "Departure · Jun 2, 2026",
+    routeAverage: "$506",
     tracking: "Active",
     history: "Active",
     signal: "Stable",
-    recommendedFlights: [{ airline: "American Airlines", price: "$258" }],
+    recommendedFlights: [{ airline: "BoA", price: "$529" }],
   },
 ]
 
-export default function BusinessWatchlistIntelligenceLab() {
+export default function ProWatchlistIntelligenceLab() {
   const [openRoute, setOpenRoute] = useState<string | null>(null)
 
   return (

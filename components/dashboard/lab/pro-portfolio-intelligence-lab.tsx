@@ -5,57 +5,57 @@ import { useState } from "react"
 const decisionStack = [
   {
     label: "Best opportunity",
-    value: "LAX → SIN",
-    detail: "EVA Air · $868 · 12% below route average",
+    value: "BOS → MIA",
+    detail: "American Airlines · $186 · below recent route average",
     status: "Review",
   },
   {
     label: "Saved flight change",
-    value: "MIA → LAX",
-    detail: "AA 1418 is now $10 below the saved price",
+    value: "MIA → VVI",
+    detail: "OB 767 is now $23 below the saved price",
     status: "Improved",
   },
   {
     label: "Routes needing review",
-    value: "3 routes",
-    detail: "2 volatile · 1 below average · 1 limited history",
+    value: "2 routes",
+    detail: "1 active · 1 below average · 1 building history",
     status: "Active",
   },
   {
     label: "Monitoring coverage",
     value: "3 monitored",
-    detail: "3 saved flights · 2 with active history",
+    detail: "3 saved flights · Pro limit 25 routes",
     status: "Healthy",
   },
 ]
 
 const opportunities = [
   {
-    route: "LAX → SIN",
+    route: "BOS → MIA",
     source: "Watchlist",
     title: "Strongest current booking opportunity",
     detail:
-      "EVA Air is priced at $868, roughly 12% below the tracked route average.",
+      "American Airlines is priced at $186, below the recent route average for this monitored trip.",
     action: "Open route intelligence",
   },
   {
-    route: "MIA → LAX",
+    route: "MIA → VVI",
     source: "Saved Flight",
     title: "Saved fare improved",
-    detail: "AA 1418 is now $10 below the price saved for this flight.",
+    detail: "OB 767 is now below the price saved for this flight.",
     action: "Open saved flight",
   },
   {
-    route: "JFK → LHR",
+    route: "BOS → PTY",
     source: "Watchlist",
-    title: "Volatility detected",
+    title: "Active movement detected",
     detail:
-      "This route is showing wider fare movement and may need closer timing review.",
+      "This route is showing fare movement and may benefit from continued monitoring before booking.",
     action: "Review route",
   },
 ]
 
-export default function BusinessPortfolioIntelligenceLab() {
+export default function ProPortfolioIntelligenceLab() {
   const [isOpportunitiesOpen, setIsOpportunitiesOpen] = useState(false)
   const [isDigestOpen, setIsDigestOpen] = useState(false)
 
@@ -98,8 +98,8 @@ export default function BusinessPortfolioIntelligenceLab() {
                   </p>
 
                   <h3 className="mt-2 text-lg font-semibold tracking-tight text-slate-950">
-                    Lucy found 2 items worth reviewing before your next booking
-                    decision.
+                    Lucy found 2 items worth reviewing before your next
+                    booking decision.
                   </h3>
                 </div>
 
@@ -109,8 +109,8 @@ export default function BusinessPortfolioIntelligenceLab() {
               </div>
 
               <p className="mt-3 text-sm leading-6 text-slate-600">
-                LAX → SIN is currently the strongest route opportunity, while
-                one saved MIA → LAX flight has improved since it was saved.
+                BOS → MIA is currently the strongest route opportunity, while
+                one saved MIA → VVI flight has improved since it was saved.
               </p>
 
               <div className="mt-4 rounded-2xl border border-slate-200 bg-white px-4 py-3">
@@ -119,12 +119,13 @@ export default function BusinessPortfolioIntelligenceLab() {
                 </p>
 
                 <p className="mt-1 text-sm font-semibold text-slate-950">
-                  Review LAX → SIN before prices move again.
+                  Review BOS → MIA before prices move again.
                 </p>
 
                 <p className="mt-1 text-sm leading-6 text-slate-600">
-                  EVA Air is currently below the tracked route average, while
-                  other available options are priced higher.
+                  American Airlines is currently below the tracked route
+                  average, while this route continues building Pro-level fare
+                  history.
                 </p>
               </div>
 
@@ -206,8 +207,8 @@ export default function BusinessPortfolioIntelligenceLab() {
                 </h3>
 
                 <p className="mt-2 max-w-xl text-sm leading-6 text-slate-600">
-                  Lucy ranks route and saved-flight opportunities by urgency,
-                  price movement, and booking relevance.
+                  Lucy ranks route and saved-flight opportunities by
+                  urgency, price movement, and booking relevance.
                 </p>
               </div>
 
@@ -313,22 +314,20 @@ export default function BusinessPortfolioIntelligenceLab() {
 
             <div className="mt-6 space-y-4 text-sm leading-6 text-slate-700">
               <p>
-                Lucy is prioritizing LAX → SIN because EVA Air is currently
-                priced below the tracked route average while other available
-                options remain materially higher. That creates the strongest
-                booking opportunity in the current monitored set.
+                Lucy is prioritizing BOS → MIA because American Airlines is
+                currently pricing below the tracked route average while the
+                route continues building useful fare history.
               </p>
 
               <p>
-                MIA → LAX is also worth reviewing because one saved American
-                Airlines flight has improved since it was saved. The route is
-                still volatile, so the fare may not remain stable for long.
+                MIA → VVI is also worth reviewing because one saved BoA flight
+                has improved since it was saved. The route is currently stable,
+                but the saved fare movement is favorable.
               </p>
 
               <p>
-                BOS → MIA is holding close to its tracked average and does not
-                require urgent action right now. Skysirv will continue watching
-                for stronger movement before elevating it.
+                BOS → PTY is showing active fare movement and should remain
+                under watch before making a booking decision.
               </p>
             </div>
 

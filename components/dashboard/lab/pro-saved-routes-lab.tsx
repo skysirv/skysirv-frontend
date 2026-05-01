@@ -4,38 +4,38 @@ import { useState } from "react"
 
 const savedRoutes = [
   {
-    route: "LAX → SIN",
-    airline: "EVA Air",
-    flight: "BR 0023",
-    date: "May 26, 2026",
-    savedPrice: "$868",
-    latestPrice: "$868",
-    status: "Active",
-    signal: "Volatile",
-  },
-  {
-    route: "MIA → LAX",
+    route: "BOS → MIA",
     airline: "American Airlines",
-    flight: "AA 1418",
-    date: "May 20, 2026",
-    savedPrice: "$387",
-    latestPrice: "$377",
+    flight: "AA 1421",
+    date: "Apr 30, 2026",
+    savedPrice: "$186",
+    latestPrice: "$192",
     status: "Active",
-    signal: "Volatile",
+    signal: "Good Deal",
   },
   {
-    route: "JFK → LHR",
-    airline: "British Airways",
-    flight: "BA 112",
-    date: "June 14, 2026",
-    savedPrice: "$621",
-    latestPrice: "$648",
-    status: "Watching",
+    route: "BOS → PTY",
+    airline: "Copa Airlines",
+    flight: "CM 704",
+    date: "May 12, 2026",
+    savedPrice: "$412",
+    latestPrice: "$438",
+    status: "Active",
     signal: "Watching",
+  },
+  {
+    route: "MIA → VVI",
+    airline: "BoA",
+    flight: "OB 767",
+    date: "Jun 2, 2026",
+    savedPrice: "$529",
+    latestPrice: "$506",
+    status: "Watching",
+    signal: "Stable",
   },
 ]
 
-export default function BusinessSavedRoutesLab() {
+export default function ProSavedRoutesLab() {
   const [openRoute, setOpenRoute] = useState<string | null>(null)
 
   return (
@@ -54,7 +54,10 @@ export default function BusinessSavedRoutesLab() {
           </div>
 
           <div className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-4 py-2">
-            <span className="text-sm font-semibold text-slate-950">3</span>
+            <span className="text-sm font-semibold text-slate-950">
+              {savedRoutes.length}
+            </span>
+
             <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
               Saved
             </span>
@@ -64,6 +67,10 @@ export default function BusinessSavedRoutesLab() {
         <div className="mt-5 max-h-[430px] space-y-2 overflow-y-auto pr-2 [scrollbar-color:rgba(148,163,184,0.45)_rgba(241,245,249,0.9)] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-slate-100 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb:hover]:bg-slate-400">
           {savedRoutes.map((route) => {
             const isOpen = openRoute === route.flight
+
+            const chevronClasses = isOpen
+              ? "rotate-180 border-cyan-200 bg-cyan-50 text-cyan-700"
+              : "hover:border-slate-300 hover:text-slate-700"
 
             return (
               <article
@@ -116,10 +123,7 @@ export default function BusinessSavedRoutesLab() {
                   </div>
 
                   <span
-                    className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition ${isOpen
-                      ? "rotate-180 border-cyan-200 bg-cyan-50 text-cyan-700"
-                      : "hover:border-slate-300 hover:text-slate-700"
-                      }`}
+                    className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition ${chevronClasses}`}
                   >
                     <svg
                       viewBox="0 0 24 24"
@@ -138,13 +142,14 @@ export default function BusinessSavedRoutesLab() {
                   </span>
                 </button>
 
-                {isOpen && (
+                {isOpen ? (
                   <div className="border-t border-slate-200 px-4 pb-4 pt-3">
                     <div className="grid gap-3 sm:grid-cols-4 lg:grid-cols-[1fr_1fr_1fr_1fr_auto]">
                       <div>
                         <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                           Saved price
                         </p>
+
                         <p className="mt-1 text-sm font-semibold text-slate-950">
                           {route.savedPrice}
                         </p>
@@ -154,6 +159,7 @@ export default function BusinessSavedRoutesLab() {
                         <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                           Latest price
                         </p>
+
                         <p className="mt-1 text-sm font-semibold text-slate-950">
                           {route.latestPrice}
                         </p>
@@ -163,6 +169,7 @@ export default function BusinessSavedRoutesLab() {
                         <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                           Status
                         </p>
+
                         <p className="mt-1 text-sm font-semibold text-slate-950">
                           {route.status}
                         </p>
@@ -172,6 +179,7 @@ export default function BusinessSavedRoutesLab() {
                         <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                           Signal
                         </p>
+
                         <p className="mt-1 text-sm font-semibold text-slate-950">
                           {route.signal}
                         </p>
@@ -201,7 +209,7 @@ export default function BusinessSavedRoutesLab() {
                       </div>
                     </div>
                   </div>
-                )}
+                ) : null}
               </article>
             )
           })}
