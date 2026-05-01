@@ -6,6 +6,7 @@ import DashboardFlightAttendant from "@/components/flight-attendant/DashboardFli
 import RouteSearch from "@/components/dashboard/route-search"
 import BusinessWatchlistIntelligenceLab from "@/components/dashboard/lab/business-watchlist-intelligence-lab"
 import BusinessSavedRoutesLab from "@/components/dashboard/lab/business-saved-routes-lab"
+import BusinessPortfolioIntelligenceLab from "@/components/dashboard/lab/business-portfolio-intelligence-lab"
 
 export default function BusinessDashboardLabPage() {
   if (process.env.NODE_ENV === "production") {
@@ -61,6 +62,8 @@ export default function BusinessDashboardLabPage() {
       <BusinessWatchlistIntelligenceLab />
 
       <BusinessSavedRoutesLab />
+
+      <BusinessPortfolioIntelligenceLab />
     </main>
   )
 }
