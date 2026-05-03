@@ -61,13 +61,42 @@ export default function BusinessDashboardLabPage() {
             <RouteSearch theme="light" />
           </div>
 
-          <BusinessWatchlistIntelligenceLab />
+          <BusinessWatchlistIntelligenceLab watchlist={[]} />
 
-          <BusinessSavedRoutesLab />
+          <BusinessSavedRoutesLab savedFlights={[]} />
 
-          <BusinessPortfolioIntelligenceLab />
+          <BusinessPortfolioIntelligenceLab
+            watchlist={[]}
+            savedFlights={[]}
+          />
 
-          <BusinessIntelligenceWrappedLab />
+          <BusinessIntelligenceWrappedLab
+            wrappedLoading={false}
+            wrappedData={{
+              flights: 0,
+              countries: 0,
+              distance: "0 km",
+              skyscore: 0,
+              savings: 0,
+              avgSavings: 0,
+              beatMarket: 0,
+              routesMonitored: 0,
+              alertsTriggered: 0,
+              alertsWon: 0,
+              travelerIdentity: "Precision Booker",
+              bestRoute: {
+                route: "—",
+                saved: 0,
+                beforeSpike: "—",
+                timingGrade: "—",
+              },
+            }}
+            selectedYear={2026}
+            availableWrappedYears={[2026]}
+            setSelectedYear={() => { }}
+            globeAirportNodes={[]}
+            globeRouteArcs={[]}
+          />
         </div>
       </div>
     </section>

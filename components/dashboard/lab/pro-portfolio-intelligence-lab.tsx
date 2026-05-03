@@ -1,63 +1,65 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 
-const decisionStack = [
-  {
-    label: "Best opportunity",
-    value: "BOS → MIA",
-    detail: "American Airlines · $186 · below recent route average",
-    status: "Review",
-  },
-  {
-    label: "Saved flight change",
-    value: "MIA → VVI",
-    detail: "OB 767 is now $23 below the saved price",
-    status: "Improved",
-  },
-  {
-    label: "Routes needing review",
-    value: "2 routes",
-    detail: "1 active · 1 below average · 1 building history",
-    status: "Active",
-  },
-  {
-    label: "Monitoring coverage",
-    value: "3 monitored",
-    detail: "3 saved flights · Pro limit 25 routes",
-    status: "Healthy",
-  },
-]
+import type { SavedFlightCardData } from "@/components/dashboard/saved-flight-card"
+import type { ProWatchlistRouteLabData } from "@/components/dashboard/lab/pro-watchlist-intelligence-lab"
 
-const opportunities = [
-  {
-    route: "BOS → MIA",
-    source: "Watchlist",
-    title: "Strongest current booking opportunity",
-    detail:
-      "American Airlines is priced at $186, below the recent route average for this monitored trip.",
-    action: "Open route intelligence",
-  },
-  {
-    route: "MIA → VVI",
-    source: "Saved Flight",
-    title: "Saved fare improved",
-    detail: "OB 767 is now below the price saved for this flight.",
-    action: "Open saved flight",
-  },
-  {
-    route: "BOS → PTY",
-    source: "Watchlist",
-    title: "Active movement detected",
-    detail:
-      "This route is showing fare movement and may benefit from continued monitoring before booking.",
-    action: "Review route",
-  },
-]
+type RecommendedFlight = {
+  airline?: string | null
+  flightNumber?: string | null
+  price?: number | null
+  currency?: string | null
+  capturedAt?: string | null
+}
 
-export default function ProPortfolioIntelligenceLab() {
+type ProPortfolioSavedFlightData = SavedFlightCardData & {
+  completed_at?: string | null
+}
+
+type ProPortfolioIntelligenceLabProps = {
+  watchlist: ProWatchlistRouteLabData[]
+  savedFlights: ProPortfolioSavedFlightData[]
+  remainingRoutes: number
+  onOpenFlightModal?: (
+    route: ProWatchlistRouteLabData,
+    flight?: RecommendedFlight | null
+  ) => void
+  onOpenSavedFlightIntelligence?: (flight: ProPortfolioSavedFlightData) => void
+}
+
+type DecisionStackItem = {
+  label: string
+  value: string
+  detail: string
+  status: string
+}
+
+type OpportunityItem = {
+  id: string
+  route: string
+  source: "Watchlist" | "Saved Flight"
+  title: string
+  detail: string
+  action: string
+  routeData?: ProWatchlistRouteLabData
+  flightData?: ProPortfolioSavedFlightData
+  recommendedFlight?: RecommendedFlight | null
+}
+
+export default function ProPortfolioIntelligenceLab({
+  watchlist,
+  savedFlights,
+  remainingRoutes,
+  onOpenFlightModal,
+  onOpenSavedFlightIntelligence,
+}: ProPortfolioIntelligenceLabProps) {
   const [isOpportunitiesOpen, setIsOpportunitiesOpen] = useState(false)
   const [isDigestOpen, setIsDigestOpen] = useState(false)
+
+  const intelligence = useMemo(() => {
+    return buildPortfolioIntelligence(watchlist, savedFlights, remainingRoutes)
+  }, [watchlist, savedFlights, remainingRoutes])
 
   return (
     <>
@@ -98,19 +100,17 @@ export default function ProPortfolioIntelligenceLab() {
                   </p>
 
                   <h3 className="mt-2 text-lg font-semibold tracking-tight text-slate-950">
-                    Lucy found 2 items worth reviewing before your next
-                    booking decision.
+                    {intelligence.briefTitle}
                   </h3>
                 </div>
 
                 <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-cyan-200 bg-cyan-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-700">
-                  Building Signal
+                  {intelligence.briefStatus}
                 </span>
               </div>
 
               <p className="mt-3 text-sm leading-6 text-slate-600">
-                BOS → MIA is currently the strongest route opportunity, while
-                one saved MIA → VVI flight has improved since it was saved.
+                {intelligence.briefBody}
               </p>
 
               <div className="mt-4 rounded-2xl border border-slate-200 bg-white px-4 py-3">
@@ -119,13 +119,11 @@ export default function ProPortfolioIntelligenceLab() {
                 </p>
 
                 <p className="mt-1 text-sm font-semibold text-slate-950">
-                  Review BOS → MIA before prices move again.
+                  {intelligence.nextActionTitle}
                 </p>
 
                 <p className="mt-1 text-sm leading-6 text-slate-600">
-                  American Airlines is currently below the tracked route
-                  average, while this route continues building Pro-level fare
-                  history.
+                  {intelligence.nextActionDetail}
                 </p>
               </div>
 
@@ -156,7 +154,7 @@ export default function ProPortfolioIntelligenceLab() {
               </div>
 
               <div className="divide-y divide-slate-200">
-                {decisionStack.map((item) => (
+                {intelligence.decisionStack.map((item) => (
                   <div
                     key={item.label}
                     className="grid gap-3 px-4 py-3 sm:grid-cols-[0.8fr_1fr_auto] sm:items-center"
@@ -186,7 +184,7 @@ export default function ProPortfolioIntelligenceLab() {
         </div>
       </section>
 
-      {isOpportunitiesOpen && (
+      {isOpportunitiesOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
           <button
             type="button"
@@ -207,8 +205,8 @@ export default function ProPortfolioIntelligenceLab() {
                 </h3>
 
                 <p className="mt-2 max-w-xl text-sm leading-6 text-slate-600">
-                  Lucy ranks route and saved-flight opportunities by
-                  urgency, price movement, and booking relevance.
+                  Lucy ranks route and saved-flight opportunities by urgency,
+                  price movement, and booking relevance.
                 </p>
               </div>
 
@@ -221,10 +219,10 @@ export default function ProPortfolioIntelligenceLab() {
               </button>
             </div>
 
-            <div className="mt-6 max-h-[52vh] space-y-2 overflow-y-auto pr-2 [scrollbar-color:rgba(148,163,184,0.45)_rgba(241,245,249,0.9)] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-slate-100 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb:hover]:bg-slate-400">
-              {opportunities.map((item, index) => (
+            <div className="mt-6 max-h-[52vh] space-y-2 overflow-y-auto pr-2 [scrollbar-color:rgba(148,163,184,0.45)_rgba(241,245,249,0.9)] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-slate-100 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb:hover]:bg-slate-400">
+              {intelligence.opportunities.map((item, index) => (
                 <article
-                  key={`${item.route}-${item.title}`}
+                  key={item.id}
                   className="rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3"
                 >
                   <div className="grid gap-3 sm:grid-cols-[0.7fr_1.2fr_auto] sm:items-center">
@@ -250,6 +248,21 @@ export default function ProPortfolioIntelligenceLab() {
 
                     <button
                       type="button"
+                      onClick={() => {
+                        if (item.routeData && onOpenFlightModal) {
+                          onOpenFlightModal(
+                            item.routeData,
+                            item.recommendedFlight ?? null
+                          )
+                          setIsOpportunitiesOpen(false)
+                          return
+                        }
+
+                        if (item.flightData && onOpenSavedFlightIntelligence) {
+                          onOpenSavedFlightIntelligence(item.flightData)
+                          setIsOpportunitiesOpen(false)
+                        }
+                      }}
                       className="inline-flex w-fit shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
                     >
                       {item.action}
@@ -275,9 +288,9 @@ export default function ProPortfolioIntelligenceLab() {
             </div>
           </div>
         </div>
-      )}
+      ) : null}
 
-      {isDigestOpen && (
+      {isDigestOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
           <button
             type="button"
@@ -313,30 +326,37 @@ export default function ProPortfolioIntelligenceLab() {
             </div>
 
             <div className="mt-6 space-y-4 text-sm leading-6 text-slate-700">
-              <p>
-                Lucy is prioritizing BOS → MIA because American Airlines is
-                currently pricing below the tracked route average while the
-                route continues building useful fare history.
-              </p>
-
-              <p>
-                MIA → VVI is also worth reviewing because one saved BoA flight
-                has improved since it was saved. The route is currently stable,
-                but the saved fare movement is favorable.
-              </p>
-
-              <p>
-                BOS → PTY is showing active fare movement and should remain
-                under watch before making a booking decision.
-              </p>
+              {intelligence.digestParagraphs.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
             </div>
 
             <div className="mt-6 flex flex-wrap gap-2">
               <button
                 type="button"
+                onClick={() => {
+                  const topOpportunity = intelligence.opportunities[0]
+
+                  if (topOpportunity?.routeData && onOpenFlightModal) {
+                    onOpenFlightModal(
+                      topOpportunity.routeData,
+                      topOpportunity.recommendedFlight ?? null
+                    )
+                    setIsDigestOpen(false)
+                    return
+                  }
+
+                  if (
+                    topOpportunity?.flightData &&
+                    onOpenSavedFlightIntelligence
+                  ) {
+                    onOpenSavedFlightIntelligence(topOpportunity.flightData)
+                    setIsDigestOpen(false)
+                  }
+                }}
                 className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
               >
-                Open top route
+                Open top item
               </button>
 
               <button
@@ -349,7 +369,276 @@ export default function ProPortfolioIntelligenceLab() {
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </>
   )
+}
+
+function buildPortfolioIntelligence(
+  watchlist: ProWatchlistRouteLabData[],
+  savedFlights: ProPortfolioSavedFlightData[],
+  remainingRoutes: number
+) {
+  const opportunities = buildOpportunities(watchlist, savedFlights)
+  const bestOpportunity = opportunities[0]
+
+  const improvedSavedFlights = savedFlights.filter((flight) => {
+    const savedPrice = Number(flight.price)
+    const latestPrice = Number(flight.latest_price ?? flight.price)
+
+    return (
+      Number.isFinite(savedPrice) &&
+      Number.isFinite(latestPrice) &&
+      latestPrice < savedPrice
+    )
+  })
+
+  const activeRoutes = watchlist.filter(
+    (route) => route.latest_price != null || route.last_checked_at
+  )
+
+  const belowAverageRoutes = watchlist.filter((route) => {
+    const latestPrice = Number(route.latest_price)
+    const averagePrice =
+      route.avg_price != null && Number.isFinite(Number(route.avg_price))
+        ? Number(route.avg_price) / 100
+        : null
+
+    return (
+      Number.isFinite(latestPrice) &&
+      averagePrice != null &&
+      latestPrice < averagePrice
+    )
+  })
+
+  const briefTitle =
+    opportunities.length > 0
+      ? `Lucy found ${opportunities.length} item${opportunities.length === 1 ? "" : "s"
+      } worth reviewing before your next booking decision.`
+      : "Lucy is watching your routes while Skysirv builds stronger fare history."
+
+  const briefBody =
+    bestOpportunity != null
+      ? `${bestOpportunity.route} is currently the highest-priority item in your Pro dashboard. ${bestOpportunity.detail}`
+      : "Add monitored routes and save flights to help Skysirv build a clearer booking brief."
+
+  const nextActionTitle =
+    bestOpportunity != null
+      ? bestOpportunity.action
+      : "Add or save a flight to build your portfolio."
+
+  const nextActionDetail =
+    bestOpportunity != null
+      ? bestOpportunity.detail
+      : "Your Pro intelligence layer becomes more useful as routes collect pricing history and saved flights create comparison points."
+
+  const decisionStack: DecisionStackItem[] = [
+    {
+      label: "Best opportunity",
+      value: bestOpportunity?.route ?? "Building",
+      detail:
+        bestOpportunity?.detail ??
+        "No route or saved-flight opportunity is ready yet.",
+      status: bestOpportunity ? "Review" : "Building",
+    },
+    {
+      label: "Saved flight change",
+      value:
+        improvedSavedFlights.length > 0
+          ? getSavedFlightRouteLabel(improvedSavedFlights[0])
+          : "No drop yet",
+      detail:
+        improvedSavedFlights.length > 0
+          ? `${getSavedFlightLabel(
+            improvedSavedFlights[0]
+          )} is now below the saved price.`
+          : "Saved flights are being monitored for price movement.",
+      status: improvedSavedFlights.length > 0 ? "Improved" : "Watching",
+    },
+    {
+      label: "Routes needing review",
+      value: `${opportunities.length} item${opportunities.length === 1 ? "" : "s"
+        }`,
+      detail: `${activeRoutes.length} active · ${belowAverageRoutes.length} below average · ${Math.max(
+        watchlist.length - activeRoutes.length,
+        0
+      )} building history`,
+      status: activeRoutes.length > 0 ? "Active" : "Building",
+    },
+    {
+      label: "Monitoring coverage",
+      value: `${watchlist.length} monitored`,
+      detail: `${savedFlights.length} saved flight${savedFlights.length === 1 ? "" : "s"
+        } · ${remainingRoutes} Pro route slot${remainingRoutes === 1 ? "" : "s"
+        } remaining`,
+      status: watchlist.length > 0 ? "Healthy" : "Open",
+    },
+  ]
+
+  const digestParagraphs =
+    bestOpportunity != null
+      ? [
+        `Lucy is prioritizing ${bestOpportunity.route} because it is currently the strongest item across your monitored routes and saved flights.`,
+        bestOpportunity.detail,
+        `Your Pro dashboard is currently watching ${watchlist.length} monitored route${watchlist.length === 1 ? "" : "s"
+        } and ${savedFlights.length} saved flight${savedFlights.length === 1 ? "" : "s"
+        }. Routes with live fare movement and saved flights with price changes are ranked first.`,
+      ]
+      : [
+        "Lucy is watching your Pro dashboard, but there is not enough live movement yet to rank a strong booking opportunity.",
+        "As your monitored routes collect pricing history and saved flights receive updated comparisons, this digest will become more specific.",
+        `You currently have ${remainingRoutes} Pro route slot${remainingRoutes === 1 ? "" : "s"
+        } remaining for additional monitoring coverage.`,
+      ]
+
+  return {
+    briefTitle,
+    briefBody,
+    briefStatus: opportunities.length > 0 ? "Live Signal" : "Building Signal",
+    nextActionTitle,
+    nextActionDetail,
+    decisionStack,
+    opportunities,
+    digestParagraphs,
+  }
+}
+
+function buildOpportunities(
+  watchlist: ProWatchlistRouteLabData[],
+  savedFlights: ProPortfolioSavedFlightData[]
+): OpportunityItem[] {
+  const watchlistOpportunities = watchlist
+    .map((route) => {
+      const recommendedFlight = normalizeRecommendedFlights(route)[0] ?? null
+      const latestPrice = Number(recommendedFlight?.price ?? route.latest_price)
+      const averagePrice =
+        route.avg_price != null && Number.isFinite(Number(route.avg_price))
+          ? Number(route.avg_price) / 100
+          : null
+
+      const routeLabel = getRouteLabel(route)
+      const airlineLabel =
+        recommendedFlight?.airline ??
+        route.latest_airline ??
+        "Recommended flight"
+
+      const isBelowAverage =
+        Number.isFinite(latestPrice) &&
+        averagePrice != null &&
+        latestPrice < averagePrice
+
+      const detail = isBelowAverage
+        ? `${airlineLabel} is priced at ${formatPrice(
+          latestPrice
+        )}, below the recent route average of ${formatPrice(averagePrice)}.`
+        : `${routeLabel} is active and building Pro-level fare intelligence.`
+
+      return {
+        id: `watchlist-${route.id}`,
+        route: routeLabel,
+        source: "Watchlist" as const,
+        title: isBelowAverage
+          ? "Strong current booking opportunity"
+          : "Active route movement detected",
+        detail,
+        action: "Open route intelligence",
+        routeData: route,
+        recommendedFlight,
+        score: isBelowAverage ? 3 : route.latest_price != null ? 2 : 1,
+      }
+    })
+    .filter((item) => item.score > 1)
+
+  const savedFlightOpportunities = savedFlights
+    .map((flight) => {
+      const savedPrice = Number(flight.price)
+      const latestPrice = Number(flight.latest_price ?? flight.price)
+      const improved =
+        Number.isFinite(savedPrice) &&
+        Number.isFinite(latestPrice) &&
+        latestPrice < savedPrice
+
+      const routeLabel = getSavedFlightRouteLabel(flight)
+
+      return {
+        id: `saved-${flight.id}`,
+        route: routeLabel,
+        source: "Saved Flight" as const,
+        title: improved ? "Saved fare improved" : "Saved flight under watch",
+        detail: improved
+          ? `${getSavedFlightLabel(flight)} is now ${formatPrice(
+            savedPrice - latestPrice
+          )} below the saved price.`
+          : `${getSavedFlightLabel(
+            flight
+          )} is saved and being monitored for movement.`,
+        action: "Open saved flight",
+        flightData: flight,
+        score: improved ? 4 : 1,
+      }
+    })
+    .filter((item) => item.score > 1)
+
+  return [...savedFlightOpportunities, ...watchlistOpportunities]
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5)
+}
+
+function normalizeRecommendedFlights(route: ProWatchlistRouteLabData) {
+  const directFlights = Array.isArray(route.recommended_flights)
+    ? route.recommended_flights
+    : []
+
+  if (directFlights.length > 0) {
+    return directFlights.slice(0, 4)
+  }
+
+  if (route.latest_price != null || route.latest_airline || route.latest_flight_number) {
+    return [
+      {
+        airline: route.latest_airline,
+        flightNumber: route.latest_flight_number,
+        price: route.latest_price,
+        currency: "USD",
+        capturedAt: route.latest_captured_at,
+      },
+    ]
+  }
+
+  return []
+}
+
+function getRouteLabel(route: ProWatchlistRouteLabData) {
+  if (route.route) return route.route
+
+  const origin = route.origin?.trim() || "—"
+  const destination = route.destination?.trim() || "—"
+
+  return `${origin} → ${destination}`
+}
+
+function getSavedFlightRouteLabel(flight: ProPortfolioSavedFlightData) {
+  const origin = flight.origin?.trim() || "—"
+  const destination = flight.destination?.trim() || "—"
+
+  return `${origin} → ${destination}`
+}
+
+function getSavedFlightLabel(flight: ProPortfolioSavedFlightData) {
+  const airline = flight.airline?.trim() || "Saved flight"
+  const flightNumber = flight.flight_number?.trim()
+
+  return flightNumber ? `${airline} · ${flightNumber}` : airline
+}
+
+function formatPrice(value?: number | null) {
+  if (value == null || !Number.isFinite(Number(value))) {
+    return "Building"
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(Number(value))
 }

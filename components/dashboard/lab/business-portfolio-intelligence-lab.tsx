@@ -1,63 +1,70 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 
-const decisionStack = [
-  {
-    label: "Best opportunity",
-    value: "LAX → SIN",
-    detail: "EVA Air · $868 · 12% below route average",
-    status: "Review",
-  },
-  {
-    label: "Saved flight change",
-    value: "MIA → LAX",
-    detail: "AA 1418 is now $10 below the saved price",
-    status: "Improved",
-  },
-  {
-    label: "Routes needing review",
-    value: "3 routes",
-    detail: "2 volatile · 1 below average · 1 limited history",
-    status: "Active",
-  },
-  {
-    label: "Monitoring coverage",
-    value: "3 monitored",
-    detail: "3 saved flights · 2 with active history",
-    status: "Healthy",
-  },
-]
+import type { SavedFlightCardData } from "@/components/dashboard/saved-flight-card"
+import type { BusinessWatchlistRouteLabData } from "@/components/dashboard/lab/business-watchlist-intelligence-lab"
 
-const opportunities = [
-  {
-    route: "LAX → SIN",
-    source: "Watchlist",
-    title: "Strongest current booking opportunity",
-    detail:
-      "EVA Air is priced at $868, roughly 12% below the tracked route average.",
-    action: "Open route intelligence",
-  },
-  {
-    route: "MIA → LAX",
-    source: "Saved Flight",
-    title: "Saved fare improved",
-    detail: "AA 1418 is now $10 below the price saved for this flight.",
-    action: "Open saved flight",
-  },
-  {
-    route: "JFK → LHR",
-    source: "Watchlist",
-    title: "Volatility detected",
-    detail:
-      "This route is showing wider fare movement and may need closer timing review.",
-    action: "Review route",
-  },
-]
+type RecommendedFlight = {
+  airline?: string | null
+  flightNumber?: string | null
+  price?: number | null
+  currency?: string | null
+  capturedAt?: string | null
+}
 
-export default function BusinessPortfolioIntelligenceLab() {
+type BusinessSavedFlightLabData = SavedFlightCardData & {
+  completed_at?: string | null
+  status?: string | null
+  signal?: string | null
+  booking_signal?: string | null
+}
+
+type BusinessPortfolioIntelligenceLabProps = {
+  watchlist: BusinessWatchlistRouteLabData[]
+  savedFlights: BusinessSavedFlightLabData[]
+  onOpenFlightModal?: (
+    route: BusinessWatchlistRouteLabData,
+    flight?: RecommendedFlight | null
+  ) => void
+  onOpenSavedFlightIntelligence?: (flight: BusinessSavedFlightLabData) => void
+}
+
+type DecisionStackItem = {
+  label: string
+  value: string
+  detail: string
+  status: string
+}
+
+type OpportunityItem = {
+  id: string
+  route: string
+  source: "Watchlist" | "Saved Flight"
+  title: string
+  detail: string
+  action: string
+  routeData?: BusinessWatchlistRouteLabData
+  flightData?: BusinessSavedFlightLabData
+  recommendedFlight?: RecommendedFlight | null
+}
+
+type ScoredOpportunityItem = OpportunityItem & {
+  score: number
+}
+
+export default function BusinessPortfolioIntelligenceLab({
+  watchlist,
+  savedFlights,
+  onOpenFlightModal,
+  onOpenSavedFlightIntelligence,
+}: BusinessPortfolioIntelligenceLabProps) {
   const [isOpportunitiesOpen, setIsOpportunitiesOpen] = useState(false)
   const [isDigestOpen, setIsDigestOpen] = useState(false)
+
+  const intelligence = useMemo(() => {
+    return buildPortfolioIntelligence(watchlist, savedFlights)
+  }, [watchlist, savedFlights])
 
   return (
     <>
@@ -98,19 +105,17 @@ export default function BusinessPortfolioIntelligenceLab() {
                   </p>
 
                   <h3 className="mt-2 text-lg font-semibold tracking-tight text-slate-950">
-                    Lucy found 2 items worth reviewing before your next booking
-                    decision.
+                    {intelligence.briefTitle}
                   </h3>
                 </div>
 
                 <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-cyan-200 bg-cyan-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-700">
-                  Building Signal
+                  {intelligence.briefStatus}
                 </span>
               </div>
 
               <p className="mt-3 text-sm leading-6 text-slate-600">
-                LAX → SIN is currently the strongest route opportunity, while
-                one saved MIA → LAX flight has improved since it was saved.
+                {intelligence.briefBody}
               </p>
 
               <div className="mt-4 rounded-2xl border border-slate-200 bg-white px-4 py-3">
@@ -119,12 +124,11 @@ export default function BusinessPortfolioIntelligenceLab() {
                 </p>
 
                 <p className="mt-1 text-sm font-semibold text-slate-950">
-                  Review LAX → SIN before prices move again.
+                  {intelligence.nextActionTitle}
                 </p>
 
                 <p className="mt-1 text-sm leading-6 text-slate-600">
-                  EVA Air is currently below the tracked route average, while
-                  other available options are priced higher.
+                  {intelligence.nextActionDetail}
                 </p>
               </div>
 
@@ -155,7 +159,7 @@ export default function BusinessPortfolioIntelligenceLab() {
               </div>
 
               <div className="divide-y divide-slate-200">
-                {decisionStack.map((item) => (
+                {intelligence.decisionStack.map((item) => (
                   <div
                     key={item.label}
                     className="grid gap-3 px-4 py-3 sm:grid-cols-[0.8fr_1fr_auto] sm:items-center"
@@ -185,7 +189,7 @@ export default function BusinessPortfolioIntelligenceLab() {
         </div>
       </section>
 
-      {isOpportunitiesOpen && (
+      {isOpportunitiesOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
           <button
             type="button"
@@ -207,7 +211,7 @@ export default function BusinessPortfolioIntelligenceLab() {
 
                 <p className="mt-2 max-w-xl text-sm leading-6 text-slate-600">
                   Lucy ranks route and saved-flight opportunities by urgency,
-                  price movement, and booking relevance.
+                  price movement, volatility, and booking relevance.
                 </p>
               </div>
 
@@ -221,9 +225,9 @@ export default function BusinessPortfolioIntelligenceLab() {
             </div>
 
             <div className="mt-6 max-h-[52vh] space-y-2 overflow-y-auto pr-2 [scrollbar-color:rgba(148,163,184,0.45)_rgba(241,245,249,0.9)] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-slate-100 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb:hover]:bg-slate-400">
-              {opportunities.map((item, index) => (
+              {intelligence.opportunities.map((item, index) => (
                 <article
-                  key={`${item.route}-${item.title}`}
+                  key={item.id}
                   className="rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3"
                 >
                   <div className="grid gap-3 sm:grid-cols-[0.7fr_1.2fr_auto] sm:items-center">
@@ -249,6 +253,21 @@ export default function BusinessPortfolioIntelligenceLab() {
 
                     <button
                       type="button"
+                      onClick={() => {
+                        if (item.routeData && onOpenFlightModal) {
+                          onOpenFlightModal(
+                            item.routeData,
+                            item.recommendedFlight ?? null
+                          )
+                          setIsOpportunitiesOpen(false)
+                          return
+                        }
+
+                        if (item.flightData && onOpenSavedFlightIntelligence) {
+                          onOpenSavedFlightIntelligence(item.flightData)
+                          setIsOpportunitiesOpen(false)
+                        }
+                      }}
                       className="inline-flex w-fit shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
                     >
                       {item.action}
@@ -274,9 +293,9 @@ export default function BusinessPortfolioIntelligenceLab() {
             </div>
           </div>
         </div>
-      )}
+      ) : null}
 
-      {isDigestOpen && (
+      {isDigestOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
           <button
             type="button"
@@ -312,32 +331,37 @@ export default function BusinessPortfolioIntelligenceLab() {
             </div>
 
             <div className="mt-6 space-y-4 text-sm leading-6 text-slate-700">
-              <p>
-                Lucy is prioritizing LAX → SIN because EVA Air is currently
-                priced below the tracked route average while other available
-                options remain materially higher. That creates the strongest
-                booking opportunity in the current monitored set.
-              </p>
-
-              <p>
-                MIA → LAX is also worth reviewing because one saved American
-                Airlines flight has improved since it was saved. The route is
-                still volatile, so the fare may not remain stable for long.
-              </p>
-
-              <p>
-                BOS → MIA is holding close to its tracked average and does not
-                require urgent action right now. Skysirv will continue watching
-                for stronger movement before elevating it.
-              </p>
+              {intelligence.digestParagraphs.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
             </div>
 
             <div className="mt-6 flex flex-wrap gap-2">
               <button
                 type="button"
+                onClick={() => {
+                  const topOpportunity = intelligence.opportunities[0]
+
+                  if (topOpportunity?.routeData && onOpenFlightModal) {
+                    onOpenFlightModal(
+                      topOpportunity.routeData,
+                      topOpportunity.recommendedFlight ?? null
+                    )
+                    setIsDigestOpen(false)
+                    return
+                  }
+
+                  if (
+                    topOpportunity?.flightData &&
+                    onOpenSavedFlightIntelligence
+                  ) {
+                    onOpenSavedFlightIntelligence(topOpportunity.flightData)
+                    setIsDigestOpen(false)
+                  }
+                }}
                 className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
               >
-                Open top route
+                Open top item
               </button>
 
               <button
@@ -350,7 +374,291 @@ export default function BusinessPortfolioIntelligenceLab() {
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </>
   )
+}
+
+function buildPortfolioIntelligence(
+  watchlist: BusinessWatchlistRouteLabData[],
+  savedFlights: BusinessSavedFlightLabData[]
+) {
+  const opportunities = buildOpportunities(watchlist, savedFlights)
+  const bestOpportunity = opportunities[0]
+
+  const improvedSavedFlights = savedFlights.filter((flight) => {
+    const savedPrice = Number(flight.price)
+    const latestPrice = Number(flight.latest_price ?? flight.price)
+
+    return (
+      Number.isFinite(savedPrice) &&
+      Number.isFinite(latestPrice) &&
+      latestPrice < savedPrice
+    )
+  })
+
+  const activeRoutes = watchlist.filter(
+    (route) => route.latest_price != null || route.last_checked_at
+  )
+
+  const belowAverageRoutes = watchlist.filter((route) => {
+    const latestPrice = Number(route.latest_price)
+    const averagePrice =
+      route.avg_price != null && Number.isFinite(Number(route.avg_price))
+        ? Number(route.avg_price) / 100
+        : null
+
+    return (
+      Number.isFinite(latestPrice) &&
+      averagePrice != null &&
+      latestPrice < averagePrice
+    )
+  })
+
+  const volatileRoutes = watchlist.filter((route) => {
+    const signal = `${route.booking_signal ?? ""} ${route.volatility_index ?? ""
+      }`.toLowerCase()
+
+    return signal.includes("volatile") || signal.includes("overpriced")
+  })
+
+  const briefTitle =
+    opportunities.length > 0
+      ? `Lucy found ${opportunities.length} priority item${opportunities.length === 1 ? "" : "s"
+      } across your Business intelligence portfolio.`
+      : "Lucy is watching your Business portfolio while Skysirv builds deeper fare history."
+
+  const briefBody =
+    bestOpportunity != null
+      ? `${bestOpportunity.route} is currently the highest-priority item in your Business dashboard. ${bestOpportunity.detail}`
+      : "Add monitored routes and save flights to help Skysirv build a stronger Business-level intelligence portfolio."
+
+  const nextActionTitle =
+    bestOpportunity != null
+      ? bestOpportunity.action
+      : "Add or save a flight to build your portfolio."
+
+  const nextActionDetail =
+    bestOpportunity != null
+      ? bestOpportunity.detail
+      : "Your Business intelligence layer becomes more useful as routes collect pricing history and saved flights create comparison points."
+
+  const decisionStack: DecisionStackItem[] = [
+    {
+      label: "Best opportunity",
+      value: bestOpportunity?.route ?? "Building",
+      detail:
+        bestOpportunity?.detail ??
+        "No route or saved-flight opportunity is ready yet.",
+      status: bestOpportunity ? "Review" : "Building",
+    },
+    {
+      label: "Saved flight change",
+      value:
+        improvedSavedFlights.length > 0
+          ? getSavedFlightRouteLabel(improvedSavedFlights[0])
+          : "No drop yet",
+      detail:
+        improvedSavedFlights.length > 0
+          ? `${getSavedFlightLabel(
+            improvedSavedFlights[0]
+          )} is now below the saved price.`
+          : "Saved flights are being monitored for price movement.",
+      status: improvedSavedFlights.length > 0 ? "Improved" : "Watching",
+    },
+    {
+      label: "Routes needing review",
+      value: `${opportunities.length} item${opportunities.length === 1 ? "" : "s"
+        }`,
+      detail: `${volatileRoutes.length} volatile · ${belowAverageRoutes.length} below average · ${Math.max(
+        watchlist.length - activeRoutes.length,
+        0
+      )} building history`,
+      status: activeRoutes.length > 0 ? "Active" : "Building",
+    },
+    {
+      label: "Monitoring coverage",
+      value: `${watchlist.length} monitored`,
+      detail: `${savedFlights.length} saved flight${savedFlights.length === 1 ? "" : "s"
+        } · ${activeRoutes.length} with active history`,
+      status: watchlist.length > 0 ? "Healthy" : "Open",
+    },
+  ]
+
+  const digestParagraphs =
+    bestOpportunity != null
+      ? [
+        `Lucy is prioritizing ${bestOpportunity.route} because it is currently the strongest item across your monitored routes and saved flights.`,
+        bestOpportunity.detail,
+        `Your Business dashboard is currently watching ${watchlist.length} monitored route${watchlist.length === 1 ? "" : "s"
+        } and ${savedFlights.length} saved flight${savedFlights.length === 1 ? "" : "s"
+        }. Routes with live fare movement, volatility, below-average pricing, and saved-flight improvements are ranked first.`,
+      ]
+      : [
+        "Lucy is watching your Business dashboard, but there is not enough live movement yet to rank a strong booking opportunity.",
+        "As your monitored routes collect pricing history and saved flights receive updated comparisons, this digest will become more specific.",
+        "Business intelligence is designed to surface deeper portfolio-level context as more routes, saved flights, and completed trips accumulate.",
+      ]
+
+  return {
+    briefTitle,
+    briefBody,
+    briefStatus: opportunities.length > 0 ? "Live Signal" : "Building Signal",
+    nextActionTitle,
+    nextActionDetail,
+    decisionStack,
+    opportunities,
+    digestParagraphs,
+  }
+}
+
+function buildOpportunities(
+  watchlist: BusinessWatchlistRouteLabData[],
+  savedFlights: BusinessSavedFlightLabData[]
+): OpportunityItem[] {
+  const watchlistOpportunities: ScoredOpportunityItem[] = watchlist
+    .map((route) => {
+      const recommendedFlight = normalizeRecommendedFlights(route)[0] ?? null
+      const latestPrice = Number(recommendedFlight?.price ?? route.latest_price)
+      const averagePrice =
+        route.avg_price != null && Number.isFinite(Number(route.avg_price))
+          ? Number(route.avg_price) / 100
+          : null
+
+      const routeLabel = getRouteLabel(route)
+      const airlineLabel =
+        recommendedFlight?.airline ??
+        route.latest_airline ??
+        "Recommended flight"
+
+      const signalText = `${route.booking_signal ?? ""} ${route.volatility_index ?? ""
+        }`.toLowerCase()
+
+      const isBelowAverage =
+        Number.isFinite(latestPrice) &&
+        averagePrice != null &&
+        latestPrice < averagePrice
+
+      const isVolatile =
+        signalText.includes("volatile") || signalText.includes("overpriced")
+
+      const detail = isBelowAverage
+        ? `${airlineLabel} is priced at ${formatPrice(
+          latestPrice
+        )}, below the tracked route average of ${formatPrice(averagePrice)}.`
+        : isVolatile
+          ? `${routeLabel} is showing elevated movement and may need closer timing review.`
+          : `${routeLabel} is active and building Business-level fare intelligence.`
+
+      return {
+        id: `watchlist-${route.id}`,
+        route: routeLabel,
+        source: "Watchlist" as const,
+        title: isBelowAverage
+          ? "Strong current booking opportunity"
+          : isVolatile
+            ? "Volatility detected"
+            : "Active route movement detected",
+        detail,
+        action: "Open route intelligence",
+        routeData: route,
+        recommendedFlight,
+        score: isBelowAverage ? 4 : isVolatile ? 3 : route.latest_price != null ? 2 : 1,
+      }
+    })
+    .filter((item) => item.score > 1)
+
+  const savedFlightOpportunities: ScoredOpportunityItem[] = savedFlights
+    .map((flight) => {
+      const savedPrice = Number(flight.price)
+      const latestPrice = Number(flight.latest_price ?? flight.price)
+      const improved =
+        Number.isFinite(savedPrice) &&
+        Number.isFinite(latestPrice) &&
+        latestPrice < savedPrice
+
+      const routeLabel = getSavedFlightRouteLabel(flight)
+
+      return {
+        id: `saved-${flight.id}`,
+        route: routeLabel,
+        source: "Saved Flight" as const,
+        title: improved ? "Saved fare improved" : "Saved flight under watch",
+        detail: improved
+          ? `${getSavedFlightLabel(flight)} is now ${formatPrice(
+            savedPrice - latestPrice
+          )} below the saved price.`
+          : `${getSavedFlightLabel(
+            flight
+          )} is saved and being monitored for movement.`,
+        action: "Open saved flight",
+        flightData: flight,
+        score: improved ? 5 : 1,
+      }
+    })
+    .filter((item) => item.score > 1)
+
+  return [...savedFlightOpportunities, ...watchlistOpportunities]
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 6)
+    .map(({ score, ...item }) => item)
+}
+
+function normalizeRecommendedFlights(route: BusinessWatchlistRouteLabData) {
+  const directFlights = Array.isArray(route.recommended_flights)
+    ? route.recommended_flights
+    : []
+
+  if (directFlights.length > 0) {
+    return directFlights.slice(0, 6)
+  }
+
+  if (route.latest_price != null || route.latest_airline || route.latest_flight_number) {
+    return [
+      {
+        airline: route.latest_airline,
+        flightNumber: route.latest_flight_number,
+        price: route.latest_price,
+        currency: "USD",
+        capturedAt: route.latest_captured_at,
+      },
+    ]
+  }
+
+  return []
+}
+
+function getRouteLabel(route: BusinessWatchlistRouteLabData) {
+  if (route.route) return route.route
+
+  const origin = route.origin?.trim() || "—"
+  const destination = route.destination?.trim() || "—"
+
+  return `${origin} → ${destination}`
+}
+
+function getSavedFlightRouteLabel(flight: BusinessSavedFlightLabData) {
+  const origin = flight.origin?.trim() || "—"
+  const destination = flight.destination?.trim() || "—"
+
+  return `${origin} → ${destination}`
+}
+
+function getSavedFlightLabel(flight: BusinessSavedFlightLabData) {
+  const airline = flight.airline?.trim() || "Saved flight"
+  const flightNumber = flight.flight_number?.trim()
+
+  return flightNumber ? `${airline} · ${flightNumber}` : airline
+}
+
+function formatPrice(value?: number | null) {
+  if (value == null || !Number.isFinite(Number(value))) {
+    return "Building"
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(Number(value))
 }

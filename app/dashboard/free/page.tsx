@@ -5,27 +5,15 @@ import { useRouter } from "next/navigation"
 import { getAuthToken } from "@/utils/auth-storage"
 
 import RouteSearch from "@/components/dashboard/route-search"
-import {
-  type SavedFlightCardData,
-} from "@/components/dashboard/saved-flight-card"
-import FlightIntelligenceModal from "@/components/dashboard/flight-intelligence-modal"
 import WelcomeModal from "@/components/dashboard/welcome-modal"
-import FreeDashboardHero from "@/components/dashboard/free/free-dashboard-hero"
-import FreeWatchlistSection from "@/components/dashboard/free/free-watchlist-section"
-import FreeSavedFlightsSection from "@/components/dashboard/free/free-saved-flights-section"
-import FreeQuickStats from "@/components/dashboard/free/free-quick-stats"
-import FreeGlobalIntelligence from "@/components/dashboard/free/free-global-intelligence"
-import FreePreviewUpgradeSection from "@/components/dashboard/free/free-preview-upgrade-section"
-import FreeIntelligenceSnapshot from "@/components/dashboard/free/free-intelligence-snapshot"
+import FreeLucyPreviewLab from "@/components/dashboard/lab/free-lucy-preview-lab"
+import FreeWatchlistLab from "@/components/dashboard/lab/free-watchlist-lab"
+import FreeSavedFlightsLab, {
+  type FreeSavedFlightLabData,
+} from "@/components/dashboard/lab/free-saved-flights-lab"
+import FreePremiumTeasersLab from "@/components/dashboard/lab/free-premium-teasers-lab"
 
 import { toast } from "@/components/ui/Toasts/use-toast"
-
-const fadeUp = {
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, amount: 0.18 },
-  transition: { duration: 0.6, ease: "easeOut" as const },
-}
 
 type WatchlistRoute = {
   id: string
@@ -62,25 +50,48 @@ type WatchlistResponse =
     data?: WatchlistRoute[]
   }
 
+type SavedFlightsResponse =
+  | FreeSavedFlightLabData[]
+  | {
+    savedFlights?: FreeSavedFlightLabData[]
+    saved_flights?: FreeSavedFlightLabData[]
+    flights?: FreeSavedFlightLabData[]
+    data?: FreeSavedFlightLabData[]
+  }
+
 export default function FreeDashboardPage() {
   const router = useRouter()
-  const [showWelcomeModal, setShowWelcomeModal] = useState(false)
 
-  const [loading, setLoading] = useState(true)
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false)
   const [watchlist, setWatchlist] = useState<WatchlistRoute[]>([])
-  const [savedFlights, setSavedFlights] = useState<SavedFlightCardData[]>([])
   const [watchlistFetchKey, setWatchlistFetchKey] = useState(0)
-  const [selectedFlightForModal, setSelectedFlightForModal] = useState<{
-    route: WatchlistRoute
-    flight: {
-      airline?: string | null
-      flightNumber?: string | null
-      price?: number | null
-      currency?: string | null
-      capturedAt?: string | null
-    } | null
-  } | null>(null)
-  const [isFlightModalOpen, setIsFlightModalOpen] = useState(false)
+  const [savedFlights, setSavedFlights] = useState<FreeSavedFlightLabData[]>([])
+  const [savedFlightsLoading, setSavedFlightsLoading] = useState(true)
+  const [savedFlightsFetchKey, setSavedFlightsFetchKey] = useState(0)
+
+  useEffect(() => {
+    const originalBackground = document.body.style.background
+    const originalBackgroundColor = document.body.style.backgroundColor
+
+    document.body.style.background = "rgb(255 255 255)"
+    document.body.style.backgroundColor = "rgb(255 255 255)"
+
+    return () => {
+      document.body.style.background = originalBackground
+      document.body.style.backgroundColor = originalBackgroundColor
+    }
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    const params = new URLSearchParams(window.location.search)
+    const shouldShowWelcome = params.get("welcome") === "1"
+
+    if (shouldShowWelcome) {
+      setShowWelcomeModal(true)
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -91,7 +102,6 @@ export default function FreeDashboardPage() {
       if (!token) {
         if (!cancelled) {
           setWatchlist([])
-          setLoading(false)
         }
         return
       }
@@ -124,10 +134,6 @@ export default function FreeDashboardPage() {
         if (!cancelled) {
           setWatchlist([])
         }
-      } finally {
-        if (!cancelled) {
-          setLoading(false)
-        }
       }
     }
 
@@ -139,17 +145,6 @@ export default function FreeDashboardPage() {
   }, [watchlistFetchKey])
 
   useEffect(() => {
-    if (typeof window === "undefined") return
-
-    const params = new URLSearchParams(window.location.search)
-    const shouldShowWelcome = params.get("welcome") === "1"
-
-    if (shouldShowWelcome) {
-      setShowWelcomeModal(true)
-    }
-  }, [])
-
-  useEffect(() => {
     let cancelled = false
 
     async function loadSavedFlights() {
@@ -158,41 +153,49 @@ export default function FreeDashboardPage() {
       if (!token) {
         if (!cancelled) {
           setSavedFlights([])
+          setSavedFlightsLoading(false)
         }
         return
       }
 
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/saved-flights`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
+        setSavedFlightsLoading(true)
 
-        const data = await res.json().catch(() => [])
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/saved-flights`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        const data: SavedFlightsResponse = await res.json().catch(() => [])
 
         if (cancelled) return
 
-        const savedFlightsData = Array.isArray(data) ? data : []
+        const flights = Array.isArray(data)
+          ? data
+          : Array.isArray(data.savedFlights)
+            ? data.savedFlights
+            : Array.isArray(data.saved_flights)
+              ? data.saved_flights
+              : Array.isArray(data.flights)
+                ? data.flights
+                : Array.isArray(data.data)
+                  ? data.data
+                  : []
 
-        setSavedFlights(
-          savedFlightsData.map((flight) => ({
-            ...flight,
-            price:
-              flight.price != null && Number.isFinite(Number(flight.price))
-                ? Number(flight.price) / 100
-                : null,
-            latest_price:
-              flight.price != null && Number.isFinite(Number(flight.price))
-                ? Number(flight.price) / 100
-                : null,
-          }))
-        )
+        setSavedFlights(flights)
       } catch (error) {
-        console.error("Failed to load saved flights", error)
+        console.error("Failed to load free dashboard saved flights", error)
 
         if (!cancelled) {
           setSavedFlights([])
+        }
+      } finally {
+        if (!cancelled) {
+          setSavedFlightsLoading(false)
         }
       }
     }
@@ -202,7 +205,7 @@ export default function FreeDashboardPage() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [savedFlightsFetchKey])
 
   function handleRouteAdded(route: WatchlistRoute) {
     setWatchlist((prev) => {
@@ -245,11 +248,15 @@ export default function FreeDashboardPage() {
 
     if (!token) {
       toast({
-        title: "Unable to remove route",
-        description: "You must be signed in to update your watchlist.",
+        title: "Session expired",
+        description: "Please sign in again to manage your watchlist.",
       })
       return
     }
+
+    const previousWatchlist = watchlist
+
+    setWatchlist((prev) => prev.filter((route) => route.id !== routeId))
 
     try {
       const res = await fetch(
@@ -262,30 +269,24 @@ export default function FreeDashboardPage() {
         }
       )
 
-      const data = await res.json().catch(() => null)
-
       if (!res.ok) {
-        console.error("Failed to delete free watchlist route", data)
-
-        toast({
-          title: "Remove failed",
-          description: "The route could not be removed from your watchlist.",
-        })
-        return
+        throw new Error("Failed to remove route")
       }
-
-      setWatchlist((prev) => prev.filter((item) => item.id !== routeId))
 
       toast({
         title: "Route removed",
         description: "The route was removed from your Free watchlist.",
       })
+
+      setWatchlistFetchKey((prev) => prev + 1)
     } catch (error) {
-      console.error("Free watchlist delete request failed", error)
+      console.error("Failed to remove free dashboard route", error)
+
+      setWatchlist(previousWatchlist)
 
       toast({
-        title: "Remove failed",
-        description: "Something went wrong while removing the route.",
+        title: "Could not remove route",
+        description: "Please try again in a moment.",
       })
     }
   }
@@ -300,232 +301,26 @@ export default function FreeDashboardPage() {
     })
   }
 
-  function handleOpenFlightModal(
-    route: WatchlistRoute,
-    flight?: {
-      airline?: string | null
-      flightNumber?: string | null
-      price?: number | null
-      currency?: string | null
-      capturedAt?: string | null
-    } | null
-  ) {
-    setSelectedFlightForModal({
-      route,
-      flight: flight ?? null,
-    })
-    setIsFlightModalOpen(true)
-  }
-
-  async function handleSaveFlight() {
-    if (!selectedFlightForModal?.route) {
-      toast({
-        title: "No flight selected",
-        description: "Select a flight before saving it.",
-      })
-      return
-    }
-
+  async function handleDeleteSavedFlight(savedFlightId: string) {
     const token = getAuthToken()
 
     if (!token) {
       toast({
-        title: "Sign in required",
-        description: "You must be signed in to save flights.",
+        title: "Session expired",
+        description: "Please sign in again to manage saved flights.",
       })
       return
     }
 
-    const { route, flight } = selectedFlightForModal
+    const previousSavedFlights = savedFlights
 
-    const payload = {
-      origin: route.origin ?? "",
-      destination: route.destination ?? "",
-      departureDate: route.departure_date ?? null,
-      airline: flight?.airline ?? route.latest_airline ?? null,
-      flightNumber: flight?.flightNumber ?? route.latest_flight_number ?? null,
-      price:
-        typeof flight?.price === "number" && Number.isFinite(flight.price)
-          ? flight.price
-          : route.latest_price != null && Number.isFinite(Number(route.latest_price))
-            ? Number(route.latest_price)
-            : null,
-      currency: flight?.currency ?? "USD",
-    }
-
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/saved-flights`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      })
-
-      const data = await res.json().catch(() => null)
-
-      if (res.status === 409) {
-        toast({
-          title: "Flight already saved",
-          description: "That saved flight is already in your Free dashboard.",
-        })
-        return
-      }
-
-      if (!res.ok || !data) {
-        toast({
-          title: "Save failed",
-          description: "The flight could not be saved.",
-        })
-        return
-      }
-
-      const savedFlight: SavedFlightCardData = {
-        ...data,
-        price:
-          data.price != null && Number.isFinite(Number(data.price))
-            ? Number(data.price) / 100
-            : null,
-        latest_price:
-          data.price != null && Number.isFinite(Number(data.price))
-            ? Number(data.price) / 100
-            : null,
-      }
-
-      setSavedFlights((prev) => [savedFlight, ...prev])
-
-      toast({
-        title: "Flight saved",
-        description: "The flight was added to your saved flights section.",
-      })
-
-      setIsFlightModalOpen(false)
-    } catch (error) {
-      console.error("Failed to save flight", error)
-
-      toast({
-        title: "Save failed",
-        description: "Something went wrong while saving the flight.",
-      })
-    }
-  }
-
-  function handleOpenSavedFlightIntelligence(flight: SavedFlightCardData) {
-    const matchingRoute =
-      watchlist.find(
-        (route) =>
-          route.origin === flight.origin &&
-          route.destination === flight.destination &&
-          route.departure_date === flight.departure_date
-      ) ?? null
-
-    if (!matchingRoute) {
-      toast({
-        title: "Route not found",
-        description: "The matching monitored route could not be found for this saved flight.",
-      })
-      return
-    }
-
-    setSelectedFlightForModal({
-      route: matchingRoute,
-      flight: {
-        airline: flight.airline ?? null,
-        flightNumber: flight.flight_number ?? null,
-        price: flight.latest_price ?? flight.price ?? null,
-        currency: flight.currency ?? "USD",
-        capturedAt: flight.saved_at ?? null,
-      },
-    })
-
-    setIsFlightModalOpen(true)
-  }
-
-  async function handleMarkSavedFlightCompleted(flight: SavedFlightCardData) {
-    const token = getAuthToken()
-
-    if (!token) {
-      toast({
-        title: "Sign in required",
-        description: "You must be signed in to complete saved flights.",
-      })
-      return
-    }
+    setSavedFlights((prev) =>
+      prev.filter((savedFlight) => savedFlight.id !== savedFlightId)
+    )
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/saved-flights/${flight.id}/complete`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
-
-      const data = await res.json().catch(() => null)
-
-      if (res.status === 409) {
-        toast({
-          title: "Already completed",
-          description: "That saved flight has already been marked completed.",
-        })
-        return
-      }
-
-      if (!res.ok || !data) {
-        toast({
-          title: "Completion failed",
-          description: "The saved flight could not be marked completed.",
-        })
-        return
-      }
-
-      const updatedFlight: SavedFlightCardData = {
-        ...data,
-        price:
-          data.price != null && Number.isFinite(Number(data.price))
-            ? Number(data.price) / 100
-            : null,
-        latest_price:
-          data.price != null && Number.isFinite(Number(data.price))
-            ? Number(data.price) / 100
-            : null,
-      }
-
-      setSavedFlights((prev) =>
-        prev.map((item) => (item.id === updatedFlight.id ? updatedFlight : item))
-      )
-
-      toast({
-        title: "Route completed",
-        description: `${flight.origin ?? "—"} → ${flight.destination ?? "—"} was added to trip history.`,
-      })
-    } catch (error) {
-      console.error("Failed to complete saved flight", error)
-
-      toast({
-        title: "Completion failed",
-        description: "Something went wrong while completing the saved flight.",
-      })
-    }
-  }
-
-  async function handleDeleteSavedFlight(flight: SavedFlightCardData) {
-    const token = getAuthToken()
-
-    if (!token) {
-      toast({
-        title: "Sign in required",
-        description: "You must be signed in to delete saved flights.",
-      })
-      return
-    }
-
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/saved-flights/${flight.id}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/saved-flights/${savedFlightId}`,
         {
           method: "DELETE",
           headers: {
@@ -534,33 +329,85 @@ export default function FreeDashboardPage() {
         }
       )
 
-      const data = await res.json().catch(() => null)
-
-      if (!res.ok || !data?.success) {
-        toast({
-          title: "Delete failed",
-          description: "The saved flight could not be removed.",
-        })
-        return
+      if (!res.ok) {
+        throw new Error("Failed to delete saved flight")
       }
 
-      setSavedFlights((prev) => prev.filter((item) => item.id !== flight.id))
-
       toast({
-        title: "Saved flight deleted",
-        description: `${flight.origin ?? "—"} → ${flight.destination ?? "—"} was removed.`,
+        title: "Saved flight removed",
+        description: "The flight was removed from your saved flights.",
       })
+
+      setSavedFlightsFetchKey((prev) => prev + 1)
     } catch (error) {
       console.error("Failed to delete saved flight", error)
 
+      setSavedFlights(previousSavedFlights)
+
       toast({
-        title: "Delete failed",
-        description: "Something went wrong while deleting the saved flight.",
+        title: "Could not remove saved flight",
+        description: "Please try again in a moment.",
       })
     }
   }
 
-  const remainingRoutes = Math.max(0, 3 - watchlist.length)
+  async function handleCompleteSavedFlight(savedFlightId: string) {
+    const token = getAuthToken()
+
+    if (!token) {
+      toast({
+        title: "Session expired",
+        description: "Please sign in again to update saved flights.",
+      })
+      return
+    }
+
+    const previousSavedFlights = savedFlights
+
+    setSavedFlights((prev) =>
+      prev.map((savedFlight) =>
+        savedFlight.id === savedFlightId
+          ? {
+            ...savedFlight,
+            status: "Completed",
+            completed_at: new Date().toISOString(),
+          }
+          : savedFlight
+      )
+    )
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/saved-flights/${savedFlightId}/complete`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      if (!res.ok) {
+        throw new Error("Failed to complete saved flight")
+      }
+
+      toast({
+        title: "Flight marked completed",
+        description: "Your saved flight was added to your travel history.",
+      })
+
+      setSavedFlightsFetchKey((prev) => prev + 1)
+    } catch (error) {
+      console.error("Failed to complete saved flight", error)
+
+      setSavedFlights(previousSavedFlights)
+
+      toast({
+        title: "Could not mark flight completed",
+        description: "Please try again in a moment.",
+      })
+    }
+  }
 
   function handleDismissWelcomeModal() {
     setShowWelcomeModal(false)
@@ -576,60 +423,76 @@ export default function FreeDashboardPage() {
       />
 
       <section
-        className={`min-h-screen bg-white transition duration-300 ${showWelcomeModal ? "pointer-events-none blur-md select-none" : ""
+        className={`min-h-screen bg-white text-slate-950 transition duration-300 ${showWelcomeModal ? "pointer-events-none blur-md select-none" : ""
           }`}
       >
-        <FreeDashboardHero showWelcomeModal={showWelcomeModal} />
-
-        {/* Main Content */}
         <div className="px-6 py-10 md:py-14">
           <div className="mx-auto max-w-7xl">
-            {/* Route Search */}
+            <section className="pb-14">
+              <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
+                <div>
+                  <div className="mb-4 flex flex-wrap items-center gap-2">
+                    <p className="inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-cyan-700">
+                      Free Dashboard
+                    </p>
+
+                    <p className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                      Basic Tracking
+                    </p>
+                  </div>
+
+                  <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-slate-950 sm:text-6xl">
+                    Start tracking flights with basic route intelligence
+                  </h1>
+
+                  <p className="mt-6 max-w-2xl text-base leading-7 text-slate-600">
+                    Monitor up to 3 routes, save up to 3 flights, and get a simple
+                    view of fare movement before upgrading to deeper Skysirv
+                    intelligence.
+                  </p>
+
+                  <div className="mt-7 flex flex-wrap gap-2">
+                    <FreeHeroPill label="3 monitored routes" />
+                    <FreeHeroPill label="3 saved flights" />
+                    <FreeHeroPill label="Basic fare tracking" />
+                    <FreeHeroPill label="Paid intelligence previews" />
+                  </div>
+                </div>
+
+                <FreeLucyPreviewLab />
+              </div>
+            </section>
+
             <div className="mb-10">
-              <RouteSearch onRouteAdded={handleRouteAdded} />
+              <RouteSearch theme="light" onRouteAdded={handleRouteAdded} />
             </div>
 
-            <FreeWatchlistSection
-              loading={loading}
+            <FreeWatchlistLab
               watchlist={watchlist}
-              remainingRoutes={remainingRoutes}
-              fadeUp={fadeUp}
-              onOpenFlightModal={handleOpenFlightModal}
-              onRemoveRoute={(routeId) => {
-                void handleRouteRemoved(routeId)
-              }}
+              remainingRoutes={Math.max(0, 3 - watchlist.length)}
+              onRemoveRoute={handleRouteRemoved}
             />
 
-            <FreeSavedFlightsSection
+            <FreeSavedFlightsLab
+              loading={savedFlightsLoading}
               savedFlights={savedFlights}
-              fadeUp={fadeUp}
-              onOpenSavedFlightIntelligence={handleOpenSavedFlightIntelligence}
-              onMarkSavedFlightCompleted={(flight) => {
-                void handleMarkSavedFlightCompleted(flight)
-              }}
-              onDeleteSavedFlight={(flight) => {
-                void handleDeleteSavedFlight(flight)
-              }}
+              remainingSavedFlights={Math.max(0, 3 - savedFlights.length)}
+              onDeleteSavedFlight={handleDeleteSavedFlight}
+              onCompleteSavedFlight={handleCompleteSavedFlight}
             />
 
-            <FreeQuickStats fadeUp={fadeUp} />
-
-            <FreeGlobalIntelligence loading={loading} />
-
-            <FreePreviewUpgradeSection fadeUp={fadeUp} />
-
-            <FreeIntelligenceSnapshot fadeUp={fadeUp} />
+            <FreePremiumTeasersLab />
           </div>
         </div>
-
-        <FlightIntelligenceModal
-          isOpen={isFlightModalOpen}
-          onClose={() => setIsFlightModalOpen(false)}
-          onSaveFlight={handleSaveFlight}
-          route={selectedFlightForModal?.route ?? null}
-          flight={selectedFlightForModal?.flight ?? null}
-        />
       </section>
     </>
+  )
+}
+
+function FreeHeroPill({ label }: { label: string }) {
+  return (
+    <div className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600">
+      {label}
+    </div>
   )
 }

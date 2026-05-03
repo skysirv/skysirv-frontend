@@ -65,9 +65,9 @@ export default function FreeDashboardLabPage() {
             <RouteSearch theme="light" />
           </div>
 
-          <FreeWatchlistLab />
+          <FreeWatchlistLab watchlist={[]} remainingRoutes={3} />
 
-          <FreeSavedFlightsLab />
+          <FreeSavedFlightsLab savedFlights={[]} remainingSavedFlights={3} />
 
           <FreePremiumTeasersLab />
         </div>

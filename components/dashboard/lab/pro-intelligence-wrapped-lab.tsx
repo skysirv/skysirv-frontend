@@ -4,143 +4,95 @@ import { useMemo, useState } from "react"
 import TravelGlobe from "@/components/intelligence-wrapped/travel-globe"
 import WrappedCompactModal from "@/components/dashboard/lab/wrapped-compact-modal"
 
-const years = [2026] as const
-
-type WrappedYear = (typeof years)[number]
-
-const wrappedByYear = {
-  2026: {
-    flights: 8,
-    countries: 3,
-    distance: "48,000 km",
-    skyscore: 82,
-    bestRoute: "BOS → MIA",
-    bestRouteDetail:
-      "Reviewed before prices moved upward and captured one of the strongest Pro timing wins in your profile.",
-    savings: "$640",
-    beatMarket: "63%",
-    travelerIdentity: "Smart Watcher",
-    airportNodes: [
-      {
-        airportCode: "BOS",
-        lat: 42.3656,
-        lng: -71.0096,
-        name: "Boston Logan International Airport",
-        city: "Boston",
-        country: "United States",
-        visits: 3,
-        flights: 3,
-        layoverHours: 1.2,
-        loungeHours: 0.8,
-      },
-      {
-        airportCode: "MIA",
-        lat: 25.7959,
-        lng: -80.287,
-        name: "Miami International Airport",
-        city: "Miami",
-        country: "United States",
-        visits: 3,
-        flights: 3,
-        layoverHours: 2.1,
-        loungeHours: 1.1,
-      },
-      {
-        airportCode: "PTY",
-        lat: 9.0714,
-        lng: -79.3835,
-        name: "Tocumen International Airport",
-        city: "Panama City",
-        country: "Panama",
-        visits: 1,
-        flights: 1,
-        layoverHours: 2.8,
-        loungeHours: 1.4,
-      },
-      {
-        airportCode: "VVI",
-        lat: -17.6448,
-        lng: -63.1354,
-        name: "Viru Viru International Airport",
-        city: "Santa Cruz",
-        country: "Bolivia",
-        visits: 1,
-        flights: 1,
-        layoverHours: 0.9,
-        loungeHours: 0.3,
-      },
-    ],
-    routeArcs: [
-      {
-        tripId: "trip-1",
-        segmentId: "segment-1",
-        segmentOrder: 1,
-        origin: "BOS",
-        destination: "MIA",
-        airlineCode: "AA",
-        flightNumber: "1421",
-        status: "completed",
-        source: "wrapped",
-        scheduledDepartureAt: "2026-04-30T14:10:00Z",
-        scheduledArrivalAt: "2026-04-30T17:45:00Z",
-      },
-      {
-        tripId: "trip-2",
-        segmentId: "segment-2",
-        segmentOrder: 1,
-        origin: "BOS",
-        destination: "PTY",
-        airlineCode: "CM",
-        flightNumber: "704",
-        status: "completed",
-        source: "wrapped",
-        scheduledDepartureAt: "2026-05-12T12:20:00Z",
-        scheduledArrivalAt: "2026-05-12T17:05:00Z",
-      },
-      {
-        tripId: "trip-3",
-        segmentId: "segment-3",
-        segmentOrder: 1,
-        origin: "MIA",
-        destination: "VVI",
-        airlineCode: "OB",
-        flightNumber: "767",
-        status: "completed",
-        source: "wrapped",
-        scheduledDepartureAt: "2026-06-02T23:15:00Z",
-        scheduledArrivalAt: "2026-06-03T07:35:00Z",
-      },
-    ],
-  },
+type WrappedData = {
+  flights: number
+  countries: number
+  distance: string
+  skyscore: number
+  savings: number
+  avgSavings: number
+  beatMarket: number
+  routesMonitored: number
+  travelerIdentity: string
 }
 
-export default function ProIntelligenceWrappedLab() {
-  const [selectedYear, setSelectedYear] = useState<WrappedYear>(2026)
+type GlobeAirportNode = {
+  airportCode: string
+  lat?: number
+  lng?: number
+  name?: string
+  city?: string
+  country?: string
+  visits?: number
+  layoverHours?: number
+  loungeHours?: number
+  flights?: number
+}
+
+type GlobeRouteArc = {
+  tripId: string
+  segmentId: string
+  segmentOrder: number
+  origin: string
+  destination: string
+  airlineCode: string | null
+  flightNumber: string | null
+  status: string
+  source: string | null
+  scheduledDepartureAt: string | null
+  scheduledArrivalAt: string | null
+}
+
+type ProIntelligenceWrappedLabProps = {
+  wrappedLoading?: boolean
+  wrappedData: WrappedData
+  selectedYear: number
+  availableWrappedYears: number[]
+  setSelectedYear: (year: number) => void
+  globeAirportNodes: GlobeAirportNode[]
+  globeRouteArcs: GlobeRouteArc[]
+}
+
+export default function ProIntelligenceWrappedLab({
+  wrappedLoading = false,
+  wrappedData,
+  selectedYear,
+  availableWrappedYears,
+  setSelectedYear,
+  globeAirportNodes,
+  globeRouteArcs,
+}: ProIntelligenceWrappedLabProps) {
   const [isRouteStoryOpen, setIsRouteStoryOpen] = useState(false)
   const [isWrappedDetailsOpen, setIsWrappedDetailsOpen] = useState(false)
 
-  const wrapped = wrappedByYear[selectedYear]
+  const hasWrappedActivity =
+    wrappedData.flights > 0 ||
+    wrappedData.countries > 0 ||
+    globeAirportNodes.length > 0 ||
+    globeRouteArcs.length > 0
+
+  const bestRoute = getBestRoute(globeRouteArcs)
 
   const metrics = useMemo(
     () => [
       {
         label: "Flights",
-        value: String(wrapped.flights),
+        value: wrappedLoading ? "Loading" : String(wrappedData.flights),
       },
       {
         label: "Countries",
-        value: String(wrapped.countries),
+        value: wrappedLoading ? "Loading" : String(wrappedData.countries),
       },
       {
         label: "Distance",
-        value: wrapped.distance,
+        value: wrappedLoading ? "Loading" : wrappedData.distance,
       },
       {
         label: "Skyscore",
-        value: String(wrapped.skyscore),
+        value: wrappedLoading ? "Loading" : String(wrappedData.skyscore),
       },
     ],
-    [wrapped]
+    [wrappedData, wrappedLoading]
   )
 
   return (
@@ -175,14 +127,13 @@ export default function ProIntelligenceWrappedLab() {
               <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                 Year
               </span>
+
               <select
                 value={selectedYear}
-                onChange={(event) =>
-                  setSelectedYear(Number(event.target.value) as WrappedYear)
-                }
+                onChange={(event) => setSelectedYear(Number(event.target.value))}
                 className="bg-transparent text-sm font-semibold text-slate-950 outline-none"
               >
-                {years.map((year) => (
+                {availableWrappedYears.map((year) => (
                   <option key={year} value={year}>
                     {year}
                   </option>
@@ -210,10 +161,25 @@ export default function ProIntelligenceWrappedLab() {
         </div>
 
         <div className="mt-5">
-          <TravelGlobe
-            airportNodes={wrapped.airportNodes}
-            routeArcs={wrapped.routeArcs}
-          />
+          {hasWrappedActivity ? (
+            <TravelGlobe
+              airportNodes={globeAirportNodes}
+              routeArcs={globeRouteArcs}
+            />
+          ) : (
+            <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-slate-200 bg-slate-50/70 px-6 py-10 text-center">
+              <div>
+                <p className="text-sm font-semibold text-slate-950">
+                  Your travel globe is building.
+                </p>
+
+                <p className="mt-2 max-w-md text-sm leading-6 text-slate-600">
+                  Mark saved flights as completed to start creating airport
+                  nodes, route arcs, and yearly travel intelligence.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_auto]">
@@ -226,17 +192,17 @@ export default function ProIntelligenceWrappedLab() {
                   </p>
 
                   <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-cyan-200 bg-cyan-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-700">
-                    Smartest move
+                    {hasWrappedActivity ? "Smartest move" : "Building"}
                   </span>
                 </div>
 
                 <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
                   <h3 className="text-xl font-semibold tracking-tight text-slate-950">
-                    {wrapped.bestRoute}
+                    {bestRoute}
                   </h3>
 
                   <p className="max-w-2xl text-sm leading-6 text-slate-600">
-                    {wrapped.bestRouteDetail}
+                    {getBestRouteDetail(hasWrappedActivity, bestRoute)}
                   </p>
                 </div>
               </div>
@@ -252,24 +218,27 @@ export default function ProIntelligenceWrappedLab() {
           </div>
 
           <div className="grid gap-2 sm:grid-cols-3 lg:w-[360px] lg:grid-cols-1">
-            <SummaryCard label="Savings" value={wrapped.savings} />
-            <SummaryCard label="Beat market" value={wrapped.beatMarket} />
-            <SummaryCard label="Traveler identity" value={wrapped.travelerIdentity} />
+            <SummaryCard label="Savings" value={formatCurrency(wrappedData.savings)} />
+            <SummaryCard label="Beat market" value={`${wrappedData.beatMarket}%`} />
+            <SummaryCard
+              label="Traveler identity"
+              value={wrappedData.travelerIdentity || "Smart Traveler"}
+            />
           </div>
         </div>
       </div>
 
-      {isRouteStoryOpen && (
+      {isRouteStoryOpen ? (
         <WrappedCompactModal
           eyebrow="Route Story"
-          title={wrapped.bestRoute}
+          title={bestRoute}
           description="A compact explanation of why this route stood out inside your yearly travel intelligence."
           onClose={() => setIsRouteStoryOpen(false)}
           footer={
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="text-xs leading-5 text-slate-500">
-                Route story details will become more precise as completed trip
-                and fare-history depth increases.
+                Route story details become more precise as completed trip and
+                fare-history depth increases.
               </p>
 
               <button
@@ -289,14 +258,23 @@ export default function ProIntelligenceWrappedLab() {
               </p>
 
               <p className="mt-2 text-sm leading-6 text-slate-700">
-                {wrapped.bestRouteDetail}
+                {getBestRouteDetail(hasWrappedActivity, bestRoute)}
               </p>
             </div>
 
             <div className="grid gap-2 sm:grid-cols-3">
-              <RouteStoryPill label="Timing" value="Before spike" />
-              <RouteStoryPill label="Savings" value={wrapped.savings} />
-              <RouteStoryPill label="Grade" value="A" />
+              <RouteStoryPill
+                label="Timing"
+                value={hasWrappedActivity ? "Completed" : "Building"}
+              />
+              <RouteStoryPill
+                label="Savings"
+                value={formatCurrency(wrappedData.savings)}
+              />
+              <RouteStoryPill
+                label="Grade"
+                value={wrappedData.skyscore > 0 ? String(wrappedData.skyscore) : "—"}
+              />
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-4">
@@ -306,14 +284,13 @@ export default function ProIntelligenceWrappedLab() {
 
               <div className="mt-3 space-y-3 text-sm leading-6 text-slate-600">
                 <p>
-                  This route stood out because it combined favorable price
-                  behavior, better-than-market timing, and a completed booking
-                  outcome that improved the yearly intelligence profile.
+                  This route stood out because it connects completed travel
+                  activity with Skysirv&apos;s yearly route intelligence layer.
                 </p>
 
                 <p>
-                  In the full data-backed version, this story can include fare
-                  movement before and after booking, alert context, route
+                  As more saved flights are completed, this story can include
+                  fare movement before and after booking, alert context, route
                   volatility, and how the decision affected the user&apos;s
                   annual Skyscore.
                 </p>
@@ -321,9 +298,9 @@ export default function ProIntelligenceWrappedLab() {
             </div>
           </div>
         </WrappedCompactModal>
-      )}
+      ) : null}
 
-      {isWrappedDetailsOpen && (
+      {isWrappedDetailsOpen ? (
         <WrappedCompactModal
           eyebrow="Wrapped Intelligence"
           title={`${selectedYear} travel intelligence`}
@@ -348,10 +325,13 @@ export default function ProIntelligenceWrappedLab() {
         >
           <div className="space-y-3">
             <div className="grid gap-2 sm:grid-cols-2">
-              <WrappedDetailPill label="Flights" value={String(wrapped.flights)} />
-              <WrappedDetailPill label="Countries" value={String(wrapped.countries)} />
-              <WrappedDetailPill label="Distance" value={wrapped.distance} />
-              <WrappedDetailPill label="Skyscore" value={String(wrapped.skyscore)} />
+              <WrappedDetailPill label="Flights" value={String(wrappedData.flights)} />
+              <WrappedDetailPill
+                label="Countries"
+                value={String(wrappedData.countries)}
+              />
+              <WrappedDetailPill label="Distance" value={wrappedData.distance} />
+              <WrappedDetailPill label="Skyscore" value={String(wrappedData.skyscore)} />
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
@@ -360,25 +340,31 @@ export default function ProIntelligenceWrappedLab() {
               </p>
 
               <p className="mt-3 text-sm leading-6 text-slate-600">
-                Your {selectedYear} profile shows a growing travel pattern built
-                from completed trips, monitored routes, airport activity, and
-                booking outcomes. As more trips are completed, this view can
-                become a richer annual intelligence archive.
+                Your {selectedYear} profile is built from completed trips,
+                monitored routes, airport activity, and booking outcomes. As
+                more trips are completed, this view becomes a richer annual
+                intelligence archive.
               </p>
             </div>
 
             <div className="grid gap-2 sm:grid-cols-3">
-              <WrappedDetailPill label="Savings" value={wrapped.savings} />
-              <WrappedDetailPill label="Beat market" value={wrapped.beatMarket} />
+              <WrappedDetailPill
+                label="Savings"
+                value={formatCurrency(wrappedData.savings)}
+              />
+              <WrappedDetailPill
+                label="Beat market"
+                value={`${wrappedData.beatMarket}%`}
+              />
               <WrappedDetailPill
                 label="Identity"
-                value={wrapped.travelerIdentity}
+                value={wrappedData.travelerIdentity || "Smart Traveler"}
               />
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-4">
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                What this can include later
+                What this includes
               </p>
 
               <div className="mt-3 grid gap-2">
@@ -405,9 +391,39 @@ export default function ProIntelligenceWrappedLab() {
             </div>
           </div>
         </WrappedCompactModal>
-      )}
+      ) : null}
     </section>
   )
+}
+
+function getBestRoute(routeArcs: GlobeRouteArc[]) {
+  const firstArc = routeArcs[0]
+
+  if (!firstArc?.origin || !firstArc?.destination) {
+    return "Building"
+  }
+
+  return `${firstArc.origin} → ${firstArc.destination}`
+}
+
+function getBestRouteDetail(hasWrappedActivity: boolean, bestRoute: string) {
+  if (!hasWrappedActivity || bestRoute === "Building") {
+    return "Complete saved flights to build route stories, airport activity, and yearly travel intelligence."
+  }
+
+  return `${bestRoute} stands out in your completed travel archive and helps shape your yearly Skysirv intelligence profile.`
+}
+
+function formatCurrency(value?: number | null) {
+  if (value == null || !Number.isFinite(Number(value))) {
+    return "$0"
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(Number(value))
 }
 
 function SummaryCard({
@@ -483,9 +499,7 @@ function WrappedDetailRow({
         {title}
       </p>
 
-      <p className="mt-1 text-xs leading-5 text-slate-500">
-        {description}
-      </p>
+      <p className="mt-1 text-xs leading-5 text-slate-500">{description}</p>
     </div>
   )
 }

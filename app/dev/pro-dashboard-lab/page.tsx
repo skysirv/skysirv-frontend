@@ -78,13 +78,35 @@ export default function ProDashboardLabPage() {
             <RouteSearch theme="light" />
           </div>
 
-          <ProWatchlistIntelligenceLab />
+          <ProWatchlistIntelligenceLab watchlist={[]} remainingRoutes={25} />
 
-          <ProSavedRoutesLab />
+          <ProSavedRoutesLab savedFlights={[]} />
 
-          <ProPortfolioIntelligenceLab />
+          <ProPortfolioIntelligenceLab
+            watchlist={[]}
+            savedFlights={[]}
+            remainingRoutes={25}
+          />
 
-          <ProIntelligenceWrappedLab />
+          <ProIntelligenceWrappedLab
+            wrappedLoading={false}
+            wrappedData={{
+              flights: 0,
+              countries: 0,
+              distance: "0 km",
+              skyscore: 0,
+              savings: 0,
+              avgSavings: 0,
+              beatMarket: 0,
+              routesMonitored: 0,
+              travelerIdentity: "Smart Traveler",
+            }}
+            selectedYear={2026}
+            availableWrappedYears={[2026]}
+            setSelectedYear={() => { }}
+            globeAirportNodes={[]}
+            globeRouteArcs={[]}
+          />
         </div>
       </div>
     </section>

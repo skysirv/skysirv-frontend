@@ -2,51 +2,57 @@
 
 import { useState } from "react"
 
-const monitoredRoutes = [
-  {
-    route: "LAX → SIN",
-    status: "Live Data",
-    airports: "Los Angeles Intl Airport → Singapore Changi Airport",
-    date: "Departure · May 26, 2026",
-    routeAverage: "$989",
-    tracking: "Active",
-    history: "Active",
-    signal: "Volatile",
-    recommendedFlights: [
-      { airline: "EVA Air", price: "$868" },
-      { airline: "Air Canada", price: "$1,022" },
-      { airline: "Asiana Airlines", price: "$1,092" },
-      { airline: "JX", price: "$918" },
-    ],
-  },
-  {
-    route: "MIA → LAX",
-    status: "Live Data",
-    airports: "Miami Intl Airport → Los Angeles Intl Airport",
-    date: "Departure · May 20, 2026",
-    routeAverage: "$377",
-    tracking: "Active",
-    history: "Active",
-    signal: "Volatile",
-    recommendedFlights: [
-      { airline: "American Airlines", price: "$387" },
-      { airline: "Spirit Airlines", price: "$229" },
-    ],
-  },
-  {
-    route: "BOS → MIA",
-    status: "Building",
-    airports: "Boston Logan Intl Airport → Miami Intl Airport",
-    date: "Departure · May 8, 2026",
-    routeAverage: "$262",
-    tracking: "Active",
-    history: "Active",
-    signal: "Stable",
-    recommendedFlights: [{ airline: "American Airlines", price: "$258" }],
-  },
-]
+export type BusinessWatchlistRouteLabData = {
+  id: string
+  route?: string | null
+  route_hash?: string | null
+  origin?: string | null
+  destination?: string | null
+  departure_date?: string | null
+  last_checked_at?: string | null
+  created_at?: string | null
+  latest_price?: number | null
+  avg_price?: number | null
+  booking_signal?: string | null
+  latest_airline?: string | null
+  latest_flight_number?: string | null
+  latest_captured_at?: string | null
+  volatility_index?: string | null
+  recommended_flights?:
+  | {
+    airline?: string | null
+    flightNumber?: string | null
+    price?: number | null
+    currency?: string | null
+    capturedAt?: string | null
+  }[]
+  | null
+}
 
-export default function BusinessWatchlistIntelligenceLab() {
+type RecommendedFlight = {
+  airline?: string | null
+  flightNumber?: string | null
+  price?: number | null
+  currency?: string | null
+  capturedAt?: string | null
+}
+
+type BusinessWatchlistIntelligenceLabProps = {
+  loading?: boolean
+  watchlist: BusinessWatchlistRouteLabData[]
+  onOpenFlightModal?: (
+    route: BusinessWatchlistRouteLabData,
+    flight?: RecommendedFlight | null
+  ) => void
+  onRemoveRoute?: (routeId: string) => void
+}
+
+export default function BusinessWatchlistIntelligenceLab({
+  loading = false,
+  watchlist,
+  onOpenFlightModal,
+  onRemoveRoute,
+}: BusinessWatchlistIntelligenceLabProps) {
   const [openRoute, setOpenRoute] = useState<string | null>(null)
 
   return (
@@ -65,159 +71,325 @@ export default function BusinessWatchlistIntelligenceLab() {
           </div>
 
           <div className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-4 py-2">
-            <span className="text-sm font-semibold text-slate-950">3</span>
+            <span className="text-sm font-semibold text-slate-950">
+              {watchlist.length}
+            </span>
+
             <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
               Routes
             </span>
           </div>
         </div>
 
-        <div className="mt-5 max-h-[430px] space-y-2 overflow-y-auto pr-2 [scrollbar-color:rgba(148,163,184,0.45)_rgba(241,245,249,0.9)] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-slate-100 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb:hover]:bg-slate-400">
-          {monitoredRoutes.map((route) => {
-            const isOpen = openRoute === route.route
+        {loading ? (
+          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-6">
+            <p className="text-sm font-semibold text-slate-950">
+              Loading monitored routes.
+            </p>
 
-            return (
-              <article
-                key={route.route}
-                className="overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-cyan-200 hover:bg-slate-50/60"
-              >
-                <button
-                  type="button"
-                  onClick={() =>
-                    setOpenRoute((current) =>
-                      current === route.route ? null : route.route
-                    )
-                  }
-                  className="flex w-full items-center justify-between gap-4 px-4 py-3 text-left"
+            <p className="mt-1 text-sm leading-6 text-slate-600">
+              Skysirv is pulling your Business watchlist and live fare context.
+            </p>
+          </div>
+        ) : watchlist.length === 0 ? (
+          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-6">
+            <p className="text-sm font-semibold text-slate-950">
+              No monitored routes yet.
+            </p>
+
+            <p className="mt-1 text-sm leading-6 text-slate-600">
+              Add a route above to begin building Business-level fare
+              intelligence.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-5 max-h-[430px] space-y-2 overflow-y-auto pr-2 [scrollbar-color:rgba(148,163,184,0.45)_rgba(241,245,249,0.9)] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-slate-100 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb:hover]:bg-slate-400">
+            {watchlist.map((route) => {
+              const routeKey = getRouteKey(route)
+              const isOpen = openRoute === routeKey
+              const recommendedFlights = normalizeRecommendedFlights(route)
+
+              const chevronClasses = isOpen
+                ? "rotate-180 border-cyan-200 bg-cyan-50 text-cyan-700"
+                : "hover:border-slate-300 hover:text-slate-700"
+
+              return (
+                <article
+                  key={route.id}
+                  className="overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-cyan-200 hover:bg-slate-50/60"
                 >
-                  <div className="min-w-0">
-                    <div className="flex min-w-0 flex-wrap items-center gap-2">
-                      <span className="shrink-0 text-sm font-semibold tracking-tight text-slate-950">
-                        {route.route}
-                      </span>
-
-                      <span className="hidden text-slate-300 sm:inline">•</span>
-
-                      <span className="min-w-0 truncate text-sm text-slate-600">
-                        {route.airports}
-                      </span>
-
-                      <span className="hidden text-slate-300 md:inline">•</span>
-
-                      <span className="shrink-0 text-sm text-slate-500">
-                        {route.date}
-                      </span>
-
-                      <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-cyan-200 bg-cyan-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-700">
-                        {route.status}
-                      </span>
-                    </div>
-                  </div>
-
-                  <span
-                    className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition ${isOpen
-                      ? "rotate-180 border-cyan-200 bg-cyan-50 text-cyan-700"
-                      : "hover:border-slate-300 hover:text-slate-700"
-                      }`}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOpenRoute((current) =>
+                        current === routeKey ? null : routeKey
+                      )
+                    }
+                    className="flex w-full items-center justify-between gap-4 px-4 py-3 text-left"
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                      className="h-5 w-5"
-                      fill="none"
-                    >
-                      <path
-                        d="M6 9l6 6 6-6"
-                        stroke="currentColor"
-                        strokeWidth="2.25"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </span>
-                </button>
+                    <div className="min-w-0">
+                      <div className="flex min-w-0 flex-wrap items-center gap-2">
+                        <span className="shrink-0 text-sm font-semibold tracking-tight text-slate-950">
+                          {getRouteLabel(route)}
+                        </span>
 
-                {isOpen && (
-                  <div className="border-t border-slate-200 px-4 pb-4 pt-3">
-                    <div className="grid gap-4 lg:grid-cols-[1.25fr_1fr_auto]">
-                      <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                          Recommended flights
-                        </p>
+                        <span className="hidden text-slate-300 sm:inline">
+                          •
+                        </span>
 
-                        <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                          {route.recommendedFlights.map((flight) => (
-                            <button
-                              key={`${route.route}-${flight.airline}-${flight.price}`}
-                              type="button"
-                              className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-left transition hover:border-cyan-200 hover:bg-white"
-                            >
-                              <span className="min-w-0 truncate text-sm text-slate-700">
-                                {flight.airline}
-                              </span>
+                        <span className="min-w-0 truncate text-sm text-slate-600">
+                          {getAirportLabel(route)}
+                        </span>
 
-                              <span className="shrink-0 text-sm font-semibold text-slate-950">
-                                {flight.price}
-                              </span>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
+                        <span className="hidden text-slate-300 md:inline">
+                          •
+                        </span>
 
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            Route avg
-                          </p>
-                          <p className="mt-1 text-sm font-semibold text-slate-950">
-                            {route.routeAverage}
-                          </p>
-                        </div>
+                        <span className="shrink-0 text-sm text-slate-500">
+                          {getDepartureLabel(route)}
+                        </span>
 
-                        <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            Tracking
-                          </p>
-                          <p className="mt-1 text-sm font-semibold text-slate-950">
-                            {route.tracking}
-                          </p>
-                        </div>
-
-                        <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            History
-                          </p>
-                          <p className="mt-1 text-sm font-semibold text-slate-950">
-                            {route.history}
-                          </p>
-                        </div>
-
-                        <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            Signal
-                          </p>
-                          <p className="mt-1 text-sm font-semibold text-slate-950">
-                            {route.signal}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-end">
-                        <button
-                          type="button"
-                          className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
-                        >
-                          View intelligence
-                        </button>
+                        <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-cyan-200 bg-cyan-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-700">
+                          {getStatusLabel(route)}
+                        </span>
                       </div>
                     </div>
-                  </div>
-                )}
-              </article>
-            )
-          })}
-        </div>
+
+                    <span
+                      className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition ${chevronClasses}`}
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                        className="h-5 w-5"
+                        fill="none"
+                      >
+                        <path
+                          d="M6 9l6 6 6-6"
+                          stroke="currentColor"
+                          strokeWidth="2.25"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </span>
+                  </button>
+
+                  {isOpen ? (
+                    <div className="border-t border-slate-200 px-4 pb-4 pt-3">
+                      <div className="grid gap-4 lg:grid-cols-[1.25fr_1fr_auto]">
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                            Recommended flights
+                          </p>
+
+                          {recommendedFlights.length > 0 ? (
+                            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                              {recommendedFlights.map((flight, index) => (
+                                <button
+                                  key={`${route.id}-${flight.airline ?? "flight"}-${flight.flightNumber ?? index
+                                    }-${flight.price ?? "price"}`}
+                                  type="button"
+                                  onClick={() => {
+                                    if (onOpenFlightModal) {
+                                      onOpenFlightModal(route, flight)
+                                    }
+                                  }}
+                                  className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-left transition hover:border-cyan-200 hover:bg-white"
+                                >
+                                  <span className="min-w-0 truncate text-sm text-slate-700">
+                                    {getFlightLabel(flight)}
+                                  </span>
+
+                                  <span className="shrink-0 text-sm font-semibold text-slate-950">
+                                    {formatPrice(flight.price)}
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
+                              <p className="text-sm text-slate-600">
+                                Recommended flights are building for this route.
+                              </p>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                              Route avg
+                            </p>
+                            <p className="mt-1 text-sm font-semibold text-slate-950">
+                              {formatAveragePrice(route.avg_price)}
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                              Tracking
+                            </p>
+                            <p className="mt-1 text-sm font-semibold text-slate-950">
+                              Active
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                              History
+                            </p>
+                            <p className="mt-1 text-sm font-semibold text-slate-950">
+                              {route.last_checked_at ? "Active" : "Building"}
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                              Signal
+                            </p>
+                            <p className="mt-1 text-sm font-semibold text-slate-950">
+                              {getSignalLabel(route)}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-end justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (onOpenFlightModal) {
+                                onOpenFlightModal(route, recommendedFlights[0] ?? null)
+                              }
+                            }}
+                            className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
+                          >
+                            View intelligence
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (onRemoveRoute) {
+                                onRemoveRoute(route.id)
+                              }
+                            }}
+                            className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-100"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+                </article>
+              )
+            })}
+          </div>
+        )}
       </div>
     </section>
   )
+}
+
+function getRouteKey(route: BusinessWatchlistRouteLabData) {
+  return route.route_hash ?? route.id
+}
+
+function getRouteLabel(route: BusinessWatchlistRouteLabData) {
+  if (route.route) return route.route
+
+  const origin = route.origin?.trim() || "—"
+  const destination = route.destination?.trim() || "—"
+
+  return `${origin} → ${destination}`
+}
+
+function getAirportLabel(route: BusinessWatchlistRouteLabData) {
+  const origin = route.origin?.trim() || "Origin"
+  const destination = route.destination?.trim() || "Destination"
+
+  return `${origin} → ${destination}`
+}
+
+function getDepartureLabel(route: BusinessWatchlistRouteLabData) {
+  if (!route.departure_date) return "Departure · Watching"
+
+  const parsedDate = new Date(route.departure_date)
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return `Departure · ${route.departure_date}`
+  }
+
+  return `Departure · ${parsedDate.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })}`
+}
+
+function getStatusLabel(route: BusinessWatchlistRouteLabData) {
+  if (route.latest_price != null || route.recommended_flights?.length) {
+    return "Live Data"
+  }
+
+  return "Building"
+}
+
+function getSignalLabel(route: BusinessWatchlistRouteLabData) {
+  if (route.booking_signal) return route.booking_signal
+  if (route.volatility_index) return route.volatility_index
+  if (route.latest_price != null) return "Active"
+  return "Building"
+}
+
+function normalizeRecommendedFlights(route: BusinessWatchlistRouteLabData) {
+  const directFlights = Array.isArray(route.recommended_flights)
+    ? route.recommended_flights
+    : []
+
+  if (directFlights.length > 0) {
+    return directFlights.slice(0, 6)
+  }
+
+  if (route.latest_price != null || route.latest_airline || route.latest_flight_number) {
+    return [
+      {
+        airline: route.latest_airline,
+        flightNumber: route.latest_flight_number,
+        price: route.latest_price,
+        currency: "USD",
+        capturedAt: route.latest_captured_at,
+      },
+    ]
+  }
+
+  return []
+}
+
+function getFlightLabel(flight: RecommendedFlight) {
+  const airline = flight.airline?.trim() || "Recommended flight"
+  const flightNumber = flight.flightNumber?.trim()
+
+  return flightNumber ? `${airline} · ${flightNumber}` : airline
+}
+
+function formatAveragePrice(value?: number | null) {
+  if (value == null || !Number.isFinite(Number(value))) {
+    return "Building"
+  }
+
+  return formatPrice(Number(value) / 100)
+}
+
+function formatPrice(value?: number | null) {
+  if (value == null || !Number.isFinite(Number(value))) {
+    return "Building"
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(Number(value))
 }

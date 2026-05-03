@@ -4,155 +4,105 @@ import { useMemo, useState } from "react"
 import TravelGlobe from "@/components/intelligence-wrapped/travel-globe"
 import WrappedCompactModal from "@/components/dashboard/lab/wrapped-compact-modal"
 
-const years = [2026] as const
-
-type WrappedYear = (typeof years)[number]
-
-const wrappedByYear = {
-  2026: {
-    flights: 18,
-    countries: 7,
-    distance: "142,000 km",
-    skyscore: 87,
-    bestRoute: "BOS → LHR",
-    bestRouteDetail:
-      "Booked before a major upward move and captured one of the strongest timing wins in your profile.",
-    savings: "$2,340",
-    beatMarket: "71%",
-    travelerIdentity: "Precision Booker",
-    airportNodes: [
-      {
-        airportCode: "BOS",
-        lat: 42.3656,
-        lng: -71.0096,
-        name: "Boston Logan International Airport",
-        city: "Boston",
-        country: "United States",
-        visits: 5,
-        flights: 5,
-        layoverHours: 2.4,
-        loungeHours: 1.2,
-      },
-      {
-        airportCode: "LHR",
-        lat: 51.47,
-        lng: -0.4543,
-        name: "London Heathrow Airport",
-        city: "London",
-        country: "United Kingdom",
-        visits: 3,
-        flights: 3,
-        layoverHours: 4.1,
-        loungeHours: 2.8,
-      },
-      {
-        airportCode: "MIA",
-        lat: 25.7959,
-        lng: -80.287,
-        name: "Miami International Airport",
-        city: "Miami",
-        country: "United States",
-        visits: 4,
-        flights: 4,
-        layoverHours: 3.2,
-        loungeHours: 1.5,
-      },
-      {
-        airportCode: "LAX",
-        lat: 33.9416,
-        lng: -118.4085,
-        name: "Los Angeles International Airport",
-        city: "Los Angeles",
-        country: "United States",
-        visits: 3,
-        flights: 3,
-        layoverHours: 2.9,
-        loungeHours: 1.7,
-      },
-      {
-        airportCode: "SIN",
-        lat: 1.3644,
-        lng: 103.9915,
-        name: "Singapore Changi Airport",
-        city: "Singapore",
-        country: "Singapore",
-        visits: 2,
-        flights: 2,
-        layoverHours: 5.6,
-        loungeHours: 3.4,
-      },
-    ],
-    routeArcs: [
-      {
-        tripId: "trip-1",
-        segmentId: "segment-1",
-        segmentOrder: 1,
-        origin: "BOS",
-        destination: "LHR",
-        airlineCode: "BA",
-        flightNumber: "212",
-        status: "completed",
-        source: "wrapped",
-        scheduledDepartureAt: "2026-03-14T21:20:00Z",
-        scheduledArrivalAt: "2026-03-15T08:55:00Z",
-      },
-      {
-        tripId: "trip-2",
-        segmentId: "segment-2",
-        segmentOrder: 1,
-        origin: "MIA",
-        destination: "LAX",
-        airlineCode: "AA",
-        flightNumber: "1418",
-        status: "completed",
-        source: "wrapped",
-        scheduledDepartureAt: "2026-05-20T14:10:00Z",
-        scheduledArrivalAt: "2026-05-20T17:25:00Z",
-      },
-      {
-        tripId: "trip-3",
-        segmentId: "segment-3",
-        segmentOrder: 1,
-        origin: "LAX",
-        destination: "SIN",
-        airlineCode: "BR",
-        flightNumber: "23",
-        status: "completed",
-        source: "wrapped",
-        scheduledDepartureAt: "2026-08-11T22:45:00Z",
-        scheduledArrivalAt: "2026-08-13T05:50:00Z",
-      },
-    ],
-  },
+type WrappedData = {
+  flights: number
+  countries: number
+  distance: string
+  skyscore: number
+  savings: number
+  avgSavings: number
+  beatMarket: number
+  routesMonitored: number
+  alertsTriggered: number
+  alertsWon: number
+  travelerIdentity: string
+  bestRoute: {
+    route: string
+    saved: number
+    beforeSpike: string
+    timingGrade: string
+  }
 }
 
-export default function BusinessIntelligenceWrappedLab() {
-  const [selectedYear, setSelectedYear] = useState<WrappedYear>(2026)
+type GlobeAirportNode = {
+  airportCode: string
+  lat?: number
+  lng?: number
+  name?: string
+  city?: string
+  country?: string
+  visits?: number
+  layoverHours?: number
+  loungeHours?: number
+  flights?: number
+}
+
+type GlobeRouteArc = {
+  tripId: string
+  segmentId: string
+  segmentOrder: number
+  origin: string
+  destination: string
+  airlineCode: string | null
+  flightNumber: string | null
+  status: string
+  source: string | null
+  scheduledDepartureAt: string | null
+  scheduledArrivalAt: string | null
+}
+
+type BusinessIntelligenceWrappedLabProps = {
+  wrappedLoading?: boolean
+  wrappedData: WrappedData
+  selectedYear: number
+  availableWrappedYears: number[]
+  setSelectedYear: (year: number) => void
+  globeAirportNodes: GlobeAirportNode[]
+  globeRouteArcs: GlobeRouteArc[]
+}
+
+export default function BusinessIntelligenceWrappedLab({
+  wrappedLoading = false,
+  wrappedData,
+  selectedYear,
+  availableWrappedYears,
+  setSelectedYear,
+  globeAirportNodes,
+  globeRouteArcs,
+}: BusinessIntelligenceWrappedLabProps) {
   const [isRouteStoryOpen, setIsRouteStoryOpen] = useState(false)
   const [isWrappedDetailsOpen, setIsWrappedDetailsOpen] = useState(false)
 
-  const wrapped = wrappedByYear[selectedYear]
+  const hasWrappedActivity =
+    wrappedData.flights > 0 ||
+    wrappedData.countries > 0 ||
+    globeAirportNodes.length > 0 ||
+    globeRouteArcs.length > 0
+
+  const bestRoute = getBestRoute(wrappedData, globeRouteArcs)
+  const timingLabel = wrappedData.bestRoute.beforeSpike || "Building"
+  const gradeLabel = wrappedData.bestRoute.timingGrade || "—"
 
   const metrics = useMemo(
     () => [
       {
         label: "Flights",
-        value: String(wrapped.flights),
+        value: wrappedLoading ? "Loading" : String(wrappedData.flights),
       },
       {
         label: "Countries",
-        value: String(wrapped.countries),
+        value: wrappedLoading ? "Loading" : String(wrappedData.countries),
       },
       {
         label: "Distance",
-        value: wrapped.distance,
+        value: wrappedLoading ? "Loading" : wrappedData.distance,
       },
       {
         label: "Skyscore",
-        value: String(wrapped.skyscore),
+        value: wrappedLoading ? "Loading" : String(wrappedData.skyscore),
       },
     ],
-    [wrapped]
+    [wrappedData, wrappedLoading]
   )
 
   return (
@@ -187,14 +137,13 @@ export default function BusinessIntelligenceWrappedLab() {
               <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                 Year
               </span>
+
               <select
                 value={selectedYear}
-                onChange={(event) =>
-                  setSelectedYear(Number(event.target.value) as WrappedYear)
-                }
+                onChange={(event) => setSelectedYear(Number(event.target.value))}
                 className="bg-transparent text-sm font-semibold text-slate-950 outline-none"
               >
-                {years.map((year) => (
+                {availableWrappedYears.map((year) => (
                   <option key={year} value={year}>
                     {year}
                   </option>
@@ -222,10 +171,25 @@ export default function BusinessIntelligenceWrappedLab() {
         </div>
 
         <div className="mt-5">
-          <TravelGlobe
-            airportNodes={wrapped.airportNodes}
-            routeArcs={wrapped.routeArcs}
-          />
+          {hasWrappedActivity ? (
+            <TravelGlobe
+              airportNodes={globeAirportNodes}
+              routeArcs={globeRouteArcs}
+            />
+          ) : (
+            <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-slate-200 bg-slate-50/70 px-6 py-10 text-center">
+              <div>
+                <p className="text-sm font-semibold text-slate-950">
+                  Your Business travel globe is building.
+                </p>
+
+                <p className="mt-2 max-w-md text-sm leading-6 text-slate-600">
+                  Mark saved flights as completed to start creating airport
+                  nodes, route arcs, and yearly Business travel intelligence.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_auto]">
@@ -238,17 +202,17 @@ export default function BusinessIntelligenceWrappedLab() {
                   </p>
 
                   <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-cyan-200 bg-cyan-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-700">
-                    Smartest move
+                    {hasWrappedActivity ? "Smartest move" : "Building"}
                   </span>
                 </div>
 
                 <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
                   <h3 className="text-xl font-semibold tracking-tight text-slate-950">
-                    {wrapped.bestRoute}
+                    {bestRoute}
                   </h3>
 
                   <p className="max-w-2xl text-sm leading-6 text-slate-600">
-                    {wrapped.bestRouteDetail}
+                    {getBestRouteDetail(hasWrappedActivity, bestRoute, wrappedData)}
                   </p>
                 </div>
               </div>
@@ -264,24 +228,27 @@ export default function BusinessIntelligenceWrappedLab() {
           </div>
 
           <div className="grid gap-2 sm:grid-cols-3 lg:w-[360px] lg:grid-cols-1">
-            <SummaryCard label="Savings" value={wrapped.savings} />
-            <SummaryCard label="Beat market" value={wrapped.beatMarket} />
-            <SummaryCard label="Traveler identity" value={wrapped.travelerIdentity} />
+            <SummaryCard label="Savings" value={formatCurrency(wrappedData.savings)} />
+            <SummaryCard label="Beat market" value={`${wrappedData.beatMarket}%`} />
+            <SummaryCard
+              label="Traveler identity"
+              value={wrappedData.travelerIdentity || "Precision Booker"}
+            />
           </div>
         </div>
       </div>
 
-      {isRouteStoryOpen && (
+      {isRouteStoryOpen ? (
         <WrappedCompactModal
           eyebrow="Route Story"
-          title={wrapped.bestRoute}
+          title={bestRoute}
           description="A compact explanation of why this route stood out inside your yearly travel intelligence."
           onClose={() => setIsRouteStoryOpen(false)}
           footer={
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="text-xs leading-5 text-slate-500">
-                Route story details will become more precise as completed trip
-                and fare-history depth increases.
+                Route story details become more precise as completed trip and
+                fare-history depth increases.
               </p>
 
               <button
@@ -301,14 +268,23 @@ export default function BusinessIntelligenceWrappedLab() {
               </p>
 
               <p className="mt-2 text-sm leading-6 text-slate-700">
-                {wrapped.bestRouteDetail}
+                {getBestRouteDetail(hasWrappedActivity, bestRoute, wrappedData)}
               </p>
             </div>
 
             <div className="grid gap-2 sm:grid-cols-3">
-              <RouteStoryPill label="Timing" value="Before spike" />
-              <RouteStoryPill label="Savings" value={wrapped.savings} />
-              <RouteStoryPill label="Grade" value="A+" />
+              <RouteStoryPill
+                label="Timing"
+                value={hasWrappedActivity ? timingLabel : "Building"}
+              />
+              <RouteStoryPill
+                label="Savings"
+                value={formatCurrency(wrappedData.bestRoute.saved || wrappedData.savings)}
+              />
+              <RouteStoryPill
+                label="Grade"
+                value={hasWrappedActivity ? gradeLabel : "—"}
+              />
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-4">
@@ -318,14 +294,13 @@ export default function BusinessIntelligenceWrappedLab() {
 
               <div className="mt-3 space-y-3 text-sm leading-6 text-slate-600">
                 <p>
-                  This route stood out because it combined favorable price
-                  behavior, better-than-market timing, and a completed booking
-                  outcome that improved the yearly intelligence profile.
+                  This route stood out because it connects completed travel
+                  activity with Skysirv&apos;s yearly route intelligence layer.
                 </p>
 
                 <p>
-                  In the full data-backed version, this story can include fare
-                  movement before and after booking, alert context, route
+                  As more saved flights are completed, this story can include
+                  fare movement before and after booking, alert context, route
                   volatility, and how the decision affected the user&apos;s
                   annual Skyscore.
                 </p>
@@ -333,9 +308,9 @@ export default function BusinessIntelligenceWrappedLab() {
             </div>
           </div>
         </WrappedCompactModal>
-      )}
+      ) : null}
 
-      {isWrappedDetailsOpen && (
+      {isWrappedDetailsOpen ? (
         <WrappedCompactModal
           eyebrow="Wrapped Intelligence"
           title={`${selectedYear} travel intelligence`}
@@ -360,10 +335,13 @@ export default function BusinessIntelligenceWrappedLab() {
         >
           <div className="space-y-3">
             <div className="grid gap-2 sm:grid-cols-2">
-              <WrappedDetailPill label="Flights" value={String(wrapped.flights)} />
-              <WrappedDetailPill label="Countries" value={String(wrapped.countries)} />
-              <WrappedDetailPill label="Distance" value={wrapped.distance} />
-              <WrappedDetailPill label="Skyscore" value={String(wrapped.skyscore)} />
+              <WrappedDetailPill label="Flights" value={String(wrappedData.flights)} />
+              <WrappedDetailPill
+                label="Countries"
+                value={String(wrappedData.countries)}
+              />
+              <WrappedDetailPill label="Distance" value={wrappedData.distance} />
+              <WrappedDetailPill label="Skyscore" value={String(wrappedData.skyscore)} />
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
@@ -372,25 +350,46 @@ export default function BusinessIntelligenceWrappedLab() {
               </p>
 
               <p className="mt-3 text-sm leading-6 text-slate-600">
-                Your {selectedYear} profile shows a high-confidence travel pattern
-                built from completed trips, monitored routes, airport activity, and
-                booking outcomes. As more trips are completed, this view can become a
-                richer annual intelligence archive.
+                Your {selectedYear} Business profile is built from completed
+                trips, monitored routes, airport activity, alert outcomes, and
+                booking decisions. As more trips are completed, this view becomes
+                a richer annual intelligence archive.
               </p>
             </div>
 
             <div className="grid gap-2 sm:grid-cols-3">
-              <WrappedDetailPill label="Savings" value={wrapped.savings} />
-              <WrappedDetailPill label="Beat market" value={wrapped.beatMarket} />
+              <WrappedDetailPill
+                label="Savings"
+                value={formatCurrency(wrappedData.savings)}
+              />
+              <WrappedDetailPill
+                label="Beat market"
+                value={`${wrappedData.beatMarket}%`}
+              />
               <WrappedDetailPill
                 label="Identity"
-                value={wrapped.travelerIdentity}
+                value={wrappedData.travelerIdentity || "Precision Booker"}
+              />
+            </div>
+
+            <div className="grid gap-2 sm:grid-cols-3">
+              <WrappedDetailPill
+                label="Alerts"
+                value={String(wrappedData.alertsTriggered)}
+              />
+              <WrappedDetailPill
+                label="Alerts won"
+                value={String(wrappedData.alertsWon)}
+              />
+              <WrappedDetailPill
+                label="Routes"
+                value={String(wrappedData.routesMonitored)}
               />
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-4">
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                What this can include later
+                What this includes
               </p>
 
               <div className="mt-3 grid gap-2">
@@ -417,9 +416,53 @@ export default function BusinessIntelligenceWrappedLab() {
             </div>
           </div>
         </WrappedCompactModal>
-      )}
+      ) : null}
     </section>
   )
+}
+
+function getBestRoute(wrappedData: WrappedData, routeArcs: GlobeRouteArc[]) {
+  if (wrappedData.bestRoute.route && wrappedData.bestRoute.route !== "—") {
+    return wrappedData.bestRoute.route
+  }
+
+  const firstArc = routeArcs[0]
+
+  if (!firstArc?.origin || !firstArc?.destination) {
+    return "Building"
+  }
+
+  return `${firstArc.origin} → ${firstArc.destination}`
+}
+
+function getBestRouteDetail(
+  hasWrappedActivity: boolean,
+  bestRoute: string,
+  wrappedData: WrappedData
+) {
+  if (!hasWrappedActivity || bestRoute === "Building") {
+    return "Complete saved flights to build route stories, airport activity, alert outcomes, and yearly Business travel intelligence."
+  }
+
+  if (wrappedData.bestRoute.saved > 0) {
+    return `${bestRoute} stands out with ${formatCurrency(
+      wrappedData.bestRoute.saved
+    )} in tracked savings and helps shape your yearly Skysirv intelligence profile.`
+  }
+
+  return `${bestRoute} stands out in your completed travel archive and helps shape your yearly Skysirv intelligence profile.`
+}
+
+function formatCurrency(value?: number | null) {
+  if (value == null || !Number.isFinite(Number(value))) {
+    return "$0"
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(Number(value))
 }
 
 function SummaryCard({
@@ -495,9 +538,7 @@ function WrappedDetailRow({
         {title}
       </p>
 
-      <p className="mt-1 text-xs leading-5 text-slate-500">
-        {description}
-      </p>
+      <p className="mt-1 text-xs leading-5 text-slate-500">{description}</p>
     </div>
   )
 }
