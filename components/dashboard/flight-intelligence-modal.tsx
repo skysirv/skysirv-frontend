@@ -3,6 +3,17 @@
 import { useEffect } from "react"
 import { getAirportByCode } from "@/lib/airports/major-airports"
 
+type ItinerarySegment = {
+  origin?: string | null
+  destination?: string | null
+  marketingCarrier?: string | null
+  operatingCarrier?: string | null
+  marketingFlightNumber?: string | null
+  operatingFlightNumber?: string | null
+  departureTime?: string | null
+  arrivalTime?: string | null
+}
+
 type RecommendedFlight = {
   airline?: string | null
   flightNumber?: string | null
@@ -11,6 +22,9 @@ type RecommendedFlight = {
   capturedAt?: string | null
   bookingSignal?: string | null
   volatilityIndex?: string | null
+  stopCount?: number | null
+  itineraryKey?: string | null
+  itinerarySegments?: ItinerarySegment[] | null
 }
 
 type FlightIntelligenceModalProps = {
@@ -135,6 +149,160 @@ function getSignalDisplay(volatility?: string | null) {
   return "Volatile"
 }
 
+const airlineNamesByCode: Record<string, string> = {
+  AA: "American Airlines",
+  AC: "Air Canada",
+  AF: "Air France",
+  AM: "Aeromexico",
+  AV: "Avianca",
+  BA: "British Airways",
+  B6: "JetBlue",
+  BR: "EVA Air",
+  CM: "Copa Airlines",
+  DL: "Delta Air Lines",
+  EK: "Emirates",
+  IB: "Iberia",
+  KL: "KLM",
+  LA: "LATAM Airlines",
+  LH: "Lufthansa",
+  QR: "Qatar Airways",
+  TK: "Turkish Airlines",
+  UA: "United Airlines",
+  VS: "Virgin Atlantic",
+}
+
+function getAirlineDisplay(value?: string | null) {
+  const raw = value?.trim()
+
+  if (!raw) return "Airline pending"
+
+  const normalizedCode = raw.toUpperCase()
+
+  return airlineNamesByCode[normalizedCode] ?? raw
+}
+
+function getSegmentCarrier(segment: ItinerarySegment) {
+  return (
+    segment.marketingCarrier?.trim().toUpperCase() ||
+    segment.operatingCarrier?.trim().toUpperCase() ||
+    null
+  )
+}
+
+function getSegmentFlightNumber(segment: ItinerarySegment) {
+  const rawFlightNumber =
+    segment.marketingFlightNumber?.trim() ||
+    segment.operatingFlightNumber?.trim()
+
+  if (!rawFlightNumber) return null
+
+  return rawFlightNumber.replace(/^[A-Z]{2}\s*/i, "").replace(/^0+/, "")
+}
+
+function getSegmentFlightLabel(segment: ItinerarySegment) {
+  const carrier = getSegmentCarrier(segment)
+  const flightNumber = getSegmentFlightNumber(segment)
+
+  if (!carrier || !flightNumber) return "Flight pending"
+
+  return `${carrier} ${flightNumber}`
+}
+
+function getSelectedFlightDisplay(flight?: RecommendedFlight | null) {
+  if (!flight) return "No flight selected"
+
+  const segments = Array.isArray(flight.itinerarySegments)
+    ? flight.itinerarySegments
+    : []
+
+  if (segments.length > 1) {
+    return `${getAirlineDisplay(flight.airline)} · ${segments.length} segments · ${formatPrice(
+      flight.price
+    )}`
+  }
+
+  if (segments.length === 1) {
+    return `${getAirlineDisplay(flight.airline)} · ${getSegmentFlightLabel(
+      segments[0]
+    )} · ${formatPrice(flight.price)}`
+  }
+
+  return `${getAirlineDisplay(flight.airline)}${flight.flightNumber ? ` ${flight.flightNumber}` : ""
+    } • ${formatPrice(flight.price)}`
+}
+
+function getRouteShapeFromSegments(flight?: RecommendedFlight | null) {
+  const segments = Array.isArray(flight?.itinerarySegments)
+    ? flight?.itinerarySegments
+    : []
+
+  if (!segments.length) return null
+
+  const routePoints = segments.reduce<string[]>((points, segment, index) => {
+    const origin = segment.origin?.trim().toUpperCase()
+    const destination = segment.destination?.trim().toUpperCase()
+
+    if (index === 0 && origin) {
+      points.push(origin)
+    }
+
+    if (destination) {
+      points.push(destination)
+    }
+
+    return points
+  }, [])
+
+  return routePoints.length > 1 ? routePoints.join(" → ") : null
+}
+
+function getPrimaryFlightLabel(flight?: RecommendedFlight | null) {
+  if (!flight) return "Flight pending"
+
+  const segments = Array.isArray(flight.itinerarySegments)
+    ? flight.itinerarySegments
+    : []
+
+  if (segments.length > 1) {
+    return `${segments.length} segments`
+  }
+
+  if (segments.length === 1) {
+    return getSegmentFlightLabel(segments[0])
+  }
+
+  return flight.flightNumber ?? "Flight pending"
+}
+
+function getSegmentAirportLabel(code?: string | null) {
+  const airportCode = code?.trim().toUpperCase()
+
+  if (!airportCode) return "Airport pending"
+
+  const airport = getAirportByCode(airportCode)
+
+  if (!airport) return airportCode
+
+  const airportName = airport.displayName ?? airport.name
+
+  return `${airportCode} · ${airportName}`
+}
+
+function getSegmentTimeLabel(value?: string | null) {
+  if (!value) return "Time pending"
+
+  const parsed = new Date(value)
+
+  if (Number.isNaN(parsed.getTime())) return "Time pending"
+
+  return parsed.toLocaleString([], {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  })
+}
+
 function getSignalClasses(signal: string) {
   if (signal === "Stable") {
     return "border-emerald-200 bg-emerald-50 text-emerald-700"
@@ -236,10 +404,7 @@ export default function FlightIntelligenceModal({
       ? `${formatAirportDisplay(originAirport)} → ${formatAirportDisplay(destinationAirport)}`
       : null
 
-  const selectedFlightSummary = selectedFlight
-    ? `${selectedFlight.airline ?? "Airline"}${selectedFlight.flightNumber ? ` ${selectedFlight.flightNumber}` : ""
-    } • ${formatPrice(selectedFlight.price)}`
-    : "No flight selected"
+  const selectedFlightSummary = getSelectedFlightDisplay(selectedFlight)
 
   const marketStatusDisplay = getMarketStatusDisplay(
     selectedFlight?.bookingSignal
@@ -260,6 +425,12 @@ export default function FlightIntelligenceModal({
   const recommendedFlights = Array.isArray(route?.recommendedFlights)
     ? route.recommendedFlights
     : []
+
+  const selectedSegments = Array.isArray(selectedFlight?.itinerarySegments)
+    ? selectedFlight.itinerarySegments
+    : []
+
+  const selectedRouteShape = getRouteShapeFromSegments(selectedFlight)
 
   useEffect(() => {
     if (!isOpen) return
@@ -404,16 +575,15 @@ export default function FlightIntelligenceModal({
                 <SnapshotRow label="Route" value={routeLabel} />
                 <SnapshotRow
                   label="Airline"
-                  value={
-                    selectedFlight?.airline ??
-                    route.latestAirline ??
-                    "Airline pending"
-                  }
+                  value={getAirlineDisplay(selectedFlight?.airline ?? route.latestAirline)}
                 />
                 <SnapshotRow
                   label="Flight"
-                  value={selectedFlight?.flightNumber ?? "Flight pending"}
+                  value={getPrimaryFlightLabel(selectedFlight)}
                 />
+                {selectedRouteShape ? (
+                  <SnapshotRow label="Itinerary" value={selectedRouteShape} />
+                ) : null}
                 <SnapshotRow
                   label="Tracking"
                   value={route.latestPrice ? "Live data" : "Building history"}
@@ -422,6 +592,57 @@ export default function FlightIntelligenceModal({
               </div>
             </div>
           </div>
+
+          {selectedSegments.length > 0 ? (
+            <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                    Selected Itinerary
+                  </p>
+
+                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                    Exact provider-returned segment details for the selected fare.
+                  </p>
+                </div>
+
+                <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  {selectedSegments.length === 1
+                    ? "Direct"
+                    : `${selectedSegments.length} segments`}
+                </span>
+              </div>
+
+              <div className="mt-3 grid gap-2">
+                {selectedSegments.map((segment, index) => (
+                  <div
+                    key={`${segment.origin ?? "origin"}-${segment.destination ?? "destination"}-${index}`}
+                    className="rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-slate-950">
+                          Segment {index + 1} · {getSegmentFlightLabel(segment)}
+                        </p>
+
+                        <p className="mt-1 truncate text-xs text-slate-500">
+                          {getSegmentAirportLabel(segment.origin)} →{" "}
+                          {getSegmentAirportLabel(segment.destination)}
+                        </p>
+                      </div>
+
+                      <div className="shrink-0 text-right text-xs text-slate-500">
+                        <p>Depart · {getSegmentTimeLabel(segment.departureTime)}</p>
+                        <p className="mt-0.5">
+                          Arrive · {getSegmentTimeLabel(segment.arrivalTime)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
 
           <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
@@ -452,18 +673,21 @@ export default function FlightIntelligenceModal({
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="text-sm font-semibold text-slate-950">
-                          {recommendedFlight.airline ?? "Airline pending"}
+                          {getAirlineDisplay(recommendedFlight.airline)}
                         </p>
 
-                        {recommendedFlight.flightNumber ? (
-                          <>
-                            <span className="text-slate-300">•</span>
-                            <p className="text-sm text-slate-500">
-                              {recommendedFlight.flightNumber}
-                            </p>
-                          </>
-                        ) : null}
+                        <span className="text-slate-300">•</span>
+
+                        <p className="text-sm text-slate-500">
+                          {getPrimaryFlightLabel(recommendedFlight)}
+                        </p>
                       </div>
+
+                      {getRouteShapeFromSegments(recommendedFlight) ? (
+                        <p className="mt-1 truncate text-xs text-slate-500">
+                          {getRouteShapeFromSegments(recommendedFlight)}
+                        </p>
+                      ) : null}
 
                       <p className="mt-1 text-xs text-slate-500">
                         Captured · {formatCapturedTime(recommendedFlight.capturedAt)}

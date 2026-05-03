@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { getAirportByCode } from "@/lib/airports/major-airports"
 
 export type BusinessWatchlistRouteLabData = {
   id: string
@@ -17,16 +18,22 @@ export type BusinessWatchlistRouteLabData = {
   latest_airline?: string | null
   latest_flight_number?: string | null
   latest_captured_at?: string | null
+  latest_stop_count?: number | null
+  latest_itinerary_key?: string | null
+  latest_itinerary_segments?: ItinerarySegment[] | null
   volatility_index?: string | null
-  recommended_flights?:
-  | {
-    airline?: string | null
-    flightNumber?: string | null
-    price?: number | null
-    currency?: string | null
-    capturedAt?: string | null
-  }[]
-  | null
+  recommended_flights?: RecommendedFlight[] | null
+}
+
+type ItinerarySegment = {
+  origin?: string | null
+  destination?: string | null
+  marketingCarrier?: string | null
+  operatingCarrier?: string | null
+  marketingFlightNumber?: string | null
+  operatingFlightNumber?: string | null
+  departureTime?: string | null
+  arrivalTime?: string | null
 }
 
 type RecommendedFlight = {
@@ -35,6 +42,11 @@ type RecommendedFlight = {
   price?: number | null
   currency?: string | null
   capturedAt?: string | null
+  bookingSignal?: string | null
+  volatilityIndex?: string | null
+  stopCount?: number | null
+  itineraryKey?: string | null
+  itinerarySegments?: ItinerarySegment[] | null
 }
 
 type BusinessWatchlistIntelligenceLabProps = {
@@ -197,8 +209,14 @@ export default function BusinessWatchlistIntelligenceLab({
                                   }}
                                   className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-left transition hover:border-cyan-200 hover:bg-white"
                                 >
-                                  <span className="min-w-0 truncate text-sm text-slate-700">
-                                    {getFlightLabel(flight)}
+                                  <span className="min-w-0">
+                                    <span className="block truncate text-sm font-medium text-slate-700">
+                                      {getFlightLabel(flight)}
+                                    </span>
+
+                                    <span className="mt-0.5 block truncate text-xs text-slate-500">
+                                      {getItineraryRouteLabel(flight)}
+                                    </span>
                                   </span>
 
                                   <span className="shrink-0 text-sm font-semibold text-slate-950">
@@ -306,10 +324,23 @@ function getRouteLabel(route: BusinessWatchlistRouteLabData) {
 }
 
 function getAirportLabel(route: BusinessWatchlistRouteLabData) {
-  const origin = route.origin?.trim() || "Origin"
-  const destination = route.destination?.trim() || "Destination"
+  return `${getAirportDisplay(route.origin)} → ${getAirportDisplay(
+    route.destination
+  )}`
+}
 
-  return `${origin} → ${destination}`
+function getAirportDisplay(code?: string | null) {
+  const airportCode = code?.trim().toUpperCase()
+
+  if (!airportCode) return "Airport pending"
+
+  const airport = getAirportByCode(airportCode)
+
+  if (!airport) return airportCode
+
+  const airportName = airport.displayName ?? airport.name
+
+  return `${airportCode} · ${airportName}`
 }
 
 function getDepartureLabel(route: BusinessWatchlistRouteLabData) {
@@ -360,6 +391,9 @@ function normalizeRecommendedFlights(route: BusinessWatchlistRouteLabData) {
         price: route.latest_price,
         currency: "USD",
         capturedAt: route.latest_captured_at,
+        stopCount: route.latest_stop_count,
+        itineraryKey: route.latest_itinerary_key,
+        itinerarySegments: route.latest_itinerary_segments,
       },
     ]
   }
@@ -367,11 +401,136 @@ function normalizeRecommendedFlights(route: BusinessWatchlistRouteLabData) {
   return []
 }
 
-function getFlightLabel(flight: RecommendedFlight) {
-  const airline = flight.airline?.trim() || "Recommended flight"
-  const flightNumber = flight.flightNumber?.trim()
+const airlineNamesByCode: Record<string, string> = {
+  AA: "American Airlines",
+  AC: "Air Canada",
+  AF: "Air France",
+  AM: "Aeromexico",
+  AV: "Avianca",
+  BA: "British Airways",
+  B6: "JetBlue",
+  BR: "EVA Air",
+  CM: "Copa Airlines",
+  DL: "Delta Air Lines",
+  EK: "Emirates",
+  IB: "Iberia",
+  KL: "KLM",
+  LA: "LATAM Airlines",
+  LH: "Lufthansa",
+  QR: "Qatar Airways",
+  TK: "Turkish Airlines",
+  UA: "United Airlines",
+  VS: "Virgin Atlantic",
+}
 
-  return flightNumber ? `${airline} · ${flightNumber}` : airline
+function getAirlineDisplay(value?: string | null) {
+  const raw = value?.trim()
+
+  if (!raw) return "Airline pending"
+
+  const normalizedCode = raw.toUpperCase()
+
+  return airlineNamesByCode[normalizedCode] ?? raw
+}
+
+function getSegmentFlightLabel(segment: ItinerarySegment) {
+  const carrier =
+    segment.marketingCarrier?.trim().toUpperCase() ||
+    segment.operatingCarrier?.trim().toUpperCase()
+
+  const rawFlightNumber =
+    segment.marketingFlightNumber?.trim() ||
+    segment.operatingFlightNumber?.trim()
+
+  if (!carrier || !rawFlightNumber) return null
+
+  const normalizedFlightNumber = rawFlightNumber
+    .replace(/^[A-Z]{2}\s*/i, "")
+    .replace(/^0+/, "")
+
+  return `${carrier} ${normalizedFlightNumber || rawFlightNumber}`
+}
+
+function getPrimarySegmentLabel(flight: RecommendedFlight) {
+  const segments = Array.isArray(flight.itinerarySegments)
+    ? flight.itinerarySegments
+    : []
+
+  const firstSegmentLabel = segments[0]
+    ? getSegmentFlightLabel(segments[0])
+    : null
+
+  if (firstSegmentLabel) return firstSegmentLabel
+
+  const rawFlightNumber = flight.flightNumber?.trim()
+
+  if (!rawFlightNumber) return "Flight pending"
+
+  const airlineCode = flight.airline?.trim().toUpperCase()
+  const numericFlightNumber = rawFlightNumber
+    .replace(/^[A-Z]{2}\s*/i, "")
+    .replace(/^0+/, "")
+
+  if (airlineCode && /^[A-Z0-9]{2}$/.test(airlineCode)) {
+    return `${airlineCode} ${numericFlightNumber || rawFlightNumber}`
+  }
+
+  return rawFlightNumber
+}
+
+function getFlightLabel(flight: RecommendedFlight) {
+  const airline = getAirlineDisplay(flight.airline)
+  const segments = Array.isArray(flight.itinerarySegments)
+    ? flight.itinerarySegments
+    : []
+
+  if (segments.length > 1) {
+    return `${airline} · ${segments.length} segments`
+  }
+
+  return `${airline} · ${getPrimarySegmentLabel(flight)} · Direct`
+}
+
+function getItineraryRouteLabel(flight: RecommendedFlight) {
+  const segments = Array.isArray(flight.itinerarySegments)
+    ? flight.itinerarySegments
+    : []
+
+  if (!segments.length) {
+    return flight.stopCount && flight.stopCount > 0
+      ? `${flight.stopCount + 1} segments`
+      : "Direct itinerary"
+  }
+
+  const routePoints = segments.reduce<string[]>((points, segment, index) => {
+    const origin = segment.origin?.trim().toUpperCase()
+    const destination = segment.destination?.trim().toUpperCase()
+
+    if (index === 0 && origin) {
+      points.push(origin)
+    }
+
+    if (destination) {
+      points.push(destination)
+    }
+
+    return points
+  }, [])
+
+  const routeShape = routePoints.length > 1 ? routePoints.join(" → ") : "Route pending"
+
+  if (segments.length === 1) {
+    const segmentLabel = getSegmentFlightLabel(segments[0])
+    return segmentLabel ? `${routeShape} · ${segmentLabel}` : routeShape
+  }
+
+  const segmentLabels = segments
+    .map(getSegmentFlightLabel)
+    .filter((value): value is string => Boolean(value))
+
+  return segmentLabels.length
+    ? `${routeShape} · ${segmentLabels.join(" + ")}`
+    : routeShape
 }
 
 function formatAveragePrice(value?: number | null) {
