@@ -1,523 +1,555 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { getAirportByCode } from "@/lib/airports/major-airports"
-import { AnimatePresence, motion } from "framer-motion"
 
 type RecommendedFlight = {
-    airline?: string | null
-    flightNumber?: string | null
-    price?: number | null
-    currency?: string | null
-    capturedAt?: string | null
-    bookingSignal?: string | null
-    volatilityIndex?: string | null
+  airline?: string | null
+  flightNumber?: string | null
+  price?: number | null
+  currency?: string | null
+  capturedAt?: string | null
+  bookingSignal?: string | null
+  volatilityIndex?: string | null
 }
 
 type FlightIntelligenceModalProps = {
-    isOpen: boolean
-    onClose: () => void
-    onSaveFlight?: () => void
-    route: {
-        id?: string | null
-        origin?: string | null
-        destination?: string | null
-        departureDate?: string | null
-        latestPrice?: number | null
-        avgPrice?: number | null
-        latestAirline?: string | null
-        latestCapturedAt?: string | null
-        volatilityIndex?: string | null
-        recommendedFlights?: RecommendedFlight[] | null
-    } | null
-    flight: RecommendedFlight | null
+  isOpen: boolean
+  onClose: () => void
+  onSaveFlight?: () => void
+  route: {
+    id?: string | null
+    origin?: string | null
+    destination?: string | null
+    departureDate?: string | null
+    latestPrice?: number | null
+    avgPrice?: number | null
+    latestAirline?: string | null
+    latestCapturedAt?: string | null
+    volatilityIndex?: string | null
+    recommendedFlights?: RecommendedFlight[] | null
+  } | null
+  flight: RecommendedFlight | null
 }
 
 function formatDepartureDate(value?: string | null) {
-    if (!value) return "Pending"
+  if (!value) return "Pending"
 
-    const raw = value.split("T")[0]
-    const parts = raw.split("-")
+  const raw = value.split("T")[0]
+  const parts = raw.split("-")
 
-    if (parts.length !== 3) return value
+  if (parts.length !== 3) return value
 
-    const [year, month, day] = parts.map(Number)
+  const [year, month, day] = parts.map(Number)
 
-    if (!year || !month || !day) return value
+  if (!year || !month || !day) return value
 
-    const parsed = new Date(year, month - 1, day)
+  const parsed = new Date(year, month - 1, day)
 
-    if (Number.isNaN(parsed.getTime())) return value
+  if (Number.isNaN(parsed.getTime())) return value
 
-    return parsed.toLocaleDateString([], {
-        weekday: "long",
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-    })
+  return parsed.toLocaleDateString([], {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })
 }
 
 function formatCapturedTime(value?: string | null) {
-    if (!value) return "Capture time pending"
+  if (!value) return "Pending"
 
-    const parsed = new Date(value)
+  const parsed = new Date(value)
 
-    if (Number.isNaN(parsed.getTime())) {
-        return "Capture time pending"
-    }
+  if (Number.isNaN(parsed.getTime())) {
+    return "Pending"
+  }
 
-    return parsed.toLocaleString([], {
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-    })
+  return parsed.toLocaleString([], {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  })
 }
 
 function formatPrice(value?: number | null) {
-    if (typeof value !== "number" || !Number.isFinite(value)) {
-        return "—"
-    }
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return "—"
+  }
 
-    return `$${Math.round(value).toLocaleString()}`
+  return `$${Math.round(value).toLocaleString()}`
+}
+
+function getMarketStatusDisplay(signal?: string | null) {
+  const raw = signal?.trim().toLowerCase()
+
+  if (!raw) return "Pending"
+
+  if (["strong buy", "buy", "cheap", "good deal"].includes(raw)) {
+    return "Good Deal"
+  }
+
+  if (["favorable window", "fair price", "neutral", "wait"].includes(raw)) {
+    return "Fair Price"
+  }
+
+  if (["overpriced", "expensive"].includes(raw)) {
+    return "Overpriced"
+  }
+
+  if (["monitor closely", "watch"].includes(raw)) {
+    return "Watch"
+  }
+
+  return signal ?? "Pending"
+}
+
+function getMarketStatusClasses(status: string) {
+  if (status === "Good Deal") {
+    return "border-emerald-200 bg-emerald-50 text-emerald-700"
+  }
+
+  if (status === "Fair Price") {
+    return "border-slate-200 bg-slate-50 text-slate-700"
+  }
+
+  if (status === "Overpriced") {
+    return "border-rose-200 bg-rose-50 text-rose-700"
+  }
+
+  if (status === "Watch") {
+    return "border-amber-200 bg-amber-50 text-amber-700"
+  }
+
+  return "border-slate-200 bg-slate-50 text-slate-500"
+}
+
+function getSignalDisplay(volatility?: string | null) {
+  const numericVolatility = Number(volatility)
+
+  if (!Number.isFinite(numericVolatility)) return "Pending"
+  if (numericVolatility < 5) return "Stable"
+  if (numericVolatility < 12) return "Moderate"
+
+  return "Volatile"
+}
+
+function getSignalClasses(signal: string) {
+  if (signal === "Stable") {
+    return "border-emerald-200 bg-emerald-50 text-emerald-700"
+  }
+
+  if (signal === "Moderate") {
+    return "border-amber-200 bg-amber-50 text-amber-700"
+  }
+
+  if (signal === "Volatile") {
+    return "border-rose-200 bg-rose-50 text-rose-700"
+  }
+
+  return "border-slate-200 bg-slate-50 text-slate-500"
+}
+
+function buildLucyBrief({
+  routeLabel,
+  marketStatus,
+  signalDisplay,
+  latestPrice,
+  avgPrice,
+}: {
+  routeLabel: string
+  marketStatus: string
+  signalDisplay: string
+  latestPrice?: number | null
+  avgPrice?: number | null
+}) {
+  const hasLatestPrice = typeof latestPrice === "number" && Number.isFinite(latestPrice)
+  const hasAveragePrice = typeof avgPrice === "number" && Number.isFinite(avgPrice)
+
+  if (marketStatus === "Overpriced") {
+    return {
+      recommendation: "Wait",
+      confidence: signalDisplay === "Volatile" ? "Medium" : "Standard",
+      title: "This route does not look like the strongest booking moment yet.",
+      body: `${routeLabel} is currently showing an overpriced signal${signalDisplay !== "Pending" ? ` with ${signalDisplay.toLowerCase()} movement` : ""
+        }. Unless the travel date is fixed, this is a better route to keep watching before committing.`,
+    }
+  }
+
+  if (marketStatus === "Good Deal") {
+    return {
+      recommendation: "Review",
+      confidence: "High",
+      title: "This route is showing a stronger booking opportunity.",
+      body: `${routeLabel} is currently presenting a favorable fare signal. Review the selected flight and compare it against the route average before prices move again.`,
+    }
+  }
+
+  if (hasLatestPrice && hasAveragePrice && latestPrice < avgPrice) {
+    return {
+      recommendation: "Review",
+      confidence: "Medium",
+      title: "The selected fare is below the tracked route average.",
+      body: `${routeLabel} is currently pricing below its tracked average. That does not guarantee the lowest fare, but it is worth reviewing while the route is active.`,
+    }
+  }
+
+  return {
+    recommendation: "Watch",
+    confidence: "Building",
+    title: "Skysirv is still building route context here.",
+    body: `${routeLabel} is being monitored for fare movement, volatility, and timing pressure. More captured pricing history will make this intelligence stronger over time.`,
+  }
 }
 
 export default function FlightIntelligenceModal({
-    isOpen,
-    onClose,
-    onSaveFlight,
-    route,
-    flight,
+  isOpen,
+  onClose,
+  route,
+  flight,
 }: FlightIntelligenceModalProps) {
-    const selectedFlight = flight ?? null
+  const selectedFlight = flight ?? null
 
-    const originAirport = getAirportByCode(route?.origin)
-    const destinationAirport = getAirportByCode(route?.destination)
+  const originAirport = getAirportByCode(route?.origin)
+  const destinationAirport = getAirportByCode(route?.destination)
 
-    const formatAirportDisplay = (
-        airport: ReturnType<typeof getAirportByCode>
-    ) => {
-        if (!airport) return null
+  const formatAirportDisplay = (
+    airport: ReturnType<typeof getAirportByCode>
+  ) => {
+    if (!airport) return null
 
-        const locationLabel =
-            airport.country === "United States" && airport.region
-                ? `${airport.city}, ${airport.region}`
-                : `${airport.city}, ${airport.country}`
+    const locationLabel =
+      airport.country === "United States" && airport.region
+        ? `${airport.city}, ${airport.region}`
+        : `${airport.city}, ${airport.country}`
 
-        const airportLabel = airport.displayName ?? airport.name
+    const airportLabel = airport.displayName ?? airport.name
 
-        return `${locationLabel} - ${airportLabel} (${airport.code})`
+    return `${locationLabel} - ${airportLabel} (${airport.code})`
+  }
+
+  const routeLabel = `${route?.origin ?? "—"} → ${route?.destination ?? "—"}`
+
+  const routeLocationDisplay =
+    originAirport && destinationAirport
+      ? `${formatAirportDisplay(originAirport)} → ${formatAirportDisplay(destinationAirport)}`
+      : null
+
+  const selectedFlightSummary = selectedFlight
+    ? `${selectedFlight.airline ?? "Airline"}${selectedFlight.flightNumber ? ` ${selectedFlight.flightNumber}` : ""
+    } • ${formatPrice(selectedFlight.price)}`
+    : "No flight selected"
+
+  const marketStatusDisplay = getMarketStatusDisplay(
+    selectedFlight?.bookingSignal
+  )
+
+  const signalDisplay = getSignalDisplay(
+    selectedFlight?.volatilityIndex ?? route?.volatilityIndex
+  )
+
+  const lucyBrief = buildLucyBrief({
+    routeLabel,
+    marketStatus: marketStatusDisplay,
+    signalDisplay,
+    latestPrice: selectedFlight?.price ?? route?.latestPrice,
+    avgPrice: route?.avgPrice,
+  })
+
+  const recommendedFlights = Array.isArray(route?.recommendedFlights)
+    ? route.recommendedFlights
+    : []
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        onClose()
+      }
     }
 
-    const routeLocationDisplay =
-        originAirport && destinationAirport
-            ? `${formatAirportDisplay(originAirport)} → ${formatAirportDisplay(destinationAirport)}`
-            : null
+    document.addEventListener("keydown", handleEscape)
+    document.body.style.overflow = "hidden"
 
-    const selectedFlightSummary = selectedFlight
-        ? `${selectedFlight.airline ?? "Airline"}${selectedFlight.flightNumber ? ` ${selectedFlight.flightNumber}` : ""} • ${formatPrice(selectedFlight.price)}`
-        : null
-
-    const marketStatusDisplay = (() => {
-        const raw = selectedFlight?.bookingSignal?.trim().toLowerCase()
-
-        if (!raw) return "Pending"
-
-        if (["strong buy", "buy", "cheap"].includes(raw)) return "Good Deal"
-        if (["favorable window", "fair price", "neutral", "wait"].includes(raw)) return "Fair Price"
-        if (["overpriced", "expensive"].includes(raw)) return "Overpriced"
-        if (["monitor closely"].includes(raw)) return "Watch"
-
-        return "Pending"
-    })()
-
-    const marketStatusClass =
-        marketStatusDisplay === "Good Deal"
-            ? "text-emerald-600"
-            : marketStatusDisplay === "Fair Price"
-                ? "text-slate-700"
-                : marketStatusDisplay === "Overpriced"
-                    ? "text-rose-600"
-                    : marketStatusDisplay === "Watch"
-                        ? "text-amber-600"
-                        : "text-slate-400"
-
-    const signalDisplay = (() => {
-        const numericVolatility = Number(selectedFlight?.volatilityIndex)
-
-        if (!Number.isFinite(numericVolatility)) return "Pending"
-        if (numericVolatility < 5) return "Stable"
-        if (numericVolatility < 12) return "Moderate"
-        return "Volatile"
-    })()
-
-    const intelligenceModules = [
-        {
-            id: "monitor",
-            title: "Skysirv Monitor™",
-            description:
-                "Live route tracking focused on this selected city pair, watching fare movement, timing shifts, and booking pressure.",
-        },
-        {
-            id: "signals",
-            title: "Skysirv Signals™",
-            description:
-                "Clear signal detection for fare momentum, timing opportunities, and notable movement across the selected route.",
-        },
-        {
-            id: "price-behavior",
-            title: "Skysirv Price Behavior™",
-            description:
-                "A focused look at how this route tends to move, settle, spike, or soften as departure approaches.",
-        },
-        {
-            id: "predict",
-            title: "Skysirv Predict™",
-            description:
-                "Forward-looking guidance built to help estimate whether this route is more likely to rise, dip, or hold.",
-        },
-        {
-            id: "insights",
-            title: "Skysirv Insights™",
-            description:
-                "High-value route context distilled into a premium intelligence layer for faster booking decisions.",
-        },
-        {
-            id: "route-digest",
-            title: "Skysirv Route Digest™",
-            description:
-                "A concise route briefing that summarizes what matters most right now for this selected flight path.",
-        },
-        {
-            id: "skyscore",
-            title: "Skyscore™",
-            description:
-                "A simple confidence indicator designed to express the overall quality of the current opportunity.",
-        },
-    ]
-
-    const [activeIntelligenceModule, setActiveIntelligenceModule] = useState(0)
-    const [direction, setDirection] = useState(1)
-
-    function handlePreviousIntelligenceModule() {
-        setDirection(-1)
-        setActiveIntelligenceModule((current) =>
-            current === 0 ? intelligenceModules.length - 1 : current - 1
-        )
+    return () => {
+      document.removeEventListener("keydown", handleEscape)
+      document.body.style.overflow = ""
     }
+  }, [isOpen, onClose])
 
-    function handleNextIntelligenceModule() {
-        setDirection(1)
-        setActiveIntelligenceModule((current) =>
-            current === intelligenceModules.length - 1 ? 0 : current + 1
-        )
-    }
+  if (!isOpen || !route) return null
 
-    useEffect(() => {
-        if (!isOpen) return
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/45 px-4 py-6 backdrop-blur-sm">
+      <div className="absolute inset-0" onClick={onClose} aria-hidden="true" />
 
-        function handleEscape(event: KeyboardEvent) {
-            if (event.key === "Escape") {
-                onClose()
-            }
-        }
+      <div className="relative z-[101] flex max-h-[88vh] w-full max-w-3xl flex-col overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_30px_100px_rgba(15,23,42,0.22)]">
+        <div className="border-b border-slate-200 bg-white/95 px-5 py-4 backdrop-blur">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-cyan-700">
+                Flight Intelligence
+              </p>
 
-        document.addEventListener("keydown", handleEscape)
-        document.body.style.overflow = "hidden"
+              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+                {routeLabel}
+              </h2>
 
-        return () => {
-            document.removeEventListener("keydown", handleEscape)
-            document.body.style.overflow = ""
-        }
-    }, [isOpen, onClose])
+              {routeLocationDisplay ? (
+                <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-500">
+                  {routeLocationDisplay}
+                </p>
+              ) : null}
 
-    if (!isOpen || !route) return null
-
-    const recommendedFlights = Array.isArray(route.recommendedFlights)
-        ? route.recommendedFlights
-        : []
-
-    return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/55 px-4 py-6 backdrop-blur-sm">
-            <div
-                className="absolute inset-0"
-                onClick={onClose}
-                aria-hidden="true"
-            />
-
-            <div className="relative z-[101] flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_30px_100px_rgba(15,23,42,0.22)]">
-                <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 pl-6 pr-0 py-5 backdrop-blur">
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="flex w-full flex-col gap-2">
-                            <div className="flex w-full items-start">
-                                <div className="flex-1">
-                                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-700">
-                                        Flight Intelligence
-                                    </p>
-
-                                    <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-                                        {route.origin ?? "—"} → {route.destination ?? "—"}
-                                    </h2>
-
-                                    {routeLocationDisplay && (
-                                        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
-                                            {routeLocationDisplay}
-                                        </p>
-                                    )}
-
-                                    <p className="mt-2 text-sm text-slate-500">
-                                        Departure • {formatDepartureDate(route.departureDate)}
-                                    </p>
-                                </div>
-
-                                <button
-                                    type="button"
-                                    onClick={onClose}
-                                    className="ml-auto mr-6 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-500"
-                                >
-                                    ✕
-                                </button>
-                            </div>
-
-                            {selectedFlightSummary && (
-                                <div className="flex w-full items-center">
-                                    <p className="text-sm font-medium text-slate-700">
-                                        Selected Flight • {selectedFlightSummary}
-                                    </p>
-
-                                    {selectedFlight && (
-                                        <button
-                                            type="button"
-                                            onClick={onSaveFlight}
-                                            className="ml-auto mr-6 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
-                                        >
-                                            Save Flight
-                                        </button>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                <div className="skysirv-modal-scroll flex-1 overflow-y-auto px-6 py-6">
-                    <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                            Selected Flight
-                        </p>
-
-                        {selectedFlight ? (
-                            <div className="mt-4 flex flex-wrap gap-3">
-                                <div className="min-w-[160px] rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-center">
-                                    <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
-                                        Market Status
-                                    </p>
-                                    <p className={`mt-1 text-base font-semibold ${marketStatusClass}`}>
-                                        {marketStatusDisplay}
-                                    </p>
-                                </div>
-
-                                <div className="min-w-[140px] rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-center">
-                                    <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">
-                                        Signals
-                                    </p>
-                                    <p className="mt-1 text-base font-semibold text-slate-900">
-                                        {signalDisplay}
-                                    </p>
-                                </div>
-                            </div>
-                        ) : (
-                            <p className="mt-2 text-sm text-slate-500">
-                                No flight selected
-                            </p>
-                        )}
-                    </div>
-
-                    <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-                        <div className="rounded-[1.75rem] border border-slate-200 bg-[linear-gradient(180deg,#f8fbff_0%,#ffffff_100%)] p-5">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                                Route Snapshot
-                            </p>
-
-                            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center shadow-sm">
-                                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                                        Latest Fare
-                                    </p>
-                                    <p className="mt-2 text-2xl font-semibold text-slate-950">
-                                        {formatPrice(route.latestPrice)}
-                                    </p>
-                                </div>
-
-                                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center shadow-sm">
-                                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                                        Route Average
-                                    </p>
-                                    <p className="mt-2 text-2xl font-semibold text-slate-950">
-                                        {formatPrice(route.avgPrice)}
-                                    </p>
-                                </div>
-
-                                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center shadow-sm">
-                                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                                        Latest Airline
-                                    </p>
-                                    <p className="mt-2 text-base font-semibold text-slate-950">
-                                        {route.latestAirline ?? "Pending"}
-                                    </p>
-                                </div>
-
-                                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center shadow-sm">
-                                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                                        Captured
-                                    </p>
-                                    <p className="mt-2 text-base font-semibold text-slate-950">
-                                        {formatCapturedTime(route.latestCapturedAt)}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="rounded-[1.75rem] border border-slate-200 bg-white p-5">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                                Selected Route Intelligence
-                            </p>
-
-                            <AnimatePresence mode="wait">
-                                <motion.div
-                                    key={intelligenceModules[activeIntelligenceModule].id}
-                                    initial={{ opacity: 0, x: direction === 1 ? 24 : -24 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: direction === 1 ? -24 : 24 }}
-                                    transition={{ duration: 0.4, ease: "easeInOut" }}
-                                    className="mt-4 rounded-[1.5rem] border border-slate-200 bg-[linear-gradient(180deg,#f8fbff_0%,#ffffff_100%)] p-4 shadow-sm"
-                                >
-                                    <div className="flex items-start justify-between gap-4">
-                                        <div>
-                                            <h3 className="mt-2 text-lg font-semibold tracking-tight text-slate-950">
-                                                {intelligenceModules[activeIntelligenceModule].title}
-                                            </h3>
-
-                                            <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                                                {activeIntelligenceModule + 1} / {intelligenceModules.length}
-                                            </p>
-                                        </div>
-
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                type="button"
-                                                onClick={handlePreviousIntelligenceModule}
-                                                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-500 transition hover:border-slate-300 hover:text-slate-900"
-                                                aria-label="Previous intelligence module"
-                                            >
-                                                ←
-                                            </button>
-
-                                            <button
-                                                type="button"
-                                                onClick={handleNextIntelligenceModule}
-                                                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-500 transition hover:border-slate-300 hover:text-slate-900"
-                                                aria-label="Next intelligence module"
-                                            >
-                                                →
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <p className="mt-4 max-w-xl text-sm leading-6 text-slate-600">
-                                        {intelligenceModules[activeIntelligenceModule].description}
-                                    </p>
-
-                                    <div className="mt-5 rounded-2xl border border-slate-200 bg-white px-4 py-4">
-                                        <p className="text-sm font-medium text-slate-700">
-                                            Module content area
-                                        </p>
-                                        <p className="mt-2 text-sm leading-6 text-slate-500">
-                                            This is where the live intelligence output for the active module
-                                            will render next.
-                                        </p>
-                                    </div>
-                                </motion.div>
-                            </AnimatePresence>
-                        </div>
-                    </div>
-
-                    <div className="mt-6 rounded-[1.75rem] border border-slate-200 bg-white p-5">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            Recommended Flights
-                        </p>
-
-                        <div className="mt-4 space-y-3">
-                            {recommendedFlights.length > 0 ? (
-                                recommendedFlights.map((flight, index) => (
-                                    <div
-                                        key={`${flight.airline ?? "airline"}-${flight.flightNumber ?? "flight"}-${index}`}
-                                        className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-4"
-                                    >
-                                        <div>
-                                            <p className="text-sm font-semibold text-slate-900">
-                                                {flight.airline ?? "Airline pending"}
-                                            </p>
-                                            <p className="mt-1 text-xs text-slate-500">
-                                                Flight detail expansion comes next
-                                            </p>
-                                        </div>
-
-                                        <p className="text-base font-semibold text-slate-950">
-                                            {formatPrice(flight.price)}
-                                        </p>
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-sm text-slate-600">
-                                    No recommended flights available yet for this route.
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
+                <span>Departure · {formatDepartureDate(route.departureDate)}</span>
+                <span className="hidden text-slate-300 sm:inline">•</span>
+                <span>Selected · {selectedFlightSummary}</span>
+              </div>
             </div>
 
-            <style jsx>{`
-                .skysirv-modal-scroll {
-                    scrollbar-width: thin;
-                    scrollbar-color: rgba(15, 23, 42, 0.28) transparent;
-                }
-
-                .skysirv-modal-scroll::-webkit-scrollbar {
-                    width: 10px;
-                }
-
-                .skysirv-modal-scroll::-webkit-scrollbar-track {
-                    background: transparent;
-                    margin: 12px 0 20px 0;
-                }
-
-                .skysirv-modal-scroll::-webkit-scrollbar-thumb {
-                    background: rgba(15, 23, 42, 0.22);
-                    border: 3px solid transparent;
-                    border-radius: 999px;
-                    background-clip: padding-box;
-                }
-
-                .skysirv-modal-scroll::-webkit-scrollbar-thumb:hover {
-                    background: rgba(15, 23, 42, 0.34);
-                    border: 3px solid transparent;
-                    border-radius: 999px;
-                    background-clip: padding-box;
-                }
-
-                @keyframes fadeSlide {
-                    from {
-                        opacity: 0;
-                        transform: translateX(8px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateX(0);
-                    }
-                }
-            `}</style>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close flight intelligence"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+            >
+              <span className="text-2xl leading-none">×</span>
+            </button>
+          </div>
         </div>
-    )
+
+        <div className="skysirv-modal-scroll flex-1 overflow-y-auto px-5 py-5">
+          <div className="flex flex-wrap gap-2">
+            <CompactPill
+              label="Market"
+              value={marketStatusDisplay}
+              className={getMarketStatusClasses(marketStatusDisplay)}
+            />
+
+            <CompactPill
+              label="Signal"
+              value={signalDisplay}
+              className={getSignalClasses(signalDisplay)}
+            />
+
+            <CompactPill
+              label="Selected fare"
+              value={formatPrice(selectedFlight?.price)}
+            />
+
+            <CompactPill label="Latest fare" value={formatPrice(route.latestPrice)} />
+
+            <CompactPill label="Route avg" value={formatPrice(route.avgPrice)} />
+
+            <CompactPill
+              label="Captured"
+              value={formatCapturedTime(
+                selectedFlight?.capturedAt ?? route.latestCapturedAt
+              )}
+            />
+          </div>
+
+          <div className="mt-4 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                    Lucy Route Brief
+                  </p>
+
+                  <h3 className="mt-2 text-lg font-semibold tracking-tight text-slate-950">
+                    {lucyBrief.title}
+                  </h3>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-cyan-200 bg-cyan-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-700">
+                    {lucyBrief.recommendation}
+                  </span>
+
+                  <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    {lucyBrief.confidence}
+                  </span>
+                </div>
+              </div>
+
+              <p className="mt-3 text-sm leading-6 text-slate-600">
+                {lucyBrief.body}
+              </p>
+
+              <div className="mt-4 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  Recommended next move
+                </p>
+
+                <p className="mt-1 text-sm font-semibold text-slate-950">
+                  {lucyBrief.recommendation === "Wait"
+                    ? "Keep watching before booking."
+                    : lucyBrief.recommendation === "Review"
+                      ? "Review this fare before it moves again."
+                      : "Let Skysirv collect more route history."}
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-4">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                Route Snapshot
+              </p>
+
+              <div className="mt-3 space-y-2">
+                <SnapshotRow label="Route" value={routeLabel} />
+                <SnapshotRow
+                  label="Airline"
+                  value={
+                    selectedFlight?.airline ??
+                    route.latestAirline ??
+                    "Airline pending"
+                  }
+                />
+                <SnapshotRow
+                  label="Flight"
+                  value={selectedFlight?.flightNumber ?? "Flight pending"}
+                />
+                <SnapshotRow
+                  label="Tracking"
+                  value={route.latestPrice ? "Live data" : "Building history"}
+                />
+                <SnapshotRow label="Departure" value={formatDepartureDate(route.departureDate)} />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  Recommended Flights
+                </p>
+
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  Comparable route options currently available from the latest
+                  monitored response.
+                </p>
+              </div>
+
+              <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                {recommendedFlights.length} shown
+              </span>
+            </div>
+
+            <div className="mt-3 grid gap-2">
+              {recommendedFlights.length > 0 ? (
+                recommendedFlights.slice(0, 4).map((recommendedFlight, index) => (
+                  <div
+                    key={`${recommendedFlight.airline ?? "airline"}-${recommendedFlight.flightNumber ?? "flight"
+                      }-${index}`}
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-sm font-semibold text-slate-950">
+                          {recommendedFlight.airline ?? "Airline pending"}
+                        </p>
+
+                        {recommendedFlight.flightNumber ? (
+                          <>
+                            <span className="text-slate-300">•</span>
+                            <p className="text-sm text-slate-500">
+                              {recommendedFlight.flightNumber}
+                            </p>
+                          </>
+                        ) : null}
+                      </div>
+
+                      <p className="mt-1 text-xs text-slate-500">
+                        Captured · {formatCapturedTime(recommendedFlight.capturedAt)}
+                      </p>
+                    </div>
+
+                    <p className="shrink-0 text-sm font-semibold text-slate-950">
+                      {formatPrice(recommendedFlight.price)}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-sm text-slate-600">
+                  No recommended flights available yet for this route.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        .skysirv-modal-scroll {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(15, 23, 42, 0.24) transparent;
+        }
+
+        .skysirv-modal-scroll::-webkit-scrollbar {
+          width: 10px;
+        }
+
+        .skysirv-modal-scroll::-webkit-scrollbar-track {
+          background: transparent;
+          margin: 12px 0 20px 0;
+        }
+
+        .skysirv-modal-scroll::-webkit-scrollbar-thumb {
+          background: rgba(15, 23, 42, 0.18);
+          border: 3px solid transparent;
+          border-radius: 999px;
+          background-clip: padding-box;
+        }
+
+        .skysirv-modal-scroll::-webkit-scrollbar-thumb:hover {
+          background: rgba(15, 23, 42, 0.3);
+          border: 3px solid transparent;
+          border-radius: 999px;
+          background-clip: padding-box;
+        }
+      `}</style>
+    </div>
+  )
+}
+
+function CompactPill({
+  label,
+  value,
+  className = "border-slate-200 bg-slate-50 text-slate-700",
+}: {
+  label: string
+  value: string
+  className?: string
+}) {
+  return (
+    <div
+      className={`inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border px-3 py-1.5 ${className}`}
+    >
+      <span className="text-[10px] font-semibold uppercase tracking-[0.16em] opacity-70">
+        {label}
+      </span>
+
+      <span className="text-xs font-semibold">{value}</span>
+    </div>
+  )
+}
+
+function SnapshotRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-2.5">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+        {label}
+      </p>
+
+      <p className="shrink-0 text-right text-sm font-semibold text-slate-950">
+        {value}
+      </p>
+    </div>
+  )
 }
