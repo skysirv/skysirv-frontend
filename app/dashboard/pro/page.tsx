@@ -4,48 +4,17 @@ import React, { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { getAuthToken } from "@/utils/auth-storage"
 
+import DashboardFlightAttendant from "@/components/flight-attendant/DashboardFlightAttendant"
 import RouteSearch from "@/components/dashboard/route-search"
 import type { SavedFlightCardData } from "@/components/dashboard/saved-flight-card"
 import FlightIntelligenceModal from "@/components/dashboard/flight-intelligence-modal"
 import WelcomeModal from "@/components/dashboard/welcome-modal"
-import ProDashboardHero from "@/components/dashboard/pro/pro-dashboard-hero"
-import ProWatchlistSection from "@/components/dashboard/pro/pro-watchlist-section"
-import ProSavedFlightsSection from "@/components/dashboard/pro/pro-saved-flights-section"
-import ProCapabilityStats from "@/components/dashboard/pro/pro-capability-stats"
-import ProGlobalIntelligence from "@/components/dashboard/pro/pro-global-intelligence"
-import ProIntelligenceWrappedSection from "@/components/dashboard/pro/pro-intelligence-wrapped-section"
-import ProStackSection from "@/components/dashboard/pro/pro-stack-section"
-import ProMarketView from "@/components/dashboard/pro/pro-market-view"
+import ProWatchlistIntelligenceLab from "@/components/dashboard/lab/pro-watchlist-intelligence-lab"
+import ProSavedRoutesLab from "@/components/dashboard/lab/pro-saved-routes-lab"
+import ProPortfolioIntelligenceLab from "@/components/dashboard/lab/pro-portfolio-intelligence-lab"
+import ProIntelligenceWrappedLab from "@/components/dashboard/lab/pro-intelligence-wrapped-lab"
 
 import { toast } from "@/components/ui/Toasts/use-toast"
-
-const fadeUp = {
-  initial: { opacity: 0, y: 26 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, amount: 0.18 },
-  transition: { duration: 0.6, ease: "easeOut" as const },
-}
-
-const staggerContainer = {
-  hidden: {},
-  show: {
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-}
-
-const staggerItem = {
-  hidden: { opacity: 0, y: 22 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-      ease: "easeOut" as const,
-    },
-  },
-}
 
 type SessionSubscription = {
   id: string | null
@@ -225,6 +194,7 @@ async function fetchAvailableWrappedYears(token: string) {
 
 export default function ProDashboardPage() {
   const router = useRouter()
+
   const [showWelcomeModal, setShowWelcomeModal] = useState(false)
   const [showLifetimeSetupModal, setShowLifetimeSetupModal] = useState(false)
   const [lifetimeSetupComplete, setLifetimeSetupComplete] = useState(false)
@@ -233,20 +203,6 @@ export default function ProDashboardPage() {
   const [lifetimeSetupLoading, setLifetimeSetupLoading] = useState(false)
   const [lifetimeSetupError, setLifetimeSetupError] = useState("")
 
-  useEffect(() => {
-    if (!lifetimeSetupComplete) return
-
-    const timer = window.setTimeout(() => {
-      setShowLifetimeSetupModal(false)
-      setShowWelcomeModal(true)
-      setLifetimePassword("")
-      setShowLifetimePassword(false)
-      setLifetimeSetupError("")
-    }, 1200)
-
-    return () => window.clearTimeout(timer)
-  }, [lifetimeSetupComplete])
-
   const [loading, setLoading] = useState(true)
   const [wrappedLoading, setWrappedLoading] = useState(true)
   const [watchlist, setWatchlist] = useState<WatchlistRoute[]>([])
@@ -254,11 +210,17 @@ export default function ProDashboardPage() {
   const [wrappedData, setWrappedData] = useState<WrappedData>(defaultWrappedData)
   const [wrappedRefreshKey, setWrappedRefreshKey] = useState(0)
   const [selectedYear, setSelectedYear] = useState<number>(2026)
-  const [availableWrappedYears, setAvailableWrappedYears] = useState<number[]>([2026])
+  const [availableWrappedYears, setAvailableWrappedYears] = useState<number[]>([
+    2026,
+  ])
   const [wrappedSegments, setWrappedSegments] = useState<WrappedSegment[]>([])
-  const [globeAirportNodes, setGlobeAirportNodes] = useState<GlobeAirportNode[]>([])
+  const [globeAirportNodes, setGlobeAirportNodes] = useState<GlobeAirportNode[]>(
+    []
+  )
   const [globeRouteArcs, setGlobeRouteArcs] = useState<GlobeRouteArc[]>([])
-  const [subscription, setSubscription] = useState<SessionSubscription | null>(null)
+  const [subscription, setSubscription] = useState<SessionSubscription | null>(
+    null
+  )
   const [watchlistFetchKey, setWatchlistFetchKey] = useState(0)
   const [selectedFlightForModal, setSelectedFlightForModal] = useState<{
     route: WatchlistRoute
@@ -275,13 +237,46 @@ export default function ProDashboardPage() {
 
   const isLifetimePro = subscription?.plan_id === "pro_lifetime"
 
+  const dashboardLabel = isLifetimePro
+    ? "Lifetime Pro Dashboard"
+    : "Pro Plan Dashboard"
+
+  useEffect(() => {
+    const originalBackground = document.body.style.background
+    const originalBackgroundColor = document.body.style.backgroundColor
+
+    document.body.style.background = "rgb(255 255 255)"
+    document.body.style.backgroundColor = "rgb(255 255 255)"
+
+    return () => {
+      document.body.style.background = originalBackground
+      document.body.style.backgroundColor = originalBackgroundColor
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!lifetimeSetupComplete) return
+
+    const timer = window.setTimeout(() => {
+      setShowLifetimeSetupModal(false)
+      setShowWelcomeModal(true)
+      setLifetimePassword("")
+      setShowLifetimePassword(false)
+      setLifetimeSetupError("")
+    }, 1200)
+
+    return () => window.clearTimeout(timer)
+  }, [lifetimeSetupComplete])
+
   async function handleLifetimeSetupSubmit(e: React.FormEvent) {
     e.preventDefault()
 
     const inviteToken = sessionStorage.getItem("skysirv_lifetime_invite_token")
 
     if (!inviteToken) {
-      setLifetimeSetupError("Invite token missing. Please reopen your gifted access link.")
+      setLifetimeSetupError(
+        "Invite token missing. Please reopen your gifted access link."
+      )
       return
     }
 
@@ -294,16 +289,19 @@ export default function ProDashboardPage() {
       setLifetimeSetupLoading(true)
       setLifetimeSetupError("")
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/invite/activate`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          token: inviteToken,
-          password: lifetimePassword,
-        }),
-      })
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/invite/activate`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            token: inviteToken,
+            password: lifetimePassword,
+          }),
+        }
+      )
 
       const data = await res.json().catch(() => null)
 
@@ -311,16 +309,19 @@ export default function ProDashboardPage() {
         throw new Error(data?.error || "Unable to finish setup.")
       }
 
-      const loginRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: data.email,
-          password: lifetimePassword,
-        }),
-      })
+      const loginRes = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: data.email,
+            password: lifetimePassword,
+          }),
+        }
+      )
 
       const loginData = await loginRes.json().catch(() => null)
 
@@ -328,8 +329,11 @@ export default function ProDashboardPage() {
         throw new Error("Login failed after setup.")
       }
 
-      localStorage.setItem("skysirv_token", loginData.token)
-      localStorage.setItem("skysirv_admin", loginData.user?.is_admin ? "true" : "false")
+      sessionStorage.setItem("skysirv_token", loginData.token)
+      sessionStorage.setItem(
+        "skysirv_admin",
+        loginData.user?.is_admin ? "true" : "false"
+      )
 
       await refreshSession()
 
@@ -433,11 +437,14 @@ export default function ProDashboardPage() {
       }
 
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/saved-flights`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/saved-flights`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
 
         const data = await res.json().catch(() => [])
 
@@ -532,7 +539,9 @@ export default function ProDashboardPage() {
 
         setAvailableWrappedYears(years)
         setSelectedYear((currentSelectedYear) => {
-          return years.includes(currentSelectedYear) ? currentSelectedYear : years[0]
+          return years.includes(currentSelectedYear)
+            ? currentSelectedYear
+            : years[0]
         })
       } catch (error) {
         console.error("Failed to load available wrapped years", error)
@@ -587,13 +596,17 @@ export default function ProDashboardPage() {
         }
 
         const segments = Array.isArray(data.segments) ? data.segments : []
-        const airportNodes = Array.isArray(data.airportNodes) ? data.airportNodes : []
+        const airportNodes = Array.isArray(data.airportNodes)
+          ? data.airportNodes
+          : []
         const routeArcs = Array.isArray(data.routeArcs) ? data.routeArcs : []
 
         setWrappedData({
           flights: Number(data.wrapped.flights ?? 0),
           countries: Number(data.wrapped.countries ?? 0),
-          distance: `${Number(data.wrapped.distance_km ?? 0).toLocaleString()} km`,
+          distance: `${Number(
+            data.wrapped.distance_km ?? 0
+          ).toLocaleString()} km`,
           skyscore: Number(data.wrapped.skyscore_avg ?? 0),
           savings: Number(data.wrapped.savings_total ?? 0),
           avgSavings: Number(data.wrapped.avg_savings ?? 0),
@@ -785,14 +798,17 @@ export default function ProDashboardPage() {
     }
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/saved-flights`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      })
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/saved-flights`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      )
 
       const data = await res.json().catch(() => null)
 
@@ -854,7 +870,8 @@ export default function ProDashboardPage() {
     if (!matchingRoute) {
       toast({
         title: "Route not found",
-        description: "The matching monitored route could not be found for this saved flight.",
+        description:
+          "The matching monitored route could not be found for this saved flight.",
       })
       return
     }
@@ -933,7 +950,8 @@ export default function ProDashboardPage() {
 
       toast({
         title: "Route completed",
-        description: `${flight.origin ?? "—"} → ${flight.destination ?? "—"} was added to trip history.`,
+        description: `${flight.origin ?? "—"} → ${flight.destination ?? "—"
+          } was added to trip history.`,
       })
     } catch (error) {
       console.error("Failed to complete saved flight", error)
@@ -981,7 +999,8 @@ export default function ProDashboardPage() {
 
       toast({
         title: "Saved flight deleted",
-        description: `${flight.origin ?? "—"} → ${flight.destination ?? "—"} was removed.`,
+        description: `${flight.origin ?? "—"} → ${flight.destination ?? "—"
+          } was removed.`,
       })
     } catch (error) {
       console.error("Failed to delete saved flight", error)
@@ -995,7 +1014,7 @@ export default function ProDashboardPage() {
 
   const remainingRoutes = Math.max(0, 25 - watchlist.length)
 
-  const sortedSegments = useMemo(() => {
+  useMemo(() => {
     return [...wrappedSegments].sort((a, b) => {
       return Number(a.segment_order ?? 0) - Number(b.segment_order ?? 0)
     })
@@ -1003,11 +1022,11 @@ export default function ProDashboardPage() {
 
   return (
     <>
-      {showLifetimeSetupModal && (
+      {showLifetimeSetupModal ? (
         <div className="fixed inset-0 z-[90] bg-slate-950/35 backdrop-blur-sm" />
-      )}
+      ) : null}
 
-      {showLifetimeSetupModal && (
+      {showLifetimeSetupModal ? (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-6">
           <div className="w-full max-w-xl rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_30px_80px_rgba(15,23,42,0.18)] sm:p-10">
             {lifetimeSetupComplete ? (
@@ -1023,7 +1042,8 @@ export default function ProDashboardPage() {
                 </h2>
 
                 <p className="mt-4 max-w-md text-sm leading-7 text-slate-600 sm:text-base">
-                  Your gifted Lifetime Pro access is now active and your dashboard is ready.
+                  Your gifted Lifetime Pro access is now active and your
+                  dashboard is ready.
                 </p>
               </div>
             ) : (
@@ -1037,7 +1057,8 @@ export default function ProDashboardPage() {
                 </h2>
 
                 <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base">
-                  You’ve been granted complimentary Lifetime Pro access. Create your password below to finish setup and unlock your dashboard.
+                  You’ve been granted complimentary Lifetime Pro access. Create
+                  your password below to finish setup and unlock your dashboard.
                 </p>
 
                 <form onSubmit={handleLifetimeSetupSubmit} className="mt-8 space-y-4">
@@ -1060,9 +1081,9 @@ export default function ProDashboardPage() {
                     </button>
                   </div>
 
-                  {lifetimeSetupError && (
+                  {lifetimeSetupError ? (
                     <p className="text-sm text-red-500">{lifetimeSetupError}</p>
-                  )}
+                  ) : null}
 
                   <button
                     type="submit"
@@ -1076,7 +1097,7 @@ export default function ProDashboardPage() {
             )}
           </div>
         </div>
-      )}
+      ) : null}
 
       <WelcomeModal
         open={showWelcomeModal}
@@ -1089,42 +1110,70 @@ export default function ProDashboardPage() {
       />
 
       <section
-        className={`min-h-screen bg-white transition duration-300 ${showWelcomeModal || showLifetimeSetupModal ? "pointer-events-none blur-md select-none" : ""
+        className={`min-h-screen bg-white text-slate-950 transition duration-300 ${showWelcomeModal || showLifetimeSetupModal
+          ? "pointer-events-none blur-md select-none"
+          : ""
           }`}
       >
-        <ProDashboardHero
-          loading={loading}
-          watchlistCount={watchlist.length}
-          remainingRoutes={remainingRoutes}
-          isLifetimePro={isLifetimePro}
-          showWelcomeModal={showWelcomeModal}
-          showLifetimeSetupModal={showLifetimeSetupModal}
-          fadeUp={fadeUp}
-        />
-
-        {/* Main Content */}
-        <div className="relative z-10 px-6 py-6 md:py-8">
+        <div className="px-6 py-10 md:py-14">
           <div className="mx-auto max-w-7xl">
-            {/* Route Search */}
+            <section className="pb-14">
+              <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
+                <div>
+                  <div className="mb-4 flex flex-wrap items-center gap-2">
+                    <p className="inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-cyan-700">
+                      {dashboardLabel}
+                    </p>
+
+                    {isLifetimePro ? (
+                      <p className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-amber-700">
+                        Gifted Lifetime Pro Access
+                      </p>
+                    ) : null}
+                  </div>
+
+                  <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-slate-950 sm:text-6xl">
+                    Your personal flight intelligence dashboard
+                  </h1>
+
+                  <p className="mt-6 max-w-2xl text-base leading-7 text-slate-600">
+                    Monitor up to 25 routes, track pricing behavior, review
+                    saved flights, and use Skysirv intelligence to make calmer,
+                    better timed booking decisions.
+                  </p>
+
+                  <div className="mt-7 flex flex-wrap gap-2">
+                    <ProHeroPill label="25 monitored routes" />
+                    <ProHeroPill label="High-frequency monitoring" />
+                    <ProHeroPill label="Standard AI intelligence" />
+                    <ProHeroPill label="Full Skyscore" />
+                  </div>
+                </div>
+
+                <DashboardFlightAttendant
+                  tier="pro"
+                  placement="inline"
+                  defaultOpen
+                />
+              </div>
+            </section>
+
             <div className="mb-10">
-              <RouteSearch onRouteAdded={handleRouteAdded} />
+              <RouteSearch theme="light" onRouteAdded={handleRouteAdded} />
             </div>
 
-            <ProWatchlistSection
+            <ProWatchlistIntelligenceLab
               loading={loading}
               watchlist={watchlist}
               remainingRoutes={remainingRoutes}
-              isLifetimePro={isLifetimePro}
-              fadeUp={fadeUp}
               onOpenFlightModal={handleOpenFlightModal}
               onRemoveRoute={(routeId) => {
                 void handleRouteRemoved(routeId)
               }}
             />
 
-            <ProSavedFlightsSection
+            <ProSavedRoutesLab
               savedFlights={savedFlights}
-              fadeUp={fadeUp}
               onOpenSavedFlightIntelligence={handleOpenSavedFlightIntelligence}
               onMarkSavedFlightCompleted={(flight) => {
                 void handleMarkSavedFlightCompleted(flight)
@@ -1134,31 +1183,23 @@ export default function ProDashboardPage() {
               }}
             />
 
-            <ProCapabilityStats fadeUp={fadeUp} />
+            <ProPortfolioIntelligenceLab
+              watchlist={watchlist}
+              savedFlights={savedFlights}
+              remainingRoutes={remainingRoutes}
+              onOpenFlightModal={handleOpenFlightModal}
+              onOpenSavedFlightIntelligence={handleOpenSavedFlightIntelligence}
+            />
 
-            <ProGlobalIntelligence loading={loading} />
-
-            <ProIntelligenceWrappedSection
+            <ProIntelligenceWrappedLab
               wrappedLoading={wrappedLoading}
               wrappedData={wrappedData}
               selectedYear={selectedYear}
               availableWrappedYears={availableWrappedYears}
               setSelectedYear={setSelectedYear}
-              sortedSegments={sortedSegments}
               globeAirportNodes={globeAirportNodes}
               globeRouteArcs={globeRouteArcs}
-              fadeUp={fadeUp}
-              staggerContainer={staggerContainer}
-              staggerItem={staggerItem}
             />
-
-            <ProStackSection
-              fadeUp={fadeUp}
-              staggerContainer={staggerContainer}
-              staggerItem={staggerItem}
-            />
-
-            <ProMarketView fadeUp={fadeUp} />
           </div>
         </div>
 
@@ -1171,5 +1212,13 @@ export default function ProDashboardPage() {
         />
       </section>
     </>
+  )
+}
+
+function ProHeroPill({ label }: { label: string }) {
+  return (
+    <div className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600">
+      {label}
+    </div>
   )
 }

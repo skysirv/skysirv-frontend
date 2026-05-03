@@ -1,0 +1,406 @@
+"use client"
+
+import { useState } from "react"
+
+export type ProWatchlistRouteLabData = {
+  id: string
+  route?: string | null
+  route_hash?: string | null
+  origin?: string | null
+  destination?: string | null
+  departure_date?: string | null
+  last_checked_at?: string | null
+  created_at?: string | null
+  latest_price?: number | null
+  avg_price?: number | null
+  booking_signal?: string | null
+  latest_airline?: string | null
+  latest_flight_number?: string | null
+  latest_captured_at?: string | null
+  volatility_index?: string | null
+  recommended_flights?:
+  | {
+    airline?: string | null
+    flightNumber?: string | null
+    price?: number | null
+    currency?: string | null
+    capturedAt?: string | null
+  }[]
+  | null
+}
+
+type RecommendedFlight = {
+  airline?: string | null
+  flightNumber?: string | null
+  price?: number | null
+  currency?: string | null
+  capturedAt?: string | null
+}
+
+type ProWatchlistIntelligenceLabProps = {
+  loading?: boolean
+  watchlist: ProWatchlistRouteLabData[]
+  remainingRoutes: number
+  onOpenFlightModal?: (
+    route: ProWatchlistRouteLabData,
+    flight?: RecommendedFlight | null
+  ) => void
+  onRemoveRoute?: (routeId: string) => void
+}
+
+export default function ProWatchlistIntelligenceLab({
+  loading = false,
+  watchlist,
+  remainingRoutes,
+  onOpenFlightModal,
+  onRemoveRoute,
+}: ProWatchlistIntelligenceLabProps) {
+  const [openRouteId, setOpenRouteId] = useState<string | null>(null)
+
+  const visibleRoutes = watchlist.slice(0, 25)
+  const usedRoutes = Math.min(visibleRoutes.length, 25)
+
+  return (
+    <section className="pb-10">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-semibold tracking-tight text-slate-950">
+              Route Watchlist
+            </h2>
+
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+              Active tracked routes with fare context, signal state, and
+              recommended flight availability.
+            </p>
+          </div>
+
+          <div className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-4 py-2">
+            <span className="text-sm font-semibold text-slate-950">
+              {usedRoutes} / 25
+            </span>
+            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Routes
+            </span>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-6">
+            <p className="text-sm leading-6 text-slate-600">
+              Loading your monitored routes…
+            </p>
+          </div>
+        ) : visibleRoutes.length === 0 ? (
+          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-6">
+            <p className="text-sm font-semibold text-slate-950">
+              No monitored routes yet.
+            </p>
+
+            <p className="mt-1 text-sm leading-6 text-slate-600">
+              Add a route above to start building Pro route intelligence.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-5 max-h-[430px] space-y-2 overflow-y-auto pr-2 [scrollbar-color:rgba(148,163,184,0.45)_rgba(241,245,249,0.9)] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-slate-100 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb:hover]:bg-slate-400">
+            {visibleRoutes.map((route) => {
+              const routeId = route.id
+              const isOpen = openRouteId === routeId
+              const recommendedFlights = normalizeRecommendedFlights(route)
+
+              return (
+                <article
+                  key={routeId}
+                  className="overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-cyan-200 hover:bg-slate-50/60"
+                >
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOpenRouteId((current) =>
+                        current === routeId ? null : routeId
+                      )
+                    }
+                    className="flex w-full items-center justify-between gap-4 px-4 py-3 text-left"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex min-w-0 flex-wrap items-center gap-2">
+                        <span className="shrink-0 text-sm font-semibold tracking-tight text-slate-950">
+                          {getRouteLabel(route)}
+                        </span>
+
+                        <span className="hidden text-slate-300 sm:inline">
+                          •
+                        </span>
+
+                        <span className="min-w-0 truncate text-sm text-slate-600">
+                          {getAirportLabel(route)}
+                        </span>
+
+                        <span className="hidden text-slate-300 md:inline">
+                          •
+                        </span>
+
+                        <span className="shrink-0 text-sm text-slate-500">
+                          {getDepartureLabel(route)}
+                        </span>
+
+                        <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-cyan-200 bg-cyan-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-700">
+                          {getStatusLabel(route)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <span
+                      className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition ${isOpen
+                          ? "rotate-180 border-cyan-200 bg-cyan-50 text-cyan-700"
+                          : "hover:border-slate-300 hover:text-slate-700"
+                        }`}
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                        className="h-5 w-5"
+                        fill="none"
+                      >
+                        <path
+                          d="M6 9l6 6 6-6"
+                          stroke="currentColor"
+                          strokeWidth="2.25"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </span>
+                  </button>
+
+                  {isOpen ? (
+                    <div className="border-t border-slate-200 px-4 pb-4 pt-3">
+                      <div className="grid gap-4 lg:grid-cols-[1.25fr_1fr_auto]">
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                            Recommended flights
+                          </p>
+
+                          {recommendedFlights.length > 0 ? (
+                            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                              {recommendedFlights.map((flight, index) => (
+                                <button
+                                  key={`${routeId}-${flight.airline ?? "flight"}-${flight.flightNumber ?? index
+                                    }-${flight.price ?? index}`}
+                                  type="button"
+                                  onClick={() => {
+                                    if (onOpenFlightModal) {
+                                      onOpenFlightModal(route, flight)
+                                    }
+                                  }}
+                                  className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-left transition hover:border-cyan-200 hover:bg-white"
+                                >
+                                  <span className="min-w-0 truncate text-sm text-slate-700">
+                                    {getFlightLabel(flight)}
+                                  </span>
+
+                                  <span className="shrink-0 text-sm font-semibold text-slate-950">
+                                    {formatPrice(flight.price)}
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
+                              <p className="text-sm leading-6 text-slate-600">
+                                Recommended flights are building as Skysirv
+                                monitors this route.
+                              </p>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                              Route avg
+                            </p>
+                            <p className="mt-1 text-sm font-semibold text-slate-950">
+                              {formatAveragePrice(route.avg_price)}
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                              Tracking
+                            </p>
+                            <p className="mt-1 text-sm font-semibold text-slate-950">
+                              Active
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                              History
+                            </p>
+                            <p className="mt-1 text-sm font-semibold text-slate-950">
+                              {route.last_checked_at ? "Active" : "Building"}
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                              Signal
+                            </p>
+                            <p className="mt-1 text-sm font-semibold text-slate-950">
+                              {getSignalLabel(route.booking_signal)}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-end justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (onOpenFlightModal) {
+                                onOpenFlightModal(
+                                  route,
+                                  recommendedFlights[0] ?? null
+                                )
+                              }
+                            }}
+                            className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
+                          >
+                            View intelligence
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (onRemoveRoute) {
+                                onRemoveRoute(routeId)
+                              }
+                            }}
+                            className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-100"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+                </article>
+              )
+            })}
+          </div>
+        )}
+
+        <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3">
+          <p className="text-sm leading-6 text-slate-600">
+            Pro plans can monitor up to 25 routes. You have{" "}
+            <span className="font-semibold text-slate-950">
+              {remainingRoutes}
+            </span>{" "}
+            monitored-route slot{remainingRoutes === 1 ? "" : "s"} remaining.
+          </p>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function getRouteLabel(route: ProWatchlistRouteLabData) {
+  if (route.route) return route.route
+
+  const origin = route.origin?.trim() || "—"
+  const destination = route.destination?.trim() || "—"
+
+  return `${origin} → ${destination}`
+}
+
+function getAirportLabel(route: ProWatchlistRouteLabData) {
+  const origin = route.origin?.trim() || "Origin"
+  const destination = route.destination?.trim() || "Destination"
+
+  return `${origin} airport → ${destination} airport`
+}
+
+function getDepartureLabel(route: ProWatchlistRouteLabData) {
+  if (!route.departure_date) return "Departure · Flexible"
+
+  const parsedDate = new Date(route.departure_date)
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return `Departure · ${route.departure_date}`
+  }
+
+  return `Departure · ${parsedDate.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })}`
+}
+
+function getStatusLabel(route: ProWatchlistRouteLabData) {
+  if (route.latest_price != null || route.last_checked_at) return "Live Data"
+  return "Building"
+}
+
+function getSignalLabel(signal?: string | null) {
+  if (!signal) return "Building"
+
+  const normalized = signal.toLowerCase()
+
+  if (normalized.includes("good")) return "Good Deal"
+  if (normalized.includes("hold")) return "Watch"
+  if (normalized.includes("over")) return "High Fare"
+  if (normalized.includes("stable")) return "Stable"
+
+  return signal
+}
+
+function normalizeRecommendedFlights(route: ProWatchlistRouteLabData) {
+  const directFlights = Array.isArray(route.recommended_flights)
+    ? route.recommended_flights
+    : []
+
+  if (directFlights.length > 0) {
+    return directFlights.slice(0, 4)
+  }
+
+  if (route.latest_price != null || route.latest_airline || route.latest_flight_number) {
+    return [
+      {
+        airline: route.latest_airline,
+        flightNumber: route.latest_flight_number,
+        price: route.latest_price,
+        currency: "USD",
+        capturedAt: route.latest_captured_at,
+      },
+    ]
+  }
+
+  return []
+}
+
+function getFlightLabel(flight: RecommendedFlight) {
+  const airline = flight.airline?.trim() || "Recommended flight"
+  const flightNumber = flight.flightNumber?.trim()
+
+  return flightNumber ? `${airline} · ${flightNumber}` : airline
+}
+
+function formatAveragePrice(value?: number | null) {
+  if (value == null || !Number.isFinite(Number(value))) {
+    return "Building"
+  }
+
+  return formatPrice(Number(value) / 100)
+}
+
+function formatPrice(value?: number | null) {
+  if (value == null || !Number.isFinite(Number(value))) {
+    return "Building"
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(Number(value))
+}

@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import Map, {
   Marker,
-  NavigationControl,
   type MapRef,
   type ViewState,
   type ViewStateChangeEvent,
@@ -43,16 +42,25 @@ type TravelGlobeProps = {
   routeArcs?: RouteArc[]
 }
 
+const mapStyles = {
+  standard: "mapbox://styles/mapbox/light-v11",
+  satellite: "mapbox://styles/mapbox/satellite-streets-v12",
+} as const
+
+type MapStyleKey = keyof typeof mapStyles
+
 export default function TravelGlobe({
   airportNodes = [],
   routeArcs = [],
 }: TravelGlobeProps) {
   const mapRef = useRef<MapRef | null>(null)
   const interactionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const spinEnabledRef = useRef(true)
 
   const [selectedAirport, setSelectedAirport] = useState<AirportNode | null>(null)
   const [mapReady, setMapReady] = useState(false)
   const [isInteracting, setIsInteracting] = useState(false)
+  const [mapStyleKey, setMapStyleKey] = useState<MapStyleKey>("standard")
   const [viewState, setViewState] = useState<ViewState>({
     latitude: 20,
     longitude: 0,
@@ -73,6 +81,7 @@ export default function TravelGlobe({
   }, [airports])
 
   const markInteraction = useCallback(() => {
+    spinEnabledRef.current = false
     setIsInteracting(true)
 
     if (interactionTimeoutRef.current) {
@@ -83,6 +92,47 @@ export default function TravelGlobe({
       setIsInteracting(false)
     }, 1400)
   }, [])
+
+  const stopSpin = useCallback(() => {
+    spinEnabledRef.current = false
+    setIsInteracting(true)
+
+    if (interactionTimeoutRef.current) {
+      clearTimeout(interactionTimeoutRef.current)
+    }
+
+    interactionTimeoutRef.current = setTimeout(() => {
+      setIsInteracting(false)
+    }, 1400)
+  }, [])
+
+  const handleZoomIn = useCallback(() => {
+    stopSpin()
+
+    setViewState((prev) => ({
+      ...prev,
+      zoom: Math.min((prev.zoom ?? 0) + 0.5, 8),
+    }))
+  }, [stopSpin])
+
+  const handleZoomOut = useCallback(() => {
+    stopSpin()
+
+    setViewState((prev) => ({
+      ...prev,
+      zoom: Math.max((prev.zoom ?? 0) - 0.5, 0.5),
+    }))
+  }, [stopSpin])
+
+  const handleResetNorth = useCallback(() => {
+    stopSpin()
+
+    setViewState((prev) => ({
+      ...prev,
+      bearing: 0,
+      pitch: 0,
+    }))
+  }, [stopSpin])
 
   useEffect(() => {
     return () => {
@@ -95,8 +145,11 @@ export default function TravelGlobe({
   useEffect(() => {
     if (!mapReady) return
     if (isInteracting) return
+    if (!spinEnabledRef.current) return
 
     const interval = setInterval(() => {
+      if (!spinEnabledRef.current) return
+
       setViewState((prev) => ({
         ...prev,
         longitude: prev.longitude + 0.12,
@@ -107,6 +160,7 @@ export default function TravelGlobe({
   }, [mapReady, isInteracting])
 
   const handleAirportSelect = useCallback((airport: AirportNode) => {
+    spinEnabledRef.current = false
     setSelectedAirport(airport)
     setIsInteracting(true)
 
@@ -175,15 +229,41 @@ export default function TravelGlobe({
         <div className="flex items-center justify-between border-b border-slate-200/80 px-5 py-4">
           <div>
             <p className="text-xs font-medium tracking-[0.16em] text-slate-500 uppercase">
-              Globe View
+              Interactive Globe View
             </p>
             <h3 className="mt-1 text-lg font-semibold text-slate-950">
               Airports visited in 2026
             </h3>
           </div>
 
-          <div className="rounded-full border border-sky-100 bg-sky-50 px-3 py-1 text-xs font-medium text-sky-700">
-            Interactive
+          <div className="flex items-center gap-2">
+            <div className="inline-flex shrink-0 items-center gap-1 rounded-full border border-slate-200 bg-slate-50 p-1">
+              <button
+                type="button"
+                onClick={() => setMapStyleKey("standard")}
+                className={cn(
+                  "rounded-full px-3 py-1 text-xs font-semibold transition",
+                  mapStyleKey === "standard"
+                    ? "bg-white text-slate-950 shadow-sm"
+                    : "text-slate-500 hover:text-slate-900"
+                )}
+              >
+                Standard
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setMapStyleKey("satellite")}
+                className={cn(
+                  "rounded-full px-3 py-1 text-xs font-semibold transition",
+                  mapStyleKey === "satellite"
+                    ? "bg-white text-slate-950 shadow-sm"
+                    : "text-slate-500 hover:text-slate-900"
+                )}
+              >
+                Satellite
+              </button>
+            </div>
           </div>
         </div>
 
@@ -200,12 +280,13 @@ export default function TravelGlobe({
             onZoomEnd={markInteraction}
             onRotateStart={markInteraction}
             onRotateEnd={markInteraction}
+            onPitchStart={markInteraction}
+            onPitchEnd={markInteraction}
             projection="globe"
-            mapStyle="mapbox://styles/mapbox/light-v11"
+            mapStyle={mapStyles[mapStyleKey]}
             style={{ width: "100%", height: "100%" }}
             attributionControl={false}
           >
-            <NavigationControl position="top-right" showCompass showZoom />
 
             {airports
               .filter((airport) => typeof airport.lat === "number" && typeof airport.lng === "number")
@@ -245,7 +326,35 @@ export default function TravelGlobe({
               ))}
           </Map>
 
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white via-white/60 to-transparent" />
+          <div className="absolute right-3 top-3 z-10 overflow-hidden rounded-2xl border border-slate-200/90 bg-white/95 shadow-[0_10px_30px_rgba(15,23,42,0.12)] backdrop-blur">
+            <button
+              type="button"
+              onClick={handleZoomIn}
+              className="flex h-9 w-9 items-center justify-center border-b border-slate-200/80 text-lg font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
+              aria-label="Zoom in"
+            >
+              +
+            </button>
+
+            <button
+              type="button"
+              onClick={handleZoomOut}
+              className="flex h-9 w-9 items-center justify-center border-b border-slate-200/80 text-lg font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
+              aria-label="Zoom out"
+            >
+              −
+            </button>
+
+            <button
+              type="button"
+              onClick={handleResetNorth}
+              className="flex h-9 w-9 items-center justify-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
+              aria-label="Reset bearing to north"
+              title="Reset north"
+            >
+              N
+            </button>
+          </div>
         </div>
       </div>
 
@@ -279,7 +388,7 @@ export default function TravelGlobe({
               </div>
             </div>
 
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            <div className="mt-7 grid gap-2">
               <GlobeMetric label="Visits" value={String(selectedAirport.visits ?? 0)} />
               <GlobeMetric label="Flights" value={String(selectedAirport.flights ?? 0)} />
               <GlobeMetric
@@ -328,13 +437,18 @@ export default function TravelGlobe({
   )
 }
 
+function cn(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ")
+}
+
 function GlobeMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm">
-      <p className="text-xs font-medium tracking-[0.14em] text-slate-500 uppercase">
+    <div className="flex items-center justify-between gap-3 rounded-full border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
+      <p className="min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
         {label}
       </p>
-      <p className="mt-2 text-lg font-semibold tracking-tight text-slate-950">
+
+      <p className="shrink-0 text-sm font-semibold tracking-tight text-slate-950">
         {value}
       </p>
     </div>

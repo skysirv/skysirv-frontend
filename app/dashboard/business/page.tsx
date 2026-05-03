@@ -1,49 +1,20 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { getAuthToken } from "@/utils/auth-storage"
 
+import DashboardFlightAttendant from "@/components/flight-attendant/DashboardFlightAttendant"
 import RouteSearch from "@/components/dashboard/route-search"
 import type { SavedFlightCardData } from "@/components/dashboard/saved-flight-card"
 import FlightIntelligenceModal from "@/components/dashboard/flight-intelligence-modal"
 import WelcomeModal from "@/components/dashboard/welcome-modal"
-import BusinessDashboardHero from "@/components/dashboard/business/business-dashboard-hero"
-import BusinessWatchlistSection from "@/components/dashboard/business/business-watchlist-section"
-import BusinessSavedFlightsSection from "@/components/dashboard/business/business-saved-flights-section"
-import BusinessGlobalIntelligence from "@/components/dashboard/business/business-global-intelligence"
-import BusinessIntelligenceWrappedSection from "@/components/dashboard/business/business-intelligence-wrapped-section"
-import BusinessMarketView from "@/components/dashboard/business/business-market-view"
+import BusinessWatchlistIntelligenceLab from "@/components/dashboard/lab/business-watchlist-intelligence-lab"
+import BusinessSavedRoutesLab from "@/components/dashboard/lab/business-saved-routes-lab"
+import BusinessPortfolioIntelligenceLab from "@/components/dashboard/lab/business-portfolio-intelligence-lab"
+import BusinessIntelligenceWrappedLab from "@/components/dashboard/lab/business-intelligence-wrapped-lab"
 
 import { toast } from "@/components/ui/Toasts/use-toast"
-
-const fadeUp = {
-  initial: { opacity: 0, y: 30 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, amount: 0.2 },
-  transition: { duration: 0.65, ease: "easeOut" as const },
-}
-
-const staggerContainer = {
-  hidden: {},
-  show: {
-    transition: {
-      staggerChildren: 0.12,
-    },
-  },
-}
-
-const staggerItem = {
-  hidden: { opacity: 0, y: 24 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.55,
-      ease: "easeOut" as const,
-    },
-  },
-}
 
 type WrappedData = {
   flights: number
@@ -235,9 +206,13 @@ export default function BusinessDashboardPage() {
   const [wrappedData, setWrappedData] = useState<WrappedData>(defaultWrappedData)
   const [wrappedRefreshKey, setWrappedRefreshKey] = useState(0)
   const [selectedYear, setSelectedYear] = useState<number>(2026)
-  const [availableWrappedYears, setAvailableWrappedYears] = useState<number[]>([2026])
+  const [availableWrappedYears, setAvailableWrappedYears] = useState<number[]>([
+    2026,
+  ])
   const [wrappedSegments, setWrappedSegments] = useState<WrappedSegment[]>([])
-  const [globeAirportNodes, setGlobeAirportNodes] = useState<GlobeAirportNode[]>([])
+  const [globeAirportNodes, setGlobeAirportNodes] = useState<GlobeAirportNode[]>(
+    []
+  )
   const [globeRouteArcs, setGlobeRouteArcs] = useState<GlobeRouteArc[]>([])
   const [watchlistFetchKey, setWatchlistFetchKey] = useState(0)
   const [lucyDashboardSummary, setLucyDashboardSummary] =
@@ -256,61 +231,18 @@ export default function BusinessDashboardPage() {
   } | null>(null)
   const [isFlightModalOpen, setIsFlightModalOpen] = useState(false)
 
-  const intelligenceItems = [
-    {
-      title: "Skysirv Monitor™",
-      stat: "Business Access",
-      description:
-        "Expanded route monitoring designed to support broader tracking coverage as real data begins to build.",
-    },
-    {
-      title: "Skysirv Signals™",
-      stat: "Included",
-      description:
-        "Signal visibility becomes available as monitored routes accumulate enough real pricing history.",
-    },
-    {
-      title: "Skysirv Price Behavior™",
-      stat: "Included",
-      description:
-        "Behavior modeling appears as tracked routes develop meaningful pricing history over time.",
-    },
-    {
-      title: "Skysirv Predict™",
-      stat: "Available",
-      description:
-        "Forward-looking guidance activates when monitored routes have enough live data to support it.",
-    },
-    {
-      title: "Skyscore™",
-      stat: "Full Access",
-      description:
-        "Business includes the full scoring layer once real route monitoring data supports score generation.",
-    },
-    {
-      title: "Skysirv Insights™",
-      stat: "Included",
-      description:
-        "Route insights populate automatically as monitored activity produces enough data to summarize.",
-    },
-    {
-      title: "Skysirv Route Digest™",
-      stat: "Included",
-      description:
-        "Digest-style route summaries appear as your monitoring history becomes rich enough to support them.",
-    },
-    {
-      title: "Skysirv Intelligence Engine™",
-      stat: "Active Framework",
-      description:
-        "The system layer is in place and begins surfacing intelligence as monitored pricing data accumulates.",
-    },
-  ]
+  useEffect(() => {
+    const originalBackground = document.body.style.background
+    const originalBackgroundColor = document.body.style.backgroundColor
 
-  const winRate =
-    wrappedData.alertsTriggered > 0
-      ? Math.round((wrappedData.alertsWon / wrappedData.alertsTriggered) * 100)
-      : 0
+    document.body.style.background = "rgb(255 255 255)"
+    document.body.style.backgroundColor = "rgb(255 255 255)"
+
+    return () => {
+      document.body.style.background = originalBackground
+      document.body.style.backgroundColor = originalBackgroundColor
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -327,11 +259,14 @@ export default function BusinessDashboardPage() {
       }
 
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/watchlist`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/watchlist`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
 
         const data: WatchlistResponse = await res.json().catch(() => [])
 
@@ -452,11 +387,14 @@ export default function BusinessDashboardPage() {
       }
 
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/saved-flights`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/saved-flights`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
 
         const data = await res.json().catch(() => [])
 
@@ -511,7 +449,9 @@ export default function BusinessDashboardPage() {
 
         setAvailableWrappedYears(years)
         setSelectedYear((currentSelectedYear) => {
-          return years.includes(currentSelectedYear) ? currentSelectedYear : years[0]
+          return years.includes(currentSelectedYear)
+            ? currentSelectedYear
+            : years[0]
         })
       } catch (error) {
         console.error("Failed to load available wrapped years", error)
@@ -535,6 +475,8 @@ export default function BusinessDashboardPage() {
         if (cancelled) return
         setWrappedData(defaultWrappedData)
         setWrappedSegments([])
+        setGlobeAirportNodes([])
+        setGlobeRouteArcs([])
         setWrappedLoading(false)
         return
       }
@@ -568,7 +510,9 @@ export default function BusinessDashboardPage() {
         const payload = data.wrapped.wrapped_payload_json ?? {}
         const bestRoute = payload.bestRoute ?? {}
         const segments = Array.isArray(data.segments) ? data.segments : []
-        const airportNodes = Array.isArray(data.airportNodes) ? data.airportNodes : []
+        const airportNodes = Array.isArray(data.airportNodes)
+          ? data.airportNodes
+          : []
         const routeArcs = Array.isArray(data.routeArcs) ? data.routeArcs : []
 
         setWrappedData({
@@ -742,21 +686,25 @@ export default function BusinessDashboardPage() {
       price:
         typeof flight?.price === "number" && Number.isFinite(flight.price)
           ? flight.price
-          : route.latest_price != null && Number.isFinite(Number(route.latest_price))
+          : route.latest_price != null &&
+            Number.isFinite(Number(route.latest_price))
             ? Number(route.latest_price)
             : null,
       currency: flight?.currency ?? "USD",
     }
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/saved-flights`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      })
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/saved-flights`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      )
 
       const data = await res.json().catch(() => null)
 
@@ -818,7 +766,8 @@ export default function BusinessDashboardPage() {
     if (!matchingRoute) {
       toast({
         title: "Route not found",
-        description: "The matching monitored route could not be found for this saved flight.",
+        description:
+          "The matching monitored route could not be found for this saved flight.",
       })
       return
     }
@@ -897,7 +846,8 @@ export default function BusinessDashboardPage() {
 
       toast({
         title: "Route completed",
-        description: `${flight.origin ?? "—"} → ${flight.destination ?? "—"} was added to trip history.`,
+        description: `${flight.origin ?? "—"} → ${flight.destination ?? "—"
+          } was added to trip history.`,
       })
     } catch (error) {
       console.error("Failed to complete saved flight", error)
@@ -945,7 +895,8 @@ export default function BusinessDashboardPage() {
 
       toast({
         title: "Saved flight deleted",
-        description: `${flight.origin ?? "—"} → ${flight.destination ?? "—"} was removed.`,
+        description: `${flight.origin ?? "—"} → ${flight.destination ?? "—"
+          } was removed.`,
       })
     } catch (error) {
       console.error("Failed to delete saved flight", error)
@@ -956,12 +907,6 @@ export default function BusinessDashboardPage() {
       })
     }
   }
-
-  const sortedSegments = useMemo(() => {
-    return [...wrappedSegments].sort((a, b) => {
-      return Number(a.segment_order ?? 0) - Number(b.segment_order ?? 0)
-    })
-  }, [wrappedSegments])
 
   return (
     <>
@@ -975,20 +920,42 @@ export default function BusinessDashboardPage() {
       />
 
       <section
-        className={`min-h-screen bg-white transition duration-300 ${showWelcomeModal ? "pointer-events-none blur-md select-none" : ""
+        className={`min-h-screen bg-white text-slate-950 transition duration-300 ${showWelcomeModal ? "pointer-events-none select-none blur-md" : ""
           }`}
       >
-        <BusinessDashboardHero showWelcomeModal={showWelcomeModal} />
-
-        {/* Main Dashboard Content */}
         <div className="px-6 py-10 md:py-14">
           <div className="mx-auto max-w-7xl">
-            {/* Route Search */}
+            <section className="pb-14">
+              <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
+                <div>
+                  <p className="mb-4 inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-cyan-700">
+                    Business Plan Dashboard
+                  </p>
+
+                  <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-slate-950 sm:text-6xl">
+                    Your full flight intelligence dashboard
+                  </h1>
+
+                  <p className="mt-6 max-w-2xl text-base leading-7 text-slate-600">
+                    Monitor tracked routes, build pricing history over time, and
+                    unlock a fuller intelligence layer designed to surface richer
+                    route context as real data begins to accumulate.
+                  </p>
+                </div>
+
+                <DashboardFlightAttendant
+                  tier="business"
+                  placement="inline"
+                  defaultOpen
+                />
+              </div>
+            </section>
+
             <div className="mb-10">
-              <RouteSearch onRouteAdded={handleRouteAdded} />
+              <RouteSearch theme="light" onRouteAdded={handleRouteAdded} />
             </div>
 
-            <BusinessWatchlistSection
+            <BusinessWatchlistIntelligenceLab
               loading={loading}
               watchlist={watchlist}
               onOpenFlightModal={handleOpenFlightModal}
@@ -997,9 +964,8 @@ export default function BusinessDashboardPage() {
               }}
             />
 
-            <BusinessSavedFlightsSection
+            <BusinessSavedRoutesLab
               savedFlights={savedFlights}
-              fadeUp={fadeUp}
               onOpenSavedFlightIntelligence={handleOpenSavedFlightIntelligence}
               onMarkSavedFlightCompleted={(flight) => {
                 void handleMarkSavedFlightCompleted(flight)
@@ -1009,28 +975,21 @@ export default function BusinessDashboardPage() {
               }}
             />
 
-            <BusinessGlobalIntelligence loading={loading} />
+            <BusinessPortfolioIntelligenceLab
+              watchlist={watchlist}
+              savedFlights={savedFlights}
+              onOpenFlightModal={handleOpenFlightModal}
+              onOpenSavedFlightIntelligence={handleOpenSavedFlightIntelligence}
+            />
 
-            <BusinessIntelligenceWrappedSection
+            <BusinessIntelligenceWrappedLab
               wrappedLoading={wrappedLoading}
               wrappedData={wrappedData}
               selectedYear={selectedYear}
               availableWrappedYears={availableWrappedYears}
               setSelectedYear={setSelectedYear}
-              sortedSegments={sortedSegments}
               globeAirportNodes={globeAirportNodes}
               globeRouteArcs={globeRouteArcs}
-              intelligenceItems={intelligenceItems}
-              winRate={winRate}
-              fadeUp={fadeUp}
-              staggerContainer={staggerContainer}
-              staggerItem={staggerItem}
-            />
-
-            <BusinessMarketView
-              watchlistCount={watchlist.length}
-              lucySummary={lucyDashboardSummary}
-              lucySummaryLoading={lucyDashboardSummaryLoading}
             />
           </div>
         </div>
