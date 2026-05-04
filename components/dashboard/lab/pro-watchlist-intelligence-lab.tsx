@@ -187,14 +187,14 @@ export default function ProWatchlistIntelligenceLab({
 
                   {isOpen ? (
                     <div className="border-t border-slate-200 px-4 pb-4 pt-3">
-                      <div className="grid gap-4 lg:grid-cols-[1.25fr_1fr_auto]">
+                      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto]">
                         <div>
                           <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                             Recommended flights
                           </p>
 
                           {recommendedFlights.length > 0 ? (
-                            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                            <div className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
                               {recommendedFlights.map((flight, index) => (
                                 <button
                                   key={`${routeId}-${flight.airline ?? "flight"}-${flight.flightNumber ?? index
@@ -205,7 +205,7 @@ export default function ProWatchlistIntelligenceLab({
                                       onOpenFlightModal(route, flight)
                                     }
                                   }}
-                                  className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-left transition hover:border-cyan-200 hover:bg-white"
+                                  className="flex w-full min-w-0 items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-left transition hover:border-cyan-200 hover:bg-white"
                                 >
                                   <span className="min-w-0">
                                     <span className="block truncate text-sm font-medium text-slate-700">
@@ -233,71 +233,42 @@ export default function ProWatchlistIntelligenceLab({
                           )}
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                              Route avg
-                            </p>
-                            <p className="mt-1 text-sm font-semibold text-slate-950">
-                              {formatAveragePrice(route.avg_price)}
-                            </p>
+                        <div className="flex min-w-[190px] flex-col items-end justify-between gap-3">
+                          <div className="flex max-w-[260px] flex-wrap justify-end gap-2">
+                            <MetricPill label="Route avg" value={formatAveragePrice(route.avg_price)} />
+                            <MetricPill label="Tracking" value="Active" />
+                            <MetricPill
+                              label="History"
+                              value={route.last_checked_at ? "Active" : "Building"}
+                            />
+                            <MetricPill label="Signal" value={getSignalLabel(route.booking_signal)} />
                           </div>
 
-                          <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                              Tracking
-                            </p>
-                            <p className="mt-1 text-sm font-semibold text-slate-950">
-                              Active
-                            </p>
+                          <div className="flex flex-wrap items-end justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (onOpenFlightModal) {
+                                  onOpenFlightModal(route, recommendedFlights[0] ?? null)
+                                }
+                              }}
+                              className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
+                            >
+                              View intelligence
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (onRemoveRoute) {
+                                  onRemoveRoute(routeId)
+                                }
+                              }}
+                              className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-100"
+                            >
+                              Remove
+                            </button>
                           </div>
-
-                          <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                              History
-                            </p>
-                            <p className="mt-1 text-sm font-semibold text-slate-950">
-                              {route.last_checked_at ? "Active" : "Building"}
-                            </p>
-                          </div>
-
-                          <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                              Signal
-                            </p>
-                            <p className="mt-1 text-sm font-semibold text-slate-950">
-                              {getSignalLabel(route.booking_signal)}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap items-end justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (onOpenFlightModal) {
-                                onOpenFlightModal(
-                                  route,
-                                  recommendedFlights[0] ?? null
-                                )
-                              }
-                            }}
-                            className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
-                          >
-                            View intelligence
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (onRemoveRoute) {
-                                onRemoveRoute(routeId)
-                              }
-                            }}
-                            className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-100"
-                          >
-                            Remove
-                          </button>
                         </div>
                       </div>
                     </div>
@@ -375,14 +346,15 @@ function getStatusLabel(route: ProWatchlistRouteLabData) {
 function getSignalLabel(signal?: string | null) {
   if (!signal) return "Building"
 
-  const normalized = signal.toLowerCase()
+  const normalized = signal.trim().toLowerCase().replace(/_/g, " ")
 
+  if (normalized.includes("fair")) return "Fair Price"
   if (normalized.includes("good")) return "Good Deal"
   if (normalized.includes("hold")) return "Watch"
-  if (normalized.includes("over")) return "High Fare"
+  if (normalized.includes("over") || normalized.includes("expensive")) return "High Fare"
   if (normalized.includes("stable")) return "Stable"
 
-  return signal
+  return normalized.replace(/\b\w/g, (letter) => letter.toUpperCase())
 }
 
 function normalizeRecommendedFlights(route: ProWatchlistRouteLabData) {
@@ -444,22 +416,57 @@ function getAirlineDisplay(value?: string | null) {
   return airlineNamesByCode[normalizedCode] ?? raw
 }
 
-function getSegmentFlightLabel(segment: ItinerarySegment) {
-  const carrier =
-    segment.marketingCarrier?.trim().toUpperCase() ||
-    segment.operatingCarrier?.trim().toUpperCase()
+function normalizeFlightNumberForCarrier(
+  rawFlightNumber?: string | null,
+  carrier?: string | null
+) {
+  const raw = rawFlightNumber?.trim().toUpperCase().replace(/\s+/g, "")
 
+  if (!raw) return null
+
+  const normalizedCarrier = carrier?.trim().toUpperCase()
+
+  let withoutCarrier = raw
+
+  if (normalizedCarrier && raw.startsWith(normalizedCarrier)) {
+    withoutCarrier = raw.slice(normalizedCarrier.length)
+  } else {
+    withoutCarrier = raw.replace(/^[A-Z]{2}/, "")
+  }
+
+  const withoutLeadingZeros = withoutCarrier.replace(/^0+/, "")
+
+  return withoutLeadingZeros || withoutCarrier || raw
+}
+
+function getFlightCarrierFromFlightNumber(rawFlightNumber?: string | null) {
+  const raw = rawFlightNumber?.trim().toUpperCase().replace(/\s+/g, "")
+
+  if (!raw) return null
+
+  const match = raw.match(/^([A-Z0-9]{2})(\d+)/)
+
+  return match?.[1] ?? null
+}
+
+function getSegmentFlightLabel(segment: ItinerarySegment) {
   const rawFlightNumber =
     segment.marketingFlightNumber?.trim() ||
     segment.operatingFlightNumber?.trim()
 
+  const carrier =
+    segment.marketingCarrier?.trim().toUpperCase() ||
+    segment.operatingCarrier?.trim().toUpperCase() ||
+    getFlightCarrierFromFlightNumber(rawFlightNumber)
+
   if (!carrier || !rawFlightNumber) return null
 
-  const normalizedFlightNumber = rawFlightNumber
-    .replace(/^[A-Z]{2}\s*/i, "")
-    .replace(/^0+/, "")
+  const normalizedFlightNumber = normalizeFlightNumberForCarrier(
+    rawFlightNumber,
+    carrier
+  )
 
-  return `${carrier} ${normalizedFlightNumber || rawFlightNumber}`
+  return `${carrier} ${normalizedFlightNumber ?? rawFlightNumber}`
 }
 
 function getPrimarySegmentLabel(flight: RecommendedFlight) {
@@ -477,20 +484,27 @@ function getPrimarySegmentLabel(flight: RecommendedFlight) {
 
   if (!rawFlightNumber) return "Flight pending"
 
-  const airlineCode = flight.airline?.trim().toUpperCase()
-  const numericFlightNumber = rawFlightNumber
-    .replace(/^[A-Z]{2}\s*/i, "")
-    .replace(/^0+/, "")
+  const airlineCode =
+    flight.airline?.trim().toUpperCase() ||
+    getFlightCarrierFromFlightNumber(rawFlightNumber)
+
+  const normalizedFlightNumber = normalizeFlightNumberForCarrier(
+    rawFlightNumber,
+    airlineCode
+  )
 
   if (airlineCode && /^[A-Z0-9]{2}$/.test(airlineCode)) {
-    return `${airlineCode} ${numericFlightNumber || rawFlightNumber}`
+    return `${airlineCode} ${normalizedFlightNumber ?? rawFlightNumber}`
   }
 
-  return rawFlightNumber
+  return normalizedFlightNumber ?? rawFlightNumber
 }
 
 function getFlightLabel(flight: RecommendedFlight) {
-  const airline = getAirlineDisplay(flight.airline)
+  const primarySegmentLabel = getPrimarySegmentLabel(flight)
+  const carrierCode = primarySegmentLabel.split(" ")[0]
+  const airline = getAirlineDisplay(carrierCode || flight.airline)
+
   const segments = Array.isArray(flight.itinerarySegments)
     ? flight.itinerarySegments
     : []
@@ -499,7 +513,7 @@ function getFlightLabel(flight: RecommendedFlight) {
     return `${airline} · ${segments.length} segments`
   }
 
-  return `${airline} · ${getPrimarySegmentLabel(flight)} · Direct`
+  return `${airline} · ${primarySegmentLabel} · Direct`
 }
 
 function getItineraryRouteLabel(flight: RecommendedFlight) {
@@ -543,6 +557,18 @@ function getItineraryRouteLabel(flight: RecommendedFlight) {
   return segmentLabels.length
     ? `${routeShape} · ${segmentLabels.join(" + ")}`
     : routeShape
+}
+
+function MetricPill({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5">
+      <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+        {label}
+      </span>
+
+      <span className="text-xs font-semibold text-slate-950">{value}</span>
+    </div>
+  )
 }
 
 function formatAveragePrice(value?: number | null) {

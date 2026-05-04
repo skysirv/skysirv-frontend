@@ -186,7 +186,7 @@ export default function FreeWatchlistLab({
 
                   {isOpen ? (
                     <div className="border-t border-slate-200 px-4 pb-4 pt-3">
-                      <div className="grid gap-4 lg:grid-cols-[1.25fr_1fr_auto]">
+                      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto]">
                         <div>
                           <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                             Available fares
@@ -198,7 +198,7 @@ export default function FreeWatchlistLab({
                                 <button
                                   key={`${routeKey}-${flight.airline}-${flight.price}`}
                                   type="button"
-                                  className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-left transition hover:border-cyan-200 hover:bg-white"
+                                  className="flex w-full min-w-0 items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-left transition hover:border-cyan-200 hover:bg-white"
                                 >
                                   <span className="min-w-0">
                                     <span className="block truncate text-sm font-medium text-slate-700">
@@ -225,63 +225,34 @@ export default function FreeWatchlistLab({
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                              Latest price
-                            </p>
-                            <p className="mt-1 text-sm font-semibold text-slate-950">
-                              {formatPrice(route.latest_price)}
-                            </p>
+                        <div className="flex min-w-[190px] flex-col items-end justify-between gap-3">
+                          <div className="flex max-w-[260px] flex-wrap justify-end gap-2">
+                            <MetricPill label="Latest" value={formatPrice(route.latest_price)} />
+                            <MetricPill label="Route avg" value={formatAveragePrice(route.avg_price)} />
+                            <MetricPill label="Tracking" value="Active" />
+                            <MetricPill label="Signal" value={getBasicSignal(route.booking_signal)} />
                           </div>
 
-                          <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                              Route avg
-                            </p>
-                            <p className="mt-1 text-sm font-semibold text-slate-950">
-                              {formatAveragePrice(route.avg_price)}
-                            </p>
+                          <div className="flex flex-wrap items-end justify-end gap-2">
+                            <button
+                              type="button"
+                              className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
+                            >
+                              Basic context
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (onRemoveRoute) {
+                                  onRemoveRoute(route.id)
+                                }
+                              }}
+                              className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
+                            >
+                              Remove
+                            </button>
                           </div>
-
-                          <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                              Tracking
-                            </p>
-                            <p className="mt-1 text-sm font-semibold text-slate-950">
-                              Active
-                            </p>
-                          </div>
-
-                          <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                              Signal
-                            </p>
-                            <p className="mt-1 text-sm font-semibold text-slate-950">
-                              {getBasicSignal(route.booking_signal)}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap items-end justify-end gap-2">
-                          <button
-                            type="button"
-                            className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
-                          >
-                            Basic context
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (onRemoveRoute) {
-                                onRemoveRoute(route.id)
-                              }
-                            }}
-                            className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
-                          >
-                            Remove
-                          </button>
                         </div>
                       </div>
                     </div>
@@ -361,13 +332,14 @@ function getStatusLabel(route: WatchlistRoute) {
 }
 
 function getBasicSignal(signal?: string | null) {
-  const normalized = signal?.toLowerCase() ?? ""
+  const normalized = signal?.trim().toLowerCase().replace(/_/g, " ") ?? ""
 
-  if (normalized.includes("good")) return "Good watch"
+  if (normalized.includes("fair")) return "Fair Price"
+  if (normalized.includes("good")) return "Good Watch"
   if (normalized.includes("hold")) return "Watching"
-  if (normalized.includes("over")) return "High fare"
+  if (normalized.includes("over") || normalized.includes("expensive")) return "High Fare"
 
-  return "Basic watch"
+  return "Basic Watch"
 }
 
 function normalizeRecommendedFlights(route: WatchlistRoute): RecommendedFlight[] {
@@ -429,22 +401,57 @@ function getAirlineDisplay(value?: string | null) {
   return airlineNamesByCode[normalizedCode] ?? raw
 }
 
-function getSegmentFlightLabel(segment: ItinerarySegment) {
-  const carrier =
-    segment.marketingCarrier?.trim().toUpperCase() ||
-    segment.operatingCarrier?.trim().toUpperCase()
+function normalizeFlightNumberForCarrier(
+  rawFlightNumber?: string | null,
+  carrier?: string | null
+) {
+  const raw = rawFlightNumber?.trim().toUpperCase().replace(/\s+/g, "")
 
+  if (!raw) return null
+
+  const normalizedCarrier = carrier?.trim().toUpperCase()
+
+  let withoutCarrier = raw
+
+  if (normalizedCarrier && raw.startsWith(normalizedCarrier)) {
+    withoutCarrier = raw.slice(normalizedCarrier.length)
+  } else {
+    withoutCarrier = raw.replace(/^[A-Z]{2}/, "")
+  }
+
+  const withoutLeadingZeros = withoutCarrier.replace(/^0+/, "")
+
+  return withoutLeadingZeros || withoutCarrier || raw
+}
+
+function getFlightCarrierFromFlightNumber(rawFlightNumber?: string | null) {
+  const raw = rawFlightNumber?.trim().toUpperCase().replace(/\s+/g, "")
+
+  if (!raw) return null
+
+  const match = raw.match(/^([A-Z0-9]{2})(\d+)/)
+
+  return match?.[1] ?? null
+}
+
+function getSegmentFlightLabel(segment: ItinerarySegment) {
   const rawFlightNumber =
     segment.marketingFlightNumber?.trim() ||
     segment.operatingFlightNumber?.trim()
 
+  const carrier =
+    segment.marketingCarrier?.trim().toUpperCase() ||
+    segment.operatingCarrier?.trim().toUpperCase() ||
+    getFlightCarrierFromFlightNumber(rawFlightNumber)
+
   if (!carrier || !rawFlightNumber) return null
 
-  const normalizedFlightNumber = rawFlightNumber
-    .replace(/^[A-Z]{2}\s*/i, "")
-    .replace(/^0+/, "")
+  const normalizedFlightNumber = normalizeFlightNumberForCarrier(
+    rawFlightNumber,
+    carrier
+  )
 
-  return `${carrier} ${normalizedFlightNumber || rawFlightNumber}`
+  return `${carrier} ${normalizedFlightNumber ?? rawFlightNumber}`
 }
 
 function getPrimarySegmentLabel(flight: RecommendedFlight) {
@@ -462,20 +469,27 @@ function getPrimarySegmentLabel(flight: RecommendedFlight) {
 
   if (!rawFlightNumber) return "Flight pending"
 
-  const airlineCode = flight.airline?.trim().toUpperCase()
-  const numericFlightNumber = rawFlightNumber
-    .replace(/^[A-Z]{2}\s*/i, "")
-    .replace(/^0+/, "")
+  const airlineCode =
+    flight.airline?.trim().toUpperCase() ||
+    getFlightCarrierFromFlightNumber(rawFlightNumber)
+
+  const normalizedFlightNumber = normalizeFlightNumberForCarrier(
+    rawFlightNumber,
+    airlineCode
+  )
 
   if (airlineCode && /^[A-Z0-9]{2}$/.test(airlineCode)) {
-    return `${airlineCode} ${numericFlightNumber || rawFlightNumber}`
+    return `${airlineCode} ${normalizedFlightNumber ?? rawFlightNumber}`
   }
 
-  return rawFlightNumber
+  return normalizedFlightNumber ?? rawFlightNumber
 }
 
 function getFlightLabel(flight: RecommendedFlight) {
-  const airline = getAirlineDisplay(flight.airline)
+  const primarySegmentLabel = getPrimarySegmentLabel(flight)
+  const carrierCode = primarySegmentLabel.split(" ")[0]
+  const airline = getAirlineDisplay(carrierCode || flight.airline)
+
   const segments = Array.isArray(flight.itinerarySegments)
     ? flight.itinerarySegments
     : []
@@ -484,7 +498,7 @@ function getFlightLabel(flight: RecommendedFlight) {
     return `${airline} · ${segments.length} segments`
   }
 
-  return `${airline} · ${getPrimarySegmentLabel(flight)} · Direct`
+  return `${airline} · ${primarySegmentLabel} · Direct`
 }
 
 function getItineraryRouteLabel(flight: RecommendedFlight) {
@@ -528,6 +542,18 @@ function getItineraryRouteLabel(flight: RecommendedFlight) {
   return segmentLabels.length
     ? `${routeShape} · ${segmentLabels.join(" + ")}`
     : routeShape
+}
+
+function MetricPill({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5">
+      <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+        {label}
+      </span>
+
+      <span className="text-xs font-semibold text-slate-950">{value}</span>
+    </div>
+  )
 }
 
 function formatPrice(value?: number | null) {
