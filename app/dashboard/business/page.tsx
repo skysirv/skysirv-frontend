@@ -1,14 +1,16 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { getAuthToken } from "@/utils/auth-storage"
+import { AirportOption, searchAirports } from "@/lib/airports/major-airports"
 
 import DashboardFlightAttendant from "@/components/flight-attendant/DashboardFlightAttendant"
 import RouteSearch from "@/components/dashboard/route-search"
 import type { SavedFlightCardData } from "@/components/dashboard/saved-flight-card"
 import FlightIntelligenceModal from "@/components/dashboard/flight-intelligence-modal"
 import WelcomeModal from "@/components/dashboard/welcome-modal"
+import AirportExplorerModal from "@/components/dashboard/airport-explorer/AirportExplorerModal"
 import BusinessWatchlistIntelligenceLab from "@/components/dashboard/lab/business-watchlist-intelligence-lab"
 import BusinessSavedRoutesLab from "@/components/dashboard/lab/business-saved-routes-lab"
 import BusinessPortfolioIntelligenceLab from "@/components/dashboard/lab/business-portfolio-intelligence-lab"
@@ -125,16 +127,6 @@ type WatchlistResponse =
     data?: WatchlistRoute[]
   }
 
-type LucyDashboardSummary = {
-  headline: string
-  summary: string
-  signalFeed: string[]
-  systemReadout: string
-  recommendedAction: "watch" | "wait" | "book" | "insufficient_data"
-  confidence: "low" | "medium" | "high"
-  dataStatus: "pending" | "building" | "ready"
-}
-
 const defaultWrappedData: WrappedData = {
   flights: 0,
   countries: 0,
@@ -209,16 +201,11 @@ export default function BusinessDashboardPage() {
   const [availableWrappedYears, setAvailableWrappedYears] = useState<number[]>([
     2026,
   ])
-  const [wrappedSegments, setWrappedSegments] = useState<WrappedSegment[]>([])
   const [globeAirportNodes, setGlobeAirportNodes] = useState<GlobeAirportNode[]>(
     []
   )
   const [globeRouteArcs, setGlobeRouteArcs] = useState<GlobeRouteArc[]>([])
   const [watchlistFetchKey, setWatchlistFetchKey] = useState(0)
-  const [lucyDashboardSummary, setLucyDashboardSummary] =
-    useState<LucyDashboardSummary | null>(null)
-  const [lucyDashboardSummaryLoading, setLucyDashboardSummaryLoading] =
-    useState(false)
   const [selectedFlightForModal, setSelectedFlightForModal] = useState<{
     route: WatchlistRoute
     flight: {
@@ -230,6 +217,19 @@ export default function BusinessDashboardPage() {
     } | null
   } | null>(null)
   const [isFlightModalOpen, setIsFlightModalOpen] = useState(false)
+  const [airportSearch, setAirportSearch] = useState("")
+  const [selectedAirport, setSelectedAirport] = useState<AirportOption | null>(null)
+  const [airportSearchOpen, setAirportSearchOpen] = useState(false)
+  const [isAirportExplorerOpen, setIsAirportExplorerOpen] = useState(false)
+  const [airportExplorerTarget, setAirportExplorerTarget] =
+    useState<AirportOption | null>(null)
+
+  const airportSearchRef = useRef<HTMLDivElement | null>(null)
+
+  const airportSearchResults =
+    airportSearch.trim().length >= 2
+      ? searchAirports(airportSearch).slice(0, 8)
+      : []
 
   useEffect(() => {
     const originalBackground = document.body.style.background
@@ -297,65 +297,6 @@ export default function BusinessDashboardPage() {
     }
 
     loadWatchlist()
-
-    return () => {
-      cancelled = true
-    }
-  }, [watchlistFetchKey])
-
-  useEffect(() => {
-    let cancelled = false
-
-    async function loadLucyDashboardSummary() {
-      const token = getAuthToken()
-
-      if (!token) {
-        if (!cancelled) {
-          setLucyDashboardSummary(null)
-          setLucyDashboardSummaryLoading(false)
-        }
-        return
-      }
-
-      if (!cancelled) {
-        setLucyDashboardSummaryLoading(true)
-      }
-
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/flight-attendant/dashboard-summary`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
-
-        const data = await res.json().catch(() => null)
-
-        if (cancelled) return
-
-        if (!res.ok || !data?.success || !data?.summary) {
-          setLucyDashboardSummary(null)
-          return
-        }
-
-        setLucyDashboardSummary(data.summary)
-      } catch (error) {
-        console.error("Failed to load Lucy dashboard summary", error)
-
-        if (!cancelled) {
-          setLucyDashboardSummary(null)
-        }
-      } finally {
-        if (!cancelled) {
-          setLucyDashboardSummaryLoading(false)
-        }
-      }
-    }
-
-    loadLucyDashboardSummary()
 
     return () => {
       cancelled = true
@@ -474,7 +415,6 @@ export default function BusinessDashboardPage() {
       if (!token) {
         if (cancelled) return
         setWrappedData(defaultWrappedData)
-        setWrappedSegments([])
         setGlobeAirportNodes([])
         setGlobeRouteArcs([])
         setWrappedLoading(false)
@@ -501,7 +441,6 @@ export default function BusinessDashboardPage() {
 
         if (!res.ok || !data?.success || !data?.wrapped) {
           setWrappedData(defaultWrappedData)
-          setWrappedSegments([])
           setGlobeAirportNodes([])
           setGlobeRouteArcs([])
           return
@@ -509,7 +448,6 @@ export default function BusinessDashboardPage() {
 
         const payload = data.wrapped.wrapped_payload_json ?? {}
         const bestRoute = payload.bestRoute ?? {}
-        const segments = Array.isArray(data.segments) ? data.segments : []
         const airportNodes = Array.isArray(data.airportNodes)
           ? data.airportNodes
           : []
@@ -535,7 +473,6 @@ export default function BusinessDashboardPage() {
           },
         })
 
-        setWrappedSegments(segments)
         setGlobeAirportNodes(airportNodes)
         setGlobeRouteArcs(routeArcs)
       } catch (err) {
@@ -543,7 +480,6 @@ export default function BusinessDashboardPage() {
 
         if (!cancelled) {
           setWrappedData(defaultWrappedData)
-          setWrappedSegments([])
           setGlobeAirportNodes([])
           setGlobeRouteArcs([])
         }
@@ -567,6 +503,23 @@ export default function BusinessDashboardPage() {
       window.removeEventListener("focus", onFocus)
     }
   }, [selectedYear, wrappedRefreshKey])
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (!airportSearchRef.current) return
+
+      if (!airportSearchRef.current.contains(event.target as Node)) {
+        setAirportSearchOpen(false)
+
+        if (!selectedAirport) {
+          setAirportSearch("")
+        }
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   function handleRouteAdded(route: WatchlistRoute) {
     setWatchlist((prev) => [route, ...prev])
@@ -941,6 +894,101 @@ export default function BusinessDashboardPage() {
                     unlock a fuller intelligence layer designed to surface richer
                     route context as real data begins to accumulate.
                   </p>
+
+                  <div className="mt-8 max-w-2xl rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_18px_50px_rgba(15,23,42,0.08)]">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-slate-950">
+                          Explore Airport
+                        </p>
+                        <p className="mt-1 text-sm leading-6 text-slate-500">
+                          Search for gates, airport lounges, restaurants, and more.
+                        </p>
+                      </div>
+
+                      <div
+                        ref={airportSearchRef}
+                        className="relative flex w-full gap-2 sm:max-w-sm"
+                      >
+                        <input
+                          value={airportSearch}
+                          onChange={(event) => {
+                            const value = event.target.value
+                            setAirportSearch(value)
+                            setSelectedAirport(null)
+                            setAirportSearchOpen(value.trim().length >= 2)
+                          }}
+                          onFocus={() => {
+                            if (airportSearch.trim().length >= 2) {
+                              setAirportSearchOpen(true)
+                            }
+                          }}
+                          placeholder="Airport, city, or code"
+                          className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-cyan-300 focus:bg-white focus:ring-4 focus:ring-cyan-100"
+                        />
+
+                        {airportSearchOpen && (
+                          <div className="absolute left-0 top-full z-30 mt-2 max-h-72 w-full overflow-y-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_18px_45px_rgba(15,23,42,0.10)]">
+                            {airportSearchResults.length === 0 ? (
+                              <div className="px-3 py-3 text-sm text-slate-500">
+                                No matching airports found.
+                              </div>
+                            ) : (
+                              airportSearchResults.map((airport) => (
+                                <button
+                                  key={airport.code}
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedAirport(airport)
+                                    setAirportSearch(`${airport.city} (${airport.code})`)
+                                    setAirportSearchOpen(false)
+                                  }}
+                                  className="flex w-full items-start justify-between rounded-xl px-3 py-3 text-left transition hover:bg-slate-50"
+                                >
+                                  <div>
+                                    <div className="text-sm font-semibold text-slate-900">
+                                      {airport.city} — {airport.code}
+                                    </div>
+                                    <div className="mt-1 text-xs text-slate-500">
+                                      {airport.name}
+                                    </div>
+                                  </div>
+
+                                  <div className="ml-4 text-[11px] uppercase tracking-[0.14em] text-slate-400">
+                                    {airport.country}
+                                  </div>
+                                </button>
+                              ))
+                            )}
+                          </div>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const airportToExplore = selectedAirport
+
+                            if (!airportToExplore) {
+                              toast({
+                                title: "Search an airport first",
+                                description: "Choose an airport from the dropdown before exploring.",
+                              })
+                              return
+                            }
+
+                            setAirportExplorerTarget(airportToExplore)
+                            setIsAirportExplorerOpen(true)
+                            setAirportSearch("")
+                            setSelectedAirport(null)
+                            setAirportSearchOpen(false)
+                          }}
+                          className="shrink-0 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                        >
+                          Explore
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <DashboardFlightAttendant
@@ -993,6 +1041,15 @@ export default function BusinessDashboardPage() {
             />
           </div>
         </div>
+
+        <AirportExplorerModal
+          open={isAirportExplorerOpen}
+          airport={airportExplorerTarget}
+          onClose={() => {
+            setIsAirportExplorerOpen(false)
+            setAirportExplorerTarget(null)
+          }}
+        />
 
         <FlightIntelligenceModal
           isOpen={isFlightModalOpen}
