@@ -20,6 +20,8 @@ type AirportSearchResult = {
   type?: string
   class?: string
   floorId?: string
+  areaName?: string
+  category?: string
   coordinates: [number, number]
 }
 
@@ -34,6 +36,21 @@ function buildApiUrl(path: string) {
   if (!API_BASE_URL) return path
 
   return `${API_BASE_URL.replace(/\/$/, "")}${path}`
+}
+
+function getAirportResultTypeLabel(result: AirportSearchResult) {
+  if (result.category === "gate" || result.type === "gates") return "Gate"
+  if (result.category === "baggage") return "Baggage claim"
+  if (result.category === "restroom") return "Restroom"
+  if (result.category === "security") return "Security"
+  if (result.category === "lounge") return "Lounge"
+  if (result.category === "food") return "Food & dining"
+  if (result.category === "shopping") return "Shopping"
+  if (result.category === "transport") return "Airport transport"
+  if (result.category === "parking") return "Parking"
+  if (result.category === "terminal") return "Terminal area"
+
+  return result.type || result.class || "Airport location"
 }
 
 function enableMapboxIndoorMapping(map: mapboxgl.Map) {
@@ -411,15 +428,20 @@ export default function AirportExplorerModal({
                             <div className="text-sm font-semibold text-slate-900">
                               {result.name}
                             </div>
-                            <div className="mt-1 text-xs text-slate-500">
-                              {result.type === "gates"
-                                ? "Gate"
-                                : result.type || result.class || "Airport location"}
+                            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                              <span>{getAirportResultTypeLabel(result)}</span>
+
+                              {result.areaName && (
+                                <>
+                                  <span className="text-slate-300">•</span>
+                                  <span>{result.areaName}</span>
+                                </>
+                              )}
                             </div>
                           </div>
 
                           <div className="ml-4 shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
-                            Indoor
+                            {result.category === "gate" ? "Gate" : "Indoor"}
                           </div>
                         </button>
                       ))
