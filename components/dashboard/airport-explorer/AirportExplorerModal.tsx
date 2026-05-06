@@ -162,6 +162,19 @@ export default function AirportExplorerModal({
   }, [open, airport, mapViewStyle])
 
   useEffect(() => {
+    if (!open) return
+
+    setAirportSearchQuery("")
+    setAirportSearchResults([])
+    setAirportSearchError(null)
+    setIsAirportSearchLoading(false)
+    setSelectedIndoorResult(null)
+
+    selectedMarkerRef.current?.remove()
+    selectedMarkerRef.current = null
+  }, [open, airport?.code])
+
+  useEffect(() => {
     if (!isFullscreen) return
 
     function handleKeyDown(event: KeyboardEvent) {
