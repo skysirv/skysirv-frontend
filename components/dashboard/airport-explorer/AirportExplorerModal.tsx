@@ -36,6 +36,35 @@ function buildApiUrl(path: string) {
   return `${API_BASE_URL.replace(/\/$/, "")}${path}`
 }
 
+function enableMapboxIndoorMapping(map: mapboxgl.Map) {
+  try {
+    map.setConfigProperty("basemap", "showIndoor", true)
+  } catch (error) {
+    console.warn("Mapbox indoor config is unavailable for this style.", error)
+  }
+}
+
+function addIndoorControlIfAvailable(
+  map: mapboxgl.Map,
+  indoorControlRef: React.MutableRefObject<unknown>
+) {
+  if (indoorControlRef.current) return
+
+  const IndoorControl = (mapboxgl as unknown as {
+    IndoorControl?: new () => mapboxgl.IControl
+  }).IndoorControl
+
+  if (!IndoorControl) {
+    console.warn("Mapbox IndoorControl is not available in this mapbox-gl build.")
+    return
+  }
+
+  const indoorControl = new IndoorControl()
+
+  map.addControl(indoorControl, "top-right")
+  indoorControlRef.current = indoorControl
+}
+
 function addIndoorAirportLayers(map: mapboxgl.Map) {
   if (map.getSource("indoor")) return
 
@@ -91,6 +120,7 @@ export default function AirportExplorerModal({
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<mapboxgl.Map | null>(null)
   const selectedMarkerRef = useRef<mapboxgl.Marker | null>(null)
+  const indoorControlRef = useRef<unknown>(null)
 
   const [mapViewStyle, setMapViewStyle] = useState<MapViewStyle>("standard")
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -123,10 +153,21 @@ export default function AirportExplorerModal({
         : [-80.287, 25.7959]
 
     if (mapRef.current) {
-      mapRef.current.setStyle(MAPBOX_STYLES[mapViewStyle])
+      mapRef.current.setStyle(MAPBOX_STYLES[mapViewStyle], {
+        config: {
+          basemap: {
+            showIndoor: true,
+          },
+        },
+      } as any)
 
       mapRef.current.once("style.load", () => {
         if (!mapRef.current) return
+
+        enableMapboxIndoorMapping(mapRef.current)
+        addIndoorControlIfAvailable(mapRef.current, indoorControlRef)
+
+        // Temporary fallback while we verify Mapbox built-in indoor rendering.
         addIndoorAirportLayers(mapRef.current)
       })
 
@@ -142,20 +183,30 @@ export default function AirportExplorerModal({
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: MAPBOX_STYLES[mapViewStyle],
+      config: {
+        basemap: {
+          showIndoor: true,
+        },
+      },
       projection: "globe",
       center,
       zoom: airport.longitude != null && airport.latitude != null ? 15.5 : 8,
-    })
+    } as mapboxgl.MapOptions)
 
     map.addControl(new mapboxgl.NavigationControl(), "top-right")
 
     map.on("load", () => {
+      enableMapboxIndoorMapping(map)
+      addIndoorControlIfAvailable(map, indoorControlRef)
+
+      // Temporary fallback while we verify Mapbox built-in indoor rendering.
       addIndoorAirportLayers(map)
     })
 
     mapRef.current = map
 
     return () => {
+      indoorControlRef.current = null
       map.remove()
       mapRef.current = null
     }
