@@ -66,9 +66,11 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [dashboardHref, setDashboardHref] = useState('/choose-plan');
 
-  function signOutSilently() {
+  function expireSessionAndReturnHome() {
+    setAccountMenuOpen(false);
     clearAuthSession();
     window.dispatchEvent(new Event('skysirv-auth-changed'));
+    window.location.href = '/';
   }
 
   function signOutAndReturnHome() {
@@ -99,7 +101,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
       }
 
       inactivityTimer = setTimeout(() => {
-        signOutSilently();
+        expireSessionAndReturnHome();
       }, SESSION_TIMEOUT_MS);
     }
 
@@ -113,6 +115,15 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
         setIsAdmin(false);
         clearAuthSession();
         setIsSessionReady(true);
+
+        if (
+          pathname.startsWith('/dashboard') ||
+          pathname.startsWith('/account') ||
+          pathname.startsWith('/admin')
+        ) {
+          window.location.href = '/';
+        }
+
         return;
       }
 
@@ -122,7 +133,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
         const inactiveFor = Date.now() - Number(lastActivity);
 
         if (inactiveFor > SESSION_TIMEOUT_MS) {
-          signOutAndReturnHome();
+          expireSessionAndReturnHome();
           return;
         }
       }
@@ -149,6 +160,15 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
           setIsAdmin(false);
           clearAuthSession();
           setIsSessionReady(true);
+
+          if (
+            pathname.startsWith('/dashboard') ||
+            pathname.startsWith('/account') ||
+            pathname.startsWith('/admin')
+          ) {
+            window.location.href = '/';
+          }
+
           return;
         }
 
@@ -171,6 +191,14 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
         setIsAdmin(false);
         clearAuthSession();
         setIsSessionReady(true);
+
+        if (
+          pathname.startsWith('/dashboard') ||
+          pathname.startsWith('/account') ||
+          pathname.startsWith('/admin')
+        ) {
+          window.location.href = '/';
+        }
       }
     }
 
@@ -205,7 +233,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
       window.removeEventListener('storage', handleStorage);
       window.removeEventListener('skysirv-auth-changed', handleAuthChanged as EventListener);
     };
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
