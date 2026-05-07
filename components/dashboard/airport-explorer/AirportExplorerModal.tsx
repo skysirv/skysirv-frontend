@@ -527,6 +527,11 @@ export default function AirportExplorerModal({
               <p className="mt-1 text-xs text-slate-500">
                 Indoor terminals, labels, and airport floorplan layers.
               </p>
+              {is3DView && (
+                <p className="mt-1 text-[11px] font-medium text-cyan-700">
+                  3D enabled · Right-click + drag to orbit
+                </p>
+              )}
             </div>
 
             <div className="flex items-center gap-2">
