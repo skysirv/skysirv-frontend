@@ -1209,10 +1209,6 @@ export default function ProDashboardPage() {
               </div>
             </section>
 
-            <div className="mb-10">
-              <RouteSearch theme="light" onRouteAdded={handleRouteAdded} />
-            </div>
-
             <div className="mb-10 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                 <div>
@@ -1284,6 +1280,10 @@ export default function ProDashboardPage() {
                   )}
                 </form>
               </div>
+            </div>
+
+            <div className="mb-10">
+              <RouteSearch theme="light" onRouteAdded={handleRouteAdded} />
             </div>
 
             <ProWatchlistIntelligenceLab
