@@ -9,6 +9,12 @@ import RouteSearch from "@/components/dashboard/route-search"
 import type { SavedFlightCardData } from "@/components/dashboard/saved-flight-card"
 import FlightIntelligenceModal from "@/components/dashboard/flight-intelligence-modal"
 import WelcomeModal from "@/components/dashboard/welcome-modal"
+import AirportExplorerModal from "@/components/dashboard/airport-explorer/AirportExplorerModal"
+import {
+  getAirportByCode,
+  searchAirports,
+  type AirportOption,
+} from "@/lib/airports/major-airports"
 import ProWatchlistIntelligenceLab from "@/components/dashboard/lab/pro-watchlist-intelligence-lab"
 import ProSavedRoutesLab from "@/components/dashboard/lab/pro-saved-routes-lab"
 import ProPortfolioIntelligenceLab from "@/components/dashboard/lab/pro-portfolio-intelligence-lab"
@@ -234,6 +240,14 @@ export default function ProDashboardPage() {
   } | null>(null)
 
   const [isFlightModalOpen, setIsFlightModalOpen] = useState(false)
+
+  const [airportExplorerQuery, setAirportExplorerQuery] = useState("")
+  const [airportExplorerResults, setAirportExplorerResults] = useState<
+    AirportOption[]
+  >([])
+  const [selectedAirportForExplorer, setSelectedAirportForExplorer] =
+    useState<AirportOption | null>(null)
+  const [isAirportExplorerOpen, setIsAirportExplorerOpen] = useState(false)
 
   const isLifetimePro = subscription?.plan_id === "pro_lifetime"
 
@@ -744,6 +758,43 @@ export default function ProDashboardPage() {
     })
   }
 
+  function handleAirportExplorerQueryChange(value: string) {
+    const nextValue = value.toUpperCase()
+
+    setAirportExplorerQuery(nextValue)
+    setSelectedAirportForExplorer(null)
+
+    if (!nextValue.trim()) {
+      setAirportExplorerResults([])
+      return
+    }
+
+    setAirportExplorerResults(searchAirports(nextValue, 8))
+  }
+
+  function handleAirportExplorerSubmit(event: React.FormEvent) {
+    event.preventDefault()
+
+    const airport =
+      selectedAirportForExplorer ??
+      getAirportByCode(airportExplorerQuery) ??
+      airportExplorerResults[0] ??
+      null
+
+    if (!airport) {
+      toast({
+        title: "Airport not found",
+        description: "Search by airport code or city, like JFK, Miami, or LAX.",
+      })
+      return
+    }
+
+    setSelectedAirportForExplorer(airport)
+    setAirportExplorerQuery(`${airport.city} (${airport.code})`)
+    setAirportExplorerResults([])
+    setIsAirportExplorerOpen(true)
+  }
+
   function handleOpenFlightModal(
     route: WatchlistRoute,
     flight?: {
@@ -1162,6 +1213,79 @@ export default function ProDashboardPage() {
               <RouteSearch theme="light" onRouteAdded={handleRouteAdded} />
             </div>
 
+            <div className="mb-10 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700">
+                    Airport Explorer
+                  </p>
+
+                  <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+                    Explore terminals, gates, lounges, and airport services
+                  </h2>
+
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                    Search supported airports and open an indoor terminal map with 3D view,
+                    satellite mode, gate search, and airport location intelligence.
+                  </p>
+                </div>
+
+                <form
+                  onSubmit={handleAirportExplorerSubmit}
+                  className="relative w-full lg:max-w-md"
+                >
+                  <div className="flex rounded-full border border-slate-200 bg-slate-50 p-1 shadow-inner">
+                    <input
+                      type="text"
+                      value={airportExplorerQuery}
+                      onChange={(event) =>
+                        handleAirportExplorerQueryChange(event.target.value)
+                      }
+                      placeholder="Search airport, e.g. JFK or Miami"
+                      className="min-w-0 flex-1 bg-transparent px-4 py-2.5 text-sm font-medium text-slate-950 outline-none placeholder:text-slate-400"
+                    />
+
+                    <button
+                      type="submit"
+                      className="shrink-0 rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+                    >
+                      Explore
+                    </button>
+                  </div>
+
+                  {airportExplorerResults.length > 0 && (
+                    <div className="absolute left-0 right-0 top-full z-40 mt-2 max-h-72 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_18px_45px_rgba(15,23,42,0.14)]">
+                      {airportExplorerResults.map((airport) => (
+                        <button
+                          key={airport.code}
+                          type="button"
+                          onClick={() => {
+                            setSelectedAirportForExplorer(airport)
+                            setAirportExplorerQuery(`${airport.city} (${airport.code})`)
+                            setAirportExplorerResults([])
+                          }}
+                          className="flex w-full items-start justify-between rounded-xl px-3 py-3 text-left transition hover:bg-slate-50"
+                        >
+                          <div>
+                            <div className="text-sm font-semibold text-slate-900">
+                              {airport.city} ({airport.code})
+                            </div>
+                            <div className="mt-1 text-xs text-slate-500">
+                              {airport.displayName ?? airport.name} · {airport.country}
+                            </div>
+                          </div>
+
+                          <div className="ml-4 shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                            {airport.region ?? "Airport"}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </form>
+              </div>
+            </div>
+
             <ProWatchlistIntelligenceLab
               loading={loading}
               watchlist={watchlist}
@@ -1209,6 +1333,12 @@ export default function ProDashboardPage() {
           onSaveFlight={handleSaveFlight}
           route={selectedFlightForModal?.route ?? null}
           flight={selectedFlightForModal?.flight ?? null}
+        />
+
+        <AirportExplorerModal
+          open={isAirportExplorerOpen}
+          airport={selectedAirportForExplorer}
+          onClose={() => setIsAirportExplorerOpen(false)}
         />
       </section>
     </>
