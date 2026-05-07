@@ -32,6 +32,16 @@ const MAPBOX_STYLES: Record<MapViewStyle, string> = {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? ""
 
+const MAP_2D_CAMERA = {
+  pitch: 0,
+  bearing: 0,
+}
+
+const MAP_3D_CAMERA = {
+  pitch: 55,
+  bearing: -18,
+}
+
 function buildApiUrl(path: string) {
   if (!API_BASE_URL) return path
 
@@ -140,6 +150,7 @@ export default function AirportExplorerModal({
   const indoorControlRef = useRef<unknown>(null)
 
   const [mapViewStyle, setMapViewStyle] = useState<MapViewStyle>("standard")
+  const [is3DView, setIs3DView] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [airportSearchQuery, setAirportSearchQuery] = useState("")
   const [airportSearchResults, setAirportSearchResults] = useState<
@@ -212,6 +223,8 @@ export default function AirportExplorerModal({
       mapRef.current.flyTo({
         center,
         zoom: airport.longitude != null && airport.latitude != null ? 15.5 : 8,
+        pitch: is3DView ? MAP_3D_CAMERA.pitch : MAP_2D_CAMERA.pitch,
+        bearing: is3DView ? MAP_3D_CAMERA.bearing : MAP_2D_CAMERA.bearing,
         essential: true,
       })
 
@@ -229,6 +242,8 @@ export default function AirportExplorerModal({
       projection: "globe",
       center,
       zoom: airport.longitude != null && airport.latitude != null ? 15.5 : 8,
+      pitch: is3DView ? MAP_3D_CAMERA.pitch : MAP_2D_CAMERA.pitch,
+      bearing: is3DView ? MAP_3D_CAMERA.bearing : MAP_2D_CAMERA.bearing,
     } as mapboxgl.MapOptions)
 
     map.addControl(new mapboxgl.NavigationControl(), "top-right")
@@ -248,7 +263,18 @@ export default function AirportExplorerModal({
       map.remove()
       mapRef.current = null
     }
-  }, [open, airport, mapViewStyle])
+  }, [open, airport, mapViewStyle, is3DView])
+
+  useEffect(() => {
+    if (!mapRef.current) return
+
+    mapRef.current.easeTo({
+      pitch: is3DView ? MAP_3D_CAMERA.pitch : MAP_2D_CAMERA.pitch,
+      bearing: is3DView ? MAP_3D_CAMERA.bearing : MAP_2D_CAMERA.bearing,
+      duration: 700,
+      essential: true,
+    })
+  }, [is3DView])
 
   useEffect(() => {
     if (!open) return
@@ -399,6 +425,8 @@ export default function AirportExplorerModal({
                             mapRef.current.flyTo({
                               center: result.coordinates,
                               zoom: 18.2,
+                              pitch: is3DView ? MAP_3D_CAMERA.pitch : MAP_2D_CAMERA.pitch,
+                              bearing: is3DView ? MAP_3D_CAMERA.bearing : MAP_2D_CAMERA.bearing,
                               essential: true,
                             })
 
@@ -502,6 +530,17 @@ export default function AirportExplorerModal({
             </div>
 
             <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIs3DView((prev) => !prev)}
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${is3DView
+                  ? "border-slate-950 bg-slate-950 text-white"
+                  : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-950"
+                  }`}
+              >
+                {is3DView ? "3D on" : "3D"}
+              </button>
+
               <button
                 type="button"
                 onClick={() => setIsFullscreen((prev) => !prev)}
