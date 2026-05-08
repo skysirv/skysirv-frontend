@@ -1,18 +1,41 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 
+import BookingSearchPanel, {
+  type BookingSearchContext,
+  type BookingSearchSuccessPayload,
+} from "@/components/booking/BookingSearchPanel"
+import type { BookingOffer, BookingSlice } from "@/lib/booking-api"
+
+type RoundTripStep = "outbound" | "return" | "review"
+
 export default function BookingPage() {
+  const [offers, setOffers] = useState<BookingOffer[]>([])
+  const [offerRequestId, setOfferRequestId] = useState<string | null>(null)
+  const [liveMode, setLiveMode] = useState<boolean | null>(null)
+  const [searchContext, setSearchContext] =
+    useState<BookingSearchContext | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [hasSearched, setHasSearched] = useState(false)
+  const [selectedOffer, setSelectedOffer] = useState<BookingOffer | null>(null)
+
+  const [roundTripStep, setRoundTripStep] =
+    useState<RoundTripStep>("outbound")
+  const [selectedOutboundKey, setSelectedOutboundKey] = useState<string | null>(
+    null
+  )
+  const [selectedRoundTripOffer, setSelectedRoundTripOffer] =
+    useState<BookingOffer | null>(null)
 
   useEffect(() => {
     const originalBackground = document.body.style.background
     const originalBackgroundColor = document.body.style.backgroundColor
 
-    document.body.style.background =
-      "linear-gradient(to bottom, rgb(2 6 23), rgb(2 6 23), rgb(15 23 42))"
-    document.body.style.backgroundColor = "rgb(2 6 23)"
+    document.body.style.background = "rgb(248 250 252)"
+    document.body.style.backgroundColor = "rgb(248 250 252)"
 
     return () => {
       document.body.style.background = originalBackground
@@ -20,301 +43,913 @@ export default function BookingPage() {
     }
   }, [])
 
-  return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 pt-32 text-white">
-      <div className="pointer-events-none absolute inset-0">
-        <motion.div
-          animate={{ opacity: [0.14, 0.24, 0.14], scale: [1, 1.03, 1] }}
-          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.16),transparent_38%)]"
-        />
-        <motion.div
-          animate={{ x: [0, 20, 0], y: [0, -16, 0] }}
-          transition={{ duration: 8.4, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute right-[-40px] top-[-10px] h-72 w-72 rounded-full bg-sky-500/10 blur-3xl"
-        />
-        <motion.div
-          animate={{ x: [0, -18, 0], y: [0, 20, 0] }}
-          transition={{ duration: 9.1, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-[-40px] left-[-20px] h-80 w-80 rounded-full bg-indigo-500/10 blur-3xl"
-        />
-      </div>
+  const sortedOffers = useMemo(() => {
+    return [...offers].sort(
+      (a, b) => Number(a.totalAmount) - Number(b.totalAmount)
+    )
+  }, [offers])
 
-      <div className="relative mx-auto flex max-w-7xl flex-col px-6 pb-12 pt-8 sm:px-8 sm:pb-14 sm:pt-10 lg:px-12">
+  const outboundOptions = useMemo(() => {
+    const map = new Map<string, BookingOffer>()
+
+    for (const offer of sortedOffers) {
+      const outboundSlice = offer.slices[0]
+      if (!outboundSlice) continue
+
+      const key = getSliceKey(outboundSlice)
+
+      if (!map.has(key)) {
+        map.set(key, offer)
+      }
+    }
+
+    return Array.from(map.entries()).map(([key, offer]) => ({
+      key,
+      offer,
+      slice: offer.slices[0],
+    }))
+  }, [sortedOffers])
+
+  const returnOptions = useMemo(() => {
+    if (!selectedOutboundKey) return []
+
+    return sortedOffers
+      .filter((offer) => {
+        const outboundSlice = offer.slices[0]
+        return outboundSlice && getSliceKey(outboundSlice) === selectedOutboundKey
+      })
+      .filter((offer) => offer.slices[1])
+      .map((offer) => ({
+        offer,
+        slice: offer.slices[1],
+      }))
+  }, [selectedOutboundKey, sortedOffers])
+
+  function handleSearchStart() {
+    setHasSearched(false)
+    setError(null)
+    setOffers([])
+    setOfferRequestId(null)
+    setLiveMode(null)
+    setSearchContext(null)
+    setSelectedOffer(null)
+    setRoundTripStep("outbound")
+    setSelectedOutboundKey(null)
+    setSelectedRoundTripOffer(null)
+  }
+
+  function handleSearchSuccess(payload: BookingSearchSuccessPayload) {
+    setOffers(payload.offers)
+    setOfferRequestId(payload.offerRequestId)
+    setLiveMode(payload.liveMode)
+    setSearchContext(payload.context)
+    setHasSearched(true)
+    setError(null)
+    setSelectedOffer(null)
+    setRoundTripStep("outbound")
+    setSelectedOutboundKey(null)
+    setSelectedRoundTripOffer(null)
+  }
+
+  function handleSearchError(message: string) {
+    setError(message)
+    setOffers([])
+    setOfferRequestId(null)
+    setLiveMode(null)
+    setHasSearched(true)
+    setSelectedOffer(null)
+    setRoundTripStep("outbound")
+    setSelectedOutboundKey(null)
+    setSelectedRoundTripOffer(null)
+  }
+
+  const isRoundTripSearch =
+    searchContext?.tripType === "round_trip" && sortedOffers.length > 0
+
+  return (
+    <section className="relative overflow-hidden bg-slate-50 pt-32 text-slate-950">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[34rem] bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.10),transparent_42%)]" />
+
+      <div className="relative mx-auto max-w-7xl px-6 pb-20 pt-8 sm:px-8 sm:pb-24 sm:pt-10 lg:px-12">
         <div className="mx-auto max-w-5xl text-center">
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-300 backdrop-blur-sm"
+            initial={{ opacity: 0, y: 18, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.55, ease: "easeOut" }}
+            className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600 shadow-sm"
           >
-            Coming soon to Skysirv™
+            Skysirv™ Booking
           </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, y: 22 }}
+            initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05, duration: 0.7, ease: "easeOut" }}
-            className="mt-8 text-5xl font-bold leading-[1.08] tracking-tight text-white sm:text-6xl md:text-7xl"
+            transition={{ delay: 0.06, duration: 0.72, ease: "easeOut" }}
+            className="mx-auto mt-8 max-w-5xl text-5xl font-bold leading-[1.04] tracking-tight text-slate-950 sm:text-6xl md:text-7xl"
           >
-            Booking built on
-            fare intelligence, not guesswork
+            Search flights with less noise and more clarity.
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.12, duration: 0.6, ease: "easeOut" }}
-            className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-300 sm:text-xl"
+            transition={{ delay: 0.14, duration: 0.62, ease: "easeOut" }}
+            className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-600 sm:text-xl"
           >
-            Skysirv™ Booking is planned as the execution layer for travelers who
-            want to move from route monitoring into smarter booking decisions
-            with more timing clarity, better context, and less noise.
+            Compare live flight offers in a cleaner booking experience designed
+            around route context, timing, and smarter trip decisions.
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, y: 14 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.18, duration: 0.55, ease: "easeOut" }}
+            transition={{ delay: 0.2, duration: 0.58, ease: "easeOut" }}
             className="mt-10 flex flex-wrap items-center justify-center gap-3"
           >
-            <PreviewPill label="Timing-aware booking flow" />
-            <PreviewPill label="Intelligence-backed fare context" />
-            <PreviewPill label="Premium travel focus" />
+            <SlimPill label="Live offer search" />
+            <SlimPill label="One-way, round-trip, multi-city" />
+            <SlimPill label="Skysirv intelligence layer" />
           </motion.div>
         </div>
 
-        <div className="mx-auto mt-16 grid max-w-6xl gap-6 lg:grid-cols-3">
-          <PreviewCard
-            eyebrow="Step 1"
-            title="Search with context"
-            text="Booking is expected to begin with route-aware search, giving travelers more than raw fares by surfacing signal, timing, and pricing structure around each option."
+        <BookingSearchPanel
+          onSearchStart={handleSearchStart}
+          onSearchSuccess={handleSearchSuccess}
+          onSearchError={handleSearchError}
+        />
+
+        {error ? (
+          <div className="mx-auto mt-5 max-w-6xl">
+            <p className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800">
+              {error}
+            </p>
+          </div>
+        ) : null}
+
+        {isRoundTripSearch ? (
+          <RoundTripResults
+            routeTitle={searchContext?.routeTitle ?? "Round-trip search"}
+            liveMode={liveMode}
+            offerRequestId={offerRequestId}
+            step={roundTripStep}
+            outboundOptions={outboundOptions}
+            returnOptions={returnOptions}
+            selectedOutboundKey={selectedOutboundKey}
+            selectedOffer={selectedRoundTripOffer}
+            onSelectOutbound={(key) => {
+              setSelectedOutboundKey(key)
+              setSelectedRoundTripOffer(null)
+              setRoundTripStep("return")
+            }}
+            onBackToOutbound={() => {
+              setSelectedOutboundKey(null)
+              setSelectedRoundTripOffer(null)
+              setRoundTripStep("outbound")
+            }}
+            onSelectReturn={(offer) => {
+              setSelectedRoundTripOffer(offer)
+              setRoundTripStep("review")
+            }}
+            onBackToReturn={() => {
+              setSelectedRoundTripOffer(null)
+              setRoundTripStep("return")
+            }}
+            onViewDetails={(offer) => setSelectedOffer(offer)}
           />
-
-          <PreviewCard
-            eyebrow="Step 2"
-            title="Understand the moment"
-            text="Instead of forcing rushed decisions, the experience is intended to help users see whether a fare looks calm, aggressive, rising, or worth watching a little longer."
+        ) : sortedOffers.length > 0 ? (
+          <StandardResults
+            title={`${sortedOffers.length} offers found`}
+            routeTitle={searchContext?.routeTitle ?? "Search results"}
+            liveMode={liveMode}
+            offerRequestId={offerRequestId}
+            offers={sortedOffers}
+            onViewDetails={setSelectedOffer}
           />
+        ) : hasSearched && !error ? (
+          <div className="mx-auto mt-10 max-w-6xl">
+            <p className="text-sm leading-6 text-slate-500">
+              No matching offers were returned for this search. Try another
+              date, route, or stop preference.
+            </p>
+          </div>
+        ) : null}
 
-          <PreviewCard
-            eyebrow="Step 3"
-            title="Book with more confidence"
-            text="The long-term goal is a smoother path from monitoring to action, so travelers can move on opportunities with a clearer sense of why now may be the right time."
-          />
-        </div>
+        <section className="mx-auto mt-20 max-w-6xl border-t border-slate-200 pt-14">
+          <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
+                Why Skysirv Booking
+              </p>
+              <h2 className="mt-3 max-w-xl text-4xl font-bold tracking-tight text-slate-950">
+                Flight search with the intelligence layer close by.
+              </h2>
+            </div>
 
-        <div className="mx-auto mt-16 max-w-6xl">
-          <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-[0_30px_80px_rgba(2,6,23,0.45)] backdrop-blur-sm sm:p-10">
-            <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-              <div>
-                <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
-                  Early preview
-                </div>
+            <div className="space-y-7 text-base leading-8 text-slate-600">
+              <p>
+                Skysirv Booking is designed to bring flight discovery, route
+                context, and fare decision support into one cleaner experience.
+                The goal is not to overwhelm travelers with endless noise, but
+                to make each option easier to compare and act on.
+              </p>
 
-                <h2 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                  A future booking layer designed to feel calmer, sharper, and more disciplined.
-                </h2>
-
-                <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-                  Please pardon the appearance while the full Skysirv™ Booking
-                  experience is being shaped. Over time, this area is expected to
-                  connect monitoring, pricing behavior, and booking execution into
-                  one cleaner decision workflow.
-                </p>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <FeatureBlock
-                  title="Live price context"
-                  text="See fares with smarter market insight."
-                />
-                <FeatureBlock
-                  title="Signal-driven timing"
-                  text="Better context around when to act."
-                />
-                <FeatureBlock
-                  title="Premium cabin focus"
-                  text="Built with high-value trips in mind."
-                />
-                <FeatureBlock
-                  title="Seamless workflow"
-                  text="From watching to booking in one system."
-                />
-              </div>
+              <p>
+                Live search is the foundation. From here, Skysirv can connect
+                booking results with monitored routes, fare behavior, Lucy
+                explanations, and timing signals so travelers understand more
+                before they move.
+              </p>
             </div>
           </div>
+        </section>
+
+        <div className="mx-auto mt-16 max-w-6xl border-t border-slate-200 pt-10">
+          <BookingFooter />
         </div>
-
-        <div className="mx-auto mt-16 max-w-4xl pb-8 text-center">
-          <p className="text-sm uppercase tracking-[0.16em] text-slate-400">
-            Coming in the months ahead
-          </p>
-
-          <h3 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Skysirv™ Booking will turn intelligence into action.
-          </h3>
-
-          <p className="mx-auto mt-5 max-w-3xl text-base leading-8 text-slate-300 sm:text-lg">
-            In the meantime, this preview is here to show the direction: a smarter
-            booking layer built to help travelers move with more confidence when
-            the market presents the right opportunity.
-          </p>
-        </div>
-
-        <BookingFooter />
       </div>
+
+      {selectedOffer ? (
+        <OfferDetailsModal
+          offer={selectedOffer}
+          onClose={() => setSelectedOffer(null)}
+        />
+      ) : null}
     </section>
   )
 }
 
-function PreviewPill({ label }: { label: string }) {
+function StandardResults({
+  title,
+  routeTitle,
+  offerRequestId,
+  liveMode,
+  offers,
+  onViewDetails,
+}: {
+  title: string
+  routeTitle: string
+  offerRequestId: string | null
+  liveMode: boolean | null
+  offers: BookingOffer[]
+  onViewDetails: (offer: BookingOffer) => void
+}) {
   return (
-    <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 backdrop-blur-sm">
+    <motion.div
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="mx-auto mt-12 max-w-6xl"
+    >
+      <ResultsHeader
+        eyebrow="Search results"
+        title={title}
+        routeTitle={routeTitle}
+        offerRequestId={offerRequestId}
+        liveMode={liveMode}
+      />
+
+      <div className="mt-5 grid gap-4">
+        {offers.map((offer, index) => (
+          <OfferCard
+            key={offer.id}
+            offer={offer}
+            index={index}
+            onViewDetails={() => onViewDetails(offer)}
+          />
+        ))}
+      </div>
+    </motion.div>
+  )
+}
+
+function RoundTripResults({
+  routeTitle,
+  offerRequestId,
+  liveMode,
+  step,
+  outboundOptions,
+  returnOptions,
+  selectedOutboundKey,
+  selectedOffer,
+  onSelectOutbound,
+  onBackToOutbound,
+  onSelectReturn,
+  onBackToReturn,
+  onViewDetails,
+}: {
+  routeTitle: string
+  offerRequestId: string | null
+  liveMode: boolean | null
+  step: RoundTripStep
+  outboundOptions: {
+    key: string
+    offer: BookingOffer
+    slice: BookingSlice
+  }[]
+  returnOptions: {
+    offer: BookingOffer
+    slice: BookingSlice
+  }[]
+  selectedOutboundKey: string | null
+  selectedOffer: BookingOffer | null
+  onSelectOutbound: (key: string) => void
+  onBackToOutbound: () => void
+  onSelectReturn: (offer: BookingOffer) => void
+  onBackToReturn: () => void
+  onViewDetails: (offer: BookingOffer) => void
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="mx-auto mt-12 max-w-6xl"
+    >
+      <ResultsHeader
+        eyebrow="Round-trip search"
+        title={
+          step === "outbound"
+            ? "Step 1 of 3 · Choose your outbound flight"
+            : step === "return"
+              ? "Step 2 of 3 · Choose your return flight"
+              : "Step 3 of 3 · Review your trip"
+        }
+        routeTitle={routeTitle}
+        offerRequestId={offerRequestId}
+        liveMode={liveMode}
+      />
+
+      {step === "outbound" ? (
+        <>
+          <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-500">
+            Select the outbound flight that works best for your trip. You will
+            choose a compatible return flight next.
+          </p>
+
+          <div className="mt-5 grid gap-4">
+            {outboundOptions.map((option, index) => (
+              <SliceChoiceCard
+                key={option.key}
+                index={index}
+                slice={option.slice}
+                priceLabel={`From ${formatMoney(option.offer.totalAmount, option.offer.totalCurrency)}`}
+                buttonLabel="Choose outbound"
+                onSelect={() => onSelectOutbound(option.key)}
+              />
+            ))}
+          </div>
+        </>
+      ) : null}
+
+      {step === "return" ? (
+        <>
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="max-w-3xl text-sm leading-6 text-slate-500">
+              These return options are compatible with the outbound flight you
+              selected. Choose one to review the full trip price.
+            </p>
+
+            <button
+              type="button"
+              onClick={onBackToOutbound}
+              className="text-sm font-semibold text-slate-600 transition hover:text-slate-950"
+            >
+              Change outbound
+            </button>
+          </div>
+
+          <div className="mt-5 grid gap-4">
+            {returnOptions.map((option, index) => (
+              <SliceChoiceCard
+                key={option.offer.id}
+                index={index}
+                slice={option.slice}
+                priceLabel={formatMoney(
+                  option.offer.totalAmount,
+                  option.offer.totalCurrency
+                )}
+                buttonLabel="Choose return"
+                onSelect={() => onSelectReturn(option.offer)}
+              />
+            ))}
+          </div>
+        </>
+      ) : null}
+
+      {step === "review" && selectedOffer ? (
+        <div className="mt-6 rounded-[1.6rem] border border-slate-200 bg-white p-5 shadow-[0_18px_55px_rgba(15,23,42,0.07)]">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
+                Total trip price
+              </p>
+
+              <h3 className="mt-2 text-4xl font-bold tracking-tight text-slate-950">
+                {formatMoney(
+                  selectedOffer.totalAmount,
+                  selectedOffer.totalCurrency
+                )}
+              </h3>
+
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500">
+                This is the full round-trip fare for the outbound and return
+                flights selected below. Passenger checkout is coming next.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={onBackToReturn}
+                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Change return
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onViewDetails(selectedOffer)}
+                className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+              >
+                View details
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+            {selectedOffer.slices.map((slice, index) => (
+              <SliceSummaryBlock
+                key={slice.id}
+                label={index === 0 ? "Outbound" : "Return"}
+                slice={slice}
+              />
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </motion.div>
+  )
+}
+
+function ResultsHeader({
+  eyebrow,
+  title,
+  routeTitle,
+  offerRequestId,
+  liveMode,
+}: {
+  eyebrow: string
+  title: string
+  routeTitle: string
+  offerRequestId: string | null
+  liveMode: boolean | null
+}) {
+  return (
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
+          {eyebrow}
+        </p>
+        <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
+          {title}
+        </h2>
+        <p className="mt-2 text-sm text-slate-500">{routeTitle}</p>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {offerRequestId ? (
+          <SlimPill label={`Request ${offerRequestId.slice(0, 10)}…`} />
+        ) : null}
+        <SlimPill label={liveMode ? "Live mode" : "Test mode"} />
+      </div>
+    </div>
+  )
+}
+
+function OfferCard({
+  offer,
+  index,
+  onViewDetails,
+}: {
+  offer: BookingOffer
+  index: number
+  onViewDetails: () => void
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.045, duration: 0.35, ease: "easeOut" }}
+      className="rounded-[1.6rem] border border-slate-200 bg-white p-4 shadow-[0_18px_55px_rgba(15,23,42,0.07)] transition hover:border-sky-200"
+    >
+      <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
+        <div className="grid gap-4">
+          {offer.slices.map((slice, sliceIndex) => (
+            <SliceSummaryBlock
+              key={slice.id}
+              label={
+                offer.slices.length === 1
+                  ? "Flight"
+                  : `Flight ${sliceIndex + 1}`
+              }
+              slice={slice}
+            />
+          ))}
+        </div>
+
+        <div className="flex items-center justify-between gap-4 rounded-[1.25rem] bg-slate-50 p-4 lg:min-w-[15rem] lg:flex-col lg:items-stretch">
+          <div className="lg:text-right">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              Total fare
+            </p>
+            <p className="mt-1 text-3xl font-bold tracking-tight text-slate-950">
+              {formatMoney(offer.totalAmount, offer.totalCurrency)}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onViewDetails}
+            className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+          >
+            View details
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
+function SliceChoiceCard({
+  slice,
+  index,
+  priceLabel,
+  buttonLabel,
+  onSelect,
+}: {
+  slice: BookingSlice
+  index: number
+  priceLabel: string
+  buttonLabel: string
+  onSelect: () => void
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.045, duration: 0.35, ease: "easeOut" }}
+      className="rounded-[1.6rem] border border-slate-200 bg-white p-4 shadow-[0_18px_55px_rgba(15,23,42,0.07)] transition hover:border-sky-200"
+    >
+      <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
+        <SliceSummaryBlock label="Flight option" slice={slice} />
+
+        <div className="flex items-center justify-between gap-4 rounded-[1.25rem] bg-slate-50 p-4 lg:min-w-[15rem] lg:flex-col lg:items-stretch">
+          <div className="lg:text-right">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              Trip fare
+            </p>
+            <p className="mt-1 text-xl font-bold tracking-tight text-slate-950">
+              {priceLabel}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onSelect}
+            className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+          >
+            {buttonLabel}
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
+function SliceSummaryBlock({
+  label,
+  slice,
+}: {
+  label: string
+  slice: BookingSlice
+}) {
+  const firstSegment = slice.segments[0]
+  const lastSegment = slice.segments[slice.segments.length - 1]
+
+  return (
+    <div>
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="text-base font-semibold text-slate-950">{label}</p>
+
+        <InlinePill
+          label={
+            slice.stops === 0
+              ? "Nonstop"
+              : `${slice.stops} stop${slice.stops > 1 ? "s" : ""}`
+          }
+        />
+
+        <InlinePill label={formatDuration(slice.duration)} />
+
+        {firstSegment?.airlineName ? (
+          <InlinePill label={firstSegment.airlineName} />
+        ) : null}
+      </div>
+
+      <div className="mt-4 grid gap-3 md:grid-cols-[auto_1fr_auto] md:items-center">
+        <FlightTimeBlock
+          code={slice.origin.iataCode ?? firstSegment?.origin.iataCode}
+          city={slice.origin.cityName ?? firstSegment?.origin.cityName}
+          time={slice.departureTime ?? firstSegment?.departingAt}
+        />
+
+        <div className="hidden items-center gap-3 md:flex">
+          <div className="h-px flex-1 bg-gradient-to-r from-slate-200 via-sky-400 to-slate-200" />
+          <span className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
+            {firstSegment?.airlineIataCode}
+            {firstSegment?.flightNumber ? ` ${firstSegment.flightNumber}` : ""}
+          </span>
+          <div className="h-px flex-1 bg-gradient-to-r from-slate-200 via-indigo-400 to-slate-200" />
+        </div>
+
+        <FlightTimeBlock
+          alignRight
+          code={slice.destination.iataCode ?? lastSegment?.destination.iataCode}
+          city={slice.destination.cityName ?? lastSegment?.destination.cityName}
+          time={slice.arrivalTime ?? lastSegment?.arrivingAt}
+        />
+      </div>
+    </div>
+  )
+}
+
+function OfferDetailsModal({
+  offer,
+  onClose,
+}: {
+  offer: BookingOffer
+  onClose: () => void
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/35 px-4 backdrop-blur-sm">
+      <motion.div
+        initial={{ opacity: 0, y: 18, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.22, ease: "easeOut" }}
+        className="max-h-[86vh] w-full max-w-3xl overflow-auto rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_30px_100px_rgba(15,23,42,0.25)]"
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+              Offer details
+            </p>
+            <h3 className="mt-2 text-2xl font-bold text-slate-950">
+              {offer.owner.name ?? offer.summary.airlineName}
+            </h3>
+            <p className="mt-1 text-sm text-slate-500">
+              {formatMoney(offer.totalAmount, offer.totalCurrency)} total fare
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-lg font-semibold text-slate-700 transition hover:bg-slate-100"
+            aria-label="Close offer details"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="mt-6 space-y-4">
+          {offer.slices.map((slice, sliceIndex) => (
+            <div
+              key={slice.id}
+              className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4"
+            >
+              <SliceSummaryBlock
+                label={`Flight ${sliceIndex + 1}`}
+                slice={slice}
+              />
+
+              <div className="mt-4 space-y-3">
+                {slice.segments.map((segment) => (
+                  <div
+                    key={segment.id}
+                    className="rounded-[1.1rem] border border-slate-200 bg-white p-4"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-950">
+                          {segment.airlineName} {segment.airlineIataCode}
+                          {segment.flightNumber
+                            ? ` ${segment.flightNumber}`
+                            : ""}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500">
+                          {segment.origin.iataCode}{" "}
+                          {formatTime(segment.departingAt)} →{" "}
+                          {segment.destination.iataCode}{" "}
+                          {formatTime(segment.arrivingAt)}
+                        </p>
+                      </div>
+
+                      <InlinePill label={formatDuration(segment.duration)} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6 rounded-[1.25rem] border border-slate-200 bg-sky-50 p-4 text-sm leading-6 text-slate-600">
+          Skysirv currently supports live offer discovery and comparison.
+          Passenger checkout will be introduced after booking confirmation,
+          payment, and post-booking support flows are production-ready.
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
+function FlightTimeBlock({
+  code,
+  city,
+  time,
+  alignRight = false,
+}: {
+  code?: string | null
+  city?: string | null
+  time?: string | null
+  alignRight?: boolean
+}) {
+  return (
+    <div className={alignRight ? "text-right" : ""}>
+      <p className="text-2xl font-bold tracking-tight text-slate-950">
+        {formatTime(time)}
+      </p>
+      <p className="mt-1 text-sm font-semibold tracking-[0.12em] text-slate-600">
+        {code ?? "---"}
+      </p>
+      <p className="mt-0.5 text-xs text-slate-400">{city ?? "Airport"}</p>
+    </div>
+  )
+}
+
+function SlimPill({ label }: { label: string }) {
+  return (
+    <div className="inline-flex items-center whitespace-nowrap rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm">
       {label}
     </div>
   )
 }
 
-function PreviewCard({
-  eyebrow,
-  title,
-  text,
-}: {
-  eyebrow: string
-  title: string
-  text: string
-}) {
+function InlinePill({ label }: { label: string }) {
   return (
-    <motion.div
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.22 }}
-      className="rounded-[1.75rem] border border-white/10 bg-white/5 p-7 backdrop-blur-sm"
-    >
-      <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
-        {eyebrow}
-      </p>
-      <h3 className="mt-3 text-2xl font-bold text-white">{title}</h3>
-      <p className="mt-4 text-sm leading-7 text-slate-300">{text}</p>
-    </motion.div>
+    <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-500">
+      {label || "—"}
+    </span>
   )
 }
 
-function FeatureBlock({
-  title,
-  text,
-}: {
-  title: string
-  text: string
-}) {
-  return (
-    <div className="flex min-h-[120px] flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] p-5 text-center">
-      <p className="text-base font-semibold text-white">{title}</p>
-      <p className="mt-2 max-w-xs text-sm leading-6 text-slate-400">{text}</p>
-    </div>
-  )
+function getSliceKey(slice: BookingSlice) {
+  const firstSegment = slice.segments[0]
+  const lastSegment = slice.segments[slice.segments.length - 1]
+
+  return [
+    slice.origin.iataCode,
+    slice.destination.iataCode,
+    slice.departureTime,
+    slice.arrivalTime,
+    firstSegment?.airlineIataCode,
+    firstSegment?.flightNumber,
+    lastSegment?.flightNumber,
+  ]
+    .filter(Boolean)
+    .join("|")
+}
+
+function formatMoney(amount: string, currency: string) {
+  const numericAmount = Number(amount)
+
+  if (!Number.isFinite(numericAmount)) {
+    return `${amount} ${currency}`
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 0,
+  }).format(numericAmount)
+}
+
+function formatTime(value?: string | null) {
+  if (!value) return "--:--"
+
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) return "--:--"
+
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date)
+}
+
+function formatDuration(value?: string | null) {
+  if (!value) return "Duration unavailable"
+
+  const match = value.match(/^PT(?:(\d+)H)?(?:(\d+)M)?$/)
+
+  if (!match) return value
+
+  const hours = match[1] ? Number(match[1]) : 0
+  const minutes = match[2] ? Number(match[2]) : 0
+
+  if (hours && minutes) return `${hours}h ${minutes}m`
+  if (hours) return `${hours}h`
+  if (minutes) return `${minutes}m`
+
+  return value
 }
 
 function BookingFooter() {
   return (
-    <div className="mx-auto max-w-6xl px-6 pt-8 pb-6 text-center md:max-w-4xl md:text-left">
+    <div className="mx-auto max-w-6xl px-6 pb-6 pt-16 text-center md:max-w-4xl md:text-left">
       <div className="grid grid-cols-1 gap-12 md:grid-cols-4 md:justify-items-center md:text-center">
-        {/* Brand */}
         <div className="flex max-w-xs flex-col justify-start text-center md:text-left">
           <Link
             href="/"
-            className="text-xl font-bold leading-none text-white transition hover:text-slate-300"
+            className="text-xl font-bold leading-none text-slate-950 transition hover:text-slate-700"
           >
             Skysirv™
           </Link>
 
-          <p className="mt-4 text-sm leading-6 text-slate-400">
-            Flight intelligence that helps travelers understand pricing and
-            book with more confidence.
+          <p className="mt-4 text-sm leading-6 text-slate-500">
+            Flight intelligence that helps travelers understand pricing and book
+            with more confidence.
           </p>
         </div>
 
-        {/* Products */}
-        <div className="text-center md:text-left">
-          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white">
-            Products
-          </h3>
+        <FooterColumn
+          title="Products"
+          links={[
+            { href: "/pricing", label: "Pricing" },
+            { href: "/booking", label: "Booking" },
+            { href: "/flight-attendant", label: "Skysirv Flight Attendant™" },
+          ]}
+        />
 
-          <ul className="mt-4 space-y-3 text-sm text-slate-400">
-            <li>
-              <Link href="/pricing" className="transition hover:text-white">
-                Pricing
-              </Link>
-            </li>
+        <FooterColumn
+          title="Company"
+          links={[
+            { href: "/about", label: "About" },
+            { href: "/beta", label: "Skysirv™ Beta" },
+          ]}
+        />
 
-            <li>
-              <Link href="/booking" className="transition hover:text-white">
-                Booking
-              </Link>
-            </li>
-
-            <li>
-              <Link href="/flight-attendant" className="transition hover:text-white">
-                Skysirv Flight Attendant™
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Company */}
-        <div className="text-center md:text-left">
-          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white">
-            Company
-          </h3>
-
-          <ul className="mt-4 space-y-3 text-sm text-slate-400">
-            <li>
-              <Link href="/about" className="transition hover:text-white">
-                About
-              </Link>
-            </li>
-
-            <li>
-              <Link href="/beta" className="transition hover:text-white">
-                Skysirv™ Beta
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Legal */}
-        <div className="text-center md:text-left">
-          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white">
-            Legal
-          </h3>
-
-          <ul className="mt-4 space-y-3 text-sm text-slate-400">
-            <li>
-              <Link href="/privacy" className="transition hover:text-white">
-                Privacy
-              </Link>
-            </li>
-
-            <li>
-              <Link href="/terms" className="transition hover:text-white">
-                Terms
-              </Link>
-            </li>
-
-            <li>
-              <Link href="/refund-policy" className="transition hover:text-white">
-                Refund Policy
-              </Link>
-            </li>
-          </ul>
-        </div>
+        <FooterColumn
+          title="Legal"
+          links={[
+            { href: "/privacy", label: "Privacy" },
+            { href: "/terms", label: "Terms" },
+            { href: "/refund-policy", label: "Refund Policy" },
+          ]}
+        />
       </div>
 
       <div className="mt-12 pt-6 text-center">
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-slate-500">
           &copy; {new Date().getFullYear()} Skysirv™. All rights reserved.
         </p>
       </div>
+    </div>
+  )
+}
+
+function FooterColumn({
+  title,
+  links,
+}: {
+  title: string
+  links: { href: string; label: string }[]
+}) {
+  return (
+    <div className="text-center md:text-left">
+      <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-slate-950">
+        {title}
+      </h3>
+
+      <ul className="mt-4 space-y-3 text-sm text-slate-500">
+        {links.map((link) => (
+          <li key={link.href}>
+            <Link href={link.href} className="transition hover:text-slate-950">
+              {link.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }
