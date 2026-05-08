@@ -14,8 +14,8 @@ export default function FlightAttendantPage() {
     const originalBackgroundColor = document.body.style.backgroundColor
 
     document.body.style.background =
-      "linear-gradient(to bottom, rgb(2 6 23), rgb(2 6 23), rgb(15 23 42))"
-    document.body.style.backgroundColor = "rgb(2 6 23)"
+      "linear-gradient(to bottom, rgb(248 250 252), rgb(255 255 255), rgb(241 245 249))"
+    document.body.style.backgroundColor = "rgb(248 250 252)"
 
     return () => {
       document.body.style.background = originalBackground
@@ -24,22 +24,22 @@ export default function FlightAttendantPage() {
   }, [])
 
   return (
-    <section className="relative -mt-32 overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 pt-32 text-white">
+    <section className="relative -mt-32 overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-100 pt-32 text-slate-950">
       <div className="pointer-events-none absolute inset-0">
         <motion.div
           animate={{ opacity: [0.16, 0.28, 0.16], scale: [1, 1.04, 1] }}
           transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.16),transparent_38%)]"
+          className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.10),transparent_42%)]"
         />
         <motion.div
           animate={{ x: [0, 24, 0], y: [0, -18, 0] }}
           transition={{ duration: 8.6, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute right-[-40px] top-[-20px] h-72 w-72 rounded-full bg-sky-500/10 blur-3xl"
+          className="absolute right-[-40px] top-[-20px] h-72 w-72 rounded-full bg-sky-200/45 blur-3xl"
         />
         <motion.div
           animate={{ x: [0, -18, 0], y: [0, 18, 0] }}
           transition={{ duration: 9.2, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-[-40px] left-[-20px] h-80 w-80 rounded-full bg-indigo-500/10 blur-3xl"
+          className="absolute bottom-[-40px] left-[-20px] h-80 w-80 rounded-full bg-indigo-200/35 blur-3xl"
         />
       </div>
 
@@ -51,7 +51,7 @@ export default function FlightAttendantPage() {
               initial={{ opacity: 0, y: 18, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.55, ease: "easeOut" }}
-              className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-300 backdrop-blur-sm"
+              className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600 shadow-sm"
             >
               Skysirv Flight Attendant™
             </motion.div>
@@ -60,7 +60,7 @@ export default function FlightAttendantPage() {
               initial={{ opacity: 0, y: 28 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.06, duration: 0.72, ease: "easeOut" }}
-              className="mt-8 text-5xl font-bold leading-[1.08] tracking-tight text-white sm:text-6xl md:text-7xl"
+              className="mt-8 text-5xl font-bold leading-[1.08] tracking-tight text-slate-950 sm:text-6xl md:text-7xl"
             >
               Your AI travel companion
               <span className="block">inside Skysirv</span>
@@ -70,7 +70,7 @@ export default function FlightAttendantPage() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.14, duration: 0.62, ease: "easeOut" }}
-              className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-300 sm:text-xl"
+              className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-600 sm:text-xl"
             >
               Skysirv's Lucy is the conversational AI intelligence layer being built to help travelers understand route behavior, fare signals,
               Skyscore™, watchlists, and booking confidence.
@@ -93,7 +93,7 @@ export default function FlightAttendantPage() {
               transition={{ delay: 0.26, duration: 0.58, ease: "easeOut" }}
               className="mt-12 text-center"
             >
-              <h2 className="text-3xl font-bold tracking-tight text-white sm:text-5xl">
+              <h2 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-5xl">
                 3 Layers of AI Intelligence
               </h2>
             </motion.div>
@@ -118,18 +118,18 @@ export default function FlightAttendantPage() {
 
         {/* AI DECISION PANEL */}
         <div className="mx-auto mt-16 max-w-6xl">
-          <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 px-6 py-8 shadow-[0_30px_80px_rgba(2,6,23,0.45)] backdrop-blur-sm sm:px-8 sm:py-10">
+          <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white px-6 py-8 shadow-[0_28px_80px_rgba(15,23,42,0.09)] sm:px-8 sm:py-10">
             <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-              <div className="rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-7">
-                <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+              <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-7">
+                <div className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                   AI decision layer
                 </div>
 
-                <h2 className="mt-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">
+                <h2 className="mt-4 text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
                   Built to explain the why behind your flight decisions.
                 </h2>
 
-                <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
+                <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
                   Most travel tools show prices. Skysirv is being built to
                   interpret pricing behavior over time. Lucy sits on top of that
                   intelligence layer to help explain route movement, booking
@@ -155,12 +155,12 @@ export default function FlightAttendantPage() {
                 </div>
               </div>
 
-              <div className="rounded-[1.75rem] border border-white/10 bg-slate-950/80 p-7 shadow-[0_20px_60px_rgba(2,6,23,0.35)]">
-                <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+              <div className="rounded-[1.75rem] border border-slate-200 bg-white p-7 shadow-[0_18px_55px_rgba(15,23,42,0.06)]">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                   Where Lucy lives
                 </p>
 
-                <h3 className="mt-4 text-3xl font-bold tracking-tight text-white">
+                <h3 className="mt-4 text-3xl font-bold tracking-tight text-slate-950">
                   Inside your dashboard, right where decisions happen.
                 </h3>
 
@@ -185,16 +185,16 @@ export default function FlightAttendantPage() {
 
         {/* SYSTEM STORY */}
         <div className="mx-auto mt-16 grid max-w-6xl gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
-            <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+          <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_18px_55px_rgba(15,23,42,0.06)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
               Why this matters
             </p>
 
-            <h2 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
               This is not generic AI. It is a specialized travel intelligence assistant.
             </h2>
 
-            <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
+            <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
               Skysirv Flight Attendant™ is being designed to sit on top of the
               Skysirv Intelligence Engine™ — helping travelers understand price
               movement, timing signals, route behavior, alerts, and confidence
@@ -247,21 +247,21 @@ export default function FlightAttendantPage() {
 
         {/* FINAL CTA */}
         <div className="mx-auto mt-20 max-w-6xl">
-          <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 px-6 py-14 text-center shadow-[0_25px_70px_rgba(2,6,23,0.38)] backdrop-blur-sm sm:px-8 sm:py-16">
+          <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white px-6 py-14 text-center shadow-[0_25px_70px_rgba(15,23,42,0.08)] sm:px-8 sm:py-16">
             <div className="pointer-events-none absolute inset-0">
               <motion.div
                 animate={{ opacity: [0.12, 0.2, 0.12], scale: [1, 1.03, 1] }}
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.18),transparent_40%)]"
+                className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.10),transparent_45%)]"
               />
             </div>
 
             <div className="relative mx-auto max-w-3xl">
-              <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+              <h2 className="text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
                 Meet Lucy inside your Skysirv dashboard.
               </h2>
 
-              <p className="mt-6 text-lg leading-8 text-slate-300">
+              <p className="mt-6 text-lg leading-8 text-slate-600">
                 Skysirv Flight Attendant™ brings conversational guidance to
                 route monitoring, price behavior, alerts, Skyscore™, and future
                 booking decisions.
@@ -270,14 +270,14 @@ export default function FlightAttendantPage() {
               <div className="mt-8 flex flex-wrap justify-center gap-4">
                 <Link
                   href="/pricing"
-                  className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-200"
+                  className="inline-flex items-center justify-center rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
                 >
                   View Skysirv plans
                 </Link>
 
                 <Link
                   href="/"
-                  className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                  className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
                 >
                   Back to homepage
                 </Link>
@@ -294,7 +294,7 @@ export default function FlightAttendantPage() {
 
 function MarketingPill({ label }: { label: string }) {
   return (
-    <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 backdrop-blur-sm">
+    <div className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm">
       {label}
     </div>
   )
@@ -308,9 +308,9 @@ function ValuePanel({
   text: string
 }) {
   return (
-    <div className="flex h-full flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/5 p-6 text-center backdrop-blur-sm">
-      <h3 className="text-xl font-bold text-white">{title}</h3>
-      <p className="mt-3 max-w-sm text-sm leading-7 text-slate-300">{text}</p>
+    <div className="flex h-full flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-[0_18px_55px_rgba(15,23,42,0.06)]">
+      <h3 className="text-xl font-bold text-slate-950">{title}</h3>
+      <p className="mt-3 max-w-sm text-sm leading-7 text-slate-600">{text}</p>
     </div>
   )
 }
@@ -325,12 +325,16 @@ function SlateMetricCard({
   subtext: string
 }) {
   return (
-    <div className="flex min-h-[156px] flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/5 p-4 text-center">
-      <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-400">
+    <div className="flex min-h-[156px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-4 text-center">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
         {label}
       </p>
-      <p className="mt-2 text-xl font-semibold leading-tight text-white">{value}</p>
-      <p className="mt-2 text-center text-xs leading-5 text-slate-400">{subtext}</p>
+      <p className="mt-2 text-xl font-semibold leading-tight text-slate-950">
+        {value}
+      </p>
+      <p className="mt-2 text-center text-xs leading-5 text-slate-500">
+        {subtext}
+      </p>
     </div>
   )
 }
@@ -343,9 +347,9 @@ function SlateFeatureCard({
   text: string
 }) {
   return (
-    <div className="flex min-h-[210px] flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/5 p-6 text-center backdrop-blur-sm">
-      <h3 className="text-xl font-bold text-white">{title}</h3>
-      <p className="mt-3 max-w-xs text-sm leading-7 text-slate-300">{text}</p>
+    <div className="flex min-h-[210px] flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-[0_18px_55px_rgba(15,23,42,0.06)]">
+      <h3 className="text-xl font-bold text-slate-950">{title}</h3>
+      <p className="mt-3 max-w-xs text-sm leading-7 text-slate-600">{text}</p>
     </div>
   )
 }
@@ -358,11 +362,11 @@ function DarkInsightRow({
   text: string
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-      <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
+    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
         {label}
       </p>
-      <p className="mt-2 text-sm leading-6 text-slate-300">{text}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-600">{text}</p>
     </div>
   )
 }
@@ -408,19 +412,19 @@ function FlightAttendantComparisonTable() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <h3 className="text-center text-5xl font-semibold text-white">
+      <h3 className="text-center text-5xl font-semibold text-slate-950">
         ChatGPT vs. Skysirv Flight Attendant™
       </h3>
 
-      <p className="mx-auto mt-3 max-w-3xl text-center text-lg leading-8 text-slate-400">
+      <p className="mx-auto mt-3 max-w-3xl text-center text-lg leading-8 text-slate-600">
         ChatGPT is a powerful general assistant. Skysirv Flight Attendant™ is
         being designed as a specialized travel intelligence assistant connected
         to the Skysirv platform.
       </p>
 
       <div className="mt-10 overflow-x-auto">
-        <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950/80 shadow-[0_20px_60px_rgba(2,6,23,0.35)] backdrop-blur-sm">
-          <div className="grid min-w-[760px] grid-cols-3 border-b border-white/10 bg-white/[0.04] text-sm font-medium text-slate-300">
+        <div className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+          <div className="grid min-w-[760px] grid-cols-3 border-b border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700">
             <div className="px-6 py-4">Capability</div>
             <div className="px-6 py-4 text-center">ChatGPT</div>
             <div className="px-6 py-4 text-center">Skysirv Flight Attendant™</div>
@@ -430,19 +434,19 @@ function FlightAttendantComparisonTable() {
             <div
               key={row.label}
               className={cn(
-                "grid min-w-[760px] grid-cols-3 border-t border-white/5 text-sm",
-                index % 2 === 0 ? "bg-transparent" : "bg-white/[0.02]"
+                "grid min-w-[760px] grid-cols-3 border-t border-slate-100 text-sm",
+                index % 2 === 0 ? "bg-white" : "bg-slate-50/70"
               )}
             >
-              <div className="px-6 py-4 font-medium text-slate-200">
+              <div className="px-6 py-4 font-medium text-slate-800">
                 {row.label}
               </div>
 
-              <div className="px-6 py-4 text-center text-slate-400">
+              <div className="px-6 py-4 text-center text-slate-600">
                 {row.chatgpt}
               </div>
 
-              <div className="px-6 py-4 text-center text-slate-200">
+              <div className="px-6 py-4 text-center text-slate-800">
                 {row.skysirv}
               </div>
             </div>
@@ -460,37 +464,37 @@ function FlightAttendantFooter() {
         <div className="flex max-w-xs flex-col justify-start text-center md:text-left">
           <Link
             href="/"
-            className="text-xl font-bold leading-none text-white transition hover:text-slate-300"
+            className="text-xl font-bold leading-none text-slate-950 transition hover:text-slate-700"
           >
             Skysirv™
           </Link>
 
-          <p className="mt-4 text-sm leading-6 text-slate-400">
+          <p className="mt-4 text-sm leading-6 text-slate-500">
             Flight intelligence that helps travelers understand pricing and
             book with more confidence.
           </p>
         </div>
 
         <div className="text-center md:text-left">
-          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white">
+          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-slate-950">
             Products
           </h3>
 
-          <ul className="mt-4 space-y-3 text-sm text-slate-400">
+          <ul className="mt-4 space-y-3 text-sm text-slate-500">
             <li>
-              <Link href="/pricing" className="transition hover:text-white">
+              <Link href="/pricing" className="transition hover:text-slate-950">
                 Pricing
               </Link>
             </li>
 
             <li>
-              <Link href="/booking" className="transition hover:text-white">
+              <Link href="/booking" className="transition hover:text-slate-950">
                 Booking
               </Link>
             </li>
 
             <li>
-              <Link href="/flight-attendant" className="transition hover:text-white">
+              <Link href="/flight-attendant" className="transition hover:text-slate-950">
                 Skysirv Flight Attendant™
               </Link>
             </li>
@@ -498,19 +502,19 @@ function FlightAttendantFooter() {
         </div>
 
         <div className="text-center md:text-left">
-          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white">
+          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-slate-950">
             Company
           </h3>
 
-          <ul className="mt-4 space-y-3 text-sm text-slate-400">
+          <ul className="mt-4 space-y-3 text-sm text-slate-500">
             <li>
-              <Link href="/about" className="transition hover:text-white">
+              <Link href="/about" className="transition hover:text-slate-950">
                 About
               </Link>
             </li>
 
             <li>
-              <Link href="/beta" className="transition hover:text-white">
+              <Link href="/beta" className="transition hover:text-slate-950">
                 Skysirv™ Beta
               </Link>
             </li>
@@ -518,25 +522,25 @@ function FlightAttendantFooter() {
         </div>
 
         <div className="text-center md:text-left">
-          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white">
+          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-slate-950">
             Legal
           </h3>
 
-          <ul className="mt-4 space-y-3 text-sm text-slate-400">
+          <ul className="mt-4 space-y-3 text-sm text-slate-500">
             <li>
-              <Link href="/privacy" className="transition hover:text-white">
+              <Link href="/privacy" className="transition hover:text-slate-950">
                 Privacy
               </Link>
             </li>
 
             <li>
-              <Link href="/terms" className="transition hover:text-white">
+              <Link href="/terms" className="transition hover:text-slate-950">
                 Terms
               </Link>
             </li>
 
             <li>
-              <Link href="/refund-policy" className="transition hover:text-white">
+              <Link href="/refund-policy" className="transition hover:text-slate-950">
                 Refund Policy
               </Link>
             </li>
@@ -545,7 +549,7 @@ function FlightAttendantFooter() {
       </div>
 
       <div className="mt-12 pt-6 text-center">
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-slate-500">
           &copy; {new Date().getFullYear()} Skysirv™. All rights reserved.
         </p>
       </div>

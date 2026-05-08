@@ -88,8 +88,8 @@ export default function BetaPage() {
     const originalBackgroundColor = document.body.style.backgroundColor
 
     document.body.style.background =
-      "linear-gradient(to bottom, rgb(2 6 23), rgb(2 6 23), rgb(15 23 42))"
-    document.body.style.backgroundColor = "rgb(2 6 23)"
+      "linear-gradient(to bottom, rgb(248 250 252), rgb(255 255 255), rgb(241 245 249))"
+    document.body.style.backgroundColor = "rgb(248 250 252)"
 
     return () => {
       document.body.style.background = originalBackground
@@ -99,22 +99,22 @@ export default function BetaPage() {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 pt-32 text-white">
+      <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-100 pt-32 text-slate-950">
         <div className="pointer-events-none absolute inset-0">
           <motion.div
             animate={{ opacity: [0.16, 0.28, 0.16], scale: [1, 1.04, 1] }}
             transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.16),transparent_38%)]"
+            className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.10),transparent_42%)]"
           />
           <motion.div
             animate={{ x: [0, 24, 0], y: [0, -18, 0] }}
             transition={{ duration: 8.6, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute right-[-40px] top-[-20px] h-72 w-72 rounded-full bg-sky-500/10 blur-3xl"
+            className="absolute right-[-40px] top-[-20px] h-72 w-72 rounded-full bg-sky-200/45 blur-3xl"
           />
           <motion.div
             animate={{ x: [0, -18, 0], y: [0, 18, 0] }}
             transition={{ duration: 9.2, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute bottom-[-40px] left-[-20px] h-80 w-80 rounded-full bg-indigo-500/10 blur-3xl"
+            className="absolute bottom-[-40px] left-[-20px] h-80 w-80 rounded-full bg-indigo-200/35 blur-3xl"
           />
         </div>
 
@@ -125,7 +125,7 @@ export default function BetaPage() {
               initial={{ opacity: 0, y: 18, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.55, ease: "easeOut" }}
-              className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-300 backdrop-blur-sm"
+              className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600 shadow-sm"
             >
               Limited Beta Access
             </motion.div>
@@ -134,7 +134,7 @@ export default function BetaPage() {
               initial={{ opacity: 0, y: 28 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.06, duration: 0.72, ease: "easeOut" }}
-              className="mt-8 text-5xl font-bold leading-[1.08] tracking-tight text-white sm:text-6xl md:text-7xl"
+              className="mt-8 text-5xl font-bold leading-[1.08] tracking-tight text-slate-950 sm:text-6xl md:text-7xl"
             >
               Join the Skysirv™ Beta
               before wider rollout begins
@@ -144,7 +144,7 @@ export default function BetaPage() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.14, duration: 0.62, ease: "easeOut" }}
-              className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-300 sm:text-xl"
+              className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-600 sm:text-xl"
             >
               Skysirv™ is building an Airfare Intelligence Network designed to go
               beyond flight search — helping travelers monitor routes, detect
@@ -171,14 +171,14 @@ export default function BetaPage() {
             >
               <Link
                 href="/beta/apply"
-                className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-200"
+                className="inline-flex items-center justify-center rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_45px_rgba(15,23,42,0.16)] transition hover:bg-slate-800"
               >
                 Join the Beta
               </Link>
 
               <Link
                 href="/signin"
-                className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
               >
                 Already have access?
               </Link>
@@ -188,15 +188,15 @@ export default function BetaPage() {
           {/* WHY BETA */}
           <div className="mx-auto mt-16 max-w-6xl">
             <motion.div {...fadeUp} className="mx-auto max-w-3xl text-center">
-              <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                 Why beta
               </p>
 
-              <h2 className="mt-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">
+              <h2 className="mt-4 text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
                 Early access to a more intelligent way to watch airfare
               </h2>
 
-              <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
+              <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
                 This beta is for travelers who want more than fare snapshots and
                 generic search results. It is an early look at a platform being
                 shaped around route monitoring, signal quality, and decision-ready
@@ -215,12 +215,12 @@ export default function BetaPage() {
                 <motion.div
                   key={benefit}
                   variants={staggerItem}
-                  className="flex min-h-[190px] flex-col items-center justify-center rounded-[1.75rem] border border-white/10 bg-white/5 p-6 text-center shadow-[0_20px_60px_rgba(2,6,23,0.28)] backdrop-blur-sm"
+                  className="flex min-h-[190px] flex-col items-center justify-center rounded-[1.75rem] border border-slate-200 bg-white p-6 text-center shadow-[0_18px_55px_rgba(15,23,42,0.06)]"
                 >
-                  <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-sky-300/20 bg-sky-400/10 text-sky-200">
+                  <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-sky-200 bg-sky-50 text-sky-600">
                     ✦
                   </div>
-                  <p className="max-w-xs text-sm leading-7 text-slate-300">{benefit}</p>
+                  <p className="max-w-xs text-sm leading-7 text-slate-600">{benefit}</p>
                 </motion.div>
               ))}
             </motion.div>
@@ -229,15 +229,15 @@ export default function BetaPage() {
           {/* INTELLIGENCE LAYER */}
           <div className="mx-auto mt-16 max-w-6xl">
             <motion.div {...fadeUp} className="mx-auto max-w-3xl text-center">
-              <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                 Intelligence layer
               </p>
 
-              <h2 className="mt-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">
+              <h2 className="mt-4 text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
                 The proprietary systems behind the platform
               </h2>
 
-              <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
+              <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
                 Skysirv™ is being built as more than a single feature. The beta
                 gives early users access to the first connected layers of an
                 airfare intelligence system designed to work in synchrony.
@@ -255,17 +255,17 @@ export default function BetaPage() {
                 <motion.div
                   key={item.title}
                   variants={staggerItem}
-                  className="group flex min-h-[260px] flex-col items-center justify-center rounded-[1.75rem] border border-white/10 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 p-7 text-center shadow-[0_25px_60px_rgba(2,6,23,0.35)]"
+                  className="group flex min-h-[260px] flex-col items-center justify-center rounded-[1.75rem] border border-slate-200 bg-white p-7 text-center shadow-[0_18px_55px_rgba(15,23,42,0.06)]"
                 >
-                  <div className="inline-flex items-center rounded-full border border-sky-300/20 bg-sky-400/10 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-sky-200">
+                  <div className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-sky-700">
                     Beta Access
                   </div>
 
-                  <h3 className="mt-5 text-lg font-semibold text-white">
+                  <h3 className="mt-5 text-lg font-semibold text-slate-950">
                     {item.title}
                   </h3>
 
-                  <p className="mt-4 max-w-xs text-sm leading-7 text-slate-300">
+                  <p className="mt-4 max-w-xs text-sm leading-7 text-slate-600">
                     {item.description}
                   </p>
                 </motion.div>
@@ -277,21 +277,21 @@ export default function BetaPage() {
           <div className="mx-auto mt-16 max-w-6xl">
             <motion.div
               {...fadeUp}
-              className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 shadow-[0_30px_80px_rgba(2,6,23,0.45)] backdrop-blur-sm"
+              className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_28px_80px_rgba(15,23,42,0.09)]"
             >
               <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
                 <div className="relative p-8 sm:p-10 md:p-12">
-                  <div className="absolute inset-0 bg-gradient-to-br from-slate-900/60 via-slate-900/40 to-sky-950/20" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-sky-50/60" />
                   <div className="relative">
-                    <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                       What beta users get
                     </p>
 
-                    <h2 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                    <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
                       A first look at the Skysirv™ dashboard ecosystem
                     </h2>
 
-                    <p className="mt-5 max-w-xl text-sm leading-7 text-slate-300 sm:text-base">
+                    <p className="mt-5 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
                       Beta users step into the live product experience — from route
                       monitoring and intelligence signals to annual wrapped views
                       and tiered dashboards designed around decision quality, not
@@ -307,20 +307,20 @@ export default function BetaPage() {
                   </div>
                 </div>
 
-                <div className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-8 text-white sm:p-10 md:p-12">
+                <div className="relative overflow-hidden border-t border-slate-200 bg-slate-50 p-8 text-slate-950 sm:p-10 md:border-l md:border-t-0 md:p-12">
                   <motion.div
                     animate={{ x: [0, 16, 0], y: [0, -12, 0] }}
                     transition={{ duration: 7.5, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute right-[-20px] top-[-20px] h-40 w-40 rounded-full bg-sky-500/10 blur-3xl"
+                    className="absolute right-[-20px] top-[-20px] h-40 w-40 rounded-full bg-sky-200/50 blur-3xl"
                   />
                   <motion.div
                     animate={{ x: [0, -12, 0], y: [0, 16, 0] }}
                     transition={{ duration: 8.2, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute bottom-[-30px] left-[-20px] h-44 w-44 rounded-full bg-indigo-500/10 blur-3xl"
+                    className="absolute bottom-[-30px] left-[-20px] h-44 w-44 rounded-full bg-indigo-200/40 blur-3xl"
                   />
 
                   <div className="relative">
-                    <p className="text-center text-xs font-medium uppercase tracking-[0.16em] text-slate-300">
+                    <p className="text-center text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                       Beta philosophy
                     </p>
 
@@ -348,24 +348,24 @@ export default function BetaPage() {
           <div className="mx-auto mt-20 max-w-4xl">
             <motion.div
               {...fadeUp}
-              className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 p-10 text-center text-white shadow-[0_25px_70px_rgba(2,6,23,0.38)] backdrop-blur-sm"
+              className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-10 text-center text-slate-950 shadow-[0_25px_70px_rgba(15,23,42,0.08)]"
             >
               <motion.div
                 animate={{ opacity: [0.12, 0.24, 0.12], scale: [1, 1.04, 1] }}
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.18),transparent_38%)]"
+                className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.10),transparent_45%)]"
               />
 
               <div className="relative">
-                <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-300">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                   Limited beta access
                 </p>
 
-                <h2 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-5xl">
+                <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-5xl">
                   Step into the Skysirv™ beta
                 </h2>
 
-                <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
+                <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
                   Apply for early access to the platform, and if approved, you’ll receive
                   an invitation into the first wave of Skysirv™ beta users.
                 </p>
@@ -373,14 +373,14 @@ export default function BetaPage() {
                 <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
                   <Link
                     href="/beta/apply"
-                    className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-200"
+                    className="inline-flex items-center justify-center rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
                   >
                     Join the Beta
                   </Link>
 
                   <Link
                     href="/signin"
-                    className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                    className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
                   >
                     Already have access?
                   </Link>
@@ -398,7 +398,7 @@ export default function BetaPage() {
 
 function BetaPill({ label }: { label: string }) {
   return (
-    <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 backdrop-blur-sm">
+    <div className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm">
       {label}
     </div>
   )
@@ -406,7 +406,7 @@ function BetaPill({ label }: { label: string }) {
 
 function FeaturePill({ label }: { label: string }) {
   return (
-    <div className="flex min-h-[64px] items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center text-sm font-medium leading-6 text-slate-300 backdrop-blur-sm">
+    <div className="flex min-h-[64px] items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-medium leading-6 text-slate-600 shadow-sm">
       {label}
     </div>
   )
@@ -414,9 +414,9 @@ function FeaturePill({ label }: { label: string }) {
 
 function StoryPoint({ title, text }: { title: string; text: string }) {
   return (
-    <div className="flex min-h-[120px] flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/5 p-4 text-center backdrop-blur-sm">
-      <p className="text-sm font-semibold text-white">{title}</p>
-      <p className="mt-2 max-w-sm text-sm leading-6 text-slate-300">{text}</p>
+    <div className="flex min-h-[120px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm">
+      <p className="text-sm font-semibold text-slate-950">{title}</p>
+      <p className="mt-2 max-w-sm text-sm leading-6 text-slate-600">{text}</p>
     </div>
   )
 }
@@ -428,37 +428,37 @@ function BetaFooter() {
         <div className="flex max-w-xs flex-col justify-start text-center md:text-left">
           <Link
             href="/"
-            className="text-xl font-bold leading-none text-white transition hover:text-slate-300"
+            className="text-xl font-bold leading-none text-slate-950 transition hover:text-slate-700"
           >
             Skysirv™
           </Link>
 
-          <p className="mt-4 text-sm leading-6 text-slate-400">
+          <p className="mt-4 text-sm leading-6 text-slate-500">
             Flight intelligence that helps travelers understand pricing and
             book with more confidence.
           </p>
         </div>
 
         <div className="text-center md:text-left">
-          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white">
+          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-slate-950">
             Products
           </h3>
 
-          <ul className="mt-4 space-y-3 text-sm text-slate-400">
+          <ul className="mt-4 space-y-3 text-sm text-slate-500">
             <li>
-              <Link href="/pricing" className="transition hover:text-white">
+              <Link href="/pricing" className="transition hover:text-slate-950">
                 Pricing
               </Link>
             </li>
 
             <li>
-              <Link href="/booking" className="transition hover:text-white">
+              <Link href="/booking" className="transition hover:text-slate-950">
                 Booking
               </Link>
             </li>
 
             <li>
-              <Link href="/flight-attendant" className="transition hover:text-white">
+              <Link href="/flight-attendant" className="transition hover:text-slate-950">
                 Skysirv Flight Attendant™
               </Link>
             </li>
@@ -466,19 +466,19 @@ function BetaFooter() {
         </div>
 
         <div className="text-center md:text-left">
-          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white">
+          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-slate-950">
             Company
           </h3>
 
-          <ul className="mt-4 space-y-3 text-sm text-slate-400">
+          <ul className="mt-4 space-y-3 text-sm text-slate-500">
             <li>
-              <Link href="/about" className="transition hover:text-white">
+              <Link href="/about" className="transition hover:text-slate-950">
                 About
               </Link>
             </li>
 
             <li>
-              <Link href="/beta" className="transition hover:text-white">
+              <Link href="/beta" className="transition hover:text-slate-950">
                 Skysirv™ Beta
               </Link>
             </li>
@@ -486,25 +486,25 @@ function BetaFooter() {
         </div>
 
         <div className="text-center md:text-left">
-          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white">
+          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-slate-950">
             Legal
           </h3>
 
-          <ul className="mt-4 space-y-3 text-sm text-slate-400">
+          <ul className="mt-4 space-y-3 text-sm text-slate-500">
             <li>
-              <Link href="/privacy" className="transition hover:text-white">
+              <Link href="/privacy" className="transition hover:text-slate-950">
                 Privacy
               </Link>
             </li>
 
             <li>
-              <Link href="/terms" className="transition hover:text-white">
+              <Link href="/terms" className="transition hover:text-slate-950">
                 Terms
               </Link>
             </li>
 
             <li>
-              <Link href="/refund-policy" className="transition hover:text-white">
+              <Link href="/refund-policy" className="transition hover:text-slate-950">
                 Refund Policy
               </Link>
             </li>
@@ -513,7 +513,7 @@ function BetaFooter() {
       </div>
 
       <div className="mt-12 pt-6 text-center">
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-slate-500">
           &copy; {new Date().getFullYear()} Skysirv™. All rights reserved.
         </p>
       </div>

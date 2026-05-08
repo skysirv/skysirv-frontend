@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { usePathname } from 'next/navigation';
 import s from './Navbar.module.css';
 import Navlinks from './Navlinks';
 
@@ -9,18 +8,14 @@ export default function Navbar() {
   const [hidden, setHidden] = useState(false);
   const lastScrollY = useRef(0);
 
-  const pathname = usePathname();
-
   /**
-   * Dark navbar pages.
+   * Public-site direction:
+   * Keep the navbar light across the main public pages.
    *
-   * Booking is intentionally excluded because the new Skysirv Booking page
-   * now uses the light OTA-style public theme.
+   * Individual pages can still have their own hero/background styling,
+   * but the shared navbar now stays consistent with the new Booking page.
    */
-  const isDark =
-    pathname === '/pricing' ||
-    pathname === '/beta' ||
-    pathname === '/flight-attendant';
+  const isDark = false;
 
   useEffect(() => {
     const handleScroll = () => {

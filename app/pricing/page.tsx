@@ -21,8 +21,8 @@ export default function PricingPage() {
     const originalBackgroundColor = document.body.style.backgroundColor
 
     document.body.style.background =
-      "linear-gradient(to bottom, rgb(2 6 23), rgb(2 6 23), rgb(15 23 42))"
-    document.body.style.backgroundColor = "rgb(2 6 23)"
+      "linear-gradient(to bottom, rgb(248 250 252), rgb(255 255 255), rgb(241 245 249))"
+    document.body.style.backgroundColor = "rgb(248 250 252)"
 
     return () => {
       document.body.style.background = originalBackground
@@ -44,22 +44,22 @@ export default function PricingPage() {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-950 to-slate-900 pt-32 text-white">
+      <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-100 pt-32 text-slate-950">
         <div className="pointer-events-none absolute inset-0">
           <motion.div
             animate={{ opacity: [0.16, 0.28, 0.16], scale: [1, 1.04, 1] }}
             transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.16),transparent_38%)]"
+            className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.10),transparent_42%)]"
           />
           <motion.div
             animate={{ x: [0, 24, 0], y: [0, -18, 0] }}
             transition={{ duration: 8.6, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute right-[-40px] top-[-20px] h-72 w-72 rounded-full bg-sky-500/10 blur-3xl"
+            className="absolute right-[-40px] top-[-20px] h-72 w-72 rounded-full bg-sky-200/45 blur-3xl"
           />
           <motion.div
             animate={{ x: [0, -18, 0], y: [0, 18, 0] }}
             transition={{ duration: 9.2, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute bottom-[-40px] left-[-20px] h-80 w-80 rounded-full bg-indigo-500/10 blur-3xl"
+            className="absolute bottom-[-40px] left-[-20px] h-80 w-80 rounded-full bg-indigo-200/35 blur-3xl"
           />
         </div>
 
@@ -70,7 +70,7 @@ export default function PricingPage() {
               initial={{ opacity: 0, y: 18, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.55, ease: "easeOut" }}
-              className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-300 backdrop-blur-sm"
+              className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600 shadow-sm"
             >
               Skysirv™ Pricing
             </motion.div>
@@ -79,7 +79,7 @@ export default function PricingPage() {
               initial={{ opacity: 0, y: 28 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.06, duration: 0.72, ease: "easeOut" }}
-              className="mt-8 text-5xl font-bold leading-[1.08] tracking-tight text-white sm:text-6xl md:text-7xl"
+              className="mt-8 text-5xl font-bold leading-[1.08] tracking-tight text-slate-950 sm:text-6xl md:text-7xl"
             >
               Choose the intelligence layer
               built for your travel style
@@ -89,7 +89,7 @@ export default function PricingPage() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.14, duration: 0.62, ease: "easeOut" }}
-              className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-300 sm:text-xl"
+              className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-600 sm:text-xl"
             >
               Start free, monitor the routes that matter, and upgrade when you want
               deeper fare intelligence, smarter signals, and a stronger timing edge.
@@ -115,7 +115,7 @@ export default function PricingPage() {
               <button
                 type="button"
                 onClick={() => setCreateAccountModalOpen(true)}
-                className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-950 shadow-[0_10px_30px_rgba(255,255,255,0.12)] transition hover:bg-slate-200"
+                className="inline-flex items-center justify-center rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_45px_rgba(15,23,42,0.16)] transition hover:bg-slate-800"
               >
                 Create account to continue
               </button>
@@ -140,32 +140,32 @@ export default function PricingPage() {
 
           {/* PRICING PANEL */}
           <div className="mx-auto mt-16 max-w-6xl">
-            <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 px-6 py-8 shadow-[0_30px_80px_rgba(2,6,23,0.45)] backdrop-blur-sm sm:px-8 sm:py-10">
+            <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white px-6 py-8 shadow-[0_28px_80px_rgba(15,23,42,0.09)] sm:px-8 sm:py-10">
               <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
                 <div className="max-w-3xl">
-                  <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+                  <div className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                     Pricing overview
                   </div>
 
-                  <h2 className="mt-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">
+                  <h2 className="mt-4 text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
                     Start free — upgrade when intelligence becomes leverage
                   </h2>
 
-                  <p className="mt-4 max-w-2xl text-base text-slate-300 sm:text-lg">
+                  <p className="mt-4 max-w-2xl text-base text-slate-600 sm:text-lg">
                     Skysirv™ is built for travelers who want signal over noise —
                     and timing advantage over guesswork.
                   </p>
                 </div>
 
-                <div className="flex shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-slate-900/80 p-1.5">
+                <div className="flex shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-slate-100 p-1.5">
                   <button
                     type="button"
                     onClick={() => setBilling("monthly")}
                     className={cn(
                       "rounded-lg px-4 py-2 text-sm font-medium transition focus:ring-2 focus:ring-slate-500",
                       billing === "monthly"
-                        ? "bg-white text-slate-950 shadow-sm"
-                        : "text-slate-400 hover:text-white"
+                        ? "bg-slate-950 text-white shadow-sm"
+                        : "text-slate-500 hover:text-slate-950"
                     )}
                   >
                     Monthly
@@ -177,8 +177,8 @@ export default function PricingPage() {
                     className={cn(
                       "rounded-lg px-4 py-2 text-sm font-medium transition focus:ring-2 focus:ring-slate-500",
                       billing === "annual"
-                        ? "bg-white text-slate-950 shadow-sm"
-                        : "text-slate-400 hover:text-white"
+                        ? "bg-slate-950 text-white shadow-sm"
+                        : "text-slate-500 hover:text-slate-950"
                     )}
                   >
                     Annual
@@ -186,7 +186,7 @@ export default function PricingPage() {
                 </div>
               </div>
 
-              <p className="mt-3 text-xs text-slate-400">{billingLabel}</p>
+              <p className="mt-3 text-xs text-slate-500">{billingLabel}</p>
 
               <div className="mt-8 grid gap-6 lg:grid-cols-3">
                 <MarketingTierCard
@@ -262,16 +262,16 @@ export default function PricingPage() {
 
           {/* SYSTEM STORY */}
           <div className="mx-auto mt-16 grid max-w-6xl gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-            <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
-              <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+            <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_18px_55px_rgba(15,23,42,0.06)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                 Why pricing matters
               </p>
 
-              <h2 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
                 This is not just a pricing page. It is your entry point into a calmer booking workflow.
               </h2>
 
-              <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
+              <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
                 Skysirv™ is designed to help travelers monitor routes, understand
                 pricing behavior, and make more disciplined booking decisions
                 using structured signals instead of raw fare noise.
@@ -323,24 +323,24 @@ export default function PricingPage() {
 
           {/* FINAL CTA */}
           <div className="mx-auto mt-20 max-w-6xl">
-            <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 px-6 py-14 text-center shadow-[0_25px_70px_rgba(2,6,23,0.38)] backdrop-blur-sm sm:px-8 sm:py-16">
+            <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white px-6 py-14 text-center shadow-[0_25px_70px_rgba(15,23,42,0.08)] sm:px-8 sm:py-16">
               <div className="pointer-events-none absolute inset-0">
                 <motion.div
                   animate={{ opacity: [0.12, 0.2, 0.12], scale: [1, 1.03, 1] }}
                   transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.18),transparent_40%)]"
+                  className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.10),transparent_45%)]"
                 />
               </div>
 
               <div className="relative mx-auto max-w-3xl">
-                <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+                <h2 className="text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
                   Start with the plan that fits now.
-                  <span className="block text-slate-300">
+                  <span className="block text-slate-600">
                     Upgrade when you want deeper intelligence.
                   </span>
                 </h2>
 
-                <p className="mt-6 text-lg leading-8 text-slate-300">
+                <p className="mt-6 text-lg leading-8 text-slate-600">
                   Create your account, verify your email, and continue through the
                   correct Skysirv onboarding flow without skipping a step.
                 </p>
@@ -349,14 +349,14 @@ export default function PricingPage() {
                   <button
                     type="button"
                     onClick={() => setCreateAccountModalOpen(true)}
-                    className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-200"
+                    className="inline-flex items-center justify-center rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
                   >
                     Create account to continue
                   </button>
 
                   <Link
                     href="/"
-                    className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                    className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
                   >
                     Back to homepage
                   </Link>
@@ -367,7 +367,7 @@ export default function PricingPage() {
         </div>
 
         <PricingFooter />
-      </section>
+      </section >
 
       <AuthModal
         open={createAccountModalOpen}
@@ -384,7 +384,7 @@ export default function PricingPage() {
 
 function MarketingPill({ label }: { label: string }) {
   return (
-    <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 backdrop-blur-sm">
+    <div className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm">
       {label}
     </div>
   )
@@ -401,10 +401,10 @@ function ValuePanel({
     <motion.div
       whileHover={{ y: -4 }}
       transition={{ duration: 0.22 }}
-      className="flex h-full flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/5 p-6 text-center backdrop-blur-sm"
+      className="flex h-full flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-[0_18px_55px_rgba(15,23,42,0.06)]"
     >
-      <h3 className="text-xl font-bold text-white">{title}</h3>
-      <p className="mt-3 max-w-sm text-sm leading-7 text-slate-300">{text}</p>
+      <h3 className="text-xl font-bold text-slate-950">{title}</h3>
+      <p className="mt-3 max-w-sm text-sm leading-7 text-slate-600">{text}</p>
     </motion.div>
   )
 }
@@ -439,16 +439,16 @@ function MarketingTierCard(props: {
       whileHover={{ y: -6, scale: 1.01 }}
       transition={{ duration: 0.22 }}
       className={cn(
-        "relative overflow-hidden rounded-[1.75rem] border p-7 shadow-[0_25px_60px_rgba(2,6,23,0.35)]",
+        "relative overflow-hidden rounded-[1.75rem] border bg-white p-7 shadow-[0_18px_55px_rgba(15,23,42,0.07)]",
         accent
-          ? "border-sky-400/20 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 ring-1 ring-sky-300/20"
-          : "border-white/10 bg-gradient-to-b from-slate-900 to-slate-950"
+          ? "border-sky-300 ring-1 ring-sky-200"
+          : "border-slate-200"
       )}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.06),transparent)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-[linear-gradient(to_bottom,rgba(14,165,233,0.06),transparent)]" />
 
       {accent && (
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-sky-300/50 via-white/60 to-sky-300/50" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-sky-300 via-slate-400 to-sky-300" />
       )}
 
       <div className="relative">
@@ -458,8 +458,8 @@ function MarketingTierCard(props: {
               className={cn(
                 "whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium",
                 accent
-                  ? "border border-sky-300/20 bg-sky-400/10 text-sky-200"
-                  : "border border-white/10 bg-white/5 text-slate-300"
+                  ? "border border-sky-200 bg-sky-50 text-sky-700"
+                  : "border border-slate-200 bg-slate-50 text-slate-600"
               )}
             >
               {badge}
@@ -467,14 +467,14 @@ function MarketingTierCard(props: {
           )}
         </div>
 
-        <h3 className="text-lg font-semibold text-white">{title}</h3>
-        <p className="mt-1 text-sm text-slate-400">{subtitle}</p>
+        <h3 className="text-lg font-semibold text-slate-950">{title}</h3>
+        <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
 
-        <div className="mt-6 text-5xl font-semibold tracking-tight text-white">
+        <div className="mt-6 text-5xl font-semibold tracking-tight text-slate-950">
           {price === 0 ? "$0" : `$${price}`}
         </div>
 
-        <p className="mt-2 text-xs text-slate-400">{priceNote}</p>
+        <p className="mt-2 text-xs text-slate-500">{priceNote}</p>
 
         <div className="mt-6">
           <button
@@ -483,8 +483,8 @@ function MarketingTierCard(props: {
             className={cn(
               "w-full rounded-xl px-4 py-3 text-sm font-medium transition",
               ctaVariant === "primary"
-                ? "bg-white text-slate-950 hover:bg-slate-200"
-                : "border border-white/10 bg-white/5 text-white hover:bg-white/10"
+                ? "bg-slate-950 text-white hover:bg-slate-800"
+                : "border border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
             )}
           >
             {ctaLabel}
@@ -495,12 +495,12 @@ function MarketingTierCard(props: {
           {bullets.map((bullet) => (
             <div
               key={bullet.label}
-              className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5"
+              className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5"
             >
-              <span className="text-xs font-medium text-slate-400">
+              <span className="text-xs font-medium text-slate-500">
                 {bullet.label}
               </span>
-              <span className="text-xs text-slate-200">{bullet.value}</span>
+              <span className="text-xs text-slate-700">{bullet.value}</span>
             </div>
           ))}
         </div>
@@ -519,14 +519,14 @@ function SlateMetricCard({
   subtext: string
 }) {
   return (
-    <div className="flex min-h-[132px] flex-col items-center justify-center rounded-2xl border border-white/10 bg-white/5 p-4 text-center">
-      <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-400">
+    <div className="flex min-h-[132px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 p-4 text-center">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
         {label}
       </p>
-      <p className="mt-2 text-xl font-semibold leading-tight text-white">
+      <p className="mt-2 text-xl font-semibold leading-tight text-slate-950">
         {value}
       </p>
-      <p className="mt-2 text-xs leading-5 text-slate-400">{subtext}</p>
+      <p className="mt-2 text-xs leading-5 text-slate-500">{subtext}</p>
     </div>
   )
 }
@@ -542,101 +542,98 @@ function SlateFeatureCard({
     <motion.div
       whileHover={{ y: -4 }}
       transition={{ duration: 0.22 }}
-      className="flex min-h-[210px] flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/5 p-6 text-center backdrop-blur-sm"
+      className="flex min-h-[210px] flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-[0_18px_55px_rgba(15,23,42,0.06)]"
     >
-      <h3 className="text-xl font-bold text-white">{title}</h3>
-      <p className="mt-3 max-w-xs text-sm leading-7 text-slate-300">{text}</p>
+      <h3 className="text-xl font-bold text-slate-950">{title}</h3>
+      <p className="mt-3 max-w-xs text-sm leading-7 text-slate-600">{text}</p>
     </motion.div>
   )
 }
+
 function PricingFooter() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-16 text-center md:max-w-4xl md:text-left">
       <div className="grid grid-cols-1 gap-12 md:grid-cols-4 md:justify-items-center md:text-center">
-        {/* Brand */}
         <div className="flex max-w-xs flex-col justify-start text-center md:text-left">
           <Link
             href="/"
-            className="text-xl font-bold leading-none text-white transition hover:text-slate-300"
+            className="text-xl font-bold leading-none text-slate-950 transition hover:text-slate-700"
           >
             Skysirv™
           </Link>
 
-          <p className="mt-4 text-sm leading-6 text-slate-400">
+          <p className="mt-4 text-sm leading-6 text-slate-500">
             Flight intelligence that helps travelers understand pricing and
             book with more confidence.
           </p>
         </div>
 
-        {/* Products */}
         <div className="text-center md:text-left">
-          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white">
+          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-slate-950">
             Products
           </h3>
 
-          <ul className="mt-4 space-y-3 text-sm text-slate-400">
+          <ul className="mt-4 space-y-3 text-sm text-slate-500">
             <li>
-              <Link href="/pricing" className="transition hover:text-white">
+              <Link href="/pricing" className="transition hover:text-slate-950">
                 Pricing
               </Link>
             </li>
 
             <li>
-              <Link href="/booking" className="transition hover:text-white">
+              <Link href="/booking" className="transition hover:text-slate-950">
                 Booking
               </Link>
             </li>
 
             <li>
-              <Link href="/flight-attendant" className="transition hover:text-white">
+              <Link href="/flight-attendant" className="transition hover:text-slate-950">
                 Skysirv Flight Attendant™
               </Link>
             </li>
           </ul>
         </div>
 
-        {/* Company */}
         <div className="text-center md:text-left">
-          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white">
+          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-slate-950">
             Company
           </h3>
 
-          <ul className="mt-4 space-y-3 text-sm text-slate-400">
+          <ul className="mt-4 space-y-3 text-sm text-slate-500">
             <li>
-              <Link href="/about" className="transition hover:text-white">
+              <Link href="/about" className="transition hover:text-slate-950">
                 About
               </Link>
             </li>
 
             <li>
-              <Link href="/beta" className="transition hover:text-white">
+              <Link href="/beta" className="transition hover:text-slate-950">
                 Skysirv™ Beta
               </Link>
             </li>
           </ul>
         </div>
 
-        {/* Legal */}
         <div className="text-center md:text-left">
-          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-white">
+          <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-slate-950">
             Legal
           </h3>
 
-          <ul className="mt-4 space-y-3 text-sm text-slate-400">
+          <ul className="mt-4 space-y-3 text-sm text-slate-500">
             <li>
-              <Link href="/privacy" className="transition hover:text-white">
+              <Link href="/privacy" className="transition hover:text-slate-950">
                 Privacy
               </Link>
             </li>
 
             <li>
-              <Link href="/terms" className="transition hover:text-white">
+              <Link href="/terms" className="transition hover:text-slate-950">
                 Terms
               </Link>
             </li>
 
             <li>
-              <Link href="/refund-policy" className="transition hover:text-white">
+              <Link href="/refund-policy" className="transition hover:text-slate-950">
                 Refund Policy
               </Link>
             </li>
@@ -645,7 +642,7 @@ function PricingFooter() {
       </div>
 
       <div className="mt-12 pt-6 text-center">
-        <p className="text-sm text-slate-300">
+        <p className="text-sm text-slate-500">
           &copy; {new Date().getFullYear()} Skysirv™. All rights reserved.
         </p>
       </div>
@@ -660,85 +657,31 @@ function DetailedPricingTableDark() {
     {
       title: "Core Monitoring",
       rows: [
-        {
-          label: "Watchlist",
-          values: ["3 routes", "25 routes", "Unlimited"],
-        },
-        {
-          label: "Monitoring cadence",
-          values: ["Standard", "High frequency", "Real-time priority"],
-        },
-        {
-          label: "Route coverage",
-          values: ["Basic", "Expanded", "Global coverage"],
-        },
+        { label: "Watchlist", values: ["3 routes", "25 routes", "Unlimited"] },
+        { label: "Monitoring cadence", values: ["Standard", "High frequency", "Real-time priority"] },
+        { label: "Route coverage", values: ["Basic", "Expanded", "Global coverage"] },
       ],
     },
     {
       title: "Skysirv Intelligence Layer",
       rows: [
-        {
-          label: "Skysirv Monitor™",
-          values: [
-            "Basic monitoring",
-            "High-frequency monitoring",
-            "Priority monitoring",
-          ],
-        },
-        {
-          label: "Skysirv Signals™",
-          values: [
-            "Limited alerts",
-            "Smart drop detection",
-            "Priority intelligence alerts",
-          ],
-        },
-        {
-          label: "Skysirv Price Behavior™",
-          values: [
-            "Basic snapshots",
-            "30–90 day analysis",
-            "Extended behavioral history",
-          ],
-        },
-        {
-          label: "Skysirv Predict™",
-          values: ["—", "Forecast signals", "Deep forecasting models"],
-        },
-        {
-          label: "Skyscore™",
-          values: ["Preview only", "Full scoring", "Advanced scoring"],
-        },
-        {
-          label: "Skysirv Insights™",
-          values: ["—", "Standard insights", "Advanced route analysis"],
-        },
-        {
-          label: "Skysirv Route Digest™",
-          values: ["—", "Included", "Enhanced summaries"],
-        },
-        {
-          label: "Skysirv Intelligence Engine™",
-          values: ["—", "Partial access", "Full system access"],
-        },
+        { label: "Skysirv Monitor™", values: ["Basic monitoring", "High-frequency monitoring", "Priority monitoring"] },
+        { label: "Skysirv Signals™", values: ["Limited alerts", "Smart drop detection", "Priority intelligence alerts"] },
+        { label: "Skysirv Price Behavior™", values: ["Basic snapshots", "30–90 day analysis", "Extended behavioral history"] },
+        { label: "Skysirv Predict™", values: ["—", "Forecast signals", "Deep forecasting models"] },
+        { label: "Skyscore™", values: ["Preview only", "Full scoring", "Advanced scoring"] },
+        { label: "Skysirv Insights™", values: ["—", "Standard insights", "Advanced route analysis"] },
+        { label: "Skysirv Route Digest™", values: ["—", "Included", "Enhanced summaries"] },
+        { label: "Skysirv Intelligence Engine™", values: ["—", "Partial access", "Full system access"] },
       ],
     },
     {
       title: "Advanced Intelligence",
       rows: [
-        {
-          label: "AI Intelligence",
-          values: ["Limited Access", "Standard Access", "Advanced Access"],
-        },
+        { label: "AI Intelligence", values: ["Limited Access", "Standard Access", "Advanced Access"] },
         { label: "Trend analysis", values: ["—", "Standard", "Advanced"] },
-        {
-          label: "Volatility insights",
-          values: ["—", "Included", "Enhanced"],
-        },
-        {
-          label: "Historical depth",
-          values: ["Limited", "Expanded", "Full dataset"],
-        },
+        { label: "Volatility insights", values: ["—", "Included", "Enhanced"] },
+        { label: "Historical depth", values: ["Limited", "Expanded", "Full dataset"] },
       ],
     },
     {
@@ -753,17 +696,17 @@ function DetailedPricingTableDark() {
 
   return (
     <div className="mx-auto max-w-6xl text-center">
-      <h3 className="text-5xl font-semibold text-white">
+      <h3 className="text-5xl font-semibold text-slate-950">
         Full feature breakdown
       </h3>
 
-      <p className="mx-auto mt-2 max-w-3xl text-lg text-slate-400">
-        Compare Skysirv™ intelligence capabilities across all plans
+      <p className="mx-auto mt-2 max-w-3xl text-lg text-slate-600">
+        Compare Skysirv™ intelligence capabilities across all plans.
       </p>
 
       <div className="mt-10 overflow-x-auto">
-        <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-950/80 shadow-[0_20px_60px_rgba(2,6,23,0.35)] backdrop-blur-sm">
-          <div className="grid min-w-[700px] grid-cols-4 border-b border-white/10 bg-white/[0.04] text-sm font-medium text-slate-300">
+        <div className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+          <div className="grid min-w-[700px] grid-cols-4 border-b border-slate-200 bg-slate-50 text-sm font-medium text-slate-700">
             <div className="px-6 py-4">Feature</div>
             {plans.map((plan) => (
               <div key={plan} className="px-6 py-4 text-center">
@@ -774,7 +717,7 @@ function DetailedPricingTableDark() {
 
           {sections.map((section) => (
             <div key={section.title}>
-              <div className="border-t border-white/10 bg-white/[0.03] px-6 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              <div className="border-t border-slate-200 bg-slate-50 px-6 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
                 {section.title}
               </div>
 
@@ -782,18 +725,18 @@ function DetailedPricingTableDark() {
                 <div
                   key={row.label}
                   className={cn(
-                    "grid min-w-[700px] grid-cols-4 border-t border-white/5 text-sm",
-                    index % 2 === 0 ? "bg-transparent" : "bg-white/[0.02]"
+                    "grid min-w-[700px] grid-cols-4 border-t border-slate-100 text-sm",
+                    index % 2 === 0 ? "bg-white" : "bg-slate-50/70"
                   )}
                 >
-                  <div className="px-6 py-4 font-medium text-slate-200">
+                  <div className="px-6 py-4 font-medium text-slate-800">
                     {row.label}
                   </div>
 
                   {row.values.map((value, idx) => (
                     <div
                       key={idx}
-                      className="px-6 py-4 text-center text-slate-400"
+                      className="px-6 py-4 text-center text-slate-600"
                     >
                       {value}
                     </div>
