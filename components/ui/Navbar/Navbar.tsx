@@ -10,9 +10,15 @@ export default function Navbar() {
   const lastScrollY = useRef(0);
 
   const pathname = usePathname();
+
+  /**
+   * Dark navbar pages.
+   *
+   * Booking is intentionally excluded because the new Skysirv Booking page
+   * now uses the light OTA-style public theme.
+   */
   const isDark =
     pathname === '/pricing' ||
-    pathname === '/booking' ||
     pathname === '/beta' ||
     pathname === '/flight-attendant';
 
