@@ -20,6 +20,8 @@ export type BookingSearchPayload = {
   returnDate?: string | null
   legs?: BookingSearchLeg[]
   adults: number
+  children?: number
+  infants?: number
   cabinClass: BookingCabinClass
   maxConnections: number
 }

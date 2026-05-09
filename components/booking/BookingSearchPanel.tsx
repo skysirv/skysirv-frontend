@@ -53,6 +53,18 @@ type BookingSearchPanelProps = {
   onSearchError: (message: string) => void
 }
 
+const MAX_PASSENGERS = 9
+
+const cabinClassOptions: {
+  value: BookingCabinClass
+  label: string
+}[] = [
+    { value: "economy", label: "Economy" },
+    { value: "premium_economy", label: "Premium Economy" },
+    { value: "business", label: "Business" },
+    { value: "first", label: "First" },
+  ]
+
 function formatDateForStorage(date: Date): string {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, "0")
@@ -87,6 +99,30 @@ function startOfToday() {
   return date
 }
 
+function formatPassengerSummary({
+  adults,
+  children,
+  infants,
+  cabinClass,
+}: {
+  adults: number
+  children: number
+  infants: number
+  cabinClass: BookingCabinClass
+}) {
+  const parts = [
+    `${adults} adult${adults === 1 ? "" : "s"}`,
+    children > 0 ? `${children} child${children === 1 ? "" : "ren"}` : null,
+    infants > 0 ? `${infants} infant${infants === 1 ? "" : "s"}` : null,
+  ].filter(Boolean)
+
+  const cabinLabel =
+    cabinClassOptions.find((option) => option.value === cabinClass)?.label ??
+    "Economy"
+
+  return `${parts.join(", ")}, ${cabinLabel}`
+}
+
 const calendarDayPickerClassNames = {
   day_selected: "bg-slate-900 text-white hover:bg-slate-800",
   day_today: "border border-slate-400",
@@ -117,6 +153,8 @@ export default function BookingSearchPanel({
   const [returnDate, setReturnDate] = useState("")
 
   const [adults, setAdults] = useState(1)
+  const [children, setChildren] = useState(0)
+  const [infants, setInfants] = useState(0)
   const [cabinClass, setCabinClass] = useState<BookingCabinClass>("economy")
   const [maxConnections, setMaxConnections] = useState(1)
 
@@ -181,6 +219,14 @@ export default function BookingSearchPanel({
     setIsSearching(true)
 
     try {
+      if (infants > adults) {
+        throw new Error("Infants on lap cannot exceed the number of adults.")
+      }
+
+      if (adults + children + infants > MAX_PASSENGERS) {
+        throw new Error(`Passenger total cannot exceed ${MAX_PASSENGERS}.`)
+      }
+
       if (tripType === "multi_city") {
         const legs = multiCitySegments.map((segment) => ({
           origin:
@@ -218,6 +264,8 @@ export default function BookingSearchPanel({
           tripType: "multi_city",
           legs,
           adults,
+          children,
+          infants,
           cabinClass,
           maxConnections,
         })
@@ -267,6 +315,8 @@ export default function BookingSearchPanel({
         departureDate,
         returnDate: tripType === "round_trip" ? returnDate : null,
         adults,
+        children,
+        infants,
         cabinClass,
         maxConnections,
       })
@@ -403,21 +453,47 @@ export default function BookingSearchPanel({
               </div>
             ))}
 
-            <button
-              type="button"
-              onClick={addMultiCitySegment}
-              className="rounded-full px-1 py-2 text-sm font-semibold text-slate-700 transition hover:text-slate-950"
-            >
-              + Add another city
-            </button>
+            <div className="flex flex-col gap-4 pt-1 lg:flex-row lg:items-end lg:justify-between">
+              <button
+                type="button"
+                onClick={addMultiCitySegment}
+                className="w-fit rounded-full px-1 py-2 text-sm font-semibold text-slate-700 transition hover:text-slate-950"
+              >
+                + Add another city
+              </button>
+
+              <div className="grid w-full gap-4 lg:max-w-xl lg:grid-cols-[1fr_0.75fr]">
+                <TravelersCabinPicker
+                  adults={adults}
+                  children={children}
+                  infants={infants}
+                  cabinClass={cabinClass}
+                  onAdultsChange={setAdults}
+                  onChildrenChange={setChildren}
+                  onInfantsChange={setInfants}
+                  onCabinClassChange={setCabinClass}
+                />
+
+                <SkysirvSelect
+                  label="Stops"
+                  value={String(maxConnections)}
+                  onChange={(value) => setMaxConnections(Number(value))}
+                  options={[
+                    { value: "0", label: "Nonstop" },
+                    { value: "1", label: "Up to 1 stop" },
+                    { value: "2", label: "Up to 2 stops" },
+                  ]}
+                />
+              </div>
+            </div>
           </div>
         ) : (
           <div className="relative mt-6">
             <div
               className={
                 tripType === "round_trip"
-                  ? "grid gap-4 lg:grid-cols-[1fr_1fr_1fr_1fr_0.8fr_0.9fr_0.8fr]"
-                  : "grid gap-4 lg:grid-cols-[1fr_1fr_1fr_0.8fr_0.9fr_0.8fr]"
+                  ? "grid gap-4 lg:grid-cols-[1.1fr_1.1fr_1fr_1fr_0.95fr_0.75fr]"
+                  : "grid gap-4 lg:grid-cols-[1.2fr_1.2fr_1fr_0.95fr_0.75fr]"
               }
             >
               <AirportPicker
@@ -480,26 +556,15 @@ export default function BookingSearchPanel({
                 />
               )}
 
-              <SkysirvSelect
-                label="Travelers"
-                value={String(adults)}
-                onChange={(value) => setAdults(Number(value))}
-                options={Array.from({ length: 9 }, (_, index) => ({
-                  value: String(index + 1),
-                  label: `${index + 1} Adult${index === 0 ? "" : "s"}`,
-                }))}
-              />
-
-              <SkysirvSelect
-                label="Cabin"
-                value={cabinClass}
-                onChange={(value) => setCabinClass(value as BookingCabinClass)}
-                options={[
-                  { value: "economy", label: "Economy" },
-                  { value: "premium_economy", label: "Premium Economy" },
-                  { value: "business", label: "Business" },
-                  { value: "first", label: "First" },
-                ]}
+              <TravelersCabinPicker
+                adults={adults}
+                children={children}
+                infants={infants}
+                cabinClass={cabinClass}
+                onAdultsChange={setAdults}
+                onChildrenChange={setChildren}
+                onInfantsChange={setInfants}
+                onCabinClassChange={setCabinClass}
               />
 
               <SkysirvSelect
@@ -857,6 +922,234 @@ function RoundTripDatePicker({
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function TravelersCabinPicker({
+  adults,
+  children,
+  infants,
+  cabinClass,
+  onAdultsChange,
+  onChildrenChange,
+  onInfantsChange,
+  onCabinClassChange,
+}: {
+  adults: number
+  children: number
+  infants: number
+  cabinClass: BookingCabinClass
+  onAdultsChange: (value: number) => void
+  onChildrenChange: (value: number) => void
+  onInfantsChange: (value: number) => void
+  onCabinClassChange: (value: BookingCabinClass) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement | null>(null)
+
+  const totalPassengers = adults + children + infants
+  const selectedSummary = formatPassengerSummary({
+    adults,
+    children,
+    infants,
+    cabinClass,
+  })
+
+  function increaseAdults() {
+    if (totalPassengers >= MAX_PASSENGERS) return
+    onAdultsChange(adults + 1)
+  }
+
+  function decreaseAdults() {
+    if (adults <= 1) return
+
+    const nextAdults = adults - 1
+    onAdultsChange(nextAdults)
+
+    if (infants > nextAdults) {
+      onInfantsChange(nextAdults)
+    }
+  }
+
+  function increaseChildren() {
+    if (totalPassengers >= MAX_PASSENGERS) return
+    onChildrenChange(children + 1)
+  }
+
+  function decreaseChildren() {
+    if (children <= 0) return
+    onChildrenChange(children - 1)
+  }
+
+  function increaseInfants() {
+    if (totalPassengers >= MAX_PASSENGERS || infants >= adults) return
+    onInfantsChange(infants + 1)
+  }
+
+  function decreaseInfants() {
+    if (infants <= 0) return
+    onInfantsChange(infants - 1)
+  }
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (!containerRef.current) return
+
+      if (!containerRef.current.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  return (
+    <div ref={containerRef} className="relative">
+      <FieldLabel>Travelers & Cabin</FieldLabel>
+
+      <button
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        className="flex w-full items-center justify-between rounded-lg border border-slate-200 px-4 py-2 text-left text-sm font-normal text-slate-950 focus:outline-none focus:ring-2 focus:ring-slate-300"
+      >
+        <span className="truncate">{selectedSummary}</span>
+        <ChevronDown />
+      </button>
+
+      {open && (
+        <div className="absolute right-0 z-40 mt-2 w-[22rem] overflow-hidden rounded-[1.4rem] border border-slate-200 bg-white p-3 shadow-[0_22px_60px_rgba(15,23,42,0.12)]">
+          <div className="px-1 pb-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+            Travelers
+          </div>
+
+          <div className="space-y-2">
+            <PassengerCounter
+              title="Adults"
+              description="18+"
+              value={adults}
+              decrementDisabled={adults <= 1}
+              incrementDisabled={totalPassengers >= MAX_PASSENGERS}
+              onDecrement={decreaseAdults}
+              onIncrement={increaseAdults}
+            />
+
+            <PassengerCounter
+              title="Children"
+              description="0–17"
+              value={children}
+              decrementDisabled={children <= 0}
+              incrementDisabled={totalPassengers >= MAX_PASSENGERS}
+              onDecrement={decreaseChildren}
+              onIncrement={increaseChildren}
+            />
+
+            <PassengerCounter
+              title="Infants on lap"
+              description="Under 2"
+              value={infants}
+              decrementDisabled={infants <= 0}
+              incrementDisabled={
+                totalPassengers >= MAX_PASSENGERS || infants >= adults
+              }
+              onDecrement={decreaseInfants}
+              onIncrement={increaseInfants}
+            />
+          </div>
+
+          <div className="mt-4 border-t border-slate-100 pt-4">
+            <div className="px-1 pb-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              Cabin Class
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              {cabinClassOptions.map((option) => {
+                const isSelected = option.value === cabinClass
+
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => onCabinClassChange(option.value)}
+                    className={`rounded-xl px-3 py-2.5 text-left text-sm font-medium transition ${isSelected
+                      ? "bg-slate-900 text-white"
+                      : "bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-slate-950"
+                      }`}
+                  >
+                    {option.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
+            <p className="text-xs text-slate-500">
+              Max {MAX_PASSENGERS} travelers total.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="rounded-full bg-slate-950 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function PassengerCounter({
+  title,
+  description,
+  value,
+  decrementDisabled,
+  incrementDisabled,
+  onDecrement,
+  onIncrement,
+}: {
+  title: string
+  description: string
+  value: number
+  decrementDisabled: boolean
+  incrementDisabled: boolean
+  onDecrement: () => void
+  onIncrement: () => void
+}) {
+  return (
+    <div className="flex items-center justify-between rounded-xl px-2 py-2.5">
+      <div>
+        <div className="text-sm font-semibold text-slate-950">{title}</div>
+        <div className="mt-0.5 text-xs text-slate-500">{description}</div>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={onDecrement}
+          disabled={decrementDisabled}
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 text-lg leading-none text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-35"
+        >
+          −
+        </button>
+
+        <span className="w-5 text-center text-sm font-semibold text-slate-950">
+          {value}
+        </span>
+
+        <button
+          type="button"
+          onClick={onIncrement}
+          disabled={incrementDisabled}
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 text-lg leading-none text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-35"
+        >
+          +
+        </button>
+      </div>
     </div>
   )
 }
