@@ -22,7 +22,7 @@ export default function Navbar() {
 
   useEffect(() => {
     const dismissed =
-      window.localStorage.getItem(BETA_BANNER_STORAGE_KEY) === 'true';
+      window.sessionStorage.getItem(BETA_BANNER_STORAGE_KEY) === 'true';
 
     setShowBetaBanner(!dismissed);
   }, []);
@@ -64,7 +64,7 @@ export default function Navbar() {
   }, []);
 
   const dismissBetaBanner = () => {
-    window.localStorage.setItem(BETA_BANNER_STORAGE_KEY, 'true');
+    window.sessionStorage.setItem(BETA_BANNER_STORAGE_KEY, 'true');
     setShowBetaBanner(false);
   };
 
