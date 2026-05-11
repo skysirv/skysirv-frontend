@@ -213,17 +213,17 @@ export default function WatchlistCard({
   const departureDateDisplay = (() => {
     if (!departureDate) return "Pending"
 
-    // Normalize: handle both "YYYY-MM-DD" and ISO strings
+    // Normalize: handle both "MM-DD-YYYY" and ISO strings
     const raw = departureDate.split("T")[0]
 
     const parts = raw.split("-")
     if (parts.length !== 3) return departureDate
 
-    const [year, month, day] = parts.map(Number)
+    const [month, day, year] = parts.map(Number)
 
-    if (!year || !month || !day) return departureDate
+    if (!month || !day || !year) return departureDate
 
-    const parsed = new Date(year, month - 1, day)
+    const parsed = new Date(month - 1, day, year)
 
     if (Number.isNaN(parsed.getTime())) return departureDate
 
