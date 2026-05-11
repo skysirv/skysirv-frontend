@@ -56,6 +56,11 @@ type FreeWatchlistLabProps = {
   onRemoveRoute?: (routeId: string) => void
 }
 
+type BasicContextSelection = {
+  route: WatchlistRoute
+  flight?: RecommendedFlight | null
+}
+
 export default function FreeWatchlistLab({
   loading = false,
   watchlist,
@@ -63,6 +68,18 @@ export default function FreeWatchlistLab({
   onRemoveRoute,
 }: FreeWatchlistLabProps) {
   const [openRoute, setOpenRoute] = useState<string | null>(null)
+  const [basicContextSelection, setBasicContextSelection] =
+    useState<BasicContextSelection | null>(null)
+
+  function openBasicContext(
+    route: WatchlistRoute,
+    flight?: RecommendedFlight | null
+  ) {
+    setBasicContextSelection({
+      route,
+      flight: flight ?? null,
+    })
+  }
 
   const visibleRoutes = watchlist.slice(0, 3)
   const usedRoutes = Math.min(visibleRoutes.length, 3)
@@ -198,6 +215,7 @@ export default function FreeWatchlistLab({
                                 <button
                                   key={`${routeKey}-${flight.airline}-${flight.price}`}
                                   type="button"
+                                  onClick={() => openBasicContext(route, flight)}
                                   className="flex w-full min-w-0 items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-left transition hover:border-cyan-200 hover:bg-white"
                                 >
                                   <span className="min-w-0">
@@ -236,6 +254,7 @@ export default function FreeWatchlistLab({
                           <div className="flex flex-wrap items-end justify-end gap-2">
                             <button
                               type="button"
+                              onClick={() => openBasicContext(route, recommendedFlights[0] ?? null)}
                               className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
                             >
                               Basic context
@@ -273,7 +292,122 @@ export default function FreeWatchlistLab({
           </p>
         </div>
       </div>
+
+      {basicContextSelection ? (
+        <FreeBasicContextModal
+          selection={basicContextSelection}
+          onClose={() => setBasicContextSelection(null)}
+        />
+      ) : null}
     </section>
+  )
+}
+
+function FreeBasicContextModal({
+  selection,
+  onClose,
+}: {
+  selection: BasicContextSelection
+  onClose: () => void
+}) {
+  const route = selection.route
+  const flight = selection.flight ?? null
+
+  const routeLabel = getRouteLabel(route)
+  const flightLabel = flight
+    ? getFlightLabel(flight)
+    : route.latest_flight_number
+      ? `${getAirlineDisplay(route.latest_airline)} · ${route.latest_flight_number}`
+      : "Flight details building"
+
+  const itineraryLabel = flight
+    ? getItineraryRouteLabel(flight)
+    : getAirportLabel(route)
+
+  const priceLabel = formatPrice(flight?.price ?? route.latest_price)
+  const signalLabel = getBasicSignal(
+    flight?.bookingSignal ?? route.booking_signal
+  )
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/35 px-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-700">
+              Basic fare context
+            </p>
+
+            <h3 className="mt-2 text-xl font-semibold tracking-tight text-slate-950">
+              {routeLabel}
+            </h3>
+
+            <p className="mt-1 text-sm leading-6 text-slate-600">
+              Free plan view with simple fare visibility and route monitoring.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close basic context"
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-lg font-semibold text-slate-500 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+          <p className="text-sm font-semibold text-slate-950">
+            {flightLabel}
+          </p>
+
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            {itineraryLabel}
+          </p>
+        </div>
+
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          <BasicContextRow label="Visible fare" value={priceLabel} />
+          <BasicContextRow label="Route average" value={formatAveragePrice(route.avg_price)} />
+          <BasicContextRow label="Signal" value={signalLabel} />
+          <BasicContextRow label="Tracking" value="Active" />
+        </div>
+
+        <div className="mt-5 rounded-2xl border border-cyan-100 bg-cyan-50/70 px-4 py-3">
+          <p className="text-sm leading-6 text-slate-700">
+            Upgrade plans unlock deeper timing guidance, confidence scoring,
+            volatility context, and richer route intelligence.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function BasicContextRow({
+  label,
+  value,
+}: {
+  label: string
+  value: string
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+        {label}
+      </span>
+
+      <span className="text-sm font-semibold text-slate-950">{value}</span>
+    </div>
   )
 }
 
