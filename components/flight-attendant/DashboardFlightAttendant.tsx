@@ -153,6 +153,7 @@ export default function DashboardFlightAttendant({
   const config = tierConfig[tier]
 
   const [open, setOpen] = useState(defaultOpen)
+  const [expanded, setExpanded] = useState(false)
   const [messages, setMessages] = useState<FlightAttendantMessage[]>([
     {
       id: "welcome-1",
@@ -177,7 +178,28 @@ export default function DashboardFlightAttendant({
       behavior: "smooth",
       block: "end",
     })
-  }, [messages, chatLoading, assistantTyping, open])
+  }, [messages, chatLoading, assistantTyping, open, expanded])
+
+  useEffect(() => {
+    if (!expanded) return
+
+    const originalOverflow = document.body.style.overflow
+
+    document.body.style.overflow = "hidden"
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setExpanded(false)
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+
+    return () => {
+      document.body.style.overflow = originalOverflow
+      window.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [expanded])
 
   async function typeAssistantReply(messageId: string, fullText: string) {
     setAssistantTyping(true)
@@ -428,17 +450,25 @@ export default function DashboardFlightAttendant({
   return (
     <>
       <div
+        onClick={expanded ? () => setExpanded(false) : undefined}
         className={
-          placement === "inline"
-            ? "w-full"
-            : "fixed right-5 top-24 z-[80] hidden lg:block"
+          expanded
+            ? "fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/35 px-4 backdrop-blur-sm"
+            : placement === "inline"
+              ? "w-full"
+              : "fixed right-5 top-24 z-[80] hidden lg:block"
         }
       >
         {open ? (
           <div
+            onClick={expanded ? (event) => event.stopPropagation() : undefined}
             className={cn(
               "overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white text-slate-950 shadow-sm",
-              placement === "inline" ? "w-full" : "w-[390px]"
+              expanded
+                ? "flex h-[min(760px,calc(100vh-3rem))] w-full max-w-3xl flex-col shadow-2xl"
+                : placement === "inline"
+                  ? "w-full"
+                  : "w-[390px]"
             )}
           >
             <div className="border-b border-slate-200 bg-slate-50/80 px-5 py-4">
@@ -451,13 +481,43 @@ export default function DashboardFlightAttendant({
                     {config.title}
                   </p>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => setExpanded((current) => !current)}
+                  aria-label={expanded ? "Close expanded Lucy chat" : "Expand Lucy chat"}
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
+                >
+                  {expanded ? (
+                    <span className="text-lg leading-none">×</span>
+                  ) : (
+                    <svg
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                      className="h-4 w-4"
+                      fill="none"
+                    >
+                      <path
+                        d="M8 4H4v4M4 4l6 6M16 20h4v-4M20 20l-6-6"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  )}
+                </button>
               </div>
             </div>
 
             <div
               className={cn(
                 "overflow-y-auto px-5 py-4",
-                placement === "inline" ? "h-[230px]" : "h-[360px]"
+                expanded
+                  ? "min-h-0 flex-1"
+                  : placement === "inline"
+                    ? "h-[230px]"
+                    : "h-[360px]"
               )}
             >
               <div className="space-y-4">
