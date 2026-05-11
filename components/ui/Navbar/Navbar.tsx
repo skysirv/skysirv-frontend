@@ -4,8 +4,11 @@ import { useEffect, useRef, useState } from 'react';
 import s from './Navbar.module.css';
 import Navlinks from './Navlinks';
 
+const BETA_BANNER_STORAGE_KEY = 'skysirv_beta_banner_dismissed';
+
 export default function Navbar() {
   const [hidden, setHidden] = useState(false);
+  const [showBetaBanner, setShowBetaBanner] = useState(false);
   const lastScrollY = useRef(0);
 
   /**
@@ -16,6 +19,13 @@ export default function Navbar() {
    * but the shared navbar now stays consistent with the new Booking page.
    */
   const isDark = false;
+
+  useEffect(() => {
+    const dismissed =
+      window.localStorage.getItem(BETA_BANNER_STORAGE_KEY) === 'true';
+
+    setShowBetaBanner(!dismissed);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -53,6 +63,11 @@ export default function Navbar() {
     };
   }, []);
 
+  const dismissBetaBanner = () => {
+    window.localStorage.setItem(BETA_BANNER_STORAGE_KEY, 'true');
+    setShowBetaBanner(false);
+  };
+
   return (
     <nav
       className={s.root}
@@ -66,6 +81,28 @@ export default function Navbar() {
       <a href="#skip" className="sr-only focus:not-sr-only">
         Skip to content
       </a>
+
+      {showBetaBanner ? (
+        <div className="relative flex min-h-[40px] items-center justify-center bg-[#10103a] px-12 py-2 text-center text-[13px] font-medium text-white shadow-sm">
+          <p className="leading-snug">
+            <span className="font-semibold">Skysirv Public Beta</span>
+            <span className="mx-2 text-white/45">|</span>
+            <span className="text-white/85">
+              Live airfare intelligence is currently in beta as we continue
+              refining accuracy, features, and the booking experience.
+            </span>
+          </p>
+
+          <button
+            type="button"
+            aria-label="Dismiss beta banner"
+            onClick={dismissBetaBanner}
+            className="absolute right-4 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white"
+          >
+            <span className="text-xl leading-none">×</span>
+          </button>
+        </div>
+      ) : null}
 
       <div className="mx-auto max-w-7xl px-6">
         <Navlinks isDark={isDark} />
