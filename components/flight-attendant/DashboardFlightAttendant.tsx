@@ -103,7 +103,7 @@ function normalizeLucyWatchlistAction(value: unknown): LucyWatchlistAction | nul
   if (!origin || !destination || !departureDate) return null
   if (!/^[A-Z0-9]{3,4}$/.test(origin)) return null
   if (!/^[A-Z0-9]{3,4}$/.test(destination)) return null
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(departureDate)) return null
+  if (!/^\d{2}-\d{2}-\d{4}$/.test(departureDate)) return null
   if (origin === destination) return null
 
   return {

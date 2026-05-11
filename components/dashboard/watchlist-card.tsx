@@ -213,26 +213,44 @@ export default function WatchlistCard({
   const departureDateDisplay = (() => {
     if (!departureDate) return "Pending"
 
-    // Normalize: handle both "MM-DD-YYYY" and ISO strings
     const raw = departureDate.split("T")[0]
 
-    const parts = raw.split("-")
-    if (parts.length !== 3) return departureDate
+    let year: number | null = null
+    let month: number | null = null
+    let day: number | null = null
 
-    const [month, day, year] = parts.map(Number)
+    const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+    const usMatch = raw.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/)
 
-    if (!month || !day || !year) return departureDate
+    if (isoMatch) {
+      year = Number(isoMatch[1])
+      month = Number(isoMatch[2])
+      day = Number(isoMatch[3])
+    } else if (usMatch) {
+      month = Number(usMatch[1])
+      day = Number(usMatch[2])
+      year = Number(usMatch[3])
+    } else {
+      return departureDate
+    }
 
-    const parsed = new Date(month - 1, day, year)
+    if (!year || !month || !day) return departureDate
 
-    if (Number.isNaN(parsed.getTime())) return departureDate
+    const parsed = new Date(year, month - 1, day)
 
-    return parsed.toLocaleDateString([], {
-      weekday: "long",
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    })
+    if (
+      Number.isNaN(parsed.getTime()) ||
+      parsed.getFullYear() !== year ||
+      parsed.getMonth() + 1 !== month ||
+      parsed.getDate() !== day
+    ) {
+      return departureDate
+    }
+
+    return `${String(month).padStart(2, "0")}-${String(day).padStart(
+      2,
+      "0"
+    )}-${year}`
   })()
 
   const currentFareDisplay = hasPrice
