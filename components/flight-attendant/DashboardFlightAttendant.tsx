@@ -32,11 +32,33 @@ type LucyWatchlistAction = {
   confirmationPrompt?: string
 }
 
+type LucyPreferredAirportsAction = {
+  type: "save_preferred_airports"
+  status: "needs_confirmation"
+  airportCodes: string[]
+  airportLabels?: string[]
+  confirmationPrompt?: string
+}
+
+type LucyPreferredRouteAction = {
+  type: "save_preferred_route"
+  status: "needs_confirmation"
+  origin: string
+  destination: string
+  routeLabel?: string
+  confirmationPrompt?: string
+}
+
+type LucyAction =
+  | LucyWatchlistAction
+  | LucyPreferredAirportsAction
+  | LucyPreferredRouteAction
+
 type FlightAttendantApiResponse = {
   success?: boolean
   model?: string
   reply?: string
-  action?: LucyWatchlistAction | null
+  action?: LucyAction | null
   error?: string
 }
 
@@ -88,33 +110,85 @@ function sanitizeLucyText(text: string) {
     .trim()
 }
 
-function normalizeLucyWatchlistAction(value: unknown): LucyWatchlistAction | null {
+function normalizeLucyAction(value: unknown): LucyAction | null {
   if (!value || typeof value !== "object") return null
 
-  const input = value as Partial<LucyWatchlistAction>
+  const input = value as Partial<LucyAction>
 
-  if (input.type !== "add_watchlist_route") return null
   if (input.status !== "needs_confirmation") return null
 
-  const origin = input.origin?.trim().toUpperCase()
-  const destination = input.destination?.trim().toUpperCase()
-  const departureDate = input.departureDate?.trim()
+  if (input.type === "add_watchlist_route") {
+    const origin = input.origin?.trim().toUpperCase()
+    const destination = input.destination?.trim().toUpperCase()
+    const departureDate = input.departureDate?.trim()
 
-  if (!origin || !destination || !departureDate) return null
-  if (!/^[A-Z0-9]{3,4}$/.test(origin)) return null
-  if (!/^[A-Z0-9]{3,4}$/.test(destination)) return null
-  if (!/^\d{2}-\d{2}-\d{4}$/.test(departureDate)) return null
-  if (origin === destination) return null
+    if (!origin || !destination || !departureDate) return null
+    if (!/^[A-Z0-9]{3,4}$/.test(origin)) return null
+    if (!/^[A-Z0-9]{3,4}$/.test(destination)) return null
+    if (!/^\d{2}-\d{2}-\d{4}$/.test(departureDate)) return null
+    if (origin === destination) return null
 
-  return {
-    type: "add_watchlist_route",
-    status: "needs_confirmation",
-    origin,
-    destination,
-    departureDate,
-    routeLabel: input.routeLabel,
-    confirmationPrompt: input.confirmationPrompt,
+    return {
+      type: "add_watchlist_route",
+      status: "needs_confirmation",
+      origin,
+      destination,
+      departureDate,
+      routeLabel: input.routeLabel,
+      confirmationPrompt: input.confirmationPrompt,
+    }
   }
+
+  if (input.type === "save_preferred_airports") {
+    const rawAirportCodes = Array.isArray(input.airportCodes)
+      ? input.airportCodes
+      : []
+
+    const airportCodes = Array.from(
+      new Set(
+        rawAirportCodes
+          .map((code) =>
+            typeof code === "string" ? code.trim().toUpperCase() : ""
+          )
+          .filter((code) => /^[A-Z0-9]{3,4}$/.test(code))
+      )
+    )
+
+    if (!airportCodes.length) return null
+
+    return {
+      type: "save_preferred_airports",
+      status: "needs_confirmation",
+      airportCodes,
+      airportLabels: Array.isArray(input.airportLabels)
+        ? input.airportLabels.filter(
+          (label): label is string => typeof label === "string"
+        )
+        : undefined,
+      confirmationPrompt: input.confirmationPrompt,
+    }
+  }
+
+  if (input.type === "save_preferred_route") {
+    const origin = input.origin?.trim().toUpperCase()
+    const destination = input.destination?.trim().toUpperCase()
+
+    if (!origin || !destination) return null
+    if (!/^[A-Z0-9]{3,4}$/.test(origin)) return null
+    if (!/^[A-Z0-9]{3,4}$/.test(destination)) return null
+    if (origin === destination) return null
+
+    return {
+      type: "save_preferred_route",
+      status: "needs_confirmation",
+      origin,
+      destination,
+      routeLabel: input.routeLabel,
+      confirmationPrompt: input.confirmationPrompt,
+    }
+  }
+
+  return null
 }
 
 function isAffirmativeRouteConfirmation(message: string) {
@@ -141,8 +215,16 @@ function isNegativeRouteConfirmation(message: string) {
   )
 }
 
-function getWatchlistActionLabel(action: LucyWatchlistAction) {
-  return `${action.origin} → ${action.destination} for ${action.departureDate}`
+function getLucyActionLabel(action: LucyAction) {
+  if (action.type === "add_watchlist_route") {
+    return `${action.origin} → ${action.destination} for ${action.departureDate}`
+  }
+
+  if (action.type === "save_preferred_airports") {
+    return action.airportCodes.join(" and ")
+  }
+
+  return `${action.origin} → ${action.destination}`
 }
 
 export default function DashboardFlightAttendant({
@@ -167,8 +249,8 @@ export default function DashboardFlightAttendant({
   const [assistantTyping, setAssistantTyping] = useState(false)
   const [authRequired, setAuthRequired] = useState(false)
   const [authModalOpen, setAuthModalOpen] = useState(false)
-  const [pendingWatchlistAction, setPendingWatchlistAction] =
-    useState<LucyWatchlistAction | null>(null)
+  const [pendingLucyAction, setPendingLucyAction] =
+    useState<LucyAction | null>(null)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -249,62 +331,136 @@ export default function DashboardFlightAttendant({
     await typeAssistantReply(assistantMessageId, fullText)
   }
 
-  async function handleConfirmPendingWatchlistAction(
-    action: LucyWatchlistAction,
-    token: string
-  ) {
+  async function handleConfirmPendingLucyAction(action: LucyAction, token: string) {
     if (!API_BASE_URL) return
 
     setChatLoading(true)
 
     try {
-      const response = await fetch(`${API_BASE_URL}/watchlist`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          origin: action.origin,
-          destination: action.destination,
-          departureDate: action.departureDate,
-        }),
-      })
+      let successReply = ""
 
-      const data = await response.json().catch(() => null)
-
-      if (!response.ok) {
-        const message =
-          response.status === 403
-            ? "Your current plan has reached its watchlist limit. You’ll need to remove a route or upgrade before Lucy can add another one."
-            : data?.error ||
-            "I couldn’t add that route to your watchlist yet. Please try again in a moment."
-
-        throw new Error(message)
-      }
-
-      setPendingWatchlistAction(null)
-
-      window.dispatchEvent(
-        new CustomEvent("skysirv:watchlist-updated", {
-          detail: {
+      if (action.type === "add_watchlist_route") {
+        const response = await fetch(`${API_BASE_URL}/watchlist`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
             origin: action.origin,
             destination: action.destination,
             departureDate: action.departureDate,
-            result: data,
-          },
+          }),
         })
-      )
 
-      await appendTypedAssistantReply(
-        `Done — I added ${getWatchlistActionLabel(
+        const data = await response.json().catch(() => null)
+
+        if (!response.ok) {
+          const message =
+            response.status === 403
+              ? "Your current plan has reached its watchlist limit. You’ll need to remove a route or upgrade before Lucy can add another one."
+              : data?.error ||
+              "I couldn’t add that route to your watchlist yet. Please try again in a moment."
+
+          throw new Error(message)
+        }
+
+        window.dispatchEvent(
+          new CustomEvent("skysirv:watchlist-updated", {
+            detail: {
+              origin: action.origin,
+              destination: action.destination,
+              departureDate: action.departureDate,
+              result: data,
+            },
+          })
+        )
+
+        successReply = `Done — I added ${getLucyActionLabel(
           action
         )} to your watchlist. Skysirv will start monitoring it from your dashboard.`
+      }
+
+      if (action.type === "save_preferred_airports") {
+        const response = await fetch(
+          `${API_BASE_URL}/api/user-preferences/preferred-airports`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              airportCodes: action.airportCodes,
+            }),
+          }
+        )
+
+        const data = await response.json().catch(() => null)
+
+        if (!response.ok) {
+          throw new Error(
+            data?.error ||
+            "I couldn’t save those preferred airports yet. Please try again in a moment."
+          )
+        }
+
+        window.dispatchEvent(
+          new CustomEvent("skysirv:preferred-airports-updated", {
+            detail: data,
+          })
+        )
+
+        successReply = `Done — I saved ${getLucyActionLabel(
+          action
+        )} as preferred airports.`
+      }
+
+      if (action.type === "save_preferred_route") {
+        const response = await fetch(
+          `${API_BASE_URL}/api/user-preferences/preferred-routes`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              origin: action.origin,
+              destination: action.destination,
+            }),
+          }
+        )
+
+        const data = await response.json().catch(() => null)
+
+        if (!response.ok) {
+          throw new Error(
+            data?.error ||
+            "I couldn’t save that preferred route yet. Please try again in a moment."
+          )
+        }
+
+        window.dispatchEvent(
+          new CustomEvent("skysirv:preferred-routes-updated", {
+            detail: data,
+          })
+        )
+
+        successReply = `Done — I saved ${getLucyActionLabel(
+          action
+        )} as a preferred route.`
+      }
+
+      setPendingLucyAction(null)
+
+      await appendTypedAssistantReply(
+        successReply || "Done — I saved that preference."
       )
     } catch (error: any) {
       await appendTypedAssistantReply(
         error?.message ||
-        "I couldn’t add that route to your watchlist yet. Please try again in a moment."
+        "I couldn’t save that action yet. Please try again in a moment."
       )
     } finally {
       setChatLoading(false)
@@ -365,18 +521,18 @@ export default function DashboardFlightAttendant({
       return
     }
 
-    if (pendingWatchlistAction && isNegativeRouteConfirmation(message)) {
-      setPendingWatchlistAction(null)
+    if (pendingLucyAction && isNegativeRouteConfirmation(message)) {
+      setPendingLucyAction(null)
 
       await appendTypedAssistantReply(
-        "No problem — I won’t add that route to your watchlist."
+        "No problem — I won’t save that action."
       )
 
       return
     }
 
-    if (pendingWatchlistAction && isAffirmativeRouteConfirmation(message)) {
-      await handleConfirmPendingWatchlistAction(pendingWatchlistAction, token)
+    if (pendingLucyAction && isAffirmativeRouteConfirmation(message)) {
+      await handleConfirmPendingLucyAction(pendingLucyAction, token)
       return
     }
 
@@ -411,10 +567,10 @@ export default function DashboardFlightAttendant({
       const assistantReply =
         data?.reply || "I’m here, but I could not generate a response."
 
-      const suggestedAction = normalizeLucyWatchlistAction(data?.action)
+      const suggestedAction = normalizeLucyAction(data?.action)
 
       if (suggestedAction) {
-        setPendingWatchlistAction(suggestedAction)
+        setPendingLucyAction(suggestedAction)
       }
 
       setChatLoading(false)
