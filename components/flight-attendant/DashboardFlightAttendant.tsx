@@ -22,6 +22,24 @@ type FlightAttendantMessage = {
   text: string
 }
 
+type LucyWatchlistAction = {
+  type: "add_watchlist_route"
+  status: "needs_confirmation"
+  origin: string
+  destination: string
+  departureDate: string
+  routeLabel?: string
+  confirmationPrompt?: string
+}
+
+type FlightAttendantApiResponse = {
+  success?: boolean
+  model?: string
+  reply?: string
+  action?: LucyWatchlistAction | null
+  error?: string
+}
+
 const tierConfig: Record<
   DashboardLucyTier,
   {
@@ -70,6 +88,63 @@ function sanitizeLucyText(text: string) {
     .trim()
 }
 
+function normalizeLucyWatchlistAction(value: unknown): LucyWatchlistAction | null {
+  if (!value || typeof value !== "object") return null
+
+  const input = value as Partial<LucyWatchlistAction>
+
+  if (input.type !== "add_watchlist_route") return null
+  if (input.status !== "needs_confirmation") return null
+
+  const origin = input.origin?.trim().toUpperCase()
+  const destination = input.destination?.trim().toUpperCase()
+  const departureDate = input.departureDate?.trim()
+
+  if (!origin || !destination || !departureDate) return null
+  if (!/^[A-Z0-9]{3,4}$/.test(origin)) return null
+  if (!/^[A-Z0-9]{3,4}$/.test(destination)) return null
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(departureDate)) return null
+  if (origin === destination) return null
+
+  return {
+    type: "add_watchlist_route",
+    status: "needs_confirmation",
+    origin,
+    destination,
+    departureDate,
+    routeLabel: input.routeLabel,
+    confirmationPrompt: input.confirmationPrompt,
+  }
+}
+
+function isAffirmativeRouteConfirmation(message: string) {
+  const normalized = message.trim().toLowerCase()
+
+  return (
+    /^(yes|yep|yeah|correct|confirm|please|sure|ok|okay)\b/.test(normalized) ||
+    normalized.includes("yes please") ||
+    normalized.includes("go ahead") ||
+    normalized.includes("add it") ||
+    normalized.includes("add this") ||
+    normalized.includes("track it") ||
+    normalized.includes("save it")
+  )
+}
+
+function isNegativeRouteConfirmation(message: string) {
+  const normalized = message.trim().toLowerCase()
+
+  return (
+    /^(no|nope|cancel|not now)\b/.test(normalized) ||
+    normalized.includes("do not add") ||
+    normalized.includes("don't add")
+  )
+}
+
+function getWatchlistActionLabel(action: LucyWatchlistAction) {
+  return `${action.origin} → ${action.destination} for ${action.departureDate}`
+}
+
 export default function DashboardFlightAttendant({
   tier,
   placement = "floating",
@@ -91,6 +166,8 @@ export default function DashboardFlightAttendant({
   const [assistantTyping, setAssistantTyping] = useState(false)
   const [authRequired, setAuthRequired] = useState(false)
   const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [pendingWatchlistAction, setPendingWatchlistAction] =
+    useState<LucyWatchlistAction | null>(null)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -132,6 +209,84 @@ export default function DashboardFlightAttendant({
     })
 
     setAssistantTyping(false)
+  }
+
+  async function appendTypedAssistantReply(fullText: string) {
+    const assistantMessageId = createMessageId()
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: assistantMessageId,
+        role: "assistant",
+        label: "Lucy",
+        text: "",
+      },
+    ])
+
+    await typeAssistantReply(assistantMessageId, fullText)
+  }
+
+  async function handleConfirmPendingWatchlistAction(
+    action: LucyWatchlistAction,
+    token: string
+  ) {
+    if (!API_BASE_URL) return
+
+    setChatLoading(true)
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/watchlist`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          origin: action.origin,
+          destination: action.destination,
+          departureDate: action.departureDate,
+        }),
+      })
+
+      const data = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        const message =
+          response.status === 403
+            ? "Your current plan has reached its watchlist limit. You’ll need to remove a route or upgrade before Lucy can add another one."
+            : data?.error ||
+            "I couldn’t add that route to your watchlist yet. Please try again in a moment."
+
+        throw new Error(message)
+      }
+
+      setPendingWatchlistAction(null)
+
+      window.dispatchEvent(
+        new CustomEvent("skysirv:watchlist-updated", {
+          detail: {
+            origin: action.origin,
+            destination: action.destination,
+            departureDate: action.departureDate,
+            result: data,
+          },
+        })
+      )
+
+      await appendTypedAssistantReply(
+        `Done — I added ${getWatchlistActionLabel(
+          action
+        )} to your watchlist. Skysirv will start monitoring it from your dashboard.`
+      )
+    } catch (error: any) {
+      await appendTypedAssistantReply(
+        error?.message ||
+        "I couldn’t add that route to your watchlist yet. Please try again in a moment."
+      )
+    } finally {
+      setChatLoading(false)
+    }
   }
 
   async function handleSendFlightAttendantMessage(
@@ -188,6 +343,21 @@ export default function DashboardFlightAttendant({
       return
     }
 
+    if (pendingWatchlistAction && isNegativeRouteConfirmation(message)) {
+      setPendingWatchlistAction(null)
+
+      await appendTypedAssistantReply(
+        "No problem — I won’t add that route to your watchlist."
+      )
+
+      return
+    }
+
+    if (pendingWatchlistAction && isAffirmativeRouteConfirmation(message)) {
+      await handleConfirmPendingWatchlistAction(pendingWatchlistAction, token)
+      return
+    }
+
     setChatLoading(true)
 
     try {
@@ -207,7 +377,9 @@ export default function DashboardFlightAttendant({
         }),
       })
 
-      const data = await response.json().catch(() => null)
+      const data = (await response.json().catch(() => null)) as
+        | FlightAttendantApiResponse
+        | null
 
       if (!response.ok) {
         throw new Error(data?.error || "Unable to reach Skysirv Flight Attendant")
@@ -216,6 +388,12 @@ export default function DashboardFlightAttendant({
       const assistantMessageId = createMessageId()
       const assistantReply =
         data?.reply || "I’m here, but I could not generate a response."
+
+      const suggestedAction = normalizeLucyWatchlistAction(data?.action)
+
+      if (suggestedAction) {
+        setPendingWatchlistAction(suggestedAction)
+      }
 
       setChatLoading(false)
 
