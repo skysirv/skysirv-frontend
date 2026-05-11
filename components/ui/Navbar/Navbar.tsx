@@ -83,7 +83,7 @@ export default function Navbar() {
       </a>
 
       {showBetaBanner ? (
-        <div className="relative flex min-h-[40px] items-center justify-center bg-[#10103a] px-12 py-2 text-center text-[13px] font-medium text-white shadow-sm">
+        <div className="relative z-50 flex min-h-[40px] pointer-events-auto items-center justify-center bg-[#10103a] px-12 py-2 text-center text-[13px] font-medium text-white shadow-sm">
           <p className="leading-snug">
             <span className="font-semibold">Skysirv Public Beta</span>
             <span className="mx-2 text-white/45">|</span>
@@ -97,7 +97,7 @@ export default function Navbar() {
             type="button"
             aria-label="Dismiss beta banner"
             onClick={dismissBetaBanner}
-            className="absolute right-4 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white"
+            className="absolute right-4 top-1/2 z-[60] flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white pointer-events-auto"
           >
             <span className="text-xl leading-none">×</span>
           </button>
