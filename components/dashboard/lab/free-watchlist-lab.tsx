@@ -53,7 +53,12 @@ type FreeWatchlistLabProps = {
   loading?: boolean
   watchlist: WatchlistRoute[]
   remainingRoutes: number
+  remainingSavedFlights?: number
   onRemoveRoute?: (routeId: string) => void
+  onSaveFlight?: (
+    route: WatchlistRoute,
+    flight?: RecommendedFlight | null
+  ) => Promise<boolean | void> | boolean | void
 }
 
 type BasicContextSelection = {
@@ -65,7 +70,9 @@ export default function FreeWatchlistLab({
   loading = false,
   watchlist,
   remainingRoutes,
+  remainingSavedFlights = 0,
   onRemoveRoute,
+  onSaveFlight,
 }: FreeWatchlistLabProps) {
   const [openRoute, setOpenRoute] = useState<string | null>(null)
   const [basicContextSelection, setBasicContextSelection] =
@@ -296,6 +303,8 @@ export default function FreeWatchlistLab({
       {basicContextSelection ? (
         <FreeBasicContextModal
           selection={basicContextSelection}
+          remainingSavedFlights={remainingSavedFlights}
+          onSaveFlight={onSaveFlight}
           onClose={() => setBasicContextSelection(null)}
         />
       ) : null}
@@ -305,15 +314,25 @@ export default function FreeWatchlistLab({
 
 function FreeBasicContextModal({
   selection,
+  remainingSavedFlights,
+  onSaveFlight,
   onClose,
 }: {
   selection: BasicContextSelection
+  remainingSavedFlights: number
+  onSaveFlight?: (
+    route: WatchlistRoute,
+    flight?: RecommendedFlight | null
+  ) => Promise<boolean | void> | boolean | void
   onClose: () => void
 }) {
+  const [saving, setSaving] = useState(false)
+
   const route = selection.route
   const flight = selection.flight ?? null
 
   const routeLabel = getRouteLabel(route)
+
   const flightLabel = flight
     ? getFlightLabel(flight)
     : route.latest_flight_number
@@ -325,9 +344,28 @@ function FreeBasicContextModal({
     : getAirportLabel(route)
 
   const priceLabel = formatPrice(flight?.price ?? route.latest_price)
+
   const signalLabel = getBasicSignal(
     flight?.bookingSignal ?? route.booking_signal
   )
+
+  const saveDisabled = saving || !onSaveFlight || remainingSavedFlights <= 0
+
+  async function handleSaveFlight() {
+    if (!onSaveFlight || saveDisabled) return
+
+    setSaving(true)
+
+    try {
+      const result = await onSaveFlight(route, flight)
+
+      if (result !== false) {
+        onClose()
+      }
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
     <div
@@ -377,7 +415,10 @@ function FreeBasicContextModal({
 
         <div className="mt-4 grid gap-2 sm:grid-cols-2">
           <BasicContextRow label="Visible fare" value={priceLabel} />
-          <BasicContextRow label="Route average" value={formatAveragePrice(route.avg_price)} />
+          <BasicContextRow
+            label="Route average"
+            value={formatAveragePrice(route.avg_price)}
+          />
           <BasicContextRow label="Signal" value={signalLabel} />
           <BasicContextRow label="Tracking" value="Active" />
         </div>
@@ -387,6 +428,29 @@ function FreeBasicContextModal({
             Upgrade plans unlock deeper timing guidance, confidence scoring,
             volatility context, and richer route intelligence.
           </p>
+        </div>
+
+        <div className="mt-5 flex flex-wrap items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
+          >
+            Not now
+          </button>
+
+          <button
+            type="button"
+            onClick={handleSaveFlight}
+            disabled={saveDisabled}
+            className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-cyan-200 bg-cyan-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-cyan-700 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-200 disabled:text-slate-500"
+          >
+            {saving
+              ? "Saving…"
+              : remainingSavedFlights <= 0
+                ? "Saved slots full"
+                : "Save flight"}
+          </button>
         </div>
       </div>
     </div>

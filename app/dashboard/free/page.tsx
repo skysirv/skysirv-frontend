@@ -59,6 +59,15 @@ type SavedFlightsResponse =
     data?: FreeSavedFlightLabData[]
   }
 
+type WatchlistFlightSelection = {
+  airline?: string | null
+  flightNumber?: string | null
+  price?: number | null
+  currency?: string | null
+  capturedAt?: string | null
+  bookingSignal?: string | null
+}
+
 export default function FreeDashboardPage() {
   const router = useRouter()
 
@@ -301,6 +310,133 @@ export default function FreeDashboardPage() {
     })
   }
 
+  function getSavedFlightRouteCodes(route: WatchlistRoute) {
+    const routeText = route.route?.trim() ?? ""
+    const routeParts = routeText
+      .replace(/→/g, "-")
+      .replace(/\s+/g, "")
+      .split("-")
+      .filter(Boolean)
+
+    const origin = (route.origin ?? routeParts[0] ?? "").trim().toUpperCase()
+    const destination = (route.destination ?? routeParts[1] ?? "")
+      .trim()
+      .toUpperCase()
+
+    return {
+      origin,
+      destination,
+    }
+  }
+
+  async function handleSaveWatchlistFlight(
+    route: WatchlistRoute,
+    flight?: WatchlistFlightSelection | null
+  ) {
+    if (savedFlights.length >= 3) {
+      toast({
+        title: "Saved flight limit reached",
+        description: "Free plans can save up to 3 flights.",
+      })
+
+      return false
+    }
+
+    const token = getAuthToken()
+
+    if (!token) {
+      toast({
+        title: "Session expired",
+        description: "Please sign in again to save flights.",
+      })
+
+      return false
+    }
+
+    const { origin, destination } = getSavedFlightRouteCodes(route)
+
+    if (!origin || !destination || origin === destination) {
+      toast({
+        title: "Could not save flight",
+        description: "This route is missing valid airport information.",
+      })
+
+      return false
+    }
+
+    const selectedFlight = flight ?? null
+
+    const payload = {
+      origin,
+      destination,
+      departureDate: route.departure_date ?? null,
+      airline: selectedFlight?.airline ?? route.latest_airline ?? null,
+      flightNumber:
+        selectedFlight?.flightNumber ?? route.latest_flight_number ?? null,
+      price: selectedFlight?.price ?? route.latest_price ?? null,
+      currency: selectedFlight?.currency ?? "USD",
+    }
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/saved-flights`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      )
+
+      if (res.status === 409) {
+        toast({
+          title: "Flight already saved",
+          description: "That flight is already in your saved flights.",
+        })
+
+        return false
+      }
+
+      if (!res.ok) {
+        throw new Error("Failed to save flight")
+      }
+
+      const savedFlight = (await res.json().catch(() => null)) as
+        | FreeSavedFlightLabData
+        | null
+
+      if (savedFlight?.id) {
+        setSavedFlights((prev) => {
+          const alreadyExists = prev.some((item) => item.id === savedFlight.id)
+
+          if (alreadyExists) return prev
+
+          return [savedFlight, ...prev].slice(0, 3)
+        })
+      }
+
+      setSavedFlightsFetchKey((prev) => prev + 1)
+
+      toast({
+        title: "Flight saved",
+        description: "The flight was added to your Free saved flights.",
+      })
+
+      return true
+    } catch (error) {
+      console.error("Failed to save watchlist flight", error)
+
+      toast({
+        title: "Could not save flight",
+        description: "Please try again in a moment.",
+      })
+
+      return false
+    }
+  }
+
   async function handleDeleteSavedFlight(savedFlightId: string) {
     const token = getAuthToken()
 
@@ -470,7 +606,9 @@ export default function FreeDashboardPage() {
             <FreeWatchlistLab
               watchlist={watchlist}
               remainingRoutes={Math.max(0, 3 - watchlist.length)}
+              remainingSavedFlights={Math.max(0, 3 - savedFlights.length)}
               onRemoveRoute={handleRouteRemoved}
+              onSaveFlight={handleSaveWatchlistFlight}
             />
 
             <FreeSavedFlightsLab
