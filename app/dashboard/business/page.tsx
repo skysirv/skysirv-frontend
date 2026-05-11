@@ -304,6 +304,40 @@ export default function BusinessDashboardPage() {
   }, [watchlistFetchKey])
 
   useEffect(() => {
+    function handleLucyWatchlistUpdated() {
+      setWatchlistFetchKey((prev) => prev + 1)
+
+      const retryTimers = [1500, 4000, 7000].map((delay) =>
+        window.setTimeout(() => {
+          setWatchlistFetchKey((prev) => prev + 1)
+        }, delay)
+      )
+
+      return retryTimers
+    }
+
+    let activeRetryTimers: number[] = []
+
+    function handleWatchlistUpdatedEvent() {
+      activeRetryTimers.forEach((timer) => window.clearTimeout(timer))
+      activeRetryTimers = handleLucyWatchlistUpdated()
+    }
+
+    window.addEventListener(
+      "skysirv:watchlist-updated",
+      handleWatchlistUpdatedEvent
+    )
+
+    return () => {
+      activeRetryTimers.forEach((timer) => window.clearTimeout(timer))
+      window.removeEventListener(
+        "skysirv:watchlist-updated",
+        handleWatchlistUpdatedEvent
+      )
+    }
+  }, [])
+
+  useEffect(() => {
     if (typeof window === "undefined") return
 
     const shouldShowWelcome =
