@@ -89,7 +89,7 @@ export default function Navbar() {
             <span className="mx-2 text-white/45">|</span>
             <span className="text-white/85">
               Live airfare intelligence is currently in beta as we continue
-              refining accuracy, features, and the booking experience.
+              refining accuracy, features, and the booking experience. | June 1st, 2026
             </span>
           </p>
 
