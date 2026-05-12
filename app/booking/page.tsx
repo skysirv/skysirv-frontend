@@ -187,6 +187,7 @@ export default function BookingPage() {
     useState<BookingSearchContext | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [hasSearched, setHasSearched] = useState(false)
+  const [isSearching, setIsSearching] = useState(false)
   const [selectedOffer, setSelectedOffer] = useState<BookingOffer | null>(null)
   const [visibleOfferCount, setVisibleOfferCount] = useState(OFFERS_PER_PAGE)
   const [selectedStopFilters, setSelectedStopFilters] = useState<StopFilter[]>([])
@@ -292,6 +293,7 @@ export default function BookingPage() {
   }, [selectedOutboundKey, sortedOffers])
 
   function handleSearchStart() {
+    setIsSearching(true)
     setVisibleOfferCount(OFFERS_PER_PAGE)
     setSelectedStopFilters([])
     setSelectedAirlineFilters([])
@@ -312,6 +314,7 @@ export default function BookingPage() {
   }
 
   function handleSearchSuccess(payload: BookingSearchSuccessPayload) {
+    setIsSearching(false)
     setVisibleOfferCount(OFFERS_PER_PAGE)
     setSelectedStopFilters([])
     setSelectedAirlineFilters([])
@@ -332,6 +335,7 @@ export default function BookingPage() {
   }
 
   function handleSearchError(message: string) {
+    setIsSearching(false)
     setVisibleOfferCount(OFFERS_PER_PAGE)
     setSelectedStopFilters([])
     setSelectedAirlineFilters([])
@@ -561,6 +565,8 @@ export default function BookingPage() {
           <BookingFooter />
         </div>
       </div>
+
+      {isSearching ? <BookingSearchLoadingOverlay /> : null}
 
       {selectedOffer ? (
         <OfferDetailsModal
@@ -1546,6 +1552,72 @@ function SliceSummaryBlock({
           time={slice.arrivalTime ?? lastSegment?.arrivingAt}
         />
       </div>
+    </div>
+  )
+}
+
+function BookingSearchLoadingOverlay() {
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/35 px-4 backdrop-blur-sm">
+      <motion.div
+        initial={{ opacity: 0, y: 18, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+        className="relative w-full max-w-sm overflow-hidden rounded-[2rem] border border-white/20 bg-white/95 p-7 text-center shadow-[0_30px_100px_rgba(15,23,42,0.25)]"
+      >
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.16),transparent_48%)]" />
+
+        <div className="relative mx-auto flex h-32 w-32 items-center justify-center">
+          <div className="absolute h-28 w-28 rounded-full border border-dashed border-cyan-300" />
+
+          <motion.div
+            className="absolute h-28 w-28"
+            animate={{ rotate: 360 }}
+            transition={{
+              duration: 2.2,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          >
+            <div className="absolute -top-1 left-1/2 -translate-x-1/2">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-950 text-lg text-white shadow-lg">
+                ✈
+              </span>
+            </div>
+          </motion.div>
+
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-cyan-50 text-sm font-bold text-cyan-700 ring-1 ring-cyan-200">
+            SKY
+          </div>
+        </div>
+
+        <div className="relative mt-4">
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-700">
+            Searching live fares
+          </p>
+
+          <h3 className="mt-2 text-2xl font-bold tracking-tight text-slate-950">
+            Checking airline availability.
+          </h3>
+
+          <p className="mt-3 text-sm leading-6 text-slate-500">
+            Skysirv is scanning live offers, sorting prices, and preparing your
+            flight results.
+          </p>
+        </div>
+
+        <div className="relative mt-5 flex items-center justify-center gap-1.5">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-500" />
+          <span
+            className="h-2 w-2 animate-pulse rounded-full bg-cyan-500"
+            style={{ animationDelay: "120ms" }}
+          />
+          <span
+            className="h-2 w-2 animate-pulse rounded-full bg-cyan-500"
+            style={{ animationDelay: "240ms" }}
+          />
+        </div>
+      </motion.div>
     </div>
   )
 }
