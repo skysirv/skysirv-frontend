@@ -1568,21 +1568,17 @@ function BookingSearchLoadingOverlay() {
               className="absolute inset-0 h-full w-full"
               aria-hidden="true"
             >
-              <circle
-                cx="50"
-                cy="50"
-                r="34"
+              <path
+                d="M 18 50 A 34 34 0 0 1 50 16"
                 fill="none"
                 stroke="rgb(15 23 42)"
                 strokeWidth="2.5"
                 strokeLinecap="round"
-                strokeDasharray="56 220"
-                transform="rotate(-90 50 50)"
               />
             </svg>
 
-            <div className="absolute left-1/2 top-[14px] -translate-x-1/2">
-              <span className="block text-[22px] leading-none text-slate-950">
+            <div className="absolute left-1/2 top-[11px] -translate-x-1/2">
+              <span className="block rotate-45 text-[30px] leading-none text-slate-950">
                 ✈
               </span>
             </div>
@@ -1590,7 +1586,7 @@ function BookingSearchLoadingOverlay() {
         </div>
 
         <motion.p
-          animate={{ opacity: [0.45, 1, 0.45] }}
+          animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{
             duration: 2.8,
             repeat: Infinity,
