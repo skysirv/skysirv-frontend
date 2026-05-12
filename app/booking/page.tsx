@@ -1558,66 +1558,46 @@ function SliceSummaryBlock({
 
 function BookingSearchLoadingOverlay() {
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/35 px-4 backdrop-blur-sm">
-      <motion.div
-        initial={{ opacity: 0, y: 18, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.25, ease: "easeOut" }}
-        className="relative w-full max-w-sm overflow-hidden rounded-[2rem] border border-white/20 bg-white/95 p-7 text-center shadow-[0_30px_100px_rgba(15,23,42,0.25)]"
-      >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.16),transparent_48%)]" />
-
-        <div className="relative mx-auto flex h-32 w-32 items-center justify-center">
-          <div className="absolute h-28 w-28 rounded-full border border-dashed border-cyan-300" />
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/10 backdrop-blur-md">
+      <div className="flex flex-col items-center justify-center">
+        <div className="relative flex h-40 w-40 items-center justify-center">
+          <div className="absolute h-32 w-32 rounded-full border border-cyan-200/80" />
 
           <motion.div
-            className="absolute h-28 w-28"
+            className="absolute h-32 w-32"
             animate={{ rotate: 360 }}
             transition={{
-              duration: 2.2,
+              duration: 2.1,
               repeat: Infinity,
               ease: "linear",
             }}
           >
-            <div className="absolute -top-1 left-1/2 -translate-x-1/2">
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-950 text-lg text-white shadow-lg">
-                ✈
-              </span>
+            <div className="absolute -top-2 left-1/2 -translate-x-1/2 text-2xl text-slate-950">
+              ✈
             </div>
           </motion.div>
 
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-cyan-50 text-sm font-bold text-cyan-700 ring-1 ring-cyan-200">
-            SKY
+          <div className="relative flex h-20 w-20 items-center justify-center rounded-full border-2 border-cyan-200 bg-white/50 shadow-sm">
+            <div className="absolute inset-2 rounded-full border border-cyan-100" />
+            <div className="absolute left-1/2 top-2 bottom-2 w-px -translate-x-1/2 bg-cyan-200" />
+            <div className="absolute top-1/2 left-2 right-2 h-px -translate-y-1/2 bg-cyan-200" />
+            <div className="absolute top-4 left-3 right-3 h-px rounded-full bg-cyan-100" />
+            <div className="absolute bottom-4 left-3 right-3 h-px rounded-full bg-cyan-100" />
           </div>
         </div>
 
-        <div className="relative mt-4">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-700">
-            Searching live fares
-          </p>
-
-          <h3 className="mt-2 text-2xl font-bold tracking-tight text-slate-950">
-            Checking airline availability.
-          </h3>
-
-          <p className="mt-3 text-sm leading-6 text-slate-500">
-            Skysirv is scanning live offers, sorting prices, and preparing your
-            flight results.
-          </p>
-        </div>
-
-        <div className="relative mt-5 flex items-center justify-center gap-1.5">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-500" />
-          <span
-            className="h-2 w-2 animate-pulse rounded-full bg-cyan-500"
-            style={{ animationDelay: "120ms" }}
-          />
-          <span
-            className="h-2 w-2 animate-pulse rounded-full bg-cyan-500"
-            style={{ animationDelay: "240ms" }}
-          />
-        </div>
-      </motion.div>
+        <motion.p
+          animate={{ opacity: [0.45, 1, 0.45] }}
+          transition={{
+            duration: 1.2,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="mt-4 text-lg font-semibold tracking-wide text-slate-950"
+        >
+          Loading Results....
+        </motion.p>
+      </div>
     </div>
   )
 }
