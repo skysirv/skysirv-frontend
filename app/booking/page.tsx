@@ -1558,44 +1558,39 @@ function SliceSummaryBlock({
 
 function BookingSearchLoadingOverlay() {
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/10 backdrop-blur-md">
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/18 px-4 backdrop-blur-md">
       <div className="flex flex-col items-center justify-center">
-        <div className="relative flex h-40 w-40 items-center justify-center">
-          <div className="absolute h-32 w-32 rounded-full border border-cyan-200/80" />
-
+        <div className="relative h-28 w-28">
           <motion.div
-            className="absolute h-32 w-32"
+            className="absolute inset-0"
             animate={{ rotate: 360 }}
             transition={{
-              duration: 2.1,
+              duration: 2.6,
               repeat: Infinity,
               ease: "linear",
             }}
           >
-            <div className="absolute -top-2 left-1/2 -translate-x-1/2 text-2xl text-slate-950">
-              ✈
+            <div className="absolute left-1/2 top-0 -translate-x-1/2">
+              <div className="flex items-center">
+                <span className="mr-2 block h-[2px] w-10 rounded-full bg-slate-950" />
+                <span className="text-[22px] leading-none text-slate-950">
+                  ✈
+                </span>
+              </div>
             </div>
           </motion.div>
-
-          <div className="relative flex h-20 w-20 items-center justify-center rounded-full border-2 border-cyan-200 bg-white/50 shadow-sm">
-            <div className="absolute inset-2 rounded-full border border-cyan-100" />
-            <div className="absolute left-1/2 top-2 bottom-2 w-px -translate-x-1/2 bg-cyan-200" />
-            <div className="absolute top-1/2 left-2 right-2 h-px -translate-y-1/2 bg-cyan-200" />
-            <div className="absolute top-4 left-3 right-3 h-px rounded-full bg-cyan-100" />
-            <div className="absolute bottom-4 left-3 right-3 h-px rounded-full bg-cyan-100" />
-          </div>
         </div>
 
         <motion.p
           animate={{ opacity: [0.45, 1, 0.45] }}
           transition={{
-            duration: 1.2,
+            duration: 2.2,
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="mt-4 text-lg font-semibold tracking-wide text-slate-950"
+          className="mt-3 text-lg font-semibold tracking-tight text-slate-950"
         >
-          Loading Results....
+          Searching for flights...
         </motion.p>
       </div>
     </div>
