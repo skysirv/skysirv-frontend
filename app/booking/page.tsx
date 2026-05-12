@@ -1621,13 +1621,11 @@ function getOfferAirportCodes(offer: BookingOffer) {
   const codes = new Set<string>()
 
   for (const slice of offer.slices) {
-    if (slice.origin.iataCode) codes.add(slice.origin.iataCode)
-    if (slice.destination.iataCode) codes.add(slice.destination.iataCode)
+    const originCode = slice.origin.iataCode?.trim().toUpperCase()
+    const destinationCode = slice.destination.iataCode?.trim().toUpperCase()
 
-    for (const segment of slice.segments) {
-      if (segment.origin.iataCode) codes.add(segment.origin.iataCode)
-      if (segment.destination.iataCode) codes.add(segment.destination.iataCode)
-    }
+    if (originCode) codes.add(originCode)
+    if (destinationCode) codes.add(destinationCode)
   }
 
   return Array.from(codes)
@@ -1676,11 +1674,6 @@ function getAirportDisplayMap(offers: BookingOffer[]) {
     for (const slice of offer.slices) {
       addAirport(slice.origin)
       addAirport(slice.destination)
-
-      for (const segment of slice.segments) {
-        addAirport(segment.origin)
-        addAirport(segment.destination)
-      }
     }
   }
 
