@@ -24,6 +24,9 @@ type SessionSubscription = {
   stripe_subscription_id: string | null
   current_period_end: string | null
   created_at: string | null
+  cancel_at_period_end?: boolean
+  cancel_at?: string | null
+  canceled_at?: string | null
 }
 
 type SessionResponse = {
@@ -513,7 +516,9 @@ export default function AccountPage() {
 
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                    Next billing date
+                    {subscription?.cancel_at || subscription?.cancel_at_period_end
+                      ? "Access ends"
+                      : "Next billing date"}
                   </p>
                   <p className="mt-2 text-sm font-medium text-slate-900">
                     {nextBillingDateLabel}
