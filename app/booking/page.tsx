@@ -330,7 +330,7 @@ function StandardResults({
       initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="mx-auto mt-12 max-w-6xl"
+      className="mx-auto mt-12 max-w-7xl"
     >
       <ResultsHeader
         eyebrow="Search results"
@@ -340,17 +340,222 @@ function StandardResults({
         liveMode={liveMode}
       />
 
-      <div className="mt-5 grid gap-4">
-        {offers.map((offer, index) => (
-          <OfferCard
-            key={offer.id}
-            offer={offer}
-            index={index}
-            onViewDetails={() => onViewDetails(offer)}
-          />
-        ))}
+      <div className="mt-5 grid gap-5 lg:grid-cols-[270px_minmax(0,1fr)_250px] lg:items-start">
+        <BookingResultsSidebar routeTitle={routeTitle} offers={offers} />
+
+        <div className="min-w-0">
+          <div className="grid gap-3">
+            {offers.map((offer, index) => (
+              <OfferCard
+                key={offer.id}
+                offer={offer}
+                index={index}
+                onViewDetails={() => onViewDetails(offer)}
+              />
+            ))}
+          </div>
+        </div>
+
+        <BookingSponsorRail />
       </div>
     </motion.div>
+  )
+}
+
+function BookingResultsSidebar({
+  routeTitle,
+  offers,
+}: {
+  routeTitle: string
+  offers: BookingOffer[]
+}) {
+  const cheapestOffer = offers.reduce<BookingOffer | null>((best, offer) => {
+    if (!best) return offer
+
+    return Number(offer.totalAmount) < Number(best.totalAmount) ? offer : best
+  }, null)
+
+  const airlineNames = Array.from(
+    new Set(
+      offers
+        .map((offer) => offer.summary.airlineName)
+        .filter((value): value is string => Boolean(value))
+    )
+  ).slice(0, 6)
+
+  const nonstopCount = offers.filter((offer) =>
+    offer.slices.every((slice) => slice.stops === 0)
+  ).length
+
+  const oneStopCount = offers.filter((offer) =>
+    offer.slices.some((slice) => slice.stops === 1)
+  ).length
+
+  return (
+    <aside className="hidden space-y-4 lg:block">
+      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+        <div className="flex items-start gap-3">
+          <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-xl bg-white text-sm font-bold text-emerald-700 shadow-sm">
+            ↗
+          </span>
+
+          <div>
+            <p className="text-sm font-semibold text-emerald-900">
+              Book with context
+            </p>
+            <p className="mt-1 text-xs leading-5 text-emerald-800">
+              Compare live fares, then save or monitor the route from your
+              Skysirv dashboard.
+            </p>
+          </div>
+        </div>
+
+        {cheapestOffer ? (
+          <div className="mt-4 rounded-xl border border-emerald-200 bg-white px-3 py-2">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-700">
+              Lowest visible fare
+            </p>
+            <p className="mt-1 text-lg font-bold text-slate-950">
+              {formatMoney(cheapestOffer.totalAmount, cheapestOffer.totalCurrency)}
+            </p>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-slate-950">Ask Lucy</p>
+            <p className="mt-1 text-xs leading-5 text-slate-500">
+              Ask for nonstop flights, cheaper options, or whether this route is
+              worth monitoring.
+            </p>
+          </div>
+
+          <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-950 text-sm font-bold text-white">
+            L
+          </span>
+        </div>
+
+        <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
+          <p className="text-xs leading-5 text-slate-500">
+            Try: “Show me nonstop flights under $300.”
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className="mt-3 w-full rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+        >
+          Open Lucy
+        </button>
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <p className="text-sm font-semibold text-slate-950">Filters</p>
+        <p className="mt-1 text-xs text-slate-500">
+          Visual filters first. Functional filtering comes next.
+        </p>
+
+        <div className="mt-4 space-y-4">
+          <FilterGroup title="Stops">
+            <FilterRow label="Nonstop" value={String(nonstopCount)} />
+            <FilterRow label="1 stop" value={String(oneStopCount)} />
+            <FilterRow label="2+ stops" value="—" />
+          </FilterGroup>
+
+          <FilterGroup title="Airlines">
+            {airlineNames.length > 0 ? (
+              airlineNames.map((airline) => (
+                <FilterRow key={airline} label={airline} value="View" />
+              ))
+            ) : (
+              <FilterRow label="Airlines building" value="—" />
+            )}
+          </FilterGroup>
+
+          <FilterGroup title="Times">
+            <FilterRow label="Morning" value="AM" />
+            <FilterRow label="Afternoon" value="PM" />
+            <FilterRow label="Evening" value="PM" />
+          </FilterGroup>
+
+          <FilterGroup title="Route">
+            <FilterRow label={routeTitle} value="Active" />
+          </FilterGroup>
+        </div>
+      </div>
+    </aside>
+  )
+}
+
+function FilterGroup({
+  title,
+  children,
+}: {
+  title: string
+  children: React.ReactNode
+}) {
+  return (
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+        {title}
+      </p>
+
+      <div className="mt-2 space-y-2">{children}</div>
+    </div>
+  )
+}
+
+function FilterRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3 text-sm">
+      <span className="min-w-0 truncate text-slate-600">{label}</span>
+      <span className="shrink-0 text-xs font-semibold text-slate-400">
+        {value}
+      </span>
+    </div>
+  )
+}
+
+function BookingSponsorRail() {
+  return (
+    <aside className="hidden space-y-4 xl:block">
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+          Sponsored
+        </p>
+
+        <h3 className="mt-3 text-lg font-bold leading-6 text-slate-950">
+          Partner placement
+        </h3>
+
+        <p className="mt-2 text-sm leading-6 text-slate-500">
+          Premium travel, card, lounge, hotel, or insurance offers can live here.
+        </p>
+
+        <button
+          type="button"
+          className="mt-4 w-full rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white"
+        >
+          Learn more
+        </button>
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-slate-950 p-4 text-white shadow-sm">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50">
+          Skysirv Intelligence
+        </p>
+
+        <h3 className="mt-3 text-lg font-bold leading-6">
+          Track this route after search.
+        </h3>
+
+        <p className="mt-2 text-sm leading-6 text-white/70">
+          Save the route to monitor future price movement and booking signals.
+        </p>
+      </div>
+    </aside>
   )
 }
 
@@ -567,31 +772,68 @@ function OfferCard({
   index: number
   onViewDetails: () => void
 }) {
+  const firstSlice = offer.slices[0]
+  const firstSegment = firstSlice?.segments[0]
+  const lastSegment = firstSlice?.segments[firstSlice.segments.length - 1]
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 14 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.045, duration: 0.35, ease: "easeOut" }}
-      className="rounded-[1.6rem] border border-slate-200 bg-white p-4 shadow-[0_18px_55px_rgba(15,23,42,0.07)] transition hover:border-sky-200"
+      transition={{ delay: Math.min(index, 8) * 0.025, duration: 0.28, ease: "easeOut" }}
+      className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_12px_35px_rgba(15,23,42,0.06)] transition hover:border-sky-200 hover:shadow-[0_18px_45px_rgba(15,23,42,0.09)]"
     >
-      <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
-        <div className="grid gap-4">
-          {offer.slices.map((slice, sliceIndex) => (
-            <SliceSummaryBlock
-              key={slice.id}
-              label={
-                offer.slices.length === 1
-                  ? "Flight"
-                  : `Flight ${sliceIndex + 1}`
-              }
-              slice={slice}
+      <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_160px] md:items-center">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-sm font-semibold text-slate-950">
+              {offer.summary.airlineName || firstSegment?.airlineName || "Flight"}
+            </p>
+
+            {firstSlice ? (
+              <>
+                <InlinePill
+                  label={
+                    firstSlice.stops === 0
+                      ? "Nonstop"
+                      : `${firstSlice.stops} stop${firstSlice.stops > 1 ? "s" : ""}`
+                  }
+                />
+                <InlinePill label={formatDuration(firstSlice.duration)} />
+              </>
+            ) : null}
+
+            {offer.owner.name ? <InlinePill label={offer.owner.name} /> : null}
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-[auto_1fr_auto] sm:items-center">
+            <FlightTimeBlock
+              code={firstSlice?.origin.iataCode ?? firstSegment?.origin.iataCode}
+              city={firstSlice?.origin.cityName ?? firstSegment?.origin.cityName}
+              time={firstSlice?.departureTime ?? firstSegment?.departingAt}
             />
-          ))}
+
+            <div className="hidden items-center gap-3 sm:flex">
+              <div className="h-px flex-1 bg-gradient-to-r from-slate-200 via-sky-400 to-slate-200" />
+              <span className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
+                {firstSegment?.airlineIataCode}
+                {firstSegment?.flightNumber ? ` ${firstSegment.flightNumber}` : ""}
+              </span>
+              <div className="h-px flex-1 bg-gradient-to-r from-slate-200 via-indigo-400 to-slate-200" />
+            </div>
+
+            <FlightTimeBlock
+              alignRight
+              code={firstSlice?.destination.iataCode ?? lastSegment?.destination.iataCode}
+              city={firstSlice?.destination.cityName ?? lastSegment?.destination.cityName}
+              time={firstSlice?.arrivalTime ?? lastSegment?.arrivingAt}
+            />
+          </div>
         </div>
 
-        <div className="flex items-center justify-between gap-4 rounded-[1.25rem] bg-slate-50 p-4 lg:min-w-[15rem] lg:flex-col lg:items-stretch">
-          <div className="lg:text-right">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+        <div className="flex items-center justify-between gap-4 rounded-2xl bg-slate-50 p-4 md:flex-col md:items-stretch md:text-right">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
               Total fare
             </p>
             <p className="mt-1 text-3xl font-bold tracking-tight text-slate-950">
