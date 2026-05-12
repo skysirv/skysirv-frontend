@@ -18,6 +18,158 @@ const OFFERS_PER_PAGE = 10
 type StopFilter = "nonstop" | "one_stop" | "two_plus"
 type TimeFilter = "morning" | "afternoon" | "evening" | "red_eye"
 
+type AirportFilterMarketGroup = {
+  label: string
+  airports: string[]
+}
+
+const AIRPORT_MARKETS: AirportFilterMarketGroup[] = [
+  {
+    label: "New York",
+    airports: ["JFK", "LGA", "EWR", "HPN", "SWF"],
+  },
+  {
+    label: "Miami / South Florida",
+    airports: ["MIA", "FLL", "PBI"],
+  },
+  {
+    label: "Boston / New England",
+    airports: ["BOS", "MHT", "PVD", "BDL", "ORH"],
+  },
+  {
+    label: "Washington, D.C.",
+    airports: ["DCA", "IAD", "BWI"],
+  },
+  {
+    label: "Los Angeles",
+    airports: ["LAX", "BUR", "LGB", "ONT", "SNA"],
+  },
+  {
+    label: "San Francisco Bay Area",
+    airports: ["SFO", "OAK", "SJC"],
+  },
+  {
+    label: "Chicago",
+    airports: ["ORD", "MDW"],
+  },
+  {
+    label: "Dallas / Fort Worth",
+    airports: ["DFW", "DAL"],
+  },
+  {
+    label: "Houston",
+    airports: ["IAH", "HOU"],
+  },
+  {
+    label: "Orlando / Central Florida",
+    airports: ["MCO", "SFB", "DAB", "MLB", "TPA"],
+  },
+  {
+    label: "Tampa Bay",
+    airports: ["TPA", "PIE", "SRQ"],
+  },
+  {
+    label: "Seattle / Puget Sound",
+    airports: ["SEA", "PAE", "BFI"],
+  },
+  {
+    label: "Phoenix",
+    airports: ["PHX", "AZA"],
+  },
+  {
+    label: "Denver / Front Range",
+    airports: ["DEN", "COS"],
+  },
+  {
+    label: "Philadelphia / Delaware Valley",
+    airports: ["PHL", "ABE", "ACY", "ILG"],
+  },
+  {
+    label: "Detroit / Southeast Michigan",
+    airports: ["DTW", "FNT", "LAN"],
+  },
+  {
+    label: "Minneapolis / Twin Cities",
+    airports: ["MSP", "RST"],
+  },
+  {
+    label: "Cleveland / Northeast Ohio",
+    airports: ["CLE", "CAK"],
+  },
+  {
+    label: "Cincinnati / Northern Kentucky",
+    airports: ["CVG", "DAY"],
+  },
+  {
+    label: "Raleigh / Research Triangle",
+    airports: ["RDU", "GSO", "FAY"],
+  },
+  {
+    label: "Charlotte / Carolinas",
+    airports: ["CLT", "GSP"],
+  },
+  {
+    label: "Nashville / Middle Tennessee",
+    airports: ["BNA", "HSV"],
+  },
+  {
+    label: "Austin / Central Texas",
+    airports: ["AUS", "SAT"],
+  },
+  {
+    label: "San Antonio",
+    airports: ["SAT", "AUS"],
+  },
+  {
+    label: "Portland / Northwest Oregon",
+    airports: ["PDX", "EUG"],
+  },
+  {
+    label: "San Diego / Southern California",
+    airports: ["SAN", "SNA", "TIJ"],
+  },
+  {
+    label: "Las Vegas",
+    airports: ["LAS", "HND"],
+  },
+  {
+    label: "St. Louis",
+    airports: ["STL", "BLV"],
+  },
+  {
+    label: "Kansas City",
+    airports: ["MCI", "MKC"],
+  },
+  {
+    label: "Milwaukee / Southeast Wisconsin",
+    airports: ["MKE", "ORD", "MDW"],
+  },
+  {
+    label: "Indianapolis",
+    airports: ["IND", "CVG", "SDF"],
+  },
+  {
+    label: "Pittsburgh",
+    airports: ["PIT", "LBE"],
+  },
+  {
+    label: "New Orleans / Gulf Coast",
+    airports: ["MSY", "GPT", "BTR"],
+  },
+  {
+    label: "Memphis / Mid-South",
+    airports: ["MEM", "LIT"],
+  },
+  {
+    label: "Salt Lake City / Wasatch Front",
+    airports: ["SLC", "PVU"],
+  },
+  {
+    label: "Albuquerque / New Mexico",
+    airports: ["ABQ", "SAF"],
+  },
+]
+
 type BookingFilterState = {
   selectedStopFilters: StopFilter[]
   selectedAirlineFilters: string[]
@@ -563,11 +715,11 @@ function BookingResultsSidebar({
     )
   ).sort((a, b) => a.localeCompare(b))
 
-  const airportCodes = Array.from(
-    new Set(offers.flatMap(getOfferAirportCodes))
-  ).sort((a, b) => a.localeCompare(b))
-
-  const airportDisplayByCode = getAirportDisplayMap(offers)
+  const searchEndpointAirportCodes = getSearchEndpointAirportCodes(offers)
+  const airportMarketGroups = getAirportFilterMarketGroups(
+    searchEndpointAirportCodes
+  )
+  const airportDisplayByCode = getAirportDisplayMap(offers, airportMarketGroups)
 
   const hasActiveFilters =
     selectedStopFilters.length > 0 ||
@@ -804,22 +956,34 @@ function BookingResultsSidebar({
           </FilterGroup>
 
           <FilterGroup title="Airports">
-            {airportCodes.length > 0 ? (
-              airportCodes.slice(0, 12).map((airportCode) => {
-                const candidateOffers = getAirportCandidateOffers(airportCode)
-                const isSelected = selectedAirportFilters.includes(airportCode)
+            {airportMarketGroups.length > 0 ? (
+              <div className="space-y-4">
+                {airportMarketGroups.map((group) => (
+                  <div key={group.label}>
+                    <p className="text-sm font-semibold text-slate-950">
+                      {group.label}
+                    </p>
 
-                return (
-                  <FilterCheckbox
-                    key={airportCode}
-                    label={airportDisplayByCode[airportCode] ?? airportCode}
-                    valueLabel={getLowestPriceLabel(candidateOffers)}
-                    checked={isSelected}
-                    disabled={isDisabledOption(isSelected, candidateOffers)}
-                    onChange={() => onToggleAirportFilter(airportCode)}
-                  />
-                )
-              })
+                    <div className="mt-2 space-y-2">
+                      {group.airports.map((airportCode) => {
+                        const candidateOffers = getAirportCandidateOffers(airportCode)
+                        const isSelected = selectedAirportFilters.includes(airportCode)
+
+                        return (
+                          <FilterCheckbox
+                            key={`${group.label}-${airportCode}`}
+                            label={airportDisplayByCode[airportCode] ?? airportCode}
+                            valueLabel={getLowestPriceLabel(candidateOffers)}
+                            checked={isSelected}
+                            disabled={isDisabledOption(isSelected, candidateOffers)}
+                            onChange={() => onToggleAirportFilter(airportCode)}
+                          />
+                        )
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : (
               <FilterRow label="Airports building" value="—" />
             )}
@@ -1617,6 +1781,73 @@ function getOfferAirlineNames(offer: BookingOffer) {
   )
 }
 
+function getSearchEndpointAirportCodes(offers: BookingOffer[]) {
+  const codes: string[] = []
+  const seen = new Set<string>()
+
+  function addCode(value?: string | null) {
+    const code = value?.trim().toUpperCase()
+
+    if (!code || seen.has(code)) return
+
+    seen.add(code)
+    codes.push(code)
+  }
+
+  for (const offer of offers) {
+    for (const slice of offer.slices) {
+      addCode(slice.origin.iataCode)
+      addCode(slice.destination.iataCode)
+    }
+  }
+
+  return codes
+}
+
+function getAirportMarketForCode(code?: string | null) {
+  const normalizedCode = code?.trim().toUpperCase()
+
+  if (!normalizedCode) return null
+
+  return (
+    AIRPORT_MARKETS.find((market) =>
+      market.airports.includes(normalizedCode)
+    ) ?? null
+  )
+}
+
+function getAirportFilterMarketGroups(endpointAirportCodes: string[]) {
+  const groups: AirportFilterMarketGroup[] = []
+  const seenGroupLabels = new Set<string>()
+  const seenStandaloneCodes = new Set<string>()
+
+  for (const code of endpointAirportCodes) {
+    const market = getAirportMarketForCode(code)
+
+    if (market) {
+      if (!seenGroupLabels.has(market.label)) {
+        seenGroupLabels.add(market.label)
+        groups.push(market)
+      }
+
+      continue
+    }
+
+    const airport = getAirportByCode(code)
+    const label = airport?.displayName ?? airport?.name ?? code
+
+    if (!seenStandaloneCodes.has(code)) {
+      seenStandaloneCodes.add(code)
+      groups.push({
+        label,
+        airports: [code],
+      })
+    }
+  }
+
+  return groups
+}
+
 function getOfferAirportCodes(offer: BookingOffer) {
   const codes = new Set<string>()
 
@@ -1631,8 +1862,28 @@ function getOfferAirportCodes(offer: BookingOffer) {
   return Array.from(codes)
 }
 
-function getAirportDisplayMap(offers: BookingOffer[]) {
+function getAirportDisplayMap(
+  offers: BookingOffer[],
+  airportMarketGroups: AirportFilterMarketGroup[] = []
+) {
   const map: Record<string, string> = {}
+
+  function addAirportByCode(rawCode?: string | null) {
+    const code = rawCode?.trim().toUpperCase()
+
+    if (!code || map[code]) return
+
+    const airportFromDirectory = getAirportByCode(code)
+    const directoryName =
+      airportFromDirectory?.displayName ?? airportFromDirectory?.name
+
+    if (directoryName) {
+      map[code] = `${code}: ${directoryName}`
+      return
+    }
+
+    map[code] = code
+  }
 
   function addAirport(airport?: {
     iataCode: string | null
@@ -1645,9 +1896,6 @@ function getAirportDisplayMap(offers: BookingOffer[]) {
 
     if (!code || map[code]) return
 
-    const name = airport.name?.trim()
-    const cityName = airport.cityName?.trim()
-
     const airportFromDirectory = getAirportByCode(code)
     const directoryName =
       airportFromDirectory?.displayName ?? airportFromDirectory?.name
@@ -1656,6 +1904,9 @@ function getAirportDisplayMap(offers: BookingOffer[]) {
       map[code] = `${code}: ${directoryName}`
       return
     }
+
+    const name = airport.name?.trim()
+    const cityName = airport.cityName?.trim()
 
     if (name) {
       map[code] = `${code}: ${name}`
@@ -1668,6 +1919,12 @@ function getAirportDisplayMap(offers: BookingOffer[]) {
     }
 
     map[code] = code
+  }
+
+  for (const group of airportMarketGroups) {
+    for (const airportCode of group.airports) {
+      addAirportByCode(airportCode)
+    }
   }
 
   for (const offer of offers) {
