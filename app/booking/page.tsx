@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, type ReactNode } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 
@@ -14,6 +14,9 @@ type RoundTripStep = "outbound" | "return" | "review"
 
 const OFFERS_PER_PAGE = 10
 
+type StopFilter = "nonstop" | "one_stop" | "two_plus"
+type TimeFilter = "morning" | "afternoon" | "evening" | "red_eye"
+
 export default function BookingPage() {
   const [offers, setOffers] = useState<BookingOffer[]>([])
   const [offerRequestId, setOfferRequestId] = useState<string | null>(null)
@@ -24,6 +27,14 @@ export default function BookingPage() {
   const [hasSearched, setHasSearched] = useState(false)
   const [selectedOffer, setSelectedOffer] = useState<BookingOffer | null>(null)
   const [visibleOfferCount, setVisibleOfferCount] = useState(OFFERS_PER_PAGE)
+  const [selectedStopFilters, setSelectedStopFilters] = useState<StopFilter[]>([])
+  const [selectedAirlineFilters, setSelectedAirlineFilters] = useState<string[]>([])
+  const [selectedAirportFilters, setSelectedAirportFilters] = useState<string[]>([])
+  const [selectedTimeFilters, setSelectedTimeFilters] = useState<TimeFilter[]>([])
+  const [selectedPriceCeiling, setSelectedPriceCeiling] = useState<number | null>(
+    null
+  )
+  const [usAirlinesOnly, setUsAirlinesOnly] = useState(false)
 
   const [roundTripStep, setRoundTripStep] =
     useState<RoundTripStep>("outbound")
@@ -51,6 +62,80 @@ export default function BookingPage() {
       (a, b) => Number(a.totalAmount) - Number(b.totalAmount)
     )
   }, [offers])
+
+  const filteredStandardOffers = useMemo(() => {
+    return sortedOffers.filter((offer) => {
+      if (selectedStopFilters.length > 0) {
+        const maxStops = getOfferMaxStops(offer)
+
+        const matchesStops = selectedStopFilters.some((filter) => {
+          if (filter === "nonstop") return maxStops === 0
+          if (filter === "one_stop") return maxStops === 1
+          return maxStops >= 2
+        })
+
+        if (!matchesStops) return false
+      }
+
+      if (selectedAirlineFilters.length > 0) {
+        const airlines = getOfferAirlineNames(offer)
+        const matchesAirline = selectedAirlineFilters.some((airline) =>
+          airlines.includes(airline)
+        )
+
+        if (!matchesAirline) return false
+      }
+
+      if (selectedAirportFilters.length > 0) {
+        const airportCodes = getOfferAirportCodes(offer)
+        const matchesAirport = selectedAirportFilters.some((airportCode) =>
+          airportCodes.includes(airportCode)
+        )
+
+        if (!matchesAirport) return false
+      }
+
+      if (selectedTimeFilters.length > 0) {
+        const matchesTime = selectedTimeFilters.some((filter) =>
+          offerMatchesTimeFilter(offer, filter)
+        )
+
+        if (!matchesTime) return false
+      }
+
+      if (
+        selectedPriceCeiling != null &&
+        Number(offer.totalAmount) > selectedPriceCeiling
+      ) {
+        return false
+      }
+
+      if (usAirlinesOnly && !offerUsesUsAirline(offer)) {
+        return false
+      }
+
+      return true
+    })
+  }, [
+    selectedAirlineFilters,
+    selectedAirportFilters,
+    selectedPriceCeiling,
+    selectedStopFilters,
+    selectedTimeFilters,
+    sortedOffers,
+    usAirlinesOnly,
+  ])
+
+  useEffect(() => {
+    setVisibleOfferCount(OFFERS_PER_PAGE)
+  }, [
+    selectedAirlineFilters,
+    selectedAirportFilters,
+    selectedPriceCeiling,
+    selectedStopFilters,
+    selectedTimeFilters,
+    usAirlinesOnly,
+  ])
 
   const outboundOptions = useMemo(() => {
     const map = new Map<string, BookingOffer>()
@@ -90,6 +175,12 @@ export default function BookingPage() {
 
   function handleSearchStart() {
     setVisibleOfferCount(OFFERS_PER_PAGE)
+    setSelectedStopFilters([])
+    setSelectedAirlineFilters([])
+    setSelectedAirportFilters([])
+    setSelectedTimeFilters([])
+    setSelectedPriceCeiling(null)
+    setUsAirlinesOnly(false)
     setHasSearched(false)
     setError(null)
     setOffers([])
@@ -104,6 +195,12 @@ export default function BookingPage() {
 
   function handleSearchSuccess(payload: BookingSearchSuccessPayload) {
     setVisibleOfferCount(OFFERS_PER_PAGE)
+    setSelectedStopFilters([])
+    setSelectedAirlineFilters([])
+    setSelectedAirportFilters([])
+    setSelectedTimeFilters([])
+    setSelectedPriceCeiling(null)
+    setUsAirlinesOnly(false)
     setOffers(payload.offers)
     setOfferRequestId(payload.offerRequestId)
     setLiveMode(payload.liveMode)
@@ -118,6 +215,12 @@ export default function BookingPage() {
 
   function handleSearchError(message: string) {
     setVisibleOfferCount(OFFERS_PER_PAGE)
+    setSelectedStopFilters([])
+    setSelectedAirlineFilters([])
+    setSelectedAirportFilters([])
+    setSelectedTimeFilters([])
+    setSelectedPriceCeiling(null)
+    setUsAirlinesOnly(false)
     setError(message)
     setOffers([])
     setOfferRequestId(null)
@@ -132,9 +235,13 @@ export default function BookingPage() {
   const isRoundTripSearch =
     searchContext?.tripType === "round_trip" && sortedOffers.length > 0
 
-  const visibleStandardOffers = sortedOffers.slice(0, visibleOfferCount)
-  const hasMoreStandardOffers = visibleOfferCount < sortedOffers.length
-  const visibleOfferEnd = Math.min(visibleOfferCount, sortedOffers.length)
+  const visibleStandardOffers = filteredStandardOffers.slice(0, visibleOfferCount)
+  const hasMoreStandardOffers =
+    visibleOfferCount < filteredStandardOffers.length
+  const visibleOfferEnd = Math.min(
+    visibleOfferCount,
+    filteredStandardOffers.length
+  )
 
   return (
     <section className="relative overflow-hidden bg-slate-50 pt-32 text-slate-950">
@@ -229,17 +336,54 @@ export default function BookingPage() {
         ) : sortedOffers.length > 0 ? (
           <>
             <StandardResults
-              title={`${sortedOffers.length} offers found`}
+              title={
+                filteredStandardOffers.length === sortedOffers.length
+                  ? `${sortedOffers.length} offers found`
+                  : `${filteredStandardOffers.length} of ${sortedOffers.length} offers match`
+              }
               routeTitle={searchContext?.routeTitle ?? "Search results"}
               liveMode={liveMode}
               offerRequestId={offerRequestId}
               offers={visibleStandardOffers}
+              allOffers={sortedOffers}
+              selectedStopFilters={selectedStopFilters}
+              selectedAirlineFilters={selectedAirlineFilters}
+              selectedAirportFilters={selectedAirportFilters}
+              selectedTimeFilters={selectedTimeFilters}
+              selectedPriceCeiling={selectedPriceCeiling}
+              usAirlinesOnly={usAirlinesOnly}
+              onToggleStopFilter={(filter) =>
+                setSelectedStopFilters((current) => toggleFilterValue(current, filter))
+              }
+              onToggleAirlineFilter={(airline) =>
+                setSelectedAirlineFilters((current) => toggleFilterValue(current, airline))
+              }
+              onToggleAirportFilter={(airportCode) =>
+                setSelectedAirportFilters((current) =>
+                  toggleFilterValue(current, airportCode)
+                )
+              }
+              onToggleTimeFilter={(filter) =>
+                setSelectedTimeFilters((current) => toggleFilterValue(current, filter))
+              }
+              onSelectPriceCeiling={(ceiling) =>
+                setSelectedPriceCeiling((current) => (current === ceiling ? null : ceiling))
+              }
+              onToggleUsAirlinesOnly={() => setUsAirlinesOnly((current) => !current)}
+              onClearFilters={() => {
+                setSelectedStopFilters([])
+                setSelectedAirlineFilters([])
+                setSelectedAirportFilters([])
+                setSelectedTimeFilters([])
+                setSelectedPriceCeiling(null)
+                setUsAirlinesOnly(false)
+              }}
               onViewDetails={setSelectedOffer}
             />
 
             <div className="mx-auto mt-6 flex max-w-6xl flex-col items-center gap-3">
               <p className="text-xs font-medium text-slate-500">
-                Showing {visibleOfferEnd} of {sortedOffers.length} offers
+                Showing {visibleOfferEnd} of {filteredStandardOffers.length} offers
               </p>
 
               {hasMoreStandardOffers ? (
@@ -247,7 +391,7 @@ export default function BookingPage() {
                   type="button"
                   onClick={() =>
                     setVisibleOfferCount((current) =>
-                      Math.min(current + OFFERS_PER_PAGE, sortedOffers.length)
+                      Math.min(current + OFFERS_PER_PAGE, filteredStandardOffers.length)
                     )
                   }
                   className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
@@ -316,6 +460,20 @@ function StandardResults({
   offerRequestId,
   liveMode,
   offers,
+  allOffers,
+  selectedStopFilters,
+  selectedAirlineFilters,
+  selectedAirportFilters,
+  selectedTimeFilters,
+  selectedPriceCeiling,
+  usAirlinesOnly,
+  onToggleStopFilter,
+  onToggleAirlineFilter,
+  onToggleAirportFilter,
+  onToggleTimeFilter,
+  onSelectPriceCeiling,
+  onToggleUsAirlinesOnly,
+  onClearFilters,
   onViewDetails,
 }: {
   title: string
@@ -323,6 +481,20 @@ function StandardResults({
   offerRequestId: string | null
   liveMode: boolean | null
   offers: BookingOffer[]
+  allOffers: BookingOffer[]
+  selectedStopFilters: StopFilter[]
+  selectedAirlineFilters: string[]
+  selectedAirportFilters: string[]
+  selectedTimeFilters: TimeFilter[]
+  selectedPriceCeiling: number | null
+  usAirlinesOnly: boolean
+  onToggleStopFilter: (filter: StopFilter) => void
+  onToggleAirlineFilter: (airline: string) => void
+  onToggleAirportFilter: (airportCode: string) => void
+  onToggleTimeFilter: (filter: TimeFilter) => void
+  onSelectPriceCeiling: (ceiling: number) => void
+  onToggleUsAirlinesOnly: () => void
+  onClearFilters: () => void
   onViewDetails: (offer: BookingOffer) => void
 }) {
   return (
@@ -341,7 +513,23 @@ function StandardResults({
       />
 
       <div className="mt-5 grid gap-5 lg:grid-cols-[270px_minmax(0,1fr)_250px] lg:items-start">
-        <BookingResultsSidebar routeTitle={routeTitle} offers={offers} />
+        <BookingResultsSidebar
+          routeTitle={routeTitle}
+          offers={allOffers}
+          selectedStopFilters={selectedStopFilters}
+          selectedAirlineFilters={selectedAirlineFilters}
+          selectedAirportFilters={selectedAirportFilters}
+          selectedTimeFilters={selectedTimeFilters}
+          selectedPriceCeiling={selectedPriceCeiling}
+          usAirlinesOnly={usAirlinesOnly}
+          onToggleStopFilter={onToggleStopFilter}
+          onToggleAirlineFilter={onToggleAirlineFilter}
+          onToggleAirportFilter={onToggleAirportFilter}
+          onToggleTimeFilter={onToggleTimeFilter}
+          onSelectPriceCeiling={onSelectPriceCeiling}
+          onToggleUsAirlinesOnly={onToggleUsAirlinesOnly}
+          onClearFilters={onClearFilters}
+        />
 
         <div className="min-w-0">
           <div className="grid gap-3">
@@ -365,9 +553,35 @@ function StandardResults({
 function BookingResultsSidebar({
   routeTitle,
   offers,
+  selectedStopFilters,
+  selectedAirlineFilters,
+  selectedAirportFilters,
+  selectedTimeFilters,
+  selectedPriceCeiling,
+  usAirlinesOnly,
+  onToggleStopFilter,
+  onToggleAirlineFilter,
+  onToggleAirportFilter,
+  onToggleTimeFilter,
+  onSelectPriceCeiling,
+  onToggleUsAirlinesOnly,
+  onClearFilters,
 }: {
   routeTitle: string
   offers: BookingOffer[]
+  selectedStopFilters: StopFilter[]
+  selectedAirlineFilters: string[]
+  selectedAirportFilters: string[]
+  selectedTimeFilters: TimeFilter[]
+  selectedPriceCeiling: number | null
+  usAirlinesOnly: boolean
+  onToggleStopFilter: (filter: StopFilter) => void
+  onToggleAirlineFilter: (airline: string) => void
+  onToggleAirportFilter: (airportCode: string) => void
+  onToggleTimeFilter: (filter: TimeFilter) => void
+  onSelectPriceCeiling: (ceiling: number) => void
+  onToggleUsAirlinesOnly: () => void
+  onClearFilters: () => void
 }) {
   const cheapestOffer = offers.reduce<BookingOffer | null>((best, offer) => {
     if (!best) return offer
@@ -381,15 +595,19 @@ function BookingResultsSidebar({
         .map((offer) => offer.summary.airlineName)
         .filter((value): value is string => Boolean(value))
     )
-  ).slice(0, 6)
+  ).sort((a, b) => a.localeCompare(b))
 
-  const nonstopCount = offers.filter((offer) =>
-    offer.slices.every((slice) => slice.stops === 0)
-  ).length
+  const airportCodes = Array.from(
+    new Set(offers.flatMap(getOfferAirportCodes))
+  ).sort((a, b) => a.localeCompare(b))
 
-  const oneStopCount = offers.filter((offer) =>
-    offer.slices.some((slice) => slice.stops === 1)
-  ).length
+  const hasActiveFilters =
+    selectedStopFilters.length > 0 ||
+    selectedAirlineFilters.length > 0 ||
+    selectedAirportFilters.length > 0 ||
+    selectedTimeFilters.length > 0 ||
+    selectedPriceCeiling != null ||
+    usAirlinesOnly
 
   return (
     <aside className="hidden space-y-4 lg:block">
@@ -452,32 +670,131 @@ function BookingResultsSidebar({
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <p className="text-sm font-semibold text-slate-950">Filters</p>
-        <p className="mt-1 text-xs text-slate-500">
-          Visual filters first. Functional filtering comes next.
-        </p>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-slate-950">Filters</p>
+            <p className="mt-1 text-xs text-slate-500">
+              Refine live offers without losing your search.
+            </p>
+          </div>
 
-        <div className="mt-4 space-y-4">
+          {hasActiveFilters ? (
+            <button
+              type="button"
+              onClick={onClearFilters}
+              className="shrink-0 text-xs font-semibold text-cyan-700 transition hover:text-cyan-900"
+            >
+              Clear
+            </button>
+          ) : null}
+        </div>
+
+        <div className="mt-4 space-y-5">
           <FilterGroup title="Stops">
-            <FilterRow label="Nonstop" value={String(nonstopCount)} />
-            <FilterRow label="1 stop" value={String(oneStopCount)} />
-            <FilterRow label="2+ stops" value="—" />
+            <FilterCheckbox
+              label="Nonstop"
+              valueLabel={getStopLowestPriceLabel(offers, "nonstop")}
+              checked={selectedStopFilters.includes("nonstop")}
+              onChange={() => onToggleStopFilter("nonstop")}
+            />
+            <FilterCheckbox
+              label="1 stop"
+              valueLabel={getStopLowestPriceLabel(offers, "one_stop")}
+              checked={selectedStopFilters.includes("one_stop")}
+              onChange={() => onToggleStopFilter("one_stop")}
+            />
+            <FilterCheckbox
+              label="2+ stops"
+              valueLabel={getStopLowestPriceLabel(offers, "two_plus")}
+              checked={selectedStopFilters.includes("two_plus")}
+              onChange={() => onToggleStopFilter("two_plus")}
+            />
+          </FilterGroup>
+
+          <FilterGroup title="Price">
+            <FilterButton
+              label="Under $150"
+              active={selectedPriceCeiling === 150}
+              onClick={() => onSelectPriceCeiling(150)}
+            />
+            <FilterButton
+              label="Under $250"
+              active={selectedPriceCeiling === 250}
+              onClick={() => onSelectPriceCeiling(250)}
+            />
+            <FilterButton
+              label="Under $400"
+              active={selectedPriceCeiling === 400}
+              onClick={() => onSelectPriceCeiling(400)}
+            />
+          </FilterGroup>
+
+          <FilterGroup title="Times">
+            <FilterCheckbox
+              label="Morning"
+              valueLabel="5a–11a"
+              checked={selectedTimeFilters.includes("morning")}
+              onChange={() => onToggleTimeFilter("morning")}
+            />
+            <FilterCheckbox
+              label="Afternoon"
+              valueLabel="11a–5p"
+              checked={selectedTimeFilters.includes("afternoon")}
+              onChange={() => onToggleTimeFilter("afternoon")}
+            />
+            <FilterCheckbox
+              label="Evening"
+              valueLabel="5p–10p"
+              checked={selectedTimeFilters.includes("evening")}
+              onChange={() => onToggleTimeFilter("evening")}
+            />
+            <FilterCheckbox
+              label="Red-eye"
+              valueLabel="10p–5a"
+              checked={selectedTimeFilters.includes("red_eye")}
+              onChange={() => onToggleTimeFilter("red_eye")}
+            />
           </FilterGroup>
 
           <FilterGroup title="Airlines">
             {airlineNames.length > 0 ? (
-              airlineNames.map((airline) => (
-                <FilterRow key={airline} label={airline} value="View" />
+              airlineNames.slice(0, 10).map((airline) => (
+                <FilterCheckbox
+                  key={airline}
+                  label={airline}
+                  valueLabel={getAirlineLowestPriceLabel(offers, airline)}
+                  checked={selectedAirlineFilters.includes(airline)}
+                  onChange={() => onToggleAirlineFilter(airline)}
+                />
               ))
             ) : (
               <FilterRow label="Airlines building" value="—" />
             )}
           </FilterGroup>
 
-          <FilterGroup title="Times">
-            <FilterRow label="Morning" value="AM" />
-            <FilterRow label="Afternoon" value="PM" />
-            <FilterRow label="Evening" value="PM" />
+          <FilterGroup title="Airports">
+            {airportCodes.length > 0 ? (
+              airportCodes.slice(0, 12).map((airportCode) => (
+                <FilterCheckbox
+                  key={airportCode}
+                  label={airportCode}
+                  valueLabel={getAirportLowestPriceLabel(offers, airportCode)}
+                  checked={selectedAirportFilters.includes(airportCode)}
+                  onChange={() => onToggleAirportFilter(airportCode)}
+                />
+              ))
+            ) : (
+              <FilterRow label="Airports building" value="—" />
+            )}
+          </FilterGroup>
+
+          <FilterGroup title="Flight quality">
+            <FilterCheckbox
+              label="US airlines only"
+              valueLabel="Filter"
+              checked={usAirlinesOnly}
+              onChange={onToggleUsAirlinesOnly}
+            />
           </FilterGroup>
 
           <FilterGroup title="Route">
@@ -494,7 +811,7 @@ function FilterGroup({
   children,
 }: {
   title: string
-  children: React.ReactNode
+  children: ReactNode
 }) {
   return (
     <div>
@@ -515,6 +832,59 @@ function FilterRow({ label, value }: { label: string; value: string }) {
         {value}
       </span>
     </div>
+  )
+}
+
+function FilterCheckbox({
+  label,
+  valueLabel,
+  checked,
+  onChange,
+}: {
+  label: string
+  valueLabel: string
+  checked: boolean
+  onChange: () => void
+}) {
+  return (
+    <label className="flex cursor-pointer items-center justify-between gap-3 text-sm">
+      <span className="flex min-w-0 items-center gap-2">
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={onChange}
+          className="h-3.5 w-3.5 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500"
+        />
+        <span className="min-w-0 truncate text-slate-600">{label}</span>
+      </span>
+
+      <span className="shrink-0 text-xs font-semibold text-slate-400">
+        {valueLabel}
+      </span>
+    </label>
+  )
+}
+
+function FilterButton({
+  label,
+  active,
+  onClick,
+}: {
+  label: string
+  active: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`mr-2 mt-2 inline-flex rounded-full border px-3 py-1 text-xs font-semibold transition ${active
+        ? "border-cyan-300 bg-cyan-50 text-cyan-700"
+        : "border-slate-200 bg-white text-slate-600 hover:border-cyan-200 hover:bg-cyan-50"
+        }`}
+    >
+      {label}
+    </button>
   )
 }
 
@@ -1102,6 +1472,135 @@ function getSliceKey(slice: BookingSlice) {
   ]
     .filter(Boolean)
     .join("|")
+}
+
+function toggleFilterValue<T>(current: T[], value: T) {
+  return current.includes(value)
+    ? current.filter((item) => item !== value)
+    : [...current, value]
+}
+
+function getOfferMaxStops(offer: BookingOffer) {
+  return offer.slices.reduce((maxStops, slice) => {
+    return Math.max(maxStops, slice.stops ?? 0)
+  }, 0)
+}
+
+function getOfferAirlineNames(offer: BookingOffer) {
+  return Array.from(
+    new Set(
+      offer.slices
+        .flatMap((slice) => slice.segments)
+        .map((segment) => segment.airlineName)
+        .filter((value): value is string => Boolean(value))
+    )
+  )
+}
+
+function getOfferAirportCodes(offer: BookingOffer) {
+  const codes = new Set<string>()
+
+  for (const slice of offer.slices) {
+    if (slice.origin.iataCode) codes.add(slice.origin.iataCode)
+    if (slice.destination.iataCode) codes.add(slice.destination.iataCode)
+
+    for (const segment of slice.segments) {
+      if (segment.origin.iataCode) codes.add(segment.origin.iataCode)
+      if (segment.destination.iataCode) codes.add(segment.destination.iataCode)
+    }
+  }
+
+  return Array.from(codes)
+}
+
+function getOfferDepartureHour(offer: BookingOffer) {
+  const firstSlice = offer.slices[0]
+  const firstSegment = firstSlice?.segments[0]
+  const departureTime = firstSlice?.departureTime ?? firstSegment?.departingAt
+
+  if (!departureTime) return null
+
+  const date = new Date(departureTime)
+
+  if (Number.isNaN(date.getTime())) return null
+
+  return date.getHours()
+}
+
+function offerMatchesTimeFilter(offer: BookingOffer, filter: TimeFilter) {
+  const hour = getOfferDepartureHour(offer)
+
+  if (hour == null) return false
+
+  if (filter === "morning") return hour >= 5 && hour < 11
+  if (filter === "afternoon") return hour >= 11 && hour < 17
+  if (filter === "evening") return hour >= 17 && hour < 22
+
+  return hour >= 22 || hour < 5
+}
+
+function offerUsesUsAirline(offer: BookingOffer) {
+  const usAirlines = new Set([
+    "AA",
+    "AS",
+    "B6",
+    "DL",
+    "F9",
+    "HA",
+    "NK",
+    "UA",
+    "WN",
+  ])
+
+  return offer.slices
+    .flatMap((slice) => slice.segments)
+    .some((segment) => {
+      const code = segment.airlineIataCode?.trim().toUpperCase()
+      return Boolean(code && usAirlines.has(code))
+    })
+}
+
+function getLowestPriceLabel(offers: BookingOffer[]) {
+  if (!offers.length) return "—"
+
+  const prices = offers
+    .map((offer) => Number(offer.totalAmount))
+    .filter((price) => Number.isFinite(price))
+
+  if (!prices.length) return "—"
+
+  const lowest = Math.min(...prices)
+
+  return formatMoney(String(lowest), offers[0]?.totalCurrency ?? "USD")
+}
+
+function getStopLowestPriceLabel(offers: BookingOffer[], filter: StopFilter) {
+  const matchingOffers = offers.filter((offer) => {
+    const maxStops = getOfferMaxStops(offer)
+
+    if (filter === "nonstop") return maxStops === 0
+    if (filter === "one_stop") return maxStops === 1
+
+    return maxStops >= 2
+  })
+
+  return getLowestPriceLabel(matchingOffers)
+}
+
+function getAirlineLowestPriceLabel(offers: BookingOffer[], airline: string) {
+  const matchingOffers = offers.filter((offer) =>
+    getOfferAirlineNames(offer).includes(airline)
+  )
+
+  return getLowestPriceLabel(matchingOffers)
+}
+
+function getAirportLowestPriceLabel(offers: BookingOffer[], airportCode: string) {
+  const matchingOffers = offers.filter((offer) =>
+    getOfferAirportCodes(offer).includes(airportCode)
+  )
+
+  return getLowestPriceLabel(matchingOffers)
 }
 
 function formatMoney(amount: string, currency: string) {
