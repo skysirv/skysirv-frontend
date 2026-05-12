@@ -32,12 +32,28 @@ type SessionResponse = {
   error?: string
 }
 
+type BillingPortalResponse = {
+  url?: string
+  error?: string
+}
+
+const RECURRING_PAID_PLAN_IDS = [
+  "pro_monthly",
+  "pro_yearly",
+  "business_monthly",
+  "business_yearly",
+]
+
 export default function AccountPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [sessionUser, setSessionUser] = useState<SessionUser | null>(null)
   const [subscription, setSubscription] = useState<SessionSubscription | null>(null)
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false)
+
+  const [subscriptionActionLoading, setSubscriptionActionLoading] = useState(false)
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [deleteAccountLoading, setDeleteAccountLoading] = useState(false)
 
   const [preferredAirports, setPreferredAirports] = useState("")
   const [preferredTravelTimes, setPreferredTravelTimes] = useState("")
@@ -141,8 +157,26 @@ export default function AccountPage() {
     return "Active"
   }, [subscription])
 
+  const isRecurringPaidPlan = useMemo(() => {
+    const planId = subscription?.plan_id
+
+    if (!planId) {
+      return false
+    }
+
+    return RECURRING_PAID_PLAN_IDS.includes(planId)
+  }, [subscription])
+
+  const hasStripeManagedSubscription = useMemo(() => {
+    return Boolean(isRecurringPaidPlan && subscription?.stripe_subscription_id)
+  }, [isRecurringPaidPlan, subscription])
+
   const subscriptionActionLabel = useMemo(() => {
     const planId = subscription?.plan_id
+
+    if (subscriptionActionLoading) {
+      return "Opening..."
+    }
 
     if (!planId || planId === "free") {
       return "Upgrade Plan"
@@ -153,7 +187,7 @@ export default function AccountPage() {
     }
 
     return "Manage Subscription"
-  }, [subscription])
+  }, [subscription, subscriptionActionLoading])
 
   const accountStatusLabel = useMemo(() => {
     if (!sessionUser) {
@@ -207,7 +241,7 @@ export default function AccountPage() {
     })
   }
 
-  function handleManageSubscription() {
+  async function handleManageSubscription() {
     const planId = subscription?.plan_id
 
     if (!planId || planId === "free") {
@@ -220,15 +254,51 @@ export default function AccountPage() {
       return
     }
 
-    if (planId === "pro_monthly" || planId === "pro_yearly") {
-      router.push("/choose-plan?mode=upgrade")
+    if (!hasStripeManagedSubscription) {
+      toast({
+        title: "Subscription details unavailable",
+        description: "We could not find a Stripe subscription for this account yet.",
+        variant: "destructive",
+      })
       return
     }
 
-    toast({
-      title: "Subscription management is not connected yet",
-      description: "Stripe Customer Portal will be connected here soon."
-    })
+    try {
+      setSubscriptionActionLoading(true)
+
+      const token = getAuthToken()
+
+      if (!token) {
+        throw new Error("You must be signed in to manage your subscription.")
+      }
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/billing/portal-session`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          returnUrl: `${window.location.origin}/account`,
+        }),
+      })
+
+      const data: BillingPortalResponse = await res.json().catch(() => ({}))
+
+      if (!res.ok || !data.url) {
+        throw new Error(data?.error || "Unable to open subscription management.")
+      }
+
+      window.location.href = data.url
+    } catch (error: any) {
+      toast({
+        title: "Unable to open billing portal",
+        description: error?.message || "Please try again in a moment.",
+        variant: "destructive",
+      })
+    } finally {
+      setSubscriptionActionLoading(false)
+    }
   }
 
   function handleChangePassword() {
@@ -239,11 +309,35 @@ export default function AccountPage() {
   }
 
   function handleDeleteAccount() {
-    toast({
-      title: "Action blocked",
-      description: "Account deletion is not available during beta.",
-      variant: "destructive"
-    })
+    setDeleteConfirmOpen(true)
+  }
+
+  async function handleConfirmDeleteAccount() {
+    try {
+      setDeleteAccountLoading(true)
+
+      const token = getAuthToken()
+
+      if (!token) {
+        throw new Error("You must be signed in to delete your account.")
+      }
+
+      toast({
+        title: "Account deletion not connected yet",
+        description: "Next we need to connect this button to the backend account deletion endpoint.",
+        variant: "destructive",
+      })
+
+      setDeleteConfirmOpen(false)
+    } catch (error: any) {
+      toast({
+        title: "Unable to delete account",
+        description: error?.message || "Please try again in a moment.",
+        variant: "destructive",
+      })
+    } finally {
+      setDeleteAccountLoading(false)
+    }
   }
 
   async function handleSubmitFeedback(payload: { rating: number; message: string }) {
@@ -389,8 +483,10 @@ export default function AccountPage() {
                 </div>
 
                 <button
+                  type="button"
                   onClick={handleManageSubscription}
-                  className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
+                  disabled={subscriptionActionLoading}
+                  className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {subscriptionActionLabel}
                 </button>
@@ -518,6 +614,56 @@ export default function AccountPage() {
           </div>
         )}
       </div>
+
+      {deleteConfirmOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
+            <h2 className="text-xl font-semibold text-slate-900">
+              Delete account?
+            </h2>
+
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              This will remove your Skysirv account access. This action should only be used if you want to permanently leave Skysirv.
+            </p>
+
+            {hasStripeManagedSubscription ? (
+              <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                You currently have a paid Stripe-managed subscription. Please use Manage Subscription to cancel billing before deleting your account.
+              </div>
+            ) : null}
+
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmOpen(false)}
+                className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-900 transition hover:bg-slate-50"
+              >
+                Keep Account
+              </button>
+
+              {hasStripeManagedSubscription ? (
+                <button
+                  type="button"
+                  onClick={handleManageSubscription}
+                  disabled={subscriptionActionLoading}
+                  className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {subscriptionActionLoading ? "Opening..." : "Manage Subscription"}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleConfirmDeleteAccount}
+                  disabled={deleteAccountLoading}
+                  className="rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {deleteAccountLoading ? "Deleting..." : "Delete Account"}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
       <FeedbackModal
         open={feedbackModalOpen}
         onClose={() => setFeedbackModalOpen(false)}
