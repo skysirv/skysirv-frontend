@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { toast } from "@/components/ui/Toasts/use-toast"
 import { useRouter } from "next/navigation"
-import { getAuthToken } from "@/utils/auth-storage"
+import { clearAuthSession, getAuthToken } from "@/utils/auth-storage"
 import FeedbackModal from "@/components/feedback/FeedbackModal"
 
 type SessionUser = {
@@ -325,13 +325,27 @@ export default function AccountPage() {
         throw new Error("You must be signed in to delete your account.")
       }
 
-      toast({
-        title: "Account deletion not connected yet",
-        description: "Next we need to connect this button to the backend account deletion endpoint.",
-        variant: "destructive",
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/account`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       })
 
-      setDeleteConfirmOpen(false)
+      const data = await res.json().catch(() => null)
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Unable to delete account.")
+      }
+
+      clearAuthSession()
+
+      toast({
+        title: "Account deleted",
+        description: "Your Skysirv account has been deleted.",
+      })
+
+      router.push("/")
     } catch (error: any) {
       toast({
         title: "Unable to delete account",
