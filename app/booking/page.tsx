@@ -1351,13 +1351,6 @@ function ResultsHeader({
         </h2>
         <p className="mt-2 text-sm text-slate-500">{routeTitle}</p>
       </div>
-
-      <div className="flex flex-wrap gap-2">
-        {offerRequestId ? (
-          <SlimPill label={`Request ${offerRequestId.slice(0, 10)}…`} />
-        ) : null}
-        <SlimPill label={liveMode ? "Live mode" : "Test mode"} />
-      </div>
     </div>
   )
 }
@@ -1565,18 +1558,33 @@ function BookingSearchLoadingOverlay() {
             className="absolute inset-0"
             animate={{ rotate: 360 }}
             transition={{
-              duration: 2.6,
+              duration: 2.8,
               repeat: Infinity,
               ease: "linear",
             }}
           >
-            <div className="absolute left-1/2 top-0 -translate-x-1/2">
-              <div className="flex items-center">
-                <span className="mr-2 block h-[2px] w-10 rounded-full bg-slate-950" />
-                <span className="text-[22px] leading-none text-slate-950">
-                  ✈
-                </span>
-              </div>
+            <svg
+              viewBox="0 0 100 100"
+              className="absolute inset-0 h-full w-full"
+              aria-hidden="true"
+            >
+              <circle
+                cx="50"
+                cy="50"
+                r="34"
+                fill="none"
+                stroke="rgb(15 23 42)"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeDasharray="56 220"
+                transform="rotate(-90 50 50)"
+              />
+            </svg>
+
+            <div className="absolute left-1/2 top-[14px] -translate-x-1/2">
+              <span className="block text-[22px] leading-none text-slate-950">
+                ✈
+              </span>
             </div>
           </motion.div>
         </div>
@@ -1584,7 +1592,7 @@ function BookingSearchLoadingOverlay() {
         <motion.p
           animate={{ opacity: [0.45, 1, 0.45] }}
           transition={{
-            duration: 2.2,
+            duration: 2.8,
             repeat: Infinity,
             ease: "easeInOut",
           }}
