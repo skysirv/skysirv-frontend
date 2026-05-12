@@ -12,6 +12,8 @@ import type { BookingOffer, BookingSlice } from "@/lib/booking-api"
 
 type RoundTripStep = "outbound" | "return" | "review"
 
+const OFFERS_PER_PAGE = 10
+
 export default function BookingPage() {
   const [offers, setOffers] = useState<BookingOffer[]>([])
   const [offerRequestId, setOfferRequestId] = useState<string | null>(null)
@@ -21,6 +23,7 @@ export default function BookingPage() {
   const [error, setError] = useState<string | null>(null)
   const [hasSearched, setHasSearched] = useState(false)
   const [selectedOffer, setSelectedOffer] = useState<BookingOffer | null>(null)
+  const [visibleOfferCount, setVisibleOfferCount] = useState(OFFERS_PER_PAGE)
 
   const [roundTripStep, setRoundTripStep] =
     useState<RoundTripStep>("outbound")
@@ -86,6 +89,7 @@ export default function BookingPage() {
   }, [selectedOutboundKey, sortedOffers])
 
   function handleSearchStart() {
+    setVisibleOfferCount(OFFERS_PER_PAGE)
     setHasSearched(false)
     setError(null)
     setOffers([])
@@ -99,6 +103,7 @@ export default function BookingPage() {
   }
 
   function handleSearchSuccess(payload: BookingSearchSuccessPayload) {
+    setVisibleOfferCount(OFFERS_PER_PAGE)
     setOffers(payload.offers)
     setOfferRequestId(payload.offerRequestId)
     setLiveMode(payload.liveMode)
@@ -112,6 +117,7 @@ export default function BookingPage() {
   }
 
   function handleSearchError(message: string) {
+    setVisibleOfferCount(OFFERS_PER_PAGE)
     setError(message)
     setOffers([])
     setOfferRequestId(null)
@@ -125,6 +131,10 @@ export default function BookingPage() {
 
   const isRoundTripSearch =
     searchContext?.tripType === "round_trip" && sortedOffers.length > 0
+
+  const visibleStandardOffers = sortedOffers.slice(0, visibleOfferCount)
+  const hasMoreStandardOffers = visibleOfferCount < sortedOffers.length
+  const visibleOfferEnd = Math.min(visibleOfferCount, sortedOffers.length)
 
   return (
     <section className="relative overflow-hidden bg-slate-50 pt-32 text-slate-950">
@@ -217,14 +227,36 @@ export default function BookingPage() {
             onViewDetails={(offer) => setSelectedOffer(offer)}
           />
         ) : sortedOffers.length > 0 ? (
-          <StandardResults
-            title={`${sortedOffers.length} offers found`}
-            routeTitle={searchContext?.routeTitle ?? "Search results"}
-            liveMode={liveMode}
-            offerRequestId={offerRequestId}
-            offers={sortedOffers}
-            onViewDetails={setSelectedOffer}
-          />
+          <>
+            <StandardResults
+              title={`${sortedOffers.length} offers found`}
+              routeTitle={searchContext?.routeTitle ?? "Search results"}
+              liveMode={liveMode}
+              offerRequestId={offerRequestId}
+              offers={visibleStandardOffers}
+              onViewDetails={setSelectedOffer}
+            />
+
+            <div className="mx-auto mt-6 flex max-w-6xl flex-col items-center gap-3">
+              <p className="text-xs font-medium text-slate-500">
+                Showing {visibleOfferEnd} of {sortedOffers.length} offers
+              </p>
+
+              {hasMoreStandardOffers ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setVisibleOfferCount((current) =>
+                      Math.min(current + OFFERS_PER_PAGE, sortedOffers.length)
+                    )
+                  }
+                  className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
+                >
+                  Show 10 more
+                </button>
+              ) : null}
+            </div>
+          </>
         ) : hasSearched && !error ? (
           <div className="mx-auto mt-10 max-w-6xl">
             <p className="text-sm leading-6 text-slate-500">
