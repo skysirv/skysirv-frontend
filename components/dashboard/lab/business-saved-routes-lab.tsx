@@ -257,12 +257,36 @@ function getFlightNumberLabel(flight: BusinessSavedFlightLabData) {
 }
 
 function getDepartureLabel(flight: BusinessSavedFlightLabData) {
-  if (!flight.departure_date) return "Departure · Watching"
+  return formatDepartureDateOnly(flight.departure_date)
+}
 
-  const parsedDate = new Date(flight.departure_date)
+function formatDepartureDateOnly(
+  date?: string | Date | null,
+  fallback = "Departure · Watching"
+) {
+  if (!date) return fallback
+
+  const raw =
+    typeof date === "string"
+      ? date.split("T")[0]
+      : date.toISOString().split("T")[0]
+
+  const parts = raw.split("-")
+
+  if (parts.length !== 3) {
+    return `Departure · ${raw}`
+  }
+
+  const [year, month, day] = parts.map(Number)
+
+  if (!year || !month || !day) {
+    return `Departure · ${raw}`
+  }
+
+  const parsedDate = new Date(year, month - 1, day)
 
   if (Number.isNaN(parsedDate.getTime())) {
-    return `Departure · ${flight.departure_date}`
+    return `Departure · ${raw}`
   }
 
   return `Departure · ${parsedDate.toLocaleDateString("en-US", {

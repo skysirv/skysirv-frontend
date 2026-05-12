@@ -508,13 +508,37 @@ function getAirportDisplay(code?: string | null) {
   return `${airportCode} · ${airportName}`
 }
 
-function getDepartureLabel(date?: string | null) {
-  if (!date) return "Departure · Watching"
+function getDepartureLabel(date?: string | Date | null) {
+  return formatDepartureDateOnly(date)
+}
 
-  const parsedDate = new Date(date)
+function formatDepartureDateOnly(
+  date?: string | Date | null,
+  fallback = "Departure · Watching"
+) {
+  if (!date) return fallback
+
+  const raw =
+    typeof date === "string"
+      ? date.split("T")[0]
+      : date.toISOString().split("T")[0]
+
+  const parts = raw.split("-")
+
+  if (parts.length !== 3) {
+    return `Departure · ${raw}`
+  }
+
+  const [year, month, day] = parts.map(Number)
+
+  if (!year || !month || !day) {
+    return `Departure · ${raw}`
+  }
+
+  const parsedDate = new Date(year, month - 1, day)
 
   if (Number.isNaN(parsedDate.getTime())) {
-    return `Departure · ${date}`
+    return `Departure · ${raw}`
   }
 
   return `Departure · ${parsedDate.toLocaleDateString("en-US", {

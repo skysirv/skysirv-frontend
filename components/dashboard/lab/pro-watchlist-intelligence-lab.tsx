@@ -323,12 +323,36 @@ function getAirportDisplay(code?: string | null) {
 }
 
 function getDepartureLabel(route: ProWatchlistRouteLabData) {
-  if (!route.departure_date) return "Departure · Flexible"
+  return formatDepartureDateOnly(route.departure_date, "Departure · Flexible")
+}
 
-  const parsedDate = new Date(route.departure_date)
+function formatDepartureDateOnly(
+  date?: string | Date | null,
+  fallback = "Departure · Watching"
+) {
+  if (!date) return fallback
+
+  const raw =
+    typeof date === "string"
+      ? date.split("T")[0]
+      : date.toISOString().split("T")[0]
+
+  const parts = raw.split("-")
+
+  if (parts.length !== 3) {
+    return `Departure · ${raw}`
+  }
+
+  const [year, month, day] = parts.map(Number)
+
+  if (!year || !month || !day) {
+    return `Departure · ${raw}`
+  }
+
+  const parsedDate = new Date(year, month - 1, day)
 
   if (Number.isNaN(parsedDate.getTime())) {
-    return `Departure · ${route.departure_date}`
+    return `Departure · ${raw}`
   }
 
   return `Departure · ${parsedDate.toLocaleDateString("en-US", {
