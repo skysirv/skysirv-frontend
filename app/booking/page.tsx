@@ -601,6 +601,8 @@ function BookingResultsSidebar({
     new Set(offers.flatMap(getOfferAirportCodes))
   ).sort((a, b) => a.localeCompare(b))
 
+  const airportDisplayByCode = getAirportDisplayMap(offers)
+
   const hasActiveFilters =
     selectedStopFilters.length > 0 ||
     selectedAirlineFilters.length > 0 ||
@@ -695,18 +697,21 @@ function BookingResultsSidebar({
               label="Nonstop"
               valueLabel={getStopLowestPriceLabel(offers, "nonstop")}
               checked={selectedStopFilters.includes("nonstop")}
+              disabled={getStopLowestPriceLabel(offers, "nonstop") === "—"}
               onChange={() => onToggleStopFilter("nonstop")}
             />
             <FilterCheckbox
               label="1 stop"
               valueLabel={getStopLowestPriceLabel(offers, "one_stop")}
               checked={selectedStopFilters.includes("one_stop")}
+              disabled={getStopLowestPriceLabel(offers, "one_stop") === "—"}
               onChange={() => onToggleStopFilter("one_stop")}
             />
             <FilterCheckbox
               label="2+ stops"
               valueLabel={getStopLowestPriceLabel(offers, "two_plus")}
               checked={selectedStopFilters.includes("two_plus")}
+              disabled={getStopLowestPriceLabel(offers, "two_plus") === "—"}
               onChange={() => onToggleStopFilter("two_plus")}
             />
           </FilterGroup>
@@ -764,6 +769,7 @@ function BookingResultsSidebar({
                   label={airline}
                   valueLabel={getAirlineLowestPriceLabel(offers, airline)}
                   checked={selectedAirlineFilters.includes(airline)}
+                  disabled={getAirlineLowestPriceLabel(offers, airline) === "—"}
                   onChange={() => onToggleAirlineFilter(airline)}
                 />
               ))
@@ -777,9 +783,10 @@ function BookingResultsSidebar({
               airportCodes.slice(0, 12).map((airportCode) => (
                 <FilterCheckbox
                   key={airportCode}
-                  label={airportCode}
+                  label={airportDisplayByCode[airportCode] ?? airportCode}
                   valueLabel={getAirportLowestPriceLabel(offers, airportCode)}
                   checked={selectedAirportFilters.includes(airportCode)}
+                  disabled={getAirportLowestPriceLabel(offers, airportCode) === "—"}
                   onChange={() => onToggleAirportFilter(airportCode)}
                 />
               ))
@@ -839,21 +846,29 @@ function FilterCheckbox({
   label,
   valueLabel,
   checked,
+  disabled = false,
   onChange,
 }: {
   label: string
   valueLabel: string
   checked: boolean
+  disabled?: boolean
   onChange: () => void
 }) {
   return (
-    <label className="flex cursor-pointer items-center justify-between gap-3 text-sm">
+    <label
+      className={`flex items-center justify-between gap-3 text-sm ${disabled
+        ? "cursor-not-allowed opacity-40"
+        : "cursor-pointer"
+        }`}
+    >
       <span className="flex min-w-0 items-center gap-2">
         <input
           type="checkbox"
           checked={checked}
+          disabled={disabled}
           onChange={onChange}
-          className="h-3.5 w-3.5 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500"
+          className="h-3.5 w-3.5 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 disabled:cursor-not-allowed"
         />
         <span className="min-w-0 truncate text-slate-600">{label}</span>
       </span>
@@ -1511,6 +1526,51 @@ function getOfferAirportCodes(offer: BookingOffer) {
   }
 
   return Array.from(codes)
+}
+
+function getAirportDisplayMap(offers: BookingOffer[]) {
+  const map: Record<string, string> = {}
+
+  function addAirport(airport?: {
+    iataCode: string | null
+    name: string | null
+    cityName: string | null
+  }) {
+    if (!airport) return
+
+    const code = airport.iataCode?.trim().toUpperCase()
+
+    if (!code || map[code]) return
+
+    const name = airport.name?.trim()
+    const cityName = airport.cityName?.trim()
+
+    if (name) {
+      map[code] = `${code}: ${name}`
+      return
+    }
+
+    if (cityName) {
+      map[code] = `${code}: ${cityName}`
+      return
+    }
+
+    map[code] = code
+  }
+
+  for (const offer of offers) {
+    for (const slice of offer.slices) {
+      addAirport(slice.origin)
+      addAirport(slice.destination)
+
+      for (const segment of slice.segments) {
+        addAirport(segment.origin)
+        addAirport(segment.destination)
+      }
+    }
+  }
+
+  return map
 }
 
 function getOfferDepartureHour(offer: BookingOffer) {
