@@ -6,6 +6,10 @@ export default function TermsPage() {
           Terms of Service
         </h1>
 
+        <p className="mt-4 text-sm text-slate-500">
+          Last updated: May 13, 2026
+        </p>
+
         <p className="mt-6 text-slate-600">
           These Terms of Service govern your access to and use of Skysirv,
           including Skysirv&apos;s website, account features, subscription

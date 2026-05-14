@@ -6,6 +6,10 @@ export default function RefundPolicyPage() {
           Refund Policy
         </h1>
 
+        <p className="mt-4 text-sm text-slate-500">
+          Last updated: May 13, 2026
+        </p>
+
         <p className="mt-6 text-slate-600">
           This Refund Policy explains how payments, cancellations, and refunds
           are handled for Skysirv subscription plans.
