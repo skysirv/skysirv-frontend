@@ -23,6 +23,10 @@ type AirportFilterMarketGroup = {
   airports: string[]
 }
 
+function cn(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ")
+}
+
 const AIRPORT_MARKETS: AirportFilterMarketGroup[] = [
   {
     label: "New York",
@@ -188,6 +192,7 @@ export default function BookingPage() {
   const [error, setError] = useState<string | null>(null)
   const [hasSearched, setHasSearched] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
+  const [mobileSearchExpanded, setMobileSearchExpanded] = useState(true)
   const [selectedOffer, setSelectedOffer] = useState<BookingOffer | null>(null)
   const [visibleOfferCount, setVisibleOfferCount] = useState(OFFERS_PER_PAGE)
   const [selectedStopFilters, setSelectedStopFilters] = useState<StopFilter[]>([])
@@ -315,6 +320,7 @@ export default function BookingPage() {
 
   function handleSearchSuccess(payload: BookingSearchSuccessPayload) {
     setIsSearching(false)
+    setMobileSearchExpanded(false)
     setVisibleOfferCount(OFFERS_PER_PAGE)
     setSelectedStopFilters([])
     setSelectedAirlineFilters([])
@@ -366,25 +372,17 @@ export default function BookingPage() {
   )
 
   return (
-    <section className="relative overflow-hidden bg-slate-50 pt-32 text-slate-950">
+    <section className="relative overflow-hidden bg-slate-50 pt-28 text-slate-950 sm:pt-40">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[34rem] bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.10),transparent_42%)]" />
 
       <div className="relative mx-auto max-w-7xl px-6 pb-20 pt-8 sm:px-8 sm:pb-24 sm:pt-10 lg:px-12">
-        <div className="mx-auto max-w-5xl text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 18, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.55, ease: "easeOut" }}
-            className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600 shadow-sm"
-          >
-            Skysirv™ Booking
-          </motion.div>
+        <div className="mx-auto hidden max-w-5xl text-center sm:block">
 
           <motion.h1
             initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.06, duration: 0.72, ease: "easeOut" }}
-            className="mx-auto mt-8 max-w-5xl text-5xl font-bold leading-[1.04] tracking-tight text-slate-950 sm:text-6xl md:text-7xl"
+            className="mx-auto mt-6 max-w-5xl text-5xl font-bold leading-[1.04] tracking-tight text-slate-950 sm:mt-8 sm:text-6xl md:text-7xl"
           >
             Search flights with less noise and more clarity.
           </motion.h1>
@@ -411,11 +409,26 @@ export default function BookingPage() {
           </motion.div>
         </div>
 
-        <BookingSearchPanel
-          onSearchStart={handleSearchStart}
-          onSearchSuccess={handleSearchSuccess}
-          onSearchError={handleSearchError}
-        />
+        <div className="mx-auto mb-5 max-w-3xl px-1 text-center sm:hidden">
+          <h1 className="text-3xl font-bold leading-tight tracking-tight text-slate-950">
+            Search flights with less noise and more clarity.
+          </h1>
+        </div>
+
+        {hasSearched && searchContext ? (
+          <MobileSearchSummary
+            searchContext={searchContext}
+            onEdit={() => setMobileSearchExpanded(true)}
+          />
+        ) : null}
+
+        <div className={hasSearched && !mobileSearchExpanded ? "hidden sm:block" : ""}>
+          <BookingSearchPanel
+            onSearchStart={handleSearchStart}
+            onSearchSuccess={handleSearchSuccess}
+            onSearchError={handleSearchError}
+          />
+        </div>
 
         {error ? (
           <div className="mx-auto mt-5 max-w-6xl">
@@ -533,12 +546,12 @@ export default function BookingPage() {
         ) : null}
 
         <section className="mx-auto mt-20 max-w-6xl border-t border-slate-200 pt-14">
-          <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+          <div className="grid gap-10 text-center lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:text-left">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
                 Why Skysirv Booking
               </p>
-              <h2 className="mt-3 max-w-xl text-4xl font-bold tracking-tight text-slate-950">
+              <h2 className="mx-auto mt-3 max-w-xl text-4xl font-bold tracking-tight text-slate-950 lg:mx-0">
                 Flight search with the intelligence layer close by.
               </h2>
             </div>
@@ -636,6 +649,20 @@ function StandardResults({
         liveMode={liveMode}
       />
 
+      <div className="mt-4 lg:hidden">
+        <MobileBookingFilterRail
+          selectedStopFilters={selectedStopFilters}
+          selectedTimeFilters={selectedTimeFilters}
+          selectedPriceCeiling={selectedPriceCeiling}
+          usAirlinesOnly={usAirlinesOnly}
+          onToggleStopFilter={onToggleStopFilter}
+          onToggleTimeFilter={onToggleTimeFilter}
+          onSelectPriceCeiling={onSelectPriceCeiling}
+          onToggleUsAirlinesOnly={onToggleUsAirlinesOnly}
+          onClearFilters={onClearFilters}
+        />
+      </div>
+
       <div className="mt-5 grid gap-5 lg:grid-cols-[270px_minmax(0,1fr)_250px] lg:items-start">
         <BookingResultsSidebar
           routeTitle={routeTitle}
@@ -656,7 +683,7 @@ function StandardResults({
         />
 
         <div className="min-w-0">
-          <div className="grid gap-3">
+          <div className="grid gap-2 sm:gap-3">
             {offers.map((offer, index) => (
               <OfferCard
                 key={offer.id}
@@ -671,6 +698,42 @@ function StandardResults({
         <BookingSponsorRail />
       </div>
     </motion.div>
+  )
+}
+
+function MobileSearchSummary({
+  searchContext,
+  onEdit,
+}: {
+  searchContext: BookingSearchContext
+  onEdit: () => void
+}) {
+  const dateLabel =
+    searchContext.departureDate ??
+    searchContext.legs?.[0]?.departureDate ??
+    "Date"
+
+  return (
+    <div className="mx-auto mt-5 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm sm:hidden">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-lg font-bold text-slate-950">
+            {searchContext.routeTitle}
+          </p>
+          <p className="mt-1 text-sm text-slate-500">
+            {dateLabel}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={onEdit}
+          className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700"
+        >
+          Edit
+        </button>
+      </div>
+    </div>
   )
 }
 
@@ -1019,6 +1082,118 @@ function BookingResultsSidebar({
         </div>
       </div>
     </aside>
+  )
+}
+
+function MobileBookingFilterRail({
+  selectedStopFilters,
+  selectedTimeFilters,
+  selectedPriceCeiling,
+  usAirlinesOnly,
+  onToggleStopFilter,
+  onToggleTimeFilter,
+  onSelectPriceCeiling,
+  onToggleUsAirlinesOnly,
+  onClearFilters,
+}: {
+  selectedStopFilters: StopFilter[]
+  selectedTimeFilters: TimeFilter[]
+  selectedPriceCeiling: number | null
+  usAirlinesOnly: boolean
+  onToggleStopFilter: (filter: StopFilter) => void
+  onToggleTimeFilter: (filter: TimeFilter) => void
+  onSelectPriceCeiling: (ceiling: number) => void
+  onToggleUsAirlinesOnly: () => void
+  onClearFilters: () => void
+}) {
+  const hasActiveFilters =
+    selectedStopFilters.length > 0 ||
+    selectedTimeFilters.length > 0 ||
+    selectedPriceCeiling != null ||
+    usAirlinesOnly
+
+  return (
+    <div className="-mx-6 overflow-x-auto px-6 pb-2">
+      <div className="flex w-max items-center gap-2">
+        {hasActiveFilters ? (
+          <button
+            type="button"
+            onClick={onClearFilters}
+            className="inline-flex h-10 items-center rounded-full border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm"
+          >
+            Clear
+          </button>
+        ) : null}
+
+        <button
+          type="button"
+          onClick={() => onToggleStopFilter("nonstop")}
+          className={mobileFilterPillClass(selectedStopFilters.includes("nonstop"))}
+        >
+          Nonstop
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onToggleStopFilter("one_stop")}
+          className={mobileFilterPillClass(selectedStopFilters.includes("one_stop"))}
+        >
+          1 stop
+        </button>
+
+        {[150, 250, 400].map((price) => (
+          <button
+            key={price}
+            type="button"
+            onClick={() => onSelectPriceCeiling(price)}
+            className={mobileFilterPillClass(selectedPriceCeiling === price)}
+          >
+            Under ${price}
+          </button>
+        ))}
+
+        <button
+          type="button"
+          onClick={() => onToggleTimeFilter("morning")}
+          className={mobileFilterPillClass(selectedTimeFilters.includes("morning"))}
+        >
+          Morning
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onToggleTimeFilter("afternoon")}
+          className={mobileFilterPillClass(selectedTimeFilters.includes("afternoon"))}
+        >
+          Afternoon
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onToggleTimeFilter("evening")}
+          className={mobileFilterPillClass(selectedTimeFilters.includes("evening"))}
+        >
+          Evening
+        </button>
+
+        <button
+          type="button"
+          onClick={onToggleUsAirlinesOnly}
+          className={mobileFilterPillClass(usAirlinesOnly)}
+        >
+          US airlines
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function mobileFilterPillClass(active: boolean) {
+  return cn(
+    "inline-flex h-10 items-center whitespace-nowrap rounded-full border px-4 text-sm font-semibold shadow-sm transition",
+    active
+      ? "border-slate-950 bg-slate-950 text-white"
+      : "border-slate-200 bg-white text-slate-700"
   )
 }
 
@@ -1373,7 +1548,7 @@ function OfferCard({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index, 8) * 0.025, duration: 0.28, ease: "easeOut" }}
-      className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_12px_35px_rgba(15,23,42,0.06)] transition hover:border-sky-200 hover:shadow-[0_18px_45px_rgba(15,23,42,0.09)]"
+      className="rounded-2xl border border-slate-200 bg-white p-3 shadow-[0_10px_28px_rgba(15,23,42,0.05)] transition hover:border-sky-200 hover:shadow-[0_16px_40px_rgba(15,23,42,0.08)] sm:p-4"
     >
       <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_160px] md:items-center">
         <div className="min-w-0">
@@ -1398,7 +1573,7 @@ function OfferCard({
             {offer.owner.name ? <InlinePill label={offer.owner.name} /> : null}
           </div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-[auto_1fr_auto] sm:items-center">
+          <div className="mt-3 grid grid-cols-2 items-start gap-3 sm:mt-4 sm:grid-cols-[auto_1fr_auto] sm:items-center">
             <FlightTimeBlock
               code={firstSlice?.origin.iataCode ?? firstSegment?.origin.iataCode}
               city={firstSlice?.origin.cityName ?? firstSegment?.origin.cityName}
@@ -1423,12 +1598,12 @@ function OfferCard({
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-4 rounded-2xl bg-slate-50 p-4 md:flex-col md:items-stretch md:text-right">
+        <div className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-3 md:flex-col md:items-stretch md:rounded-2xl md:p-4 md:text-right">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
               Total fare
             </p>
-            <p className="mt-1 text-3xl font-bold tracking-tight text-slate-950">
+            <p className="mt-1 text-2xl font-bold tracking-tight text-slate-950 md:text-3xl">
               {formatMoney(offer.totalAmount, offer.totalCurrency)}
             </p>
           </div>
@@ -1436,7 +1611,7 @@ function OfferCard({
           <button
             type="button"
             onClick={onViewDetails}
-            className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+            className="rounded-full bg-slate-950 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 sm:px-4 sm:text-sm"
           >
             View details
           </button>
@@ -1522,7 +1697,7 @@ function SliceSummaryBlock({
         ) : null}
       </div>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-[auto_1fr_auto] md:items-center">
+      <div className="mt-3 grid grid-cols-2 items-start gap-3 md:mt-4 md:grid-cols-[auto_1fr_auto] md:items-center">
         <FlightTimeBlock
           code={slice.origin.iataCode ?? firstSegment?.origin.iataCode}
           city={slice.origin.cityName ?? firstSegment?.origin.cityName}
@@ -1690,13 +1865,15 @@ function FlightTimeBlock({
 }) {
   return (
     <div className={alignRight ? "text-right" : ""}>
-      <p className="text-2xl font-bold tracking-tight text-slate-950">
+      <p className="text-xl font-bold tracking-tight text-slate-950 sm:text-2xl">
         {formatTime(time)}
       </p>
-      <p className="mt-1 text-sm font-semibold tracking-[0.12em] text-slate-600">
+      <p className="mt-0.5 text-xs font-semibold tracking-[0.12em] text-slate-600 sm:mt-1 sm:text-sm">
         {code ?? "---"}
       </p>
-      <p className="mt-0.5 text-xs text-slate-400">{city ?? "Airport"}</p>
+      <p className="mt-0.5 text-[11px] text-slate-400 sm:text-xs">
+        {city ?? "Airport"}
+      </p>
     </div>
   )
 }

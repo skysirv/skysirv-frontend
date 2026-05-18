@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 
 function cn(...classes: Array<string | false | null | undefined>) {
@@ -9,6 +9,8 @@ function cn(...classes: Array<string | false | null | undefined>) {
 }
 
 export default function FlightAttendantPage() {
+  const [openAiLayer, setOpenAiLayer] = useState<string | null>("Standard AI")
+
   useEffect(() => {
     const originalBackground = document.body.style.background
     const originalBackgroundColor = document.body.style.backgroundColor
@@ -24,7 +26,7 @@ export default function FlightAttendantPage() {
   }, [])
 
   return (
-    <section className="relative -mt-32 overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-100 pt-32 text-slate-950">
+    <section className="relative -mt-32 overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-100 pt-32 text-slate-950 sm:pt-40">
       <div className="pointer-events-none absolute inset-0">
         <motion.div
           animate={{ opacity: [0.16, 0.28, 0.16], scale: [1, 1.04, 1] }}
@@ -47,20 +49,12 @@ export default function FlightAttendantPage() {
         {/* HERO */}
         <div className="mx-auto max-w-5xl text-center">
           <div>
-            <motion.div
-              initial={{ opacity: 0, y: 18, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.55, ease: "easeOut" }}
-              className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600 shadow-sm"
-            >
-              Skysirv Flight Attendant™
-            </motion.div>
 
             <motion.h1
               initial={{ opacity: 0, y: 28 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.06, duration: 0.72, ease: "easeOut" }}
-              className="mt-8 text-5xl font-bold leading-[1.08] tracking-tight text-slate-950 sm:text-6xl md:text-7xl"
+              className="mt-6 text-5xl font-bold leading-[1.08] tracking-tight text-slate-950 sm:mt-8 sm:text-6xl md:text-7xl"
             >
               Your AI travel companion
               <span className="block">inside Skysirv</span>
@@ -73,18 +67,19 @@ export default function FlightAttendantPage() {
               className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-600 sm:text-xl"
             >
               Skysirv's Lucy is the conversational AI intelligence layer being built to help travelers understand route behavior, fare signals,
-              Skyscore™, watchlists, and booking confidence.
+              Skyscore™, watchlists, and booking confidence on any device.
             </motion.p>
 
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.58, ease: "easeOut" }}
-              className="mt-10 flex flex-wrap items-center justify-center gap-3"
+              className="mx-auto mt-10 grid max-w-sm gap-4 text-center"
             >
-              <MarketingPill label="Built for flight decisions" />
-              <MarketingPill label="Dashboard-aware by plan" />
-              <MarketingPill label="Powered by Skysirv intelligence" />
+              <HeroCheckLine label="Built for flight decisions" />
+              <HeroCheckLine label="Dashboard-aware by plan" />
+              <HeroCheckLine label="Real-time notifications" />
+              <HeroCheckLine label="Powered by Skysirv intelligence" />
             </motion.div>
 
             <motion.div
@@ -101,7 +96,34 @@ export default function FlightAttendantPage() {
         </div>
 
         {/* VALUE STRIP */}
-        <div className="mx-auto mt-14 grid max-w-6xl gap-4 md:grid-cols-3">
+        <div className="mx-auto mt-10 grid max-w-6xl gap-3 md:hidden">
+          <MobileAiLayerRow
+            title="Limited AI"
+            text="Free users get basic guidance for understanding Skysirv, starter monitoring, plan features, and simple fare intelligence concepts."
+            open={openAiLayer === "Limited AI"}
+            onClick={() =>
+              setOpenAiLayer(openAiLayer === "Limited AI" ? null : "Limited AI")
+            }
+          />
+          <MobileAiLayerRow
+            title="Standard AI"
+            text="Pro users get a more capable assistant for route timing, Skyscore™, watchlist signals, and booking confidence."
+            open={openAiLayer === "Standard AI"}
+            onClick={() =>
+              setOpenAiLayer(openAiLayer === "Standard AI" ? null : "Standard AI")
+            }
+          />
+          <MobileAiLayerRow
+            title="Advanced AI"
+            text="Business users get the deepest assistant layer for premium intelligence, saved flights, route behavior, and advanced decision support."
+            open={openAiLayer === "Advanced AI"}
+            onClick={() =>
+              setOpenAiLayer(openAiLayer === "Advanced AI" ? null : "Advanced AI")
+            }
+          />
+        </div>
+
+        <div className="mx-auto mt-14 hidden max-w-6xl gap-4 md:grid md:grid-cols-3">
           <ValuePanel
             title="Limited AI"
             text="Free users get basic guidance for understanding Skysirv, starter monitoring, plan features, and simple fare intelligence concepts."
@@ -117,10 +139,10 @@ export default function FlightAttendantPage() {
         </div>
 
         {/* AI DECISION PANEL */}
-        <div className="mx-auto mt-16 max-w-6xl">
-          <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white px-6 py-8 shadow-[0_28px_80px_rgba(15,23,42,0.09)] sm:px-8 sm:py-10">
+        <div className="mx-auto mt-16 max-w-6xl sm:mt-16">
+          <div className="overflow-visible border-0 bg-transparent p-0 shadow-none sm:overflow-hidden sm:rounded-[2rem] sm:border sm:border-slate-200 sm:bg-white sm:px-8 sm:py-10 sm:shadow-[0_28px_80px_rgba(15,23,42,0.09)]">
             <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-              <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-7">
+              <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-7 text-center">
                 <div className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                   AI decision layer
                 </div>
@@ -155,7 +177,7 @@ export default function FlightAttendantPage() {
                 </div>
               </div>
 
-              <div className="rounded-[1.75rem] border border-slate-200 bg-white p-7 shadow-[0_18px_55px_rgba(15,23,42,0.06)]">
+              <div className="rounded-[1.75rem] border border-slate-200 bg-white p-7 text-center shadow-[0_18px_55px_rgba(15,23,42,0.06)]">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                   Where Lucy lives
                 </p>
@@ -171,7 +193,7 @@ export default function FlightAttendantPage() {
                   />
                   <DarkInsightRow
                     label="Dashboard users"
-                    text="Signed-in users get Lucy directly inside their dashboard, tailored to Free, Pro, or Business access."
+                    text="Signed-in users get Lucy directly inside their dashboard, tailored to Pro and Business only."
                   />
                   <DarkInsightRow
                     label="Future intelligence"
@@ -185,7 +207,7 @@ export default function FlightAttendantPage() {
 
         {/* SYSTEM STORY */}
         <div className="mx-auto mt-16 grid max-w-6xl gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_18px_55px_rgba(15,23,42,0.06)]">
+          <div className="rounded-[2rem] border border-slate-200 bg-white p-8 text-center shadow-[0_18px_55px_rgba(15,23,42,0.06)]">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
               Why this matters
             </p>
@@ -194,7 +216,7 @@ export default function FlightAttendantPage() {
               This is not generic AI. It is a specialized travel intelligence assistant.
             </h2>
 
-            <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
+            <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
               Skysirv Flight Attendant™ is being designed to sit on top of the
               Skysirv Intelligence Engine™ — helping travelers understand price
               movement, timing signals, route behavior, alerts, and confidence
@@ -300,6 +322,17 @@ function MarketingPill({ label }: { label: string }) {
   )
 }
 
+function HeroCheckLine({ label }: { label: string }) {
+  return (
+    <div className="flex items-center justify-center gap-4 text-base font-semibold text-slate-800">
+      <span className="shrink-0 text-2xl font-bold leading-none text-emerald-600">
+        ✓
+      </span>
+      <span>{label}</span>
+    </div>
+  )
+}
+
 function ValuePanel({
   title,
   text,
@@ -308,9 +341,54 @@ function ValuePanel({
   text: string
 }) {
   return (
-    <div className="flex h-full flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-[0_18px_55px_rgba(15,23,42,0.06)]">
+    <div className="flex h-full flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-4 text-center shadow-[0_12px_35px_rgba(15,23,42,0.05)] sm:rounded-3xl sm:p-6">
       <h3 className="text-xl font-bold text-slate-950">{title}</h3>
-      <p className="mt-3 max-w-sm text-sm leading-7 text-slate-600">{text}</p>
+      <p className="mt-2 max-w-sm text-sm leading-6 text-slate-600 sm:mt-3 sm:leading-7">{text}</p>
+    </div>
+  )
+}
+
+function MobileAiLayerRow({
+  title,
+  text,
+  open,
+  onClick,
+}: {
+  title: string
+  text: string
+  open: boolean
+  onClick: () => void
+}) {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <button
+        type="button"
+        onClick={onClick}
+        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
+      >
+        <span className="text-base font-bold text-slate-950">{title}</span>
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 20 20"
+          className={`h-5 w-5 shrink-0 text-slate-400 transition-transform ${open ? "rotate-180" : ""
+            }`}
+          fill="none"
+        >
+          <path
+            d="M5.5 7.5 10 12l4.5-4.5"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+
+      {open ? (
+        <div className="border-t border-slate-100 px-5 pb-4 pt-3 text-center text-sm leading-6 text-slate-600">
+          {text}
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -325,14 +403,14 @@ function SlateMetricCard({
   subtext: string
 }) {
   return (
-    <div className="flex min-h-[156px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-4 text-center">
+    <div className="flex min-h-0 flex-col items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-center sm:min-h-[156px] sm:rounded-2xl sm:p-4">
       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
         {label}
       </p>
-      <p className="mt-2 text-xl font-semibold leading-tight text-slate-950">
+      <p className="mt-1 text-lg font-semibold leading-tight text-slate-950 sm:mt-2 sm:text-xl">
         {value}
       </p>
-      <p className="mt-2 text-center text-xs leading-5 text-slate-500">
+      <p className="mt-1 text-center text-xs leading-5 text-slate-500 sm:mt-2">
         {subtext}
       </p>
     </div>
@@ -347,9 +425,9 @@ function SlateFeatureCard({
   text: string
 }) {
   return (
-    <div className="flex min-h-[210px] flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-[0_18px_55px_rgba(15,23,42,0.06)]">
+    <div className="flex min-h-0 flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-4 text-center shadow-[0_12px_35px_rgba(15,23,42,0.05)] sm:min-h-[210px] sm:rounded-3xl sm:p-6">
       <h3 className="text-xl font-bold text-slate-950">{title}</h3>
-      <p className="mt-3 max-w-xs text-sm leading-7 text-slate-600">{text}</p>
+      <p className="mt-2 max-w-xs text-sm leading-6 text-slate-600 sm:mt-3 sm:leading-7">{text}</p>
     </div>
   )
 }
@@ -372,6 +450,8 @@ function DarkInsightRow({
 }
 
 function FlightAttendantComparisonTable() {
+  const [selectedMobileColumn, setSelectedMobileColumn] =
+    useState<"chatgpt" | "skysirv">("skysirv")
   const rows = [
     {
       label: "General travel questions",
@@ -381,7 +461,7 @@ function FlightAttendantComparisonTable() {
     {
       label: "Understands your monitored routes",
       chatgpt: "Limited unless manually provided",
-      skysirv: "Connected to your Skysirv watchlist",
+      skysirv: "Connected to your Skysirv dashboard",
     },
     {
       label: "Uses airfare history",
@@ -422,7 +502,50 @@ function FlightAttendantComparisonTable() {
         to the Skysirv platform.
       </p>
 
-      <div className="mt-10 overflow-x-auto">
+      <div className="mt-8 md:hidden">
+        <div className="grid grid-cols-2 rounded-full border border-slate-200 bg-slate-100 p-1">
+          <button
+            type="button"
+            onClick={() => setSelectedMobileColumn("chatgpt")}
+            className={cn(
+              "rounded-full px-3 py-2 text-xs font-semibold transition",
+              selectedMobileColumn === "chatgpt"
+                ? "bg-slate-950 text-white shadow-sm"
+                : "text-slate-500"
+            )}
+          >
+            ChatGPT
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSelectedMobileColumn("skysirv")}
+            className={cn(
+              "rounded-full px-3 py-2 text-xs font-semibold transition",
+              selectedMobileColumn === "skysirv"
+                ? "bg-slate-950 text-white shadow-sm"
+                : "text-slate-500"
+            )}
+          >
+            Skysirv
+          </button>
+        </div>
+
+        <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white text-center shadow-[0_18px_45px_rgba(15,23,42,0.06)]">
+          {rows.map((row) => (
+            <div key={row.label} className="border-t border-slate-100 px-4 py-3 first:border-t-0">
+              <p className="text-sm font-semibold text-slate-800">
+                {row.label}
+              </p>
+              <p className="mt-1 text-sm leading-5 text-slate-500">
+                {selectedMobileColumn === "chatgpt" ? row.chatgpt : row.skysirv}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-10 hidden overflow-x-auto md:block">
         <div className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
           <div className="grid min-w-[760px] grid-cols-3 border-b border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700">
             <div className="px-6 py-4">Capability</div>
@@ -438,7 +561,7 @@ function FlightAttendantComparisonTable() {
                 index % 2 === 0 ? "bg-white" : "bg-slate-50/70"
               )}
             >
-              <div className="px-6 py-4 font-medium text-slate-800">
+              <div className="px-6 py-4 font-semibold text-slate-800">
                 {row.label}
               </div>
 
@@ -460,8 +583,8 @@ function FlightAttendantComparisonTable() {
 function FlightAttendantFooter() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-16 text-center md:max-w-4xl md:text-left">
-      <div className="grid grid-cols-1 gap-12 md:grid-cols-4 md:justify-items-center md:text-center">
-        <div className="flex max-w-xs flex-col justify-start text-center md:text-left">
+      <div className="grid grid-cols-1 gap-10 text-center md:grid-cols-4 md:text-left">
+        <div className="mx-auto flex max-w-xs flex-col justify-start text-center md:mx-0 md:text-left">
           <Link
             href="/"
             className="text-xl font-bold leading-none text-slate-950 transition hover:text-slate-700"

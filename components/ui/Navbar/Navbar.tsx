@@ -35,17 +35,9 @@ export default function Navbar() {
         document.body.scrollTop ||
         0;
 
-      if (currentScrollY <= 24) {
-        setHidden(false);
-        lastScrollY.current = currentScrollY;
-        return;
-      }
-
-      if (currentScrollY - lastScrollY.current > 6 && currentScrollY > 80) {
-        setHidden(true);
-      } else if (lastScrollY.current - currentScrollY > 6) {
-        setHidden(false);
-      }
+      setHidden(false);
+      lastScrollY.current = currentScrollY;
+      return;
 
       lastScrollY.current = currentScrollY;
     };
@@ -72,8 +64,8 @@ export default function Navbar() {
     <nav
       className={s.root}
       style={{
-        transform: hidden ? 'translateY(-80%)' : 'translateY(0)',
-        opacity: hidden ? 0 : 1,
+        transform: hidden ? 'translateY(-64px)' : 'translateY(0)',
+        opacity: 1,
         transition:
           'transform 320ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms ease',
       }}
@@ -83,13 +75,12 @@ export default function Navbar() {
       </a>
 
       {showBetaBanner ? (
-        <div className="relative z-50 flex min-h-[40px] pointer-events-auto items-center justify-center bg-[#10103a] px-12 py-2 text-center text-[13px] font-medium text-white shadow-sm">
-          <p className="leading-snug">
+        <div className="relative z-50 flex h-9 pointer-events-auto items-center justify-center overflow-hidden bg-[#10103a]/90 backdrop-blur-xl px-10 text-center text-[11px] font-medium text-white shadow-sm sm:min-h-[40px] sm:px-12 sm:py-2 sm:text-[13px]">
+          <p className="max-w-full truncate whitespace-nowrap leading-none">
             <span className="font-semibold">Skysirv Public Beta</span>
-            <span className="mx-2 text-white/45">|</span>
+            <span className="mx-1.5 text-white/45">·</span>
             <span className="text-white/85">
-              Live airfare intelligence is currently in beta as we continue
-              refining accuracy, features, and the booking experience. | June 1st, 2026
+              Airfare intelligence in progress
             </span>
           </p>
 
@@ -97,9 +88,9 @@ export default function Navbar() {
             type="button"
             aria-label="Dismiss beta banner"
             onClick={dismissBetaBanner}
-            className="absolute right-4 top-1/2 z-[60] flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white pointer-events-auto"
+            className="absolute right-2 top-1/2 z-[60] flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white pointer-events-auto sm:right-4"
           >
-            <span className="text-xl leading-none">×</span>
+            <span className="text-lg leading-none sm:text-xl">×</span>
           </button>
         </div>
       ) : null}

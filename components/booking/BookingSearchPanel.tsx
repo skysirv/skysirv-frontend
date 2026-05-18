@@ -180,7 +180,6 @@ export default function BookingSearchPanel({
   function resetResultsForMode(nextTripType: BookingTripType) {
     setTripType(nextTripType)
     setReturnDate(nextTripType === "one_way" ? "" : returnDate)
-    onSearchStart()
   }
 
   function updateMultiCitySegment(index: number, updates: Partial<SearchLeg>) {
@@ -349,7 +348,7 @@ export default function BookingSearchPanel({
   }
 
   return (
-    <div className="mx-auto mt-14 max-w-6xl rounded-[2rem] border border-slate-200 bg-white px-5 py-5 shadow-[0_28px_80px_rgba(15,23,42,0.09)]">
+    <div className="mx-auto mt-7 max-w-6xl rounded-[2rem] border border-slate-200 bg-white px-5 py-5 shadow-[0_28px_80px_rgba(15,23,42,0.09)] sm:mt-14">
       <form onSubmit={handleSearch}>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="inline-flex rounded-full bg-slate-100 p-1">
@@ -368,13 +367,6 @@ export default function BookingSearchPanel({
               label="Multi-city"
               onClick={() => resetResultsForMode("multi_city")}
             />
-          </div>
-
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 font-medium text-emerald-700">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              Search active
-            </span>
           </div>
         </div>
 
@@ -661,7 +653,7 @@ function AirportPicker({
       />
 
       {open && (
-        <div className="absolute left-0 top-full z-40 mt-3 min-w-[430px] max-w-[32rem] rounded-[1.4rem] border border-slate-200 bg-white p-2 shadow-[0_22px_60px_rgba(15,23,42,0.12)]">
+        <div className="absolute left-0 right-0 top-full z-40 mt-2 w-full overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_22px_60px_rgba(15,23,42,0.12)] sm:right-auto sm:mt-3 sm:min-w-[430px] sm:max-w-[32rem]">
           <div className="max-h-80 overflow-y-auto pr-1">
             {results.length === 0 ? (
               <div className="px-4 py-4 text-sm text-slate-500">

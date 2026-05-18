@@ -269,7 +269,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
         <div
           className={`relative mx-auto flex max-w-5xl items-center justify-between rounded-full px-6 py-3 shadow-[0_12px_30px_rgba(15,23,42,0.10)] ${isDark
             ? 'border border-white/10 bg-slate-900/80 backdrop-blur'
-            : 'border border-slate-200 bg-white'
+            : 'border border-white/50 bg-white/75 backdrop-blur-xl'
             }`}
         >
           <div className="flex items-center translate-y-[1px] -translate-x-3">
@@ -316,7 +316,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
                 <button
                   type="button"
                   onClick={() => setAccountMenuOpen((current) => !current)}
-                  aria-label="Open account menu"
+                  aria-label="Open navigation menu"
                   aria-expanded={accountMenuOpen}
                   className={`flex h-10 w-10 items-center justify-center rounded-full border transition ${isLoggedIn
                     ? isDark
@@ -328,34 +328,64 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
                     }`}
                 >
                   <svg
-                    width="18"
-                    height="18"
+                    width="20"
+                    height="20"
                     viewBox="0 0 24 24"
                     fill="none"
                     aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      d="M20 21C20 17.6863 16.4183 15 12 15C7.58172 15 4 17.6863 4 21"
+                      d="M4 7H20M4 12H20M4 17H20"
                       stroke="currentColor"
                       strokeWidth="2"
                       strokeLinecap="round"
-                    />
-                    <path
-                      d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"
-                      stroke="currentColor"
-                      strokeWidth="2"
                     />
                   </svg>
                 </button>
 
                 {accountMenuOpen && (
                   <div
-                    className={`absolute right-0 top-12 z-50 w-36 overflow-hidden rounded-2xl border py-2 text-sm shadow-[0_18px_50px_rgba(15,23,42,0.18)] ${isDark
+                    className={`absolute right-0 top-12 z-50 w-64 overflow-hidden rounded-2xl border py-2 text-sm shadow-[0_18px_50px_rgba(15,23,42,0.18)] ${isDark
                       ? 'border-white/10 bg-slate-950 text-white'
                       : 'border-slate-200 bg-white text-slate-800'
                       }`}
                   >
+                    <div className="md:hidden">
+                      <Link
+                        href="/pricing"
+                        onClick={() => setAccountMenuOpen(false)}
+                        className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'}`}
+                      >
+                        Pricing
+                      </Link>
+
+                      <Link
+                        href="/booking"
+                        onClick={() => setAccountMenuOpen(false)}
+                        className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'}`}
+                      >
+                        Booking
+                      </Link>
+
+                      <Link
+                        href="/flight-attendant"
+                        onClick={() => setAccountMenuOpen(false)}
+                        className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'}`}
+                      >
+                        Flight Attendant
+                      </Link>
+
+                      <Link
+                        href="/beta"
+                        onClick={() => setAccountMenuOpen(false)}
+                        className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'}`}
+                      >
+                        Beta
+                      </Link>
+
+                      <div className={`my-1 h-px ${isDark ? 'bg-white/10' : 'bg-slate-100'}`} />
+                    </div>
                     {!isLoggedIn ? (
                       <button
                         type="button"

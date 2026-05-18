@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { motion } from "framer-motion"
+import { AnimatePresence, motion } from "framer-motion"
 import AuthModal from "@/components/auth/AuthModal"
 import CreateAccountForm from "@/components/auth/CreateAccountForm"
 import TestimonialsSection from "@/components/home/TestimonialsSection"
@@ -113,24 +113,16 @@ export default function HomePage() {
           />
         </div>
 
-        <div className="relative mx-auto flex max-w-7xl flex-col items-center px-6 pb-24 pt-32 text-center sm:px-8 sm:pb-28 sm:pt-36 lg:px-12 lg:pb-32 lg:pt-40">
+        <div className="relative mx-auto flex max-w-7xl flex-col items-center px-6 pb-16 pt-32 text-center sm:px-8 sm:pb-28 sm:pt-36 lg:px-12 lg:pb-32 lg:pt-40">
           <motion.div
             initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="max-w-5xl"
           >
-            <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: 0.05, duration: 0.55 }}
-              className="inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-600 shadow-sm backdrop-blur"
-            >
-              Premium Airfare Intelligence
-            </motion.div>
 
-            <h1 className="mt-8 text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl md:text-7xl">
-              Intelligent monitoring for
+            <h1 className="mt-6 text-5xl font-bold tracking-tight text-slate-900 sm:mt-8 sm:text-6xl md:text-7xl">
+              Intelligent AI monitoring for
               premium air travel
             </h1>
 
@@ -141,7 +133,7 @@ export default function HomePage() {
               className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-600 sm:text-xl"
             >
               Skysirv™ helps travelers track routes, understand fare movement, and
-              make smarter booking decisions with calm, clear travel intelligence.
+              make smarter booking decisions with calm, clear AI travel intelligence.
             </motion.p>
           </motion.div>
 
@@ -149,11 +141,155 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.24, duration: 0.65 }}
-            className="mt-10 flex flex-wrap items-center justify-center gap-3"
+            className="mx-auto mt-8 w-full max-w-6xl"
           >
-            <HeroStatPill label="Routes monitored" value="24/7" />
-            <HeroStatPill label="Signal quality" value="Adaptive" />
-            <HeroStatPill label="Intelligence layer" value="Live" />
+            <div className="group relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white px-5 py-5 text-left shadow-[0_24px_80px_rgba(15,23,42,0.08)] sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+              <motion.div
+                animate={{ x: [0, 34, 0], y: [0, -18, 0], opacity: [0.18, 0.38, 0.18] }}
+                transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute right-[-40px] top-[-36px] h-40 w-40 rounded-full bg-sky-200/60 blur-3xl"
+              />
+
+              <motion.div
+                animate={{ x: [0, -24, 0], y: [0, 22, 0], opacity: [0.12, 0.28, 0.12] }}
+                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute bottom-[-42px] left-[-36px] h-44 w-44 rounded-full bg-indigo-200/50 blur-3xl"
+              />
+
+              <motion.div
+                animate={{ opacity: [0.06, 0.12, 0.06] }}
+                transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(56,189,248,0.16),transparent_48%)]"
+              />
+
+              <div className="relative grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-stretch">
+                <div className="flex flex-col justify-center text-center lg:text-left">
+                  <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl lg:text-4xl">
+                    The AI that guides the entire Skysirv experience across all devices.
+                  </h2>
+
+                  <p className="mt-4 text-sm leading-6 text-slate-600 sm:text-base">
+                    Lucy is being built to help travelers plan, monitor, compare, save,
+                    adjust, and understand every part of their trip — from route behavior
+                    and fare timing to booking confidence and dashboard actions.
+                  </p>
+
+                  <div className="mt-5 grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
+                    {[
+                      "Plan trips: Get route insights and personalized guidance on when to book.",
+                      "Track routes: Monitor flight status and gate changes in real-time.",
+                      "Explain fare signals: Understand price fluctuations and booking opportunities.",
+                    ].map((item) => (
+                      <div
+                        key={item}
+                        className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-center text-xs font-medium text-slate-700 lg:text-left"
+                      >
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex min-h-[320px] items-stretch">
+                  <LucyCommandDemo />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* HERO CINEMATIC PANEL */}
+          <motion.div
+            {...fadeUp}
+            transition={{ delay: 0.38, duration: 0.85, ease: "easeOut" }}
+            className="mt-10 w-full max-w-6xl sm:mt-16"
+          >
+            <div className="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/90 shadow-[0_25px_70px_rgba(15,23,42,0.08)] backdrop-blur">
+              <div className="grid gap-0 lg:grid-cols-[0.95fr_1.05fr]">
+                <div className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-8 text-white sm:p-10">
+                  <motion.div
+                    animate={{ x: [0, 20, 0], y: [0, -12, 0] }}
+                    transition={{ duration: 7.2, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute right-[-18px] top-[-18px] h-40 w-40 rounded-full bg-sky-500/10 blur-3xl"
+                  />
+                  <motion.div
+                    animate={{ x: [0, -14, 0], y: [0, 16, 0] }}
+                    transition={{ duration: 8.4, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute bottom-[-28px] left-[-18px] h-44 w-44 rounded-full bg-indigo-500/10 blur-3xl"
+                  />
+
+                  <div className="relative">
+                    <p className="text-xs font-medium tracking-[0.16em] text-slate-300 uppercase">
+                      Live Intelligence Snapshot
+                    </p>
+
+                    <h2 className="mt-4 text-2xl font-bold tracking-tight text-white sm:mt-6 sm:text-4xl">
+                      Read the market before you book.
+                    </h2>
+
+                    <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300 sm:mt-4 sm:leading-7 sm:text-base">
+                      Skysirv™ transforms noisy fare movement into a calmer, more
+                      structured decision layer — so travelers know when to act,
+                      when to wait, and what the market is really saying.
+                    </p>
+
+                    <div className="mt-5 grid gap-3 sm:mt-8 sm:grid-cols-3 sm:gap-4">
+                      <MiniHeroMetric label="Skyscore™" value="87" subtext="Buy window" />
+                      <MiniHeroMetric label="Delta vs Avg" value="- $138" subtext="30-day baseline" />
+                      <MiniHeroMetric label="Signal" value="High" subtext="Confidence" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="relative p-5 sm:p-10">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-sky-50/70" />
+
+                  <div className="relative">
+                    <p className="text-xs font-medium tracking-[0.16em] text-slate-500 uppercase">
+                      Example route
+                    </p>
+
+                    <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                      <div className="flex items-start justify-between gap-6">
+                        <div>
+                          <h3 className="text-2xl font-semibold tracking-tight text-slate-950">
+                            BOS → CDG
+                          </h3>
+                          <p className="mt-2 text-sm text-slate-600">
+                            Current Price <span className="font-medium text-slate-950">$412</span>
+                          </p>
+                          <p className="mt-1 text-sm text-slate-500">
+                            Down $138 vs 30-day average
+                          </p>
+                        </div>
+
+                        <div className="text-right">
+                          <p className="text-xs font-semibold tracking-[0.14em] text-slate-400">
+                            SKYSCORE™
+                          </p>
+                          <p className="mt-1 text-4xl font-semibold text-emerald-600">
+                            87
+                          </p>
+                          <p className="mt-2 text-xs font-medium text-emerald-600">
+                            BUY WINDOW
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-5 grid gap-3">
+                      <LightInsightRow
+                        label="Price behavior"
+                        text="Recent movement suggests a stronger booking pocket before volatility returns."
+                      />
+                      <LightInsightRow
+                        label="Signal quality"
+                        text="Multiple indicators align on value relative to the route’s recent baseline."
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </motion.div>
 
           {/* TICKER STRIP */}
@@ -225,151 +361,13 @@ export default function HomePage() {
             </div>
           </motion.div>
 
-          {/* FEATURE BULLETS */}
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            animate="show"
-            className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-lg text-slate-500"
-          >
-            <motion.span variants={staggerItem}>Real-time monitoring engine</motion.span>
-            <motion.span variants={staggerItem} className="text-slate-300">
-              •
-            </motion.span>
-
-            <motion.span variants={staggerItem}>Milestone-based price alerts</motion.span>
-            <motion.span variants={staggerItem} className="text-slate-300">
-              •
-            </motion.span>
-
-            <motion.span variants={staggerItem}>Adaptive fare scoring</motion.span>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.32, duration: 0.55 }}
-            className="mt-8 flex flex-wrap items-center justify-center gap-4"
-          >
-            <motion.div
-              whileHover={{ y: -2, scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="flex shrink-0"
-            >
-              <button
-                type="button"
-                onClick={() => {
-                  setCreateAccountSuccess(false)
-                  setCreateAccountModalOpen(true)
-                }}
-                className="inline-flex h-[44px] items-center justify-center rounded-lg bg-slate-900 px-6 text-sm font-medium text-white shadow-sm transition hover:bg-slate-700"
-              >
-                Start Monitoring Flights
-              </button>
-            </motion.div>
-          </motion.div>
-
-          {/* HERO CINEMATIC PANEL */}
-          <motion.div
-            {...fadeUp}
-            transition={{ delay: 0.38, duration: 0.85, ease: "easeOut" }}
-            className="mt-16 w-full max-w-6xl"
-          >
-            <div className="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/90 shadow-[0_25px_70px_rgba(15,23,42,0.08)] backdrop-blur">
-              <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
-                <div className="relative p-8 sm:p-10">
-                  <div className="absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-sky-50/70" />
-                  <div className="relative">
-                    <div className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium tracking-[0.14em] text-slate-600 uppercase shadow-sm">
-                      Live Intelligence Snapshot
-                    </div>
-
-                    <h2 className="mt-6 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-                      Read the market before you book
-                    </h2>
-
-                    <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
-                      Skysirv™ transforms noisy fare movement into a calmer, more
-                      structured decision layer — so travelers know when to act,
-                      when to wait, and what the market is really saying.
-                    </p>
-
-                    <div className="mt-8 grid gap-4 sm:grid-cols-3">
-                      <MiniHeroMetric label="Skyscore™" value="87" subtext="Buy window" />
-                      <MiniHeroMetric label="Delta vs Avg" value="- $138" subtext="30-day baseline" />
-                      <MiniHeroMetric label="Signal" value="High" subtext="Confidence" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-8 text-white sm:p-10">
-                  <motion.div
-                    animate={{ x: [0, 20, 0], y: [0, -12, 0] }}
-                    transition={{ duration: 7.2, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute right-[-18px] top-[-18px] h-40 w-40 rounded-full bg-sky-500/10 blur-3xl"
-                  />
-                  <motion.div
-                    animate={{ x: [0, -14, 0], y: [0, 16, 0] }}
-                    transition={{ duration: 8.4, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute bottom-[-28px] left-[-18px] h-44 w-44 rounded-full bg-indigo-500/10 blur-3xl"
-                  />
-
-                  <div className="relative">
-                    <p className="text-xs font-medium tracking-[0.16em] text-slate-300 uppercase">
-                      Example route
-                    </p>
-
-                    <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
-                      <div className="flex items-start justify-between gap-6">
-                        <div>
-                          <h3 className="text-2xl font-semibold tracking-tight text-white">
-                            BOS → CDG
-                          </h3>
-                          <p className="mt-2 text-sm text-slate-300">
-                            Current Price <span className="font-medium text-white">$412</span>
-                          </p>
-                          <p className="mt-1 text-sm text-slate-400">
-                            Down $138 vs 30-day average
-                          </p>
-                        </div>
-
-                        <div className="text-right">
-                          <p className="text-xs font-semibold tracking-[0.14em] text-slate-400">
-                            SKYSCORE™
-                          </p>
-                          <p className="mt-1 text-4xl font-semibold text-emerald-400">
-                            87
-                          </p>
-                          <p className="mt-2 text-xs font-medium text-emerald-300">
-                            BUY WINDOW
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-5 grid gap-3">
-                      <DarkInsightRow
-                        label="Price behavior"
-                        text="Recent movement suggests a stronger booking pocket before volatility returns."
-                      />
-                      <DarkInsightRow
-                        label="Signal quality"
-                        text="Multiple indicators align on value relative to the route’s recent baseline."
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
           {/* FEATURE CARDS */}
           <motion.div
             variants={staggerContainer}
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, amount: 0.15 }}
-            className="mt-20 grid w-full gap-6 md:grid-cols-3"
+            className="mt-10 grid w-full gap-3 sm:mt-20 sm:gap-6 md:grid-cols-3"
           >
             <motion.div variants={staggerItem}>
               <HeroFeatureCard
@@ -574,39 +572,35 @@ export default function HomePage() {
           </h2>
 
           <p className="mt-8 text-lg leading-8 text-slate-600 sm:text-xl">
-            Built like a system — not a landing page, across all devices.
+            Built like a system — not a landing page. Skysirv™ is a collection of integrated intelligence features working together to help travelers read the market and make smarter booking decisions with less stress and more clarity.
           </p>
         </div>
 
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.08 }}
-          className="mx-auto mt-16 grid max-w-6xl gap-6 px-6 md:grid-cols-2 lg:grid-cols-4"
-        >
-          {intelligenceCards.map((card, index) => (
-            <motion.div key={card.title} variants={staggerItem}>
-              <IntelligenceCard
-                title={card.title}
-                text={card.text}
-                delay={index * 0.12}
-              />
+        <div className="mx-auto mt-10 max-w-6xl px-6 sm:mt-14">
+          <div className="relative overflow-hidden py-2">
+            <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-16 bg-gradient-to-r from-white to-transparent" />
+            <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-16 bg-gradient-to-l from-white to-transparent" />
+            <motion.div
+              animate={{ x: ["0%", "-50%"] }}
+              transition={{
+                duration: 80,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+              className="flex w-max gap-4"
+            >
+              {[...intelligenceCards, ...intelligenceCards].map((card, index) => (
+                <IntelligenceCarouselCard
+                  key={`${card.title}-${index}`}
+                  title={card.title}
+                  text={card.text}
+                  delay={index * 0.08}
+                />
+              ))}
             </motion.div>
-          ))}
-        </motion.div>
-      </motion.section>
-
-      {/* Skysirv Intelligence Graphic */}
-      <section className="relative w-full overflow-hidden bg-white py-0">
-        <div className="mx-auto max-w-7xl px-6">
-          <img
-            src="/images/stock/skysirv-intelligence-graphic.png"
-            alt="Skysirv intelligence dashboard ecosystem"
-            className="mx-auto w-full max-w-6xl object-contain"
-          />
+          </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Dark contrast section */}
       <motion.section
@@ -851,22 +845,115 @@ export default function HomePage() {
 
 /* ================= COMPONENTS ================= */
 
-function HeroStatPill({
-  label,
-  value,
-}: {
-  label: string
-  value: string
-}) {
+function LucyCommandDemo() {
+  const scenarios = [
+    {
+      user: "Lucy, watch Boston to Miami and tell me if fares look strong.",
+      lucy: "I’ll monitor BOS → MIA and flag meaningful price movement. Right now, the route is below its recent baseline, so this looks like a stronger booking window.",
+    },
+    {
+      user: "Can you compare my saved flights and explain the best option?",
+      lucy: "Yes. I can compare price position, route quality, timing signals, stops, and confidence level so you are not choosing from price alone.",
+    },
+    {
+      user: "Lucy, search New York to Frankfurt, and add it to my watchlist.",
+      lucy: "Absolutely. I’ll search JFK → FRA, prepare the route for monitoring, and add it to your watchlist so Skysirv can track fare movement, signal changes, and stronger booking windows.",
+    },
+    {
+      user: "Lucy, alert me if Miami to Los Angeles drops into a strong booking window.",
+      lucy: "Done. I’ll watch MIA → LAX and notify you when the route shows a meaningful fare drop, stronger Skyscore™, or pricing behavior that suggests it may be a good time to book.",
+    },
+  ]
+
+  const [index, setIndex] = useState(0)
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setIndex((current) => (current + 1) % scenarios.length)
+    }, 7200)
+
+    return () => window.clearInterval(timer)
+  }, [scenarios.length])
+
+  const scenario = scenarios[index]
+
   return (
-    <motion.div
-      whileHover={{ y: -2 }}
-      transition={{ duration: 0.2 }}
-      className="rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm text-slate-600 shadow-sm backdrop-blur"
-    >
-      <span className="font-medium text-slate-900">{value}</span>{" "}
-      <span>{label}</span>
-    </motion.div>
+    <div className="relative flex min-h-[320px] w-full flex-col overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-950 shadow-[0_18px_45px_rgba(15,23,42,0.18)]">
+      <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+        <div>
+          <p className="text-sm font-semibold text-white">Lucy</p>
+          <p className="mt-0.5 text-xs text-slate-400">
+            Skysirv Flight Attendant™
+          </p>
+        </div>
+
+        <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 text-xs font-medium text-emerald-200">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_12px_rgba(110,231,183,0.75)]" />
+          Online
+        </span>
+      </div>
+
+      <div className="flex flex-1 flex-col justify-end gap-3 px-4 py-4">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={scenario.user}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="space-y-3"
+          >
+            <div className="ml-auto max-w-[86%] rounded-2xl rounded-br-md border border-sky-300/20 bg-sky-300/10 px-4 py-3 text-sm leading-6 text-sky-50">
+              {scenario.user}
+            </div>
+
+            <div className="flex items-center gap-2 text-xs text-slate-400">
+              <span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_14px_rgba(110,231,183,0.75)]" />
+              Lucy is thinking
+              <span className="flex gap-1">
+                <motion.span
+                  animate={{ opacity: [0.2, 1, 0.2] }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  •
+                </motion.span>
+                <motion.span
+                  animate={{ opacity: [0.2, 1, 0.2] }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.15 }}
+                >
+                  •
+                </motion.span>
+                <motion.span
+                  animate={{ opacity: [0.2, 1, 0.2] }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
+                >
+                  •
+                </motion.span>
+              </span>
+            </div>
+
+            <div className="mr-auto max-w-[92%] rounded-2xl rounded-bl-md border border-white/10 bg-white/[0.07] px-4 py-3 text-sm leading-6 text-slate-200">
+              {scenario.lucy}
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      <div className="border-t border-white/10 p-3">
+        <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-2">
+          <span className="min-w-0 flex-1 truncate text-sm text-slate-400">
+            Ask Lucy about your trip...
+          </span>
+
+          <button
+            type="button"
+            className="inline-flex h-8 shrink-0 items-center justify-center rounded-full bg-sky-300 px-4 text-xs font-semibold text-slate-950"
+          >
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -880,19 +967,22 @@ function MiniHeroMetric({
   subtext: string
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white/85 p-4 shadow-sm">
-      <p className="text-xs font-medium tracking-[0.14em] text-slate-500 uppercase">
+    <div className="flex items-center justify-between gap-3 rounded-full border border-slate-200 bg-white/85 px-4 py-2 shadow-sm sm:block sm:rounded-2xl sm:p-4">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-700 sm:text-xs sm:tracking-[0.14em]">
         {label}
       </p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
-        {value}
-      </p>
-      <p className="mt-1 text-xs text-slate-500">{subtext}</p>
+
+      <div className="flex items-center gap-2 sm:block">
+        <p className="text-lg font-semibold tracking-tight text-slate-950 sm:mt-2 sm:text-2xl">
+          {value}
+        </p>
+        <p className="text-xs font-medium text-slate-700 sm:mt-1">{subtext}</p>
+      </div>
     </div>
   )
 }
 
-function DarkInsightRow({
+function LightInsightRow({
   label,
   text,
 }: {
@@ -900,11 +990,11 @@ function DarkInsightRow({
   text: string
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-      <p className="text-xs font-medium tracking-[0.14em] text-slate-400 uppercase">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p className="text-xs font-medium tracking-[0.14em] text-slate-500 uppercase">
         {label}
       </p>
-      <p className="mt-2 text-sm leading-6 text-slate-300">
+      <p className="mt-2 text-sm leading-6 text-slate-600">
         {text}
       </p>
     </div>
@@ -922,21 +1012,14 @@ function HeroFeatureCard({
     <motion.div
       whileHover={{ y: -5, boxShadow: "0 20px 50px rgba(15,23,42,0.09)" }}
       transition={{ duration: 0.22 }}
-      className="h-full rounded-3xl border border-slate-200 bg-white p-6 shadow-md transition-shadow"
+      className="h-full rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-shadow sm:rounded-3xl sm:p-6 sm:shadow-md"
     >
-      <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-sky-100 bg-sky-50">
-        <motion.span
-          animate={{ scale: [1, 1.12, 1], opacity: [0.65, 1, 0.65] }}
-          transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
-          className="block h-2.5 w-2.5 shrink-0 rounded-full bg-sky-600 shadow-[0_0_14px_rgba(14,165,233,0.45)]"
-        />
-      </div>
 
-      <h2 className="mt-3 text-xl font-bold text-slate-900">
+      <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
         {title}
       </h2>
 
-      <p className="mt-3 text-sm leading-6 text-slate-600">
+      <p className="mt-2 text-sm leading-5 text-slate-600 sm:mt-3 sm:leading-6">
         {text}
       </p>
     </motion.div>
@@ -1073,7 +1156,7 @@ function PreviewCard({
   )
 }
 
-function IntelligenceCard({
+function IntelligenceCarouselCard({
   title,
   text,
   delay,
@@ -1084,32 +1167,30 @@ function IntelligenceCard({
 }) {
   return (
     <motion.div
-      whileHover={{ y: -5, boxShadow: "0 20px 50px rgba(15,23,42,0.09)" }}
+      whileHover={{ y: -3 }}
       transition={{ duration: 0.22 }}
-      className="h-full rounded-3xl border border-slate-200 bg-white p-6 shadow-md transition-shadow"
+      className="flex w-[280px] shrink-0 flex-col items-center rounded-2xl border border-slate-200 bg-white px-5 py-5 text-center shadow-sm sm:w-[320px]"
     >
-      <div className="flex h-full min-h-[210px] flex-col">
-        <div className="flex min-h-[88px] items-start gap-3">
-          <motion.span
-            animate={{ scale: [1, 1.3, 1], opacity: [0.55, 1, 0.55] }}
-            transition={{
-              duration: 2.2,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay,
-            }}
-            className="mt-1 block h-2.5 w-2.5 shrink-0 rounded-full bg-sky-600 shadow-[0_0_14px_rgba(14,165,233,0.45)]"
-          />
+      <div className="flex items-center justify-center gap-2">
+        <motion.span
+          animate={{ scale: [1, 1.25, 1], opacity: [0.55, 1, 0.55] }}
+          transition={{
+            duration: 2.2,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay,
+          }}
+          className="block h-2.5 w-2.5 shrink-0 rounded-full bg-sky-600 shadow-[0_0_14px_rgba(14,165,233,0.45)]"
+        />
 
-          <h3 className="text-xl font-bold leading-tight text-slate-900">
-            {title}
-          </h3>
-        </div>
-
-        <p className="text-sm leading-relaxed text-slate-600">
-          {text}
-        </p>
+        <h3 className="text-base font-bold leading-tight text-slate-900 sm:text-lg">
+          {title}
+        </h3>
       </div>
+
+      <p className="mt-3 text-sm leading-6 text-slate-600">
+        {text}
+      </p>
     </motion.div>
   )
 }

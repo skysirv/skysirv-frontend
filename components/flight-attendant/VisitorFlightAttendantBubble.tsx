@@ -148,7 +148,7 @@ export default function VisitorFlightAttendantBubble() {
   return (
     <div
       ref={bubbleRef}
-      className="fixed bottom-24 right-6 z-[90] flex w-[min(calc(100vw-3rem),380px)] flex-col items-end"
+      className="fixed bottom-4 right-4 z-[90] flex w-[min(calc(100vw-2rem),380px)] flex-col items-end sm:right-6 sm:w-[min(calc(100vw-3rem),380px)]"
     >
       <AnimatePresence>
         {isOpen && (
@@ -261,7 +261,7 @@ export default function VisitorFlightAttendantBubble() {
         }}
         whileHover={{ y: -5, scale: 1.02 }}
         whileTap={{ scale: 0.96 }}
-        className="group relative flex items-center gap-3 rounded-full border border-sky-300/30 bg-slate-950/95 px-4 py-3 text-sky-100 shadow-[0_18px_48px_rgba(14,165,233,0.28)] backdrop-blur-xl transition hover:border-sky-200/60 hover:bg-slate-900"
+        className="group relative flex h-14 w-14 items-center justify-center rounded-full border border-sky-300/30 bg-slate-950/95 p-0 text-sky-100 shadow-[0_18px_48px_rgba(14,165,233,0.28)] backdrop-blur-xl transition hover:border-sky-200/60 hover:bg-slate-900 sm:h-auto sm:w-auto sm:gap-3 sm:px-4 sm:py-3"
         aria-label="Open Lucy, your Skysirv Flight Attendant"
       >
         <span className="absolute -inset-1 rounded-full bg-sky-300/20 blur-xl opacity-60 transition group-hover:opacity-90" />
@@ -271,7 +271,7 @@ export default function VisitorFlightAttendantBubble() {
           <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border border-slate-950 bg-emerald-300 shadow-[0_0_18px_rgba(110,231,183,0.8)]" />
         </span>
 
-        <span className="relative text-left">
+        <span className="relative hidden text-left sm:block">
           <span className="block text-sm font-semibold leading-none text-white">
             Ask Lucy
           </span>

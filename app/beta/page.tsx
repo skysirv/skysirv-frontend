@@ -99,7 +99,7 @@ export default function BetaPage() {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-100 pt-32 text-slate-950">
+      <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-100 pt-32 text-slate-950 sm:pt-40">
         <div className="pointer-events-none absolute inset-0">
           <motion.div
             animate={{ opacity: [0.16, 0.28, 0.16], scale: [1, 1.04, 1] }}
@@ -121,20 +121,12 @@ export default function BetaPage() {
         <div className="relative mx-auto max-w-7xl px-6 pb-20 pt-8 sm:px-8 sm:pb-24 sm:pt-10 lg:px-12">
           {/* HERO */}
           <div className="mx-auto max-w-4xl text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 18, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.55, ease: "easeOut" }}
-              className="inline-flex items-center rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600 shadow-sm"
-            >
-              Limited Beta Access
-            </motion.div>
 
             <motion.h1
               initial={{ opacity: 0, y: 28 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.06, duration: 0.72, ease: "easeOut" }}
-              className="mt-8 text-5xl font-bold leading-[1.08] tracking-tight text-slate-950 sm:text-6xl md:text-7xl"
+              className="mt-6 text-5xl font-bold leading-[1.08] tracking-tight text-slate-950 sm:mt-8 sm:text-6xl md:text-7xl"
             >
               Join the Skysirv™ Beta
               before wider rollout begins
@@ -155,17 +147,6 @@ export default function BetaPage() {
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.58, ease: "easeOut" }}
-              className="mt-10 flex flex-wrap items-center justify-center gap-3"
-            >
-              <BetaPill label="Early platform access" />
-              <BetaPill label="Live dashboard experience" />
-              <BetaPill label="Evolving intelligence stack" />
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.24, duration: 0.58, ease: "easeOut" }}
               className="mt-10 flex flex-wrap justify-center gap-4"
             >
@@ -182,47 +163,6 @@ export default function BetaPage() {
               >
                 Already have access?
               </Link>
-            </motion.div>
-          </div>
-
-          {/* WHY BETA */}
-          <div className="mx-auto mt-16 max-w-6xl">
-            <motion.div {...fadeUp} className="mx-auto max-w-3xl text-center">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                Why beta
-              </p>
-
-              <h2 className="mt-4 text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
-                Early access to a more intelligent way to watch airfare
-              </h2>
-
-              <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-                This beta is for travelers who want more than fare snapshots and
-                generic search results. It is an early look at a platform being
-                shaped around route monitoring, signal quality, and decision-ready
-                intelligence.
-              </p>
-            </motion.div>
-
-            <motion.div
-              variants={staggerContainer}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, amount: 0.15 }}
-              className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-4"
-            >
-              {betaBenefits.map((benefit) => (
-                <motion.div
-                  key={benefit}
-                  variants={staggerItem}
-                  className="flex min-h-[190px] flex-col items-center justify-center rounded-[1.75rem] border border-slate-200 bg-white p-6 text-center shadow-[0_18px_55px_rgba(15,23,42,0.06)]"
-                >
-                  <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-sky-200 bg-sky-50 text-sky-600">
-                    ✦
-                  </div>
-                  <p className="max-w-xs text-sm leading-7 text-slate-600">{benefit}</p>
-                </motion.div>
-              ))}
             </motion.div>
           </div>
 
@@ -255,17 +195,17 @@ export default function BetaPage() {
                 <motion.div
                   key={item.title}
                   variants={staggerItem}
-                  className="group flex min-h-[260px] flex-col items-center justify-center rounded-[1.75rem] border border-slate-200 bg-white p-7 text-center shadow-[0_18px_55px_rgba(15,23,42,0.06)]"
+                  className="group flex min-h-0 flex-col items-center rounded-2xl border border-slate-200 bg-white px-5 py-4 text-center shadow-sm sm:min-h-[260px] sm:rounded-[1.75rem] sm:p-7 sm:shadow-[0_18px_55px_rgba(15,23,42,0.06)]"
                 >
                   <div className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-sky-700">
                     Beta Access
                   </div>
 
-                  <h3 className="mt-5 text-lg font-semibold text-slate-950">
+                  <h3 className="mt-3 flex min-h-[44px] items-center justify-center text-base font-semibold leading-6 text-slate-950 sm:mt-5 sm:text-lg">
                     {item.title}
                   </h3>
 
-                  <p className="mt-4 max-w-xs text-sm leading-7 text-slate-600">
+                  <p className="mt-2 max-w-xs text-sm leading-6 text-slate-600 sm:mt-4 sm:leading-7">
                     {item.description}
                   </p>
                 </motion.div>
@@ -280,7 +220,7 @@ export default function BetaPage() {
               className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_28px_80px_rgba(15,23,42,0.09)]"
             >
               <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
-                <div className="relative p-8 sm:p-10 md:p-12">
+                <div className="relative p-8 text-center sm:p-10 md:p-12 lg:text-left">
                   <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-sky-50/60" />
                   <div className="relative">
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
@@ -291,7 +231,7 @@ export default function BetaPage() {
                       A first look at the Skysirv™ dashboard ecosystem
                     </h2>
 
-                    <p className="mt-5 max-w-xl text-sm leading-7 text-slate-600 sm:text-base">
+                    <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-slate-600 sm:text-base lg:mx-0">
                       Beta users step into the live product experience — from route
                       monitoring and intelligence signals to annual wrapped views
                       and tiered dashboards designed around decision quality, not
@@ -396,14 +336,6 @@ export default function BetaPage() {
   )
 }
 
-function BetaPill({ label }: { label: string }) {
-  return (
-    <div className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm">
-      {label}
-    </div>
-  )
-}
-
 function FeaturePill({ label }: { label: string }) {
   return (
     <div className="flex min-h-[64px] items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-medium leading-6 text-slate-600 shadow-sm">
@@ -424,8 +356,8 @@ function StoryPoint({ title, text }: { title: string; text: string }) {
 function BetaFooter() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-16 text-center md:max-w-4xl md:text-left">
-      <div className="grid grid-cols-1 gap-12 md:grid-cols-4 md:justify-items-center md:text-center">
-        <div className="flex max-w-xs flex-col justify-start text-center md:text-left">
+      <div className="grid grid-cols-1 gap-10 text-center md:grid-cols-4 md:text-left">
+        <div className="mx-auto flex max-w-xs flex-col justify-start text-center md:mx-0 md:text-left">
           <Link
             href="/"
             className="text-xl font-bold leading-none text-slate-950 transition hover:text-slate-700"
