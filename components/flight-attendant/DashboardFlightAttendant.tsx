@@ -312,6 +312,7 @@ export default function DashboardFlightAttendant({
   const realtimePeerConnectionRef = useRef<RTCPeerConnection | null>(null)
   const realtimeLocalStreamRef = useRef<MediaStream | null>(null)
   const realtimeAudioElementRef = useRef<HTMLAudioElement | null>(null)
+  const realtimeDataChannelRef = useRef<RTCDataChannel | null>(null)
 
   useEffect(() => {
     if (!open) return
@@ -577,14 +578,12 @@ export default function DashboardFlightAttendant({
       )
     } finally {
       setChatLoading(false)
-
-      window.setTimeout(() => {
-        suppressNextVoiceAssistantReplyRef.current = false
-      }, 1200)
     }
   }
 
   function stopLucyVoiceSession() {
+    realtimeDataChannelRef.current?.close()
+    realtimeDataChannelRef.current = null
     realtimePeerConnectionRef.current?.close()
     realtimePeerConnectionRef.current = null
 
@@ -686,6 +685,7 @@ export default function DashboardFlightAttendant({
       })
 
       const dataChannel = peerConnection.createDataChannel("oai-events")
+      realtimeDataChannelRef.current = dataChannel
 
       dataChannel.addEventListener("open", () => {
         setVoiceStatus("listening")
@@ -721,12 +721,12 @@ export default function DashboardFlightAttendant({
           pendingLucyActionRef.current = action
           activeAssistantVoiceMessageId = null
 
+          const confirmationText =
+            action.confirmationPrompt ||
+            `Add ${action.origin} → ${action.destination} for ${action.departureDate} to your watchlist?`
+
           setMessages((prev) => {
             const lastMessage = prev[prev.length - 1]
-
-            const confirmationText =
-              action.confirmationPrompt ||
-              `Add ${action.origin} → ${action.destination} for ${action.departureDate} to your watchlist?`
 
             if (
               lastMessage?.role === "assistant" &&
@@ -745,6 +745,20 @@ export default function DashboardFlightAttendant({
               },
             ]
           })
+
+          const realtimeDataChannel = realtimeDataChannelRef.current
+
+          if (realtimeDataChannel?.readyState === "open") {
+            realtimeDataChannel.send(
+              JSON.stringify({
+                type: "response.create",
+                response: {
+                  instructions: `Say exactly this and nothing else: ${confirmationText}`,
+                },
+              })
+            )
+          }
+
         } catch {
           // Ignore malformed realtime tool arguments.
         }
@@ -900,6 +914,7 @@ export default function DashboardFlightAttendant({
           }
 
           if (data?.type === "input_audio_buffer.speech_started") {
+            suppressNextVoiceAssistantReplyRef.current = false
             activeAssistantVoiceMessageId = null
             setVoiceStatus("listening")
           }
