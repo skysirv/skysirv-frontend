@@ -622,15 +622,67 @@ export default function DashboardFlightAttendant({
         setVoiceStatus("listening")
       })
 
+      let activeAssistantVoiceMessageId: string | null = null
+
       dataChannel.addEventListener("message", (event) => {
         try {
           const data = JSON.parse(event.data)
 
+          if (
+            data?.type === "conversation.item.input_audio_transcription.completed" &&
+            typeof data.transcript === "string" &&
+            data.transcript.trim()
+          ) {
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: createMessageId(),
+                role: "user",
+                label: "You",
+                text: data.transcript.trim(),
+              },
+            ])
+          }
+
+          if (
+            data?.type === "response.audio_transcript.delta" &&
+            typeof data.delta === "string"
+          ) {
+            if (!activeAssistantVoiceMessageId) {
+              activeAssistantVoiceMessageId = createMessageId()
+
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: activeAssistantVoiceMessageId!,
+                  role: "assistant",
+                  label: "Lucy",
+                  text: "",
+                },
+              ])
+            }
+
+            setMessages((prev) =>
+              prev.map((message) =>
+                message.id === activeAssistantVoiceMessageId
+                  ? {
+                    ...message,
+                    text: `${message.text}${data.delta}`,
+                  }
+                  : message
+              )
+            )
+
+            setVoiceStatus("speaking")
+          }
+
           if (data?.type === "response.audio_transcript.done") {
+            activeAssistantVoiceMessageId = null
             setVoiceStatus("listening")
           }
 
           if (data?.type === "input_audio_buffer.speech_started") {
+            activeAssistantVoiceMessageId = null
             setVoiceStatus("listening")
           }
 
