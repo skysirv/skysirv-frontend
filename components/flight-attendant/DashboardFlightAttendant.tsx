@@ -686,9 +686,58 @@ export default function DashboardFlightAttendant({
       let activeUserVoiceMessageId: string | null = null
       let activeAssistantVoiceMessageId: string | null = null
 
+      function handleRealtimeWatchlistToolCall(item: any) {
+        if (item?.name !== "prepare_watchlist_route") return
+
+        const rawArguments =
+          typeof item.arguments === "string" ? item.arguments : ""
+
+        if (!rawArguments) return
+
+        try {
+          const parsed = JSON.parse(rawArguments)
+
+          const action = normalizeLucyAction({
+            type: "add_watchlist_route",
+            status: "needs_confirmation",
+            origin: parsed.origin,
+            destination: parsed.destination,
+            departureDate: parsed.departureDate,
+            routeLabel: parsed.routeLabel,
+            confirmationPrompt: parsed.confirmationPrompt,
+          })
+
+          if (!action || action.type !== "add_watchlist_route") return
+
+          setPendingLucyAction(action)
+
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: createMessageId(),
+              role: "assistant",
+              label: "Lucy",
+              text:
+                action.confirmationPrompt ||
+                `Would you like me to add ${action.origin} → ${action.destination} for ${action.departureDate} to your watchlist?`,
+            },
+          ])
+        } catch {
+          // Ignore malformed realtime tool arguments.
+        }
+      }
+
       dataChannel.addEventListener("message", (event) => {
         try {
           const data = JSON.parse(event.data)
+
+          if (data?.type === "response.output_item.done") {
+            handleRealtimeWatchlistToolCall(data.item)
+          }
+
+          if (data?.type === "conversation.item.done") {
+            handleRealtimeWatchlistToolCall(data.item)
+          }
 
           if (
             data?.type === "conversation.item.input_audio_transcription.delta" &&
