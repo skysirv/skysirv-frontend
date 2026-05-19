@@ -72,7 +72,15 @@ export default function AdminPage() {
   )
 
   const platformUsers = useMemo(
-    () => users.filter((user) => user.plan !== "admin"),
+    () =>
+      users
+        .filter((user) => user.plan !== "admin")
+        .sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0
+
+          return dateB - dateA
+        }),
     [users]
   )
 
