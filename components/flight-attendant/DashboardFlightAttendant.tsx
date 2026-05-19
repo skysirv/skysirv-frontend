@@ -720,8 +720,20 @@ export default function DashboardFlightAttendant({
           }
 
           if (data?.type === "input_audio_buffer.speech_started") {
-            activeUserVoiceMessageId = null
             activeAssistantVoiceMessageId = null
+
+            activeUserVoiceMessageId = createMessageId()
+
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: activeUserVoiceMessageId!,
+                role: "user",
+                label: "You",
+                text: "",
+              },
+            ])
+
             setVoiceStatus("listening")
           }
 
