@@ -776,6 +776,11 @@ export default function DashboardFlightAttendant({
           ) {
             const completedTranscript = data.transcript.trim()
 
+            if (completedTranscript.length < 3) {
+              activeUserVoiceMessageId = null
+              return
+            }
+
             if (activeUserVoiceMessageId) {
               setMessages((prev) =>
                 prev.map((message) =>
@@ -789,6 +794,16 @@ export default function DashboardFlightAttendant({
               )
             }
 
+            const token = getAuthToken()
+
+            if (
+              token &&
+              pendingLucyAction &&
+              isAffirmativeRouteConfirmation(completedTranscript)
+            ) {
+              handleConfirmPendingLucyAction(pendingLucyAction, token)
+            }
+
             activeUserVoiceMessageId = null
           }
 
@@ -797,17 +812,30 @@ export default function DashboardFlightAttendant({
             typeof data.delta === "string"
           ) {
             if (!activeAssistantVoiceMessageId) {
-              activeAssistantVoiceMessageId = createMessageId()
+              const existingEmptyAssistantMessage = messages
+                .slice()
+                .reverse()
+                .find(
+                  (message) =>
+                    message.role === "assistant" &&
+                    message.label === "Lucy" &&
+                    !message.text.trim()
+                )
 
-              setMessages((prev) => [
-                ...prev,
-                {
-                  id: activeAssistantVoiceMessageId!,
-                  role: "assistant",
-                  label: "Lucy",
-                  text: "",
-                },
-              ])
+              activeAssistantVoiceMessageId =
+                existingEmptyAssistantMessage?.id || createMessageId()
+
+              if (!existingEmptyAssistantMessage) {
+                setMessages((prev) => [
+                  ...prev,
+                  {
+                    id: activeAssistantVoiceMessageId!,
+                    role: "assistant",
+                    label: "Lucy",
+                    text: "",
+                  },
+                ])
+              }
             }
 
             setMessages((prev) =>
@@ -831,19 +859,6 @@ export default function DashboardFlightAttendant({
 
           if (data?.type === "input_audio_buffer.speech_started") {
             activeAssistantVoiceMessageId = null
-
-            activeUserVoiceMessageId = createMessageId()
-
-            setMessages((prev) => [
-              ...prev,
-              {
-                id: activeUserVoiceMessageId!,
-                role: "user",
-                label: "You",
-                text: "",
-              },
-            ])
-
             setVoiceStatus("listening")
           }
 
