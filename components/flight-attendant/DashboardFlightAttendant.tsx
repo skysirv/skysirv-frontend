@@ -627,7 +627,6 @@ export default function DashboardFlightAttendant({
       dataChannel.addEventListener("message", (event) => {
         try {
           const data = JSON.parse(event.data)
-          console.log("Lucy realtime event:", data?.type, data)
 
           if (
             data?.type === "conversation.item.input_audio_transcription.completed" &&
@@ -646,7 +645,7 @@ export default function DashboardFlightAttendant({
           }
 
           if (
-            data?.type === "response.audio_transcript.delta" &&
+            data?.type === "response.output_audio_transcript.delta" &&
             typeof data.delta === "string"
           ) {
             if (!activeAssistantVoiceMessageId) {
@@ -677,7 +676,7 @@ export default function DashboardFlightAttendant({
             setVoiceStatus("speaking")
           }
 
-          if (data?.type === "response.audio_transcript.done") {
+          if (data?.type === "response.output_audio_transcript.done") {
             activeAssistantVoiceMessageId = null
             setVoiceStatus("listening")
           }
