@@ -49,10 +49,18 @@ type LucyPreferredRouteAction = {
   confirmationPrompt?: string
 }
 
+type LucySaveFirstNameAction = {
+  type: "save_first_name"
+  status: "needs_confirmation"
+  firstName: string
+  confirmationPrompt?: string
+}
+
 type LucyAction =
   | LucyWatchlistAction
   | LucyPreferredAirportsAction
   | LucyPreferredRouteAction
+  | LucySaveFirstNameAction
 
 type FlightAttendantApiResponse = {
   success?: boolean
@@ -195,6 +203,22 @@ function normalizeLucyAction(value: unknown): LucyAction | null {
     }
   }
 
+  if (input.type === "save_first_name") {
+    const firstName =
+      typeof input.firstName === "string"
+        ? input.firstName.trim().replace(/\s+/g, " ")
+        : ""
+
+    if (!firstName || firstName.length > 80) return null
+
+    return {
+      type: "save_first_name",
+      status: "needs_confirmation",
+      firstName,
+      confirmationPrompt: input.confirmationPrompt,
+    }
+  }
+
   if (input.type === "save_preferred_route") {
     const origin = input.origin?.trim().toUpperCase()
     const destination = input.destination?.trim().toUpperCase()
@@ -242,6 +266,10 @@ function isNegativeRouteConfirmation(message: string) {
 }
 
 function getLucyActionLabel(action: LucyAction) {
+  if (action.type === "save_first_name") {
+    return action.firstName
+  }
+
   if (action.type === "add_watchlist_route") {
     return `${action.origin} → ${action.destination} for ${action.departureDate}`
   }
@@ -386,6 +414,39 @@ export default function DashboardFlightAttendant({
 
     try {
       let successReply = ""
+
+      if (action.type === "save_first_name") {
+        const response = await fetch(
+          `${API_BASE_URL}/api/user-preferences/profile-name`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              firstName: action.firstName,
+            }),
+          }
+        )
+
+        const data = await response.json().catch(() => null)
+
+        if (!response.ok) {
+          throw new Error(
+            data?.error ||
+            "I couldn’t save your name yet. Please try again in a moment."
+          )
+        }
+
+        window.dispatchEvent(
+          new CustomEvent("skysirv:profile-name-updated", {
+            detail: data,
+          })
+        )
+
+        successReply = `Done — I’ll remember your name as ${action.firstName} for future Skysirv sessions.`
+      }
 
       if (action.type === "add_watchlist_route") {
         const response = await fetch(`${API_BASE_URL}/watchlist`, {
