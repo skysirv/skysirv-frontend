@@ -306,6 +306,7 @@ export default function DashboardFlightAttendant({
   const [pendingLucyAction, setPendingLucyAction] =
     useState<LucyAction | null>(null)
   const [voiceStatus, setVoiceStatus] = useState<LucyVoiceStatus>("idle")
+  const suppressNextVoiceAssistantReplyRef = useRef(false)
   const pendingLucyActionRef = useRef<LucyAction | null>(null)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const realtimePeerConnectionRef = useRef<RTCPeerConnection | null>(null)
@@ -576,6 +577,10 @@ export default function DashboardFlightAttendant({
       )
     } finally {
       setChatLoading(false)
+
+      window.setTimeout(() => {
+        suppressNextVoiceAssistantReplyRef.current = false
+      }, 1200)
     }
   }
 
@@ -823,6 +828,7 @@ export default function DashboardFlightAttendant({
             ) {
               pendingLucyActionRef.current = null
               setPendingLucyAction(null)
+              suppressNextVoiceAssistantReplyRef.current = true
 
               window.setTimeout(() => {
                 handleConfirmPendingLucyAction(actionToConfirm, token)
@@ -833,6 +839,10 @@ export default function DashboardFlightAttendant({
             }
 
             activeUserVoiceMessageId = null
+          }
+
+          if (suppressNextVoiceAssistantReplyRef.current) {
+            return
           }
 
           if (
