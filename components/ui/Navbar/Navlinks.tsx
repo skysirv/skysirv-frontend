@@ -24,10 +24,10 @@ const SESSION_TIMEOUT_MS = 30 * 60 * 1000;
 const ACCOUNT_HREF = '/account';
 
 function getDashboardHrefFromPlan(planId?: string | null) {
-  if (!planId) return '/choose-plan'
+  if (!planId) return '/choose-plan';
 
   if (planId === 'free') {
-    return '/dashboard/free'
+    return '/dashboard/free';
   }
 
   if (
@@ -36,7 +36,7 @@ function getDashboardHrefFromPlan(planId?: string | null) {
     planId === 'pro_yearly' ||
     planId === 'pro_lifetime'
   ) {
-    return '/dashboard/pro'
+    return '/dashboard/pro';
   }
 
   if (
@@ -47,10 +47,10 @@ function getDashboardHrefFromPlan(planId?: string | null) {
     planId === 'enterprise_monthly' ||
     planId === 'enterprise_yearly'
   ) {
-    return '/dashboard/business'
+    return '/dashboard/business';
   }
 
-  return '/choose-plan'
+  return '/choose-plan';
 }
 
 export default function Navlinks({ user, isDark = false }: NavlinksProps) {
@@ -328,6 +328,7 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
                     }`}
                 >
                   <svg
+                    className="md:hidden"
                     width="20"
                     height="20"
                     viewBox="0 0 24 24"
@@ -342,6 +343,28 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
                       strokeLinecap="round"
                     />
                   </svg>
+
+                  <svg
+                    className="hidden md:block"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M20 21C20 17.6863 16.4183 15 12 15C7.58172 15 4 17.6863 4 21"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M12 12C14.2091 12 16 10.2091 16 8C16 5.79086 14.2091 4 12 4C9.79086 4 8 5.79086 8 8C8 10.2091 9.79086 12 12 12Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    />
+                  </svg>
                 </button>
 
                 {accountMenuOpen && (
@@ -351,41 +374,48 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
                       : 'border-slate-200 bg-white text-slate-800'
                       }`}
                   >
-                    <div className="md:hidden">
-                      <Link
-                        href="/pricing"
-                        onClick={() => setAccountMenuOpen(false)}
-                        className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'}`}
-                      >
-                        Pricing
-                      </Link>
+                    {!isLoggedIn && (
+                      <div className="md:hidden">
+                        <Link
+                          href="/pricing"
+                          onClick={() => setAccountMenuOpen(false)}
+                          className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
+                            }`}
+                        >
+                          Pricing
+                        </Link>
 
-                      <Link
-                        href="/booking"
-                        onClick={() => setAccountMenuOpen(false)}
-                        className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'}`}
-                      >
-                        Booking
-                      </Link>
+                        <Link
+                          href="/booking"
+                          onClick={() => setAccountMenuOpen(false)}
+                          className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
+                            }`}
+                        >
+                          Booking
+                        </Link>
 
-                      <Link
-                        href="/flight-attendant"
-                        onClick={() => setAccountMenuOpen(false)}
-                        className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'}`}
-                      >
-                        Flight Attendant
-                      </Link>
+                        <Link
+                          href="/flight-attendant"
+                          onClick={() => setAccountMenuOpen(false)}
+                          className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
+                            }`}
+                        >
+                          Flight Attendant
+                        </Link>
 
-                      <Link
-                        href="/beta"
-                        onClick={() => setAccountMenuOpen(false)}
-                        className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'}`}
-                      >
-                        Beta
-                      </Link>
+                        <Link
+                          href="/beta"
+                          onClick={() => setAccountMenuOpen(false)}
+                          className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
+                            }`}
+                        >
+                          Beta
+                        </Link>
 
-                      <div className={`my-1 h-px ${isDark ? 'bg-white/10' : 'bg-slate-100'}`} />
-                    </div>
+                        <div className={`my-1 h-px ${isDark ? 'bg-white/10' : 'bg-slate-100'}`} />
+                      </div>
+                    )}
+
                     {!isLoggedIn ? (
                       <button
                         type="button"
