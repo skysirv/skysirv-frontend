@@ -627,6 +627,7 @@ export default function DashboardFlightAttendant({
       dataChannel.addEventListener("message", (event) => {
         try {
           const data = JSON.parse(event.data)
+          console.log("Lucy realtime event:", data?.type, data)
 
           if (
             data?.type === "conversation.item.input_audio_transcription.completed" &&
