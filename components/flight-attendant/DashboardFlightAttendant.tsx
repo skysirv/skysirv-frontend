@@ -622,6 +622,7 @@ export default function DashboardFlightAttendant({
         setVoiceStatus("listening")
       })
 
+      let activeUserVoiceMessageId: string | null = null
       let activeAssistantVoiceMessageId: string | null = null
 
       dataChannel.addEventListener("message", (event) => {
@@ -629,19 +630,56 @@ export default function DashboardFlightAttendant({
           const data = JSON.parse(event.data)
 
           if (
+            data?.type === "conversation.item.input_audio_transcription.delta" &&
+            typeof data.delta === "string"
+          ) {
+            if (!activeUserVoiceMessageId) {
+              activeUserVoiceMessageId = createMessageId()
+
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: activeUserVoiceMessageId!,
+                  role: "user",
+                  label: "You",
+                  text: "",
+                },
+              ])
+            }
+
+            setMessages((prev) =>
+              prev.map((message) =>
+                message.id === activeUserVoiceMessageId
+                  ? {
+                    ...message,
+                    text: `${message.text}${data.delta}`,
+                  }
+                  : message
+              )
+            )
+          }
+
+          if (
             data?.type === "conversation.item.input_audio_transcription.completed" &&
             typeof data.transcript === "string" &&
             data.transcript.trim()
           ) {
-            setMessages((prev) => [
-              ...prev,
-              {
-                id: createMessageId(),
-                role: "user",
-                label: "You",
-                text: data.transcript.trim(),
-              },
-            ])
+            const completedTranscript = data.transcript.trim()
+
+            if (activeUserVoiceMessageId) {
+              setMessages((prev) =>
+                prev.map((message) =>
+                  message.id === activeUserVoiceMessageId
+                    ? {
+                      ...message,
+                      text: completedTranscript,
+                    }
+                    : message
+                )
+              )
+            }
+
+            activeUserVoiceMessageId = null
           }
 
           if (
@@ -682,6 +720,7 @@ export default function DashboardFlightAttendant({
           }
 
           if (data?.type === "input_audio_buffer.speech_started") {
+            activeUserVoiceMessageId = null
             activeAssistantVoiceMessageId = null
             setVoiceStatus("listening")
           }
