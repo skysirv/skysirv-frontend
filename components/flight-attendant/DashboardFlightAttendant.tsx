@@ -449,6 +449,8 @@ export default function DashboardFlightAttendant({
       }
 
       if (action.type === "add_watchlist_route") {
+        console.log("Lucy watchlist voice action:", action)
+
         const response = await fetch(`${API_BASE_URL}/watchlist`, {
           method: "POST",
           headers: {
@@ -463,6 +465,7 @@ export default function DashboardFlightAttendant({
         })
 
         const data = await response.json().catch(() => null)
+        console.log("Lucy watchlist response:", response.status, data)
 
         if (!response.ok) {
           const message =
