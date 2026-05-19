@@ -710,18 +710,32 @@ export default function DashboardFlightAttendant({
           if (!action || action.type !== "add_watchlist_route") return
 
           setPendingLucyAction(action)
+          activeAssistantVoiceMessageId = null
 
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: createMessageId(),
-              role: "assistant",
-              label: "Lucy",
-              text:
-                action.confirmationPrompt ||
-                `Would you like me to add ${action.origin} → ${action.destination} for ${action.departureDate} to your watchlist?`,
-            },
-          ])
+          setMessages((prev) => {
+            const lastMessage = prev[prev.length - 1]
+
+            const confirmationText =
+              action.confirmationPrompt ||
+              `Add ${action.origin} → ${action.destination} for ${action.departureDate} to your watchlist?`
+
+            if (
+              lastMessage?.role === "assistant" &&
+              lastMessage.text.trim() === confirmationText.trim()
+            ) {
+              return prev
+            }
+
+            return [
+              ...prev,
+              {
+                id: createMessageId(),
+                role: "assistant",
+                label: "Lucy",
+                text: confirmationText,
+              },
+            ]
+          })
         } catch {
           // Ignore malformed realtime tool arguments.
         }
@@ -801,7 +815,15 @@ export default function DashboardFlightAttendant({
               pendingLucyAction &&
               isAffirmativeRouteConfirmation(completedTranscript)
             ) {
-              handleConfirmPendingLucyAction(pendingLucyAction, token)
+              const actionToConfirm = pendingLucyAction
+              setPendingLucyAction(null)
+
+              window.setTimeout(() => {
+                handleConfirmPendingLucyAction(actionToConfirm, token)
+              }, 0)
+
+              activeUserVoiceMessageId = null
+              return
             }
 
             activeUserVoiceMessageId = null
@@ -811,6 +833,10 @@ export default function DashboardFlightAttendant({
             data?.type === "response.output_audio_transcript.delta" &&
             typeof data.delta === "string"
           ) {
+            if (pendingLucyAction) {
+              return
+            }
+
             if (!activeAssistantVoiceMessageId) {
               const existingEmptyAssistantMessage = messages
                 .slice()
