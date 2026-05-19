@@ -306,6 +306,7 @@ export default function DashboardFlightAttendant({
   const [pendingLucyAction, setPendingLucyAction] =
     useState<LucyAction | null>(null)
   const [voiceStatus, setVoiceStatus] = useState<LucyVoiceStatus>("idle")
+  const pendingLucyActionRef = useRef<LucyAction | null>(null)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const realtimePeerConnectionRef = useRef<RTCPeerConnection | null>(null)
   const realtimeLocalStreamRef = useRef<MediaStream | null>(null)
@@ -461,6 +462,7 @@ export default function DashboardFlightAttendant({
             origin: action.origin,
             destination: action.destination,
             departureDate: action.departureDate,
+            departure_date: action.departureDate,
           }),
         })
 
@@ -488,9 +490,7 @@ export default function DashboardFlightAttendant({
           })
         )
 
-        successReply = `Done — I added ${getLucyActionLabel(
-          action
-        )} to your watchlist. Skysirv will start monitoring it from your dashboard.`
+        successReply = "Done — it’s on your watchlist."
       }
 
       if (action.type === "save_preferred_airports") {
@@ -713,6 +713,7 @@ export default function DashboardFlightAttendant({
           if (!action || action.type !== "add_watchlist_route") return
 
           setPendingLucyAction(action)
+          pendingLucyActionRef.current = action
           activeAssistantVoiceMessageId = null
 
           setMessages((prev) => {
@@ -813,12 +814,14 @@ export default function DashboardFlightAttendant({
 
             const token = getAuthToken()
 
+            const actionToConfirm = pendingLucyActionRef.current
+
             if (
               token &&
-              pendingLucyAction &&
+              actionToConfirm &&
               isAffirmativeRouteConfirmation(completedTranscript)
             ) {
-              const actionToConfirm = pendingLucyAction
+              pendingLucyActionRef.current = null
               setPendingLucyAction(null)
 
               window.setTimeout(() => {
