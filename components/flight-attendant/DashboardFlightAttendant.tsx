@@ -62,6 +62,32 @@ type FlightAttendantApiResponse = {
   error?: string
 }
 
+type LucyVoiceStatus =
+  | "idle"
+  | "connecting"
+  | "listening"
+  | "speaking"
+  | "error"
+
+type LucyRealtimeSessionResponse = {
+  success?: boolean
+  model?: string
+  voice?: string
+  plan?: string
+  session?: {
+    value?: string
+    client_secret?: {
+      value?: string
+    }
+    session?: {
+      client_secret?: {
+        value?: string
+      }
+    }
+  }
+  error?: string
+}
+
 const tierConfig: Record<
   DashboardLucyTier,
   {
@@ -251,7 +277,11 @@ export default function DashboardFlightAttendant({
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [pendingLucyAction, setPendingLucyAction] =
     useState<LucyAction | null>(null)
+  const [voiceStatus, setVoiceStatus] = useState<LucyVoiceStatus>("idle")
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
+  const realtimePeerConnectionRef = useRef<RTCPeerConnection | null>(null)
+  const realtimeLocalStreamRef = useRef<MediaStream | null>(null)
+  const realtimeAudioElementRef = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
     if (!open) return
@@ -282,6 +312,24 @@ export default function DashboardFlightAttendant({
       window.removeEventListener("keydown", handleKeyDown)
     }
   }, [expanded])
+
+  useEffect(() => {
+    return () => {
+      realtimePeerConnectionRef.current?.close()
+      realtimePeerConnectionRef.current = null
+
+      realtimeLocalStreamRef.current?.getTracks().forEach((track) => {
+        track.stop()
+      })
+      realtimeLocalStreamRef.current = null
+
+      if (realtimeAudioElementRef.current) {
+        realtimeAudioElementRef.current.pause()
+        realtimeAudioElementRef.current.srcObject = null
+        realtimeAudioElementRef.current = null
+      }
+    }
+  }, [])
 
   async function typeAssistantReply(messageId: string, fullText: string) {
     setAssistantTyping(true)
@@ -464,6 +512,175 @@ export default function DashboardFlightAttendant({
       )
     } finally {
       setChatLoading(false)
+    }
+  }
+
+  function stopLucyVoiceSession() {
+    realtimePeerConnectionRef.current?.close()
+    realtimePeerConnectionRef.current = null
+
+    realtimeLocalStreamRef.current?.getTracks().forEach((track) => {
+      track.stop()
+    })
+    realtimeLocalStreamRef.current = null
+
+    if (realtimeAudioElementRef.current) {
+      realtimeAudioElementRef.current.pause()
+      realtimeAudioElementRef.current.srcObject = null
+      realtimeAudioElementRef.current = null
+    }
+
+    setVoiceStatus("idle")
+  }
+
+  async function startLucyVoiceSession() {
+    if (tier === "free") {
+      await appendTypedAssistantReply(
+        "Lucy voice is available on Pro and Business plans."
+      )
+      return
+    }
+
+    if (!API_BASE_URL) {
+      await appendTypedAssistantReply(
+        "Lucy voice is not configured yet. Please try again once the API connection is available."
+      )
+      return
+    }
+
+    const token = getAuthToken()
+
+    if (!token) {
+      setAuthRequired(true)
+      setAuthModalOpen(true)
+      return
+    }
+
+    if (voiceStatus !== "idle") {
+      stopLucyVoiceSession()
+      return
+    }
+
+    setVoiceStatus("connecting")
+
+    try {
+      const sessionResponse = await fetch(
+        `${API_BASE_URL}/api/flight-attendant/realtime-session`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const sessionData =
+        (await sessionResponse.json().catch(() => null)) as
+        | LucyRealtimeSessionResponse
+        | null
+
+      if (!sessionResponse.ok) {
+        throw new Error(
+          sessionData?.error || "Lucy voice could not be started."
+        )
+      }
+
+      const clientSecret =
+        sessionData?.session?.value ||
+        sessionData?.session?.client_secret?.value ||
+        sessionData?.session?.session?.client_secret?.value
+
+      if (!clientSecret) {
+        throw new Error("Lucy voice session did not return a client secret.")
+      }
+
+      const peerConnection = new RTCPeerConnection()
+      realtimePeerConnectionRef.current = peerConnection
+
+      const audioElement = document.createElement("audio")
+      audioElement.autoplay = true
+      realtimeAudioElementRef.current = audioElement
+
+      peerConnection.ontrack = (event) => {
+        audioElement.srcObject = event.streams[0]
+        setVoiceStatus("speaking")
+      }
+
+      const localStream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      })
+
+      realtimeLocalStreamRef.current = localStream
+
+      localStream.getAudioTracks().forEach((track) => {
+        peerConnection.addTrack(track, localStream)
+      })
+
+      const dataChannel = peerConnection.createDataChannel("oai-events")
+
+      dataChannel.addEventListener("open", () => {
+        setVoiceStatus("listening")
+      })
+
+      dataChannel.addEventListener("message", (event) => {
+        try {
+          const data = JSON.parse(event.data)
+
+          if (data?.type === "response.audio_transcript.done") {
+            setVoiceStatus("listening")
+          }
+
+          if (data?.type === "input_audio_buffer.speech_started") {
+            setVoiceStatus("listening")
+          }
+
+          if (data?.type === "response.audio.delta") {
+            setVoiceStatus("speaking")
+          }
+        } catch {
+          // Realtime events are optional for this first voice pass.
+        }
+      })
+
+      const offer = await peerConnection.createOffer()
+      await peerConnection.setLocalDescription(offer)
+
+      const sdpResponse = await fetch(
+        "https://api.openai.com/v1/realtime/calls",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${clientSecret}`,
+            "Content-Type": "application/sdp",
+          },
+          body: offer.sdp,
+        }
+      )
+
+      if (!sdpResponse.ok) {
+        throw new Error("Lucy voice connection could not be completed.")
+      }
+
+      const answerSdp = await sdpResponse.text()
+
+      await peerConnection.setRemoteDescription({
+        type: "answer",
+        sdp: answerSdp,
+      })
+
+      setVoiceStatus("listening")
+    } catch (error: any) {
+      stopLucyVoiceSession()
+      setVoiceStatus("error")
+
+      await appendTypedAssistantReply(
+        error?.message ||
+        "Lucy voice could not be started. Please try again in a moment."
+      )
+
+      window.setTimeout(() => {
+        setVoiceStatus("idle")
+      }, 1800)
     }
   }
 
@@ -722,6 +939,26 @@ export default function DashboardFlightAttendant({
                   placeholder={config.placeholder}
                   className="min-h-[44px] flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-100"
                 />
+
+                {tier !== "free" && (
+                  <button
+                    type="button"
+                    onClick={startLucyVoiceSession}
+                    disabled={chatLoading || assistantTyping}
+                    className={cn(
+                      "inline-flex min-h-[44px] items-center justify-center rounded-xl border px-3 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-70",
+                      voiceStatus === "idle"
+                        ? "border-cyan-200 bg-white text-cyan-700 hover:bg-cyan-50"
+                        : "border-cyan-300 bg-cyan-50 text-cyan-800"
+                    )}
+                  >
+                    {voiceStatus === "idle"
+                      ? "Voice"
+                      : voiceStatus === "connecting"
+                        ? "..."
+                        : "End"}
+                  </button>
+                )}
 
                 <button
                   type="submit"
