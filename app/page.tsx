@@ -203,30 +203,21 @@ export default function HomePage() {
             transition={{ delay: 0.38, duration: 0.85, ease: "easeOut" }}
             className="mt-10 w-full max-w-6xl sm:mt-16"
           >
-            <div className="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/90 shadow-[0_25px_70px_rgba(15,23,42,0.08)] backdrop-blur">
-              <div className="grid gap-0 lg:grid-cols-[0.95fr_1.05fr]">
-                <div className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-8 text-white sm:p-10">
-                  <motion.div
-                    animate={{ x: [0, 20, 0], y: [0, -12, 0] }}
-                    transition={{ duration: 7.2, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute right-[-18px] top-[-18px] h-40 w-40 rounded-full bg-sky-500/10 blur-3xl"
-                  />
-                  <motion.div
-                    animate={{ x: [0, -14, 0], y: [0, 16, 0] }}
-                    transition={{ duration: 8.4, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute bottom-[-28px] left-[-18px] h-44 w-44 rounded-full bg-indigo-500/10 blur-3xl"
-                  />
+            <div className="overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-[0_25px_70px_rgba(15,23,42,0.08)]">
+              <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
+                <div className="relative p-5 text-center sm:p-10">
+                  <div className="absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-sky-50/70" />
 
                   <div className="relative">
-                    <p className="text-xs font-medium tracking-[0.16em] text-slate-300 uppercase">
+                    <p className="text-xs font-medium tracking-[0.16em] text-slate-500 uppercase">
                       Live Intelligence Snapshot
                     </p>
 
-                    <h2 className="mt-4 text-2xl font-bold tracking-tight text-white sm:mt-6 sm:text-4xl">
+                    <h2 className="mt-4 text-2xl font-bold tracking-tight text-slate-950 sm:mt-6 sm:text-4xl">
                       Read the market before you book.
                     </h2>
 
-                    <p className="mt-3 max-w-xl text-sm leading-6 text-slate-300 sm:mt-4 sm:leading-7 sm:text-base">
+                    <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-600 sm:mt-4 sm:leading-7 sm:text-base">
                       Skysirv™ transforms noisy fare movement into a calmer, more
                       structured decision layer — so travelers know when to act,
                       when to wait, and what the market is really saying.
@@ -243,13 +234,13 @@ export default function HomePage() {
                 <div className="relative p-5 sm:p-10">
                   <div className="absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-sky-50/70" />
 
-                  <div className="relative">
+                  <div className="relative text-center">
                     <p className="text-xs font-medium tracking-[0.16em] text-slate-500 uppercase">
                       Example route
                     </p>
 
                     <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                      <div className="flex items-start justify-between gap-6">
+                      <div className="flex items-start justify-between gap-6 text-left">
                         <div>
                           <h3 className="text-2xl font-semibold tracking-tight text-slate-950">
                             BOS → CDG
