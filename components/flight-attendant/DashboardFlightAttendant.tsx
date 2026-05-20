@@ -9,10 +9,30 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 type DashboardLucyTier = "free" | "pro" | "business"
 
+type DashboardRouteContext = {
+  id?: string
+  origin: string
+  destination: string
+  departureDate?: string | null
+  routeLabel?: string
+  latestPrice?: number | null
+  averagePrice?: number | null
+  bookingSignal?: string | null
+  recommendedFlights?: Array<{
+    airline?: string | null
+    airlineName?: string | null
+    flightNumber?: string | null
+    price?: number | null
+    currency?: string | null
+    stopCount?: number | null
+  }>
+}
+
 type DashboardFlightAttendantProps = {
   tier: DashboardLucyTier
   placement?: "inline" | "floating"
   defaultOpen?: boolean
+  dashboardRoutes?: DashboardRouteContext[]
 }
 
 type FlightAttendantMessage = {
@@ -285,6 +305,7 @@ export default function DashboardFlightAttendant({
   tier,
   placement = "floating",
   defaultOpen = false,
+  dashboardRoutes = [],
 }: DashboardFlightAttendantProps) {
   const config = tierConfig[tier]
 
@@ -1036,6 +1057,7 @@ export default function DashboardFlightAttendant({
         body: JSON.stringify({
           message,
           tier,
+          dashboardRoutes,
           messages: [...messages, userMessage].slice(-10).map((item) => ({
             role: item.role,
             content: item.text,

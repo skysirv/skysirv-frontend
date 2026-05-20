@@ -1239,6 +1239,29 @@ export default function ProDashboardPage() {
                   tier="pro"
                   placement="inline"
                   defaultOpen
+                  dashboardRoutes={watchlist.map((route) => ({
+                    id: route.id,
+                    origin: route.origin || "",
+                    destination: route.destination || "",
+                    departureDate: route.departure_date || null,
+                    routeLabel:
+                      route.origin && route.destination
+                        ? `${route.origin} → ${route.destination}`
+                        : route.route || undefined,
+                    latestPrice: route.latest_price ?? null,
+                    averagePrice: route.avg_price ?? null,
+                    bookingSignal: route.booking_signal ?? null,
+                    recommendedFlights: Array.isArray(route.recommended_flights)
+                      ? route.recommended_flights.map((flight) => ({
+                        airline: flight.airline ?? null,
+                        airlineName: null,
+                        flightNumber: flight.flightNumber ?? null,
+                        price: flight.price ?? null,
+                        currency: flight.currency ?? null,
+                        stopCount: null,
+                      }))
+                      : [],
+                  }))}
                 />
               </div>
             </section>
