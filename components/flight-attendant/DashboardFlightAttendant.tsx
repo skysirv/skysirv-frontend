@@ -799,6 +799,7 @@ export default function DashboardFlightAttendant({
             data.transcript.trim()
           ) {
             const completedTranscript = data.transcript.trim()
+            suppressNextVoiceAssistantReplyRef.current = false
 
             if (completedTranscript.length < 3) {
               activeUserVoiceMessageId = null
