@@ -865,16 +865,39 @@ export default function DashboardFlightAttendant({
               activeAssistantVoiceMessageId =
                 existingEmptyAssistantMessage?.id || createMessageId()
 
-              if (!existingEmptyAssistantMessage) {
-                setMessages((prev) => [
-                  ...prev,
-                  {
-                    id: activeAssistantVoiceMessageId!,
-                    role: "assistant",
-                    label: "Lucy",
-                    text: "",
-                  },
-                ])
+              if (!activeUserVoiceMessageId) {
+                activeUserVoiceMessageId = createMessageId()
+
+                setMessages((prev) => {
+                  const lastMessage = prev[prev.length - 1]
+
+                  if (
+                    lastMessage?.role === "assistant" &&
+                    lastMessage.label === "Lucy" &&
+                    !lastMessage.text.trim()
+                  ) {
+                    return [
+                      ...prev.slice(0, -1),
+                      {
+                        id: activeUserVoiceMessageId!,
+                        role: "user",
+                        label: "You",
+                        text: "",
+                      },
+                      lastMessage,
+                    ]
+                  }
+
+                  return [
+                    ...prev,
+                    {
+                      id: activeUserVoiceMessageId!,
+                      role: "user",
+                      label: "You",
+                      text: "",
+                    },
+                  ]
+                })
               }
             }
 
@@ -894,6 +917,7 @@ export default function DashboardFlightAttendant({
 
           if (data?.type === "response.output_audio_transcript.done") {
             activeAssistantVoiceMessageId = null
+            activeUserVoiceMessageId = null
             setVoiceStatus("listening")
           }
 
