@@ -746,19 +746,6 @@ export default function DashboardFlightAttendant({
             ]
           })
 
-          const realtimeDataChannel = realtimeDataChannelRef.current
-
-          if (realtimeDataChannel?.readyState === "open") {
-            realtimeDataChannel.send(
-              JSON.stringify({
-                type: "response.create",
-                response: {
-                  instructions: `Say exactly this and nothing else: ${confirmationText}`,
-                },
-              })
-            )
-          }
-
         } catch {
           // Ignore malformed realtime tool arguments.
         }
@@ -863,9 +850,6 @@ export default function DashboardFlightAttendant({
             data?.type === "response.output_audio_transcript.delta" &&
             typeof data.delta === "string"
           ) {
-            if (pendingLucyAction) {
-              return
-            }
 
             if (!activeAssistantVoiceMessageId) {
               const existingEmptyAssistantMessage = messages
