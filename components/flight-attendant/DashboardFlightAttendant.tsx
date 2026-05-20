@@ -864,6 +864,7 @@ export default function DashboardFlightAttendant({
               pendingLucyActionRef.current = null
               setPendingLucyAction(null)
               suppressNextVoiceAssistantReplyRef.current = true
+              activeAssistantVoiceMessageId = null
 
               window.setTimeout(() => {
                 handleConfirmPendingLucyAction(actionToConfirm, token)
@@ -929,11 +930,19 @@ export default function DashboardFlightAttendant({
           if (data?.type === "response.output_audio_transcript.done") {
             activeAssistantVoiceMessageId = null
             activeUserVoiceMessageId = null
+
+            if (!pendingLucyActionRef.current) {
+              suppressNextVoiceAssistantReplyRef.current = false
+            }
+
             setVoiceStatus("listening")
           }
 
           if (data?.type === "input_audio_buffer.speech_started") {
-            suppressNextVoiceAssistantReplyRef.current = false
+            suppressNextVoiceAssistantReplyRef.current = Boolean(
+              pendingLucyActionRef.current
+            )
+
             activeAssistantVoiceMessageId = null
 
             activeUserVoiceMessageId = createMessageId()
