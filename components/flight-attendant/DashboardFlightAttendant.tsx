@@ -622,6 +622,20 @@ export default function DashboardFlightAttendant({
     setVoiceStatus("idle")
   }
 
+  function speakLocalLucyVoice(text: string) {
+    if (typeof window === "undefined") return
+    if (!("speechSynthesis" in window)) return
+
+    window.speechSynthesis.cancel()
+
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.rate = 1
+    utterance.pitch = 1
+    utterance.volume = 1
+
+    window.speechSynthesis.speak(utterance)
+  }
+
   async function startLucyVoiceSession() {
     if (tier === "free") {
       await appendTypedAssistantReply(
@@ -770,6 +784,8 @@ export default function DashboardFlightAttendant({
               },
             ]
           })
+
+          speakLocalLucyVoice(confirmationText)
 
         } catch {
           // Ignore malformed realtime tool arguments.
