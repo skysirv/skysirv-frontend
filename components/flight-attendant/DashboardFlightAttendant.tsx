@@ -827,6 +827,14 @@ export default function DashboardFlightAttendant({
             suppressNextVoiceAssistantReplyRef.current = false
 
             if (completedTranscript.length < 3) {
+              const emptyUserMessageId = activeUserVoiceMessageId
+
+              if (emptyUserMessageId) {
+                setMessages((prev) =>
+                  prev.filter((message) => message.id !== emptyUserMessageId)
+                )
+              }
+
               activeUserVoiceMessageId = null
               return
             }
@@ -927,6 +935,19 @@ export default function DashboardFlightAttendant({
           if (data?.type === "input_audio_buffer.speech_started") {
             suppressNextVoiceAssistantReplyRef.current = false
             activeAssistantVoiceMessageId = null
+
+            activeUserVoiceMessageId = createMessageId()
+
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: activeUserVoiceMessageId!,
+                role: "user",
+                label: "You",
+                text: "",
+              },
+            ])
+
             setVoiceStatus("listening")
           }
 
