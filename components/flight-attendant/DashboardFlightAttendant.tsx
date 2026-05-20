@@ -137,7 +137,7 @@ const tierConfig: Record<
     title: "Pro Flight Attendant",
     welcome:
       "Hi, I’m Lucy, your Skysirv Flight Attendant. I can help explain your routes, fare timing, Skyscore, watchlist signals, and booking confidence.",
-    placeholder: "Ask Lucy about your route signals...",
+    placeholder: "Ask Lucy about your trip...",
   },
   business: {
     badge: "Advanced",
@@ -1179,7 +1179,7 @@ export default function DashboardFlightAttendant({
           <div
             onClick={expanded ? (event) => event.stopPropagation() : undefined}
             className={cn(
-              "overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white text-slate-950 shadow-sm",
+              "overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#050b18] text-white shadow-[0_24px_70px_rgba(2,6,23,0.28)]",
               expanded
                 ? "flex h-[min(760px,calc(100vh-3rem))] w-full max-w-3xl flex-col shadow-2xl"
                 : placement === "inline"
@@ -1187,22 +1187,30 @@ export default function DashboardFlightAttendant({
                   : "w-[390px]"
             )}
           >
-            <div className="border-b border-slate-200 bg-slate-50/80 px-5 py-4">
-              <div className="flex items-start justify-between gap-4">
+            <div className="border-b border-white/10 bg-[#050b18] px-5 py-2">
+              <div className="grid grid-cols-[1fr_auto_auto] items-center gap-2">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-700">
-                    {config.badge}
+                  <p className="text-medium font-semibold tracking-[-0.03em] text-white">
+                    Lucy
                   </p>
-                  <p className="mt-1 text-sm text-slate-600">
-                    {config.title}
+                  <p className="mt-1 text-sm text-slate-400">
+                    Skysirv Flight Attendant™
                   </p>
+                </div>
+
+                <div className="hidden -translate-x-2 items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1.5 text-sm font-semibold text-emerald-200 sm:inline-flex">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300 opacity-40" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-300" />
+                  </span>
+                  Online
                 </div>
 
                 <button
                   type="button"
                   onClick={() => setExpanded((current) => !current)}
                   aria-label={expanded ? "Close expanded Lucy chat" : "Expand Lucy chat"}
-                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-700"
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 transition hover:border-cyan-300/40 hover:bg-cyan-300/10 hover:text-cyan-100"
                 >
                   {expanded ? (
                     <span className="text-lg leading-none">×</span>
@@ -1228,7 +1236,7 @@ export default function DashboardFlightAttendant({
 
             <div
               className={cn(
-                "overflow-y-auto px-5 py-4",
+                "overflow-y-auto bg-[#071120] px-5 py-4 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/10 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-300/20",
                 expanded
                   ? "min-h-0 flex-1"
                   : placement === "inline"
@@ -1236,7 +1244,7 @@ export default function DashboardFlightAttendant({
                     : "h-[360px]"
               )}
             >
-              <div className="space-y-4">
+              <div className="space-y-5 pb-2">
                 {messages.map((message) => (
                   <AssistantBubble
                     key={message.id}
@@ -1253,16 +1261,16 @@ export default function DashboardFlightAttendant({
             </div>
 
             {authRequired && (
-              <div className="border-t border-slate-200 bg-cyan-50 px-5 py-4">
+              <div className="border-t border-white/10 bg-cyan-300/10 px-5 py-4">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="text-xs leading-5 text-slate-600">
+                  <p className="text-xs leading-5 text-slate-300">
                     Sign in again to keep Lucy connected to your account.
                   </p>
 
                   <button
                     type="button"
                     onClick={() => setAuthModalOpen(true)}
-                    className="shrink-0 rounded-full border border-cyan-200 bg-white px-3 py-1.5 text-xs font-semibold text-cyan-700 transition hover:bg-cyan-50"
+                    className="shrink-0 rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold text-cyan-100 transition hover:bg-cyan-300/20"
                   >
                     Sign in
                   </button>
@@ -1272,16 +1280,50 @@ export default function DashboardFlightAttendant({
 
             <form
               onSubmit={handleSendFlightAttendantMessage}
-              className="border-t border-slate-200 bg-slate-50/70 p-4"
+              className="border-t border-white/10 bg-[#050b18] p-4"
             >
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={chatInput}
-                  onChange={(event) => setChatInput(event.target.value)}
-                  placeholder={config.placeholder}
-                  className="min-h-[44px] flex-1 rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-100"
-                />
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    value={chatInput}
+                    onChange={(event) => setChatInput(event.target.value)}
+                    placeholder={config.placeholder}
+                    className="min-h-[46px] w-full rounded-full border border-white/10 bg-white/[0.06] px-4 pr-14 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-300/40 focus:ring-2 focus:ring-cyan-300/10"
+                  />
+
+                  <button
+                    type="submit"
+                    disabled={chatLoading || assistantTyping || !chatInput.trim()}
+                    className="absolute right-1.5 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-cyan-300 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {chatLoading || assistantTyping ? (
+                      "…"
+                    ) : (
+                      <svg
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                        className="block h-5 w-5 -translate-x-[1px] translate-y-[1px] -rotate-12"
+                        fill="none"
+                      >
+                        <path
+                          d="M21 3L10.5 13.5"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M21 3L14.5 21L10.5 13.5L3 9.5L21 3Z"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                </div>
 
                 {tier !== "free" && (
                   <button
@@ -1289,27 +1331,31 @@ export default function DashboardFlightAttendant({
                     onClick={startLucyVoiceSession}
                     disabled={chatLoading || assistantTyping}
                     className={cn(
-                      "inline-flex min-h-[44px] items-center justify-center rounded-xl border px-3 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-70",
+                      "inline-flex min-h-[46px] shrink-0 items-center justify-center rounded-full border px-5 text-sm font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition disabled:cursor-not-allowed disabled:opacity-70",
                       voiceStatus === "idle"
-                        ? "border-cyan-200 bg-white text-cyan-700 hover:bg-cyan-50"
-                        : "border-cyan-300 bg-cyan-50 text-cyan-800"
+                        ? "border-white/10 bg-white/[0.06] text-cyan-200 hover:border-cyan-300/40 hover:bg-cyan-300/10 hover:text-cyan-100"
+                        : "border-cyan-300/40 bg-cyan-300/10 text-cyan-100"
                     )}
                   >
+                    <span className="mr-2 inline-flex h-5 items-center gap-0.5" aria-hidden="true">
+                      <span className={cn("h-1 w-0.5 rounded-full bg-current", voiceStatus !== "idle" && "animate-pulse")} />
+                      <span className={cn("h-3 w-0.5 rounded-full bg-current", voiceStatus !== "idle" && "animate-pulse")} />
+                      <span className={cn("h-5 w-0.5 rounded-full bg-current", voiceStatus !== "idle" && "animate-pulse")} />
+                      <span className={cn("h-3 w-0.5 rounded-full bg-current", voiceStatus !== "idle" && "animate-pulse")} />
+                      <span className={cn("h-1 w-0.5 rounded-full bg-current", voiceStatus !== "idle" && "animate-pulse")} />
+                    </span>
+
                     {voiceStatus === "idle"
-                      ? "Voice"
+                      ? "Chat"
                       : voiceStatus === "connecting"
-                        ? "..."
-                        : "End"}
+                        ? "Connecting"
+                        : voiceStatus === "listening"
+                          ? "Listening"
+                          : voiceStatus === "speaking"
+                            ? "Speaking"
+                            : "End"}
                   </button>
                 )}
-
-                <button
-                  type="submit"
-                  disabled={chatLoading || assistantTyping || !chatInput.trim()}
-                  className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-100"
-                >
-                  {chatLoading ? "..." : assistantTyping ? "..." : "Send"}
-                </button>
               </div>
             </form>
           </div>
@@ -1375,16 +1421,16 @@ function AssistantBubble({
     >
       <div
         className={cn(
-          "max-w-[86%] rounded-2xl border px-4 py-3",
+          "max-w-[86%] rounded-[1.4rem] border px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.22)] backdrop-blur-xl",
           align === "right"
-            ? "border-cyan-200 bg-cyan-50"
-            : "border-slate-200 bg-slate-50"
+            ? "border-cyan-300/20 bg-[linear-gradient(135deg,rgba(34,211,238,0.16),rgba(15,23,42,0.92))]"
+            : "border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(15,23,42,0.88))]"
         )}
       >
-        <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+        <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
           {label}
         </p>
-        <p className="whitespace-pre-line text-sm leading-6 text-slate-700">
+        <p className="whitespace-pre-line text-sm leading-6 text-slate-100">
           {cleanText}
         </p>
       </div>
@@ -1395,19 +1441,19 @@ function AssistantBubble({
 function ThinkingDotsBubble() {
   return (
     <div className="flex justify-start">
-      <div className="max-w-[86%] rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+      <div className="max-w-[86%] rounded-[1.4rem] border border-white/10 bg-white/[0.06] px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
           Lucy
         </p>
 
         <div className="flex items-center gap-1.5 py-1">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-slate-500" />
+          <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300" />
           <span
-            className="h-2 w-2 animate-pulse rounded-full bg-slate-500"
+            className="h-2 w-2 animate-pulse rounded-full bg-cyan-300"
             style={{ animationDelay: "120ms" }}
           />
           <span
-            className="h-2 w-2 animate-pulse rounded-full bg-slate-500"
+            className="h-2 w-2 animate-pulse rounded-full bg-cyan-300"
             style={{ animationDelay: "240ms" }}
           />
         </div>
