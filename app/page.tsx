@@ -7,6 +7,7 @@ import AuthModal from "@/components/auth/AuthModal"
 import CreateAccountForm from "@/components/auth/CreateAccountForm"
 import TestimonialsSection from "@/components/home/TestimonialsSection"
 import FeaturedInSection from "@/components/home/FeaturedInSection"
+import SmsOptInModal from "@/components/sms/SmsOptInModal"
 
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
@@ -830,6 +831,8 @@ export default function HomePage() {
           />
         )}
       </AuthModal>
+
+      <SmsOptInModal sourcePage="homepage" delayMs={4200} />
     </>
   )
 }
