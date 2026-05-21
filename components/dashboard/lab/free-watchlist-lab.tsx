@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { getAirportByCode } from "@/lib/airports/major-airports"
+import { getAirlineDisplayName } from "@/lib/airlines/airlines"
 
 type ItinerarySegment = {
   origin?: string | null
@@ -16,6 +17,9 @@ type ItinerarySegment = {
 
 type RecommendedFlight = {
   airline?: string | null
+  airlineName?: string | null
+  airlineLogoSymbolUrl?: string | null
+  airlineLogoLockupUrl?: string | null
   flightNumber?: string | null
   price?: number | null
   currency?: string | null
@@ -225,13 +229,45 @@ export default function FreeWatchlistLab({
                                   onClick={() => openBasicContext(route, flight)}
                                   className="flex w-full min-w-0 items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-left transition hover:border-cyan-200 hover:bg-white"
                                 >
-                                  <span className="min-w-0">
-                                    <span className="block truncate text-sm font-medium text-slate-700">
-                                      {getFlightLabel(flight)}
-                                    </span>
+                                  <span className="flex min-w-0 items-center gap-3">
+                                    {getFlightLogoUrl(flight) ? (
+                                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white p-1.5">
+                                        <img
+                                          src={getFlightLogoUrl(flight) || ""}
+                                          alt={`${getFlightLabel(flight)} logo`}
+                                          className="h-full w-full object-contain"
+                                          onError={(event) => {
+                                            event.currentTarget.style.display = "none"
+                                          }}
+                                        />
+                                      </span>
+                                    ) : (
+                                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400">
+                                        <svg
+                                          viewBox="0 0 24 24"
+                                          aria-hidden="true"
+                                          className="h-4 w-4"
+                                          fill="none"
+                                        >
+                                          <path
+                                            d="M10.8 13.2L3 10.4V8.8l7.8 1.1L18 3h2l-4.2 8.1L21 12.4V14l-6.3.7L12.3 21h-1.7l.5-6.1L6 17.4v-1.6l4.8-2.6Z"
+                                            stroke="currentColor"
+                                            strokeWidth="1.6"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                          />
+                                        </svg>
+                                      </span>
+                                    )}
 
-                                    <span className="mt-0.5 block truncate text-xs text-slate-500">
-                                      {getItineraryRouteLabel(flight)}
+                                    <span className="min-w-0">
+                                      <span className="block truncate text-sm font-medium text-slate-700">
+                                        {getFlightLabel(flight)}
+                                      </span>
+
+                                      <span className="mt-0.5 block truncate text-xs text-slate-500">
+                                        {getFlightDetailLabel(flight)}
+                                      </span>
                                     </span>
                                   </span>
 
@@ -591,36 +627,12 @@ function normalizeRecommendedFlights(route: WatchlistRoute): RecommendedFlight[]
   return []
 }
 
-const airlineNamesByCode: Record<string, string> = {
-  AA: "American Airlines",
-  AC: "Air Canada",
-  AF: "Air France",
-  AM: "Aeromexico",
-  AV: "Avianca",
-  BA: "British Airways",
-  B6: "JetBlue",
-  BR: "EVA Air",
-  CM: "Copa Airlines",
-  DL: "Delta Air Lines",
-  EK: "Emirates",
-  IB: "Iberia",
-  KL: "KLM",
-  LA: "LATAM Airlines",
-  LH: "Lufthansa",
-  QR: "Qatar Airways",
-  TK: "Turkish Airlines",
-  UA: "United Airlines",
-  VS: "Virgin Atlantic",
+function getAirlineDisplay(value?: string | null) {
+  return getAirlineDisplayName(value)
 }
 
-function getAirlineDisplay(value?: string | null) {
-  const raw = value?.trim()
-
-  if (!raw) return "Available fare"
-
-  const normalizedCode = raw.toUpperCase()
-
-  return airlineNamesByCode[normalizedCode] ?? raw
+function getFlightLogoUrl(flight: RecommendedFlight) {
+  return flight.airlineLogoSymbolUrl || flight.airlineLogoLockupUrl || null
 }
 
 function normalizeFlightNumberForCarrier(
@@ -710,17 +722,32 @@ function getPrimarySegmentLabel(flight: RecommendedFlight) {
 function getFlightLabel(flight: RecommendedFlight) {
   const primarySegmentLabel = getPrimarySegmentLabel(flight)
   const carrierCode = primarySegmentLabel.split(" ")[0]
-  const airline = getAirlineDisplay(carrierCode || flight.airline)
+
+  return getAirlineDisplay(carrierCode || flight.airline)
+}
+
+function getFlightDetailLabel(flight: RecommendedFlight) {
+  const primarySegmentLabel = getPrimarySegmentLabel(flight)
+  const carrierCode = primarySegmentLabel.split(" ")[0]
 
   const segments = Array.isArray(flight.itinerarySegments)
     ? flight.itinerarySegments
     : []
 
+  const visibleFlightNumber = normalizeFlightNumberForCarrier(
+    flight.flightNumber || primarySegmentLabel,
+    flight.airline || carrierCode
+  )
+
   if (segments.length > 1) {
-    return `${airline} · ${segments.length} segments`
+    return visibleFlightNumber
+      ? `Flight ${visibleFlightNumber} · ${segments.length} segments`
+      : `${segments.length} segments`
   }
 
-  return `${airline} · ${primarySegmentLabel} · Direct`
+  return visibleFlightNumber
+    ? `Flight ${visibleFlightNumber} · Direct itinerary`
+    : "Direct itinerary"
 }
 
 function getItineraryRouteLabel(flight: RecommendedFlight) {

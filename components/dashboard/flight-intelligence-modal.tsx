@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 import { getAirportByCode } from "@/lib/airports/major-airports"
+import { getAirlineDisplayName } from "@/lib/airlines/airlines"
 
 type ItinerarySegment = {
   origin?: string | null
@@ -149,36 +150,8 @@ function getSignalDisplay(volatility?: string | null) {
   return "Volatile"
 }
 
-const airlineNamesByCode: Record<string, string> = {
-  AA: "American Airlines",
-  AC: "Air Canada",
-  AF: "Air France",
-  AM: "Aeromexico",
-  AV: "Avianca",
-  BA: "British Airways",
-  B6: "JetBlue",
-  BR: "EVA Air",
-  CM: "Copa Airlines",
-  DL: "Delta Air Lines",
-  EK: "Emirates",
-  IB: "Iberia",
-  KL: "KLM",
-  LA: "LATAM Airlines",
-  LH: "Lufthansa",
-  QR: "Qatar Airways",
-  TK: "Turkish Airlines",
-  UA: "United Airlines",
-  VS: "Virgin Atlantic",
-}
-
 function getAirlineDisplay(value?: string | null) {
-  const raw = value?.trim()
-
-  if (!raw) return "Airline pending"
-
-  const normalizedCode = raw.toUpperCase()
-
-  return airlineNamesByCode[normalizedCode] ?? raw
+  return getAirlineDisplayName(value)
 }
 
 function getSegmentCarrier(segment: ItinerarySegment) {

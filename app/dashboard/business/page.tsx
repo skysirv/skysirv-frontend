@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { getAuthToken } from "@/utils/auth-storage"
 import { AirportOption, searchAirports } from "@/lib/airports/major-airports"
+import { getAirlineDisplayName, normalizeAirlineCode } from "@/lib/airlines/airlines"
 
 import DashboardFlightAttendant from "@/components/flight-attendant/DashboardFlightAttendant"
 import RouteSearch from "@/components/dashboard/route-search"
@@ -111,10 +112,29 @@ type WatchlistRoute = {
   recommended_flights?:
   | {
     airline?: string | null
+    airlineName?: string | null
+    airlineLogoSymbolUrl?: string | null
+    airlineLogoLockupUrl?: string | null
     flightNumber?: string | null
     price?: number | null
     currency?: string | null
     capturedAt?: string | null
+    bookingSignal?: string | null
+    volatilityIndex?: string | null
+    stopCount?: number | null
+    itineraryKey?: string | null
+    itinerarySegments?:
+    | {
+      origin?: string | null
+      destination?: string | null
+      marketingCarrier?: string | null
+      operatingCarrier?: string | null
+      marketingFlightNumber?: string | null
+      operatingFlightNumber?: string | null
+      departureTime?: string | null
+      arrivalTime?: string | null
+    }[]
+    | null
   }[]
   | null
 }
@@ -1042,14 +1062,20 @@ export default function BusinessDashboardPage() {
                     averagePrice: route.avg_price ?? null,
                     bookingSignal: route.booking_signal ?? null,
                     recommendedFlights: Array.isArray(route.recommended_flights)
-                      ? route.recommended_flights.map((flight) => ({
-                        airline: flight.airline ?? null,
-                        airlineName: null,
-                        flightNumber: flight.flightNumber ?? null,
-                        price: flight.price ?? null,
-                        currency: flight.currency ?? null,
-                        stopCount: null,
-                      }))
+                      ? route.recommended_flights.map((flight) => {
+                        const airlineCode = normalizeAirlineCode(flight.airline)
+
+                        return {
+                          airline: airlineCode,
+                          airlineName: flight.airlineName ?? getAirlineDisplayName(airlineCode),
+                          airlineLogoSymbolUrl: flight.airlineLogoSymbolUrl ?? null,
+                          airlineLogoLockupUrl: flight.airlineLogoLockupUrl ?? null,
+                          flightNumber: flight.flightNumber ?? null,
+                          price: flight.price ?? null,
+                          currency: flight.currency ?? null,
+                          stopCount: flight.stopCount ?? null,
+                        }
+                      })
                       : [],
                   }))}
                 />

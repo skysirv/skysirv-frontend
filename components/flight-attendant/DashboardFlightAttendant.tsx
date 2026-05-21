@@ -21,6 +21,8 @@ type DashboardRouteContext = {
   recommendedFlights?: Array<{
     airline?: string | null
     airlineName?: string | null
+    airlineLogoSymbolUrl?: string | null
+    airlineLogoLockupUrl?: string | null
     flightNumber?: string | null
     price?: number | null
     currency?: string | null

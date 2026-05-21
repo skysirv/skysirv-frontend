@@ -1,6 +1,7 @@
 "use client"
 
 import { getAirportByCode } from "@/lib/airports/major-airports"
+import { getAirlineDisplayName, getAirlineTier } from "@/lib/airlines/airlines"
 
 interface WatchlistCardProps {
   origin?: string
@@ -49,140 +50,6 @@ export default function WatchlistCard({
 }: WatchlistCardProps) {
   function handleRemoveRoute() {
     onRemove?.()
-  }
-
-  const airlineReference: Record<
-    string,
-    {
-      name: string
-      tier: "major" | "secondary" | "unknown"
-    }
-  > = {
-    AA: { name: "American Airlines", tier: "major" },
-    AC: { name: "Air Canada", tier: "major" },
-    AF: { name: "Air France", tier: "major" },
-    AH: { name: "Air Algerie", tier: "secondary" },
-    AI: { name: "Air India", tier: "major" },
-    AK: { name: "AirAsia", tier: "secondary" },
-    AM: { name: "Aeromexico", tier: "major" },
-    AS: { name: "Alaska Airlines", tier: "major" },
-    AT: { name: "Royal Air Maroc", tier: "secondary" },
-    AV: { name: "Avianca", tier: "major" },
-    AY: { name: "Finnair", tier: "major" },
-
-    B6: { name: "JetBlue", tier: "major" },
-    BA: { name: "British Airways", tier: "major" },
-    BR: { name: "EVA Air", tier: "major" },
-    BT: { name: "airBaltic", tier: "secondary" },
-
-    CA: { name: "Air China", tier: "major" },
-    CI: { name: "China Airlines", tier: "major" },
-    CM: { name: "Copa Airlines", tier: "major" },
-    CX: { name: "Cathay Pacific", tier: "major" },
-    CZ: { name: "China Southern Airlines", tier: "major" },
-
-    DE: { name: "Condor", tier: "secondary" },
-    DL: { name: "Delta", tier: "major" },
-    DY: { name: "Norwegian Air Shuttle", tier: "secondary" },
-
-    EK: { name: "Emirates", tier: "major" },
-    ET: { name: "Ethiopian Airlines", tier: "major" },
-    EW: { name: "Eurowings", tier: "secondary" },
-    EY: { name: "Etihad Airways", tier: "major" },
-
-    F9: { name: "Frontier Airlines", tier: "secondary" },
-    FD: { name: "Thai AirAsia", tier: "secondary" },
-    FJ: { name: "Fiji Airways", tier: "secondary" },
-    FM: { name: "Shanghai Airlines", tier: "secondary" },
-    FR: { name: "Ryanair", tier: "secondary" },
-
-    G4: { name: "Allegiant Air", tier: "secondary" },
-    GA: { name: "Garuda Indonesia", tier: "major" },
-    GF: { name: "Gulf Air", tier: "secondary" },
-
-    HA: { name: "Hawaiian Airlines", tier: "secondary" },
-    HV: { name: "Transavia", tier: "secondary" },
-    HU: { name: "Hainan Airlines", tier: "major" },
-
-    IB: { name: "Iberia", tier: "major" },
-
-    JL: { name: "Japan Airlines", tier: "major" },
-    JU: { name: "Air Serbia", tier: "secondary" },
-
-    KE: { name: "Korean Air", tier: "major" },
-    KL: { name: "KLM", tier: "major" },
-    KP: { name: "ASKY Airlines", tier: "secondary" },
-    KQ: { name: "Kenya Airways", tier: "secondary" },
-    KU: { name: "Kuwait Airways", tier: "secondary" },
-
-    LA: { name: "LATAM Airlines Group", tier: "major" },
-    LH: { name: "Lufthansa", tier: "major" },
-    LO: { name: "LOT Polish", tier: "major" },
-    LR: { name: "Avianca Costa Rica", tier: "secondary" },
-    LX: { name: "SWISS", tier: "major" },
-    LY: { name: "EL AL", tier: "major" },
-
-    MH: { name: "Malaysia Airlines", tier: "major" },
-    MS: { name: "Egyptair", tier: "secondary" },
-    MU: { name: "China Eastern", tier: "major" },
-
-    NH: { name: "All Nippon Airways", tier: "major" },
-    NK: { name: "Spirit Airlines", tier: "secondary" },
-    NZ: { name: "Air New Zealand", tier: "major" },
-
-    OS: { name: "Austrian Airlines", tier: "major" },
-    OU: { name: "Croatia Airlines", tier: "secondary" },
-    OZ: { name: "Asiana Airlines", tier: "major" },
-
-    PK: { name: "PIA", tier: "secondary" },
-    PR: { name: "Philippine Airlines", tier: "secondary" },
-
-    QF: { name: "Qantas", tier: "major" },
-    QR: { name: "Qatar Airways", tier: "major" },
-    QZ: { name: "Indonesia AirAsia", tier: "secondary" },
-
-    RJ: { name: "Royal Jordanian", tier: "secondary" },
-    RO: { name: "Tarom", tier: "secondary" },
-
-    SA: { name: "South African Airways", tier: "secondary" },
-    SC: { name: "Shandong Airlines", tier: "secondary" },
-    SK: { name: "SAS Scandinavian", tier: "major" },
-    SL: { name: "Thai Lion Air", tier: "secondary" },
-    SQ: { name: "Singapore Airlines", tier: "major" },
-    SU: { name: "Aeroflot", tier: "secondary" },
-    SV: { name: "Saudia", tier: "major" },
-
-    TA: { name: "Avianca El Salvador", tier: "secondary" },
-    TG: { name: "THAI Airways", tier: "major" },
-    TK: { name: "Turkish Airlines", tier: "major" },
-    TP: { name: "TAP Air Portugal", tier: "major" },
-
-    U2: { name: "easyJet", tier: "secondary" },
-    UA: { name: "United Airlines", tier: "major" },
-    UL: { name: "SriLankan Airlines", tier: "secondary" },
-
-    VA: { name: "Virgin Australia", tier: "major" },
-    VJ: { name: "Vietjet", tier: "secondary" },
-    VN: { name: "Vietnam Airlines", tier: "major" },
-    VS: { name: "Virgin Atlantic", tier: "major" },
-    VY: { name: "Vueling", tier: "secondary" },
-
-    W6: { name: "Wizz Air", tier: "secondary" },
-    WN: { name: "Southwest Airlines", tier: "major" },
-    WS: { name: "WestJet", tier: "secondary" },
-    WY: { name: "Oman Air", tier: "secondary" },
-
-    ZH: { name: "Shenzhen Airlines", tier: "secondary" },
-  }
-
-  function getAirlineDisplayName(code?: string | null) {
-    const normalizedCode = code?.trim().toUpperCase()
-
-    if (!normalizedCode) {
-      return "Airline pending"
-    }
-
-    return airlineReference[normalizedCode]?.name ?? normalizedCode
   }
 
   const hasPrice = typeof latestPrice === "number"
@@ -264,22 +131,6 @@ export default function WatchlistCard({
 
   const airlineDisplay = getAirlineDisplayName(latestAirline)
 
-  const capturedTimeDisplay = latestCapturedAt
-    ? (() => {
-      const parsed = new Date(latestCapturedAt)
-
-      if (Number.isNaN(parsed.getTime())) {
-        return "Capture time pending"
-      }
-
-      return parsed.toLocaleString([], {
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-      })
-    })()
-    : "Capture time pending"
-
   const recommendedFlightsDisplay = (() => {
     if (!recommendedFlights || recommendedFlights.length === 0) {
       return []
@@ -301,17 +152,17 @@ export default function WatchlistCard({
 
     const majorFlights = sortedFlights.filter((flight) => {
       const code = flight.airline?.trim().toUpperCase() ?? ""
-      return airlineReference[code]?.tier === "major"
+      return getAirlineTier(code) === "major"
     })
 
     const secondaryFlights = sortedFlights.filter((flight) => {
       const code = flight.airline?.trim().toUpperCase() ?? ""
-      return airlineReference[code]?.tier === "secondary"
+      return getAirlineTier(code) === "secondary"
     })
 
     const unknownFlights = sortedFlights.filter((flight) => {
       const code = flight.airline?.trim().toUpperCase() ?? ""
-      return !airlineReference[code] || airlineReference[code]?.tier === "unknown"
+      return getAirlineTier(code) === "unknown"
     })
 
     const combined = [
