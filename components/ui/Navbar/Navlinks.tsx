@@ -263,6 +263,26 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
     setAccountMenuOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    if (!isSessionReady) return;
+
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get('signin') !== '1') return;
+
+    const cleanUrl = `${window.location.pathname}${window.location.hash}`;
+    window.history.replaceState({}, '', cleanUrl || '/');
+
+    setAccountMenuOpen(false);
+
+    if (isLoggedIn) {
+      window.location.href = isAdmin ? '/admin' : dashboardHref;
+      return;
+    }
+
+    setCreateAccountModalOpen(true);
+  }, [isSessionReady, isLoggedIn, isAdmin, dashboardHref]);
+
   return (
     <>
       <div className="pointer-events-auto pt-4 md:pt-5">
