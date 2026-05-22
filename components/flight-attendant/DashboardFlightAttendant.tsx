@@ -380,6 +380,169 @@ function getLucyActionLabel(action: LucyAction) {
   return `${action.origin} → ${action.destination}`
 }
 
+function normalizeFlightSearchText(value?: string | null) {
+  return String(value ?? "").toUpperCase().replace(/\s+/g, "")
+}
+
+function isVisibleFlightSaveRequest(message: string) {
+  const normalized = message.trim().toLowerCase()
+
+  if (!normalized) return false
+
+  const mentionsSave =
+    normalized.includes("save") ||
+    normalized.includes("saved flights") ||
+    normalized.includes("add it to my saved flights")
+
+  const mentionsFlight =
+    normalized.includes("flight") ||
+    normalized.includes("that one") ||
+    normalized.includes("this one") ||
+    normalized.includes("save it") ||
+    normalized.includes("save that")
+
+  return mentionsSave && mentionsFlight
+}
+
+function formatReadableFlightDate(value?: string | null) {
+  if (!value) return null
+
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) return value
+
+  return date.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  })
+}
+
+function formatVisibleFlightPrice(value?: number | null, currency = "USD") {
+  if (typeof value !== "number" || !Number.isFinite(value)) return null
+
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 0,
+  }).format(value)
+}
+
+function buildLocalVisibleFlightSaveAction({
+  message,
+  messages,
+  dashboardRoutes,
+}: {
+  message: string
+  messages: FlightAttendantMessage[]
+  dashboardRoutes: DashboardRouteContext[]
+}): LucySaveVisibleFlightAction | null {
+  if (!isVisibleFlightSaveRequest(message)) return null
+
+  const visibleFlights = dashboardRoutes.flatMap((route) => {
+    const origin = route.origin?.trim().toUpperCase()
+    const destination = route.destination?.trim().toUpperCase()
+
+    if (!origin || !destination) return []
+
+    const flights = Array.isArray(route.recommendedFlights)
+      ? route.recommendedFlights
+      : []
+
+    return flights
+      .filter((flight) => flight.flightNumber || flight.airline || flight.airlineName)
+      .map((flight) => ({
+        route,
+        origin,
+        destination,
+        flight,
+        normalizedFlightNumber: normalizeFlightSearchText(flight.flightNumber),
+      }))
+  })
+
+  if (!visibleFlights.length) return null
+
+  const recentMessages = [...messages].reverse()
+
+  const matchedFlight = recentMessages
+    .flatMap((item) => {
+      const messageText = normalizeFlightSearchText(item.text)
+
+      return visibleFlights.filter(
+        (candidate) =>
+          candidate.normalizedFlightNumber &&
+          messageText.includes(candidate.normalizedFlightNumber)
+      )
+    })
+    .at(0)
+
+  if (!matchedFlight) return null
+
+  const { route, origin, destination, flight } = matchedFlight
+
+  const airline =
+    typeof flight.airline === "string" && flight.airline.trim()
+      ? flight.airline.trim().toUpperCase()
+      : null
+
+  const airlineName =
+    typeof flight.airlineName === "string" && flight.airlineName.trim()
+      ? flight.airlineName.trim()
+      : null
+
+  const flightNumber =
+    typeof flight.flightNumber === "string" && flight.flightNumber.trim()
+      ? flight.flightNumber.trim().toUpperCase()
+      : null
+
+  const price =
+    typeof flight.price === "number" && Number.isFinite(flight.price)
+      ? flight.price
+      : null
+
+  const currency =
+    typeof flight.currency === "string" && flight.currency.trim()
+      ? flight.currency.trim().toUpperCase()
+      : "USD"
+
+  const departureDate =
+    typeof route.departureDate === "string" && route.departureDate.trim()
+      ? route.departureDate.trim()
+      : null
+
+  const flightLabel = `${airlineName || airline || "Flight"}${flightNumber ? ` ${flightNumber}` : ""
+    }`.trim()
+
+  const readableDate = formatReadableFlightDate(departureDate)
+  const priceLabel = formatVisibleFlightPrice(price, currency)
+
+  const detailParts = [
+    `${origin} → ${destination}`,
+    readableDate ? `on ${readableDate}` : null,
+    priceLabel ? `for ${priceLabel}` : null,
+  ].filter(Boolean)
+
+  const confirmationPrompt = `Save ${flightLabel} ${detailParts.join(
+    " "
+  )} to your Saved Flights?`
+
+  return {
+    type: "save_visible_flight",
+    status: "needs_confirmation",
+    origin,
+    destination,
+    departureDate,
+    airline,
+    airlineName,
+    flightNumber,
+    price,
+    currency,
+    flightLabel,
+    confirmationPrompt,
+  }
+}
+
 export default function DashboardFlightAttendant({
   tier,
   placement = "floating",
@@ -1219,6 +1382,23 @@ export default function DashboardFlightAttendant({
 
     if (pendingLucyAction && isAffirmativeRouteConfirmation(message)) {
       await handleConfirmPendingLucyAction(pendingLucyAction, token)
+      return
+    }
+
+    const localVisibleFlightSaveAction = buildLocalVisibleFlightSaveAction({
+      message,
+      messages,
+      dashboardRoutes,
+    })
+
+    if (localVisibleFlightSaveAction) {
+      setPendingLucyAction(localVisibleFlightSaveAction)
+
+      await appendTypedAssistantReply(
+        localVisibleFlightSaveAction.confirmationPrompt ||
+        "Would you like me to save this flight to your Saved Flights?"
+      )
+
       return
     }
 
