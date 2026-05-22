@@ -1412,6 +1412,10 @@ export default function DashboardFlightAttendant({
         recommendedFlightsCount: route.recommendedFlights?.length ?? 0,
         flightNumbers: route.recommendedFlights?.map((flight) => flight.flightNumber),
       })),
+      recentMessages: messages.slice(-6).map((item) => ({
+        role: item.role,
+        text: item.text,
+      })),
       matchedAction: localVisibleFlightSaveAction,
     })
 
