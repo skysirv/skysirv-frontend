@@ -419,10 +419,23 @@ export default function BusinessDashboardPage() {
       }
     }
 
+    function handleSavedFlightsUpdated() {
+      void loadSavedFlights()
+    }
+
+    window.addEventListener(
+      "skysirv:saved-flights-updated",
+      handleSavedFlightsUpdated
+    )
+
     loadSavedFlights()
 
     return () => {
       cancelled = true
+      window.removeEventListener(
+        "skysirv:saved-flights-updated",
+        handleSavedFlightsUpdated
+      )
     }
   }, [])
 

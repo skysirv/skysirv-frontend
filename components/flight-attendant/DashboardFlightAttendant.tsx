@@ -1175,6 +1175,29 @@ export default function DashboardFlightAttendant({
             const actionToConfirm = pendingLucyActionRef.current
 
             if (
+              actionToConfirm &&
+              isNegativeRouteConfirmation(completedTranscript)
+            ) {
+              pendingLucyActionRef.current = null
+              setPendingLucyAction(null)
+              suppressNextVoiceAssistantReplyRef.current = true
+              activeAssistantVoiceMessageId = null
+
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: createMessageId(),
+                  role: "assistant",
+                  label: "Lucy",
+                  text: "No problem — I won’t save that action.",
+                },
+              ])
+
+              activeUserVoiceMessageId = null
+              return
+            }
+
+            if (
               token &&
               actionToConfirm &&
               isAffirmativeRouteConfirmation(completedTranscript)
