@@ -790,14 +790,55 @@ export default function DashboardFlightAttendant({
 
         const data = await response.json().catch(() => null)
 
-        if (!response.ok) {
-          const message =
-            response.status === 409
-              ? "That flight is already in your Saved Flights."
-              : data?.error ||
-              "I couldn’t save that flight yet. Please try again in a moment."
+        if (action.type === "save_visible_flight") {
+          const response = await fetch(`${API_BASE_URL}/saved-flights`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              origin: action.origin,
+              destination: action.destination,
+              departureDate: action.departureDate ?? null,
+              airline: action.airline ?? null,
+              flightNumber: action.flightNumber ?? null,
+              price: action.price ?? null,
+              currency: action.currency ?? "USD",
+            }),
+          })
 
-          throw new Error(message)
+          const data = await response.json().catch(() => null)
+
+          if (!response.ok) {
+            if (response.status === 409) {
+              successReply = "That flight is already in your Saved Flights."
+            } else {
+              throw new Error(
+                data?.error ||
+                "I couldn’t save that flight yet. Please try again in a moment."
+              )
+            }
+          } else {
+            window.dispatchEvent(
+              new CustomEvent("skysirv:saved-flights-updated", {
+                detail: {
+                  origin: action.origin,
+                  destination: action.destination,
+                  departureDate: action.departureDate,
+                  airline: action.airline,
+                  airlineName: action.airlineName,
+                  flightNumber: action.flightNumber,
+                  price: action.price,
+                  currency: action.currency,
+                  result: data,
+                },
+              })
+            )
+
+            successReply = `Done — I saved ${action.flightLabel || action.flightNumber || "that flight"
+              } to your Saved Flights.`
+          }
         }
 
         window.dispatchEvent(
@@ -892,6 +933,7 @@ export default function DashboardFlightAttendant({
       }
 
       setPendingLucyAction(null)
+      pendingLucyActionRef.current = null
 
       await appendTypedAssistantReply(
         successReply || "Done — I saved that preference."
@@ -1424,22 +1466,6 @@ export default function DashboardFlightAttendant({
       message,
       messages,
       dashboardRoutes,
-    })
-
-    console.log("Lucy local save-flight intercept check:", {
-      message,
-      dashboardRoutesCount: dashboardRoutes.length,
-      routesWithFlights: dashboardRoutes.map((route) => ({
-        route: `${route.origin}-${route.destination}`,
-        departureDate: route.departureDate,
-        recommendedFlightsCount: route.recommendedFlights?.length ?? 0,
-        flightNumbers: route.recommendedFlights?.map((flight) => flight.flightNumber),
-      })),
-      recentMessages: messages.slice(-6).map((item) => ({
-        role: item.role,
-        text: item.text,
-      })),
-      matchedAction: localVisibleFlightSaveAction,
     })
 
     if (localVisibleFlightSaveAction) {
