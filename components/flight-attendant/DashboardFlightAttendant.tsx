@@ -366,6 +366,37 @@ function isNegativeRouteConfirmation(message: string) {
   )
 }
 
+function findRecentlyConfirmedVoiceRoute({
+  message,
+  confirmedRoutes,
+}: {
+  message: string
+  confirmedRoutes: Array<{
+    origin: string
+    destination: string
+    departureDate: string
+    routeLabel?: string
+    confirmedAt: number
+  }>
+}) {
+  const normalized = message.toLowerCase()
+
+  return confirmedRoutes.find((route) => {
+    const origin = route.origin.toLowerCase()
+    const destination = route.destination.toLowerCase()
+    const routeLabel = route.routeLabel?.toLowerCase() ?? ""
+
+    const routeMentioned =
+      normalized.includes(origin) ||
+      normalized.includes(destination) ||
+      (routeLabel && normalized.includes(routeLabel))
+
+    const recentlyConfirmed = Date.now() - route.confirmedAt < 10 * 60 * 1000
+
+    return routeMentioned && recentlyConfirmed
+  })
+}
+
 function getLucyActionLabel(action: LucyAction) {
   if (action.type === "save_first_name") {
     return action.firstName
@@ -591,6 +622,15 @@ export default function DashboardFlightAttendant({
   const realtimeAudioElementRef = useRef<HTMLAudioElement | null>(null)
   const realtimeDataChannelRef = useRef<RTCDataChannel | null>(null)
   const latestDashboardRoutesRef = useRef<DashboardRouteContext[]>(dashboardRoutes)
+  const confirmedVoiceWatchlistRoutesRef = useRef<
+    Array<{
+      origin: string
+      destination: string
+      departureDate: string
+      routeLabel?: string
+      confirmedAt: number
+    }>
+  >([])
 
   useEffect(() => {
     if (!open) return
@@ -773,6 +813,17 @@ export default function DashboardFlightAttendant({
             },
           })
         )
+
+        confirmedVoiceWatchlistRoutesRef.current = [
+          {
+            origin: action.origin,
+            destination: action.destination,
+            departureDate: action.departureDate,
+            routeLabel: action.routeLabel,
+            confirmedAt: Date.now(),
+          },
+          ...confirmedVoiceWatchlistRoutesRef.current,
+        ].slice(0, 10)
 
         successReply = "Done — it’s on your watchlist."
       }
@@ -1289,6 +1340,32 @@ export default function DashboardFlightAttendant({
             const token = getAuthToken()
 
             const actionToConfirm = pendingLucyActionRef.current
+
+            const recentlyConfirmedRoute = findRecentlyConfirmedVoiceRoute({
+              message: completedTranscript,
+              confirmedRoutes: confirmedVoiceWatchlistRoutesRef.current,
+            })
+
+            if (
+              recentlyConfirmedRoute &&
+              completedTranscript.toLowerCase().includes("watch")
+            ) {
+              suppressNextVoiceAssistantReplyRef.current = true
+              activeAssistantVoiceMessageId = null
+
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: createMessageId(),
+                  role: "assistant",
+                  label: "Lucy",
+                  text: `${recentlyConfirmedRoute.origin} → ${recentlyConfirmedRoute.destination} is on your watchlist.`,
+                },
+              ])
+
+              activeUserVoiceMessageId = null
+              return
+            }
 
             if (
               actionToConfirm &&
