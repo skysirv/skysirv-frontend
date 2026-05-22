@@ -1391,6 +1391,18 @@ export default function DashboardFlightAttendant({
       dashboardRoutes,
     })
 
+    console.log("Lucy local save-flight intercept check:", {
+      message,
+      dashboardRoutesCount: dashboardRoutes.length,
+      routesWithFlights: dashboardRoutes.map((route) => ({
+        route: `${route.origin}-${route.destination}`,
+        departureDate: route.departureDate,
+        recommendedFlightsCount: route.recommendedFlights?.length ?? 0,
+        flightNumbers: route.recommendedFlights?.map((flight) => flight.flightNumber),
+      })),
+      matchedAction: localVisibleFlightSaveAction,
+    })
+
     if (localVisibleFlightSaveAction) {
       setPendingLucyAction(localVisibleFlightSaveAction)
 
