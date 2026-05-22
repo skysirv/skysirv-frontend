@@ -360,7 +360,9 @@ function isNegativeRouteConfirmation(message: string) {
   return (
     /^(no|nope|cancel|not now)\b/.test(normalized) ||
     normalized.includes("do not add") ||
-    normalized.includes("don't add")
+    normalized.includes("don't add") ||
+    normalized.includes("do not save") ||
+    normalized.includes("don't save")
   )
 }
 
@@ -1136,16 +1138,83 @@ export default function DashboardFlightAttendant({
         }
       }
 
+      function handleRealtimeSaveVisibleFlightToolCall(item: any) {
+        if (item?.name !== "prepare_save_visible_flight") return
+
+        const rawArguments =
+          typeof item.arguments === "string" ? item.arguments : ""
+
+        if (!rawArguments) return
+
+        try {
+          const parsed = JSON.parse(rawArguments)
+
+          const parsedPrice =
+            typeof parsed.price === "number" ? parsed.price : Number(parsed.price)
+
+          const action = normalizeLucyAction({
+            type: "save_visible_flight",
+            status: "needs_confirmation",
+            origin: parsed.origin,
+            destination: parsed.destination,
+            departureDate: parsed.departureDate,
+            airline: parsed.airline,
+            airlineName: parsed.airlineName,
+            flightNumber: parsed.flightNumber,
+            price: Number.isFinite(parsedPrice) ? parsedPrice : null,
+            currency: parsed.currency,
+            flightLabel: parsed.flightLabel,
+            confirmationPrompt: parsed.confirmationPrompt,
+          })
+
+          if (!action || action.type !== "save_visible_flight") return
+
+          setPendingLucyAction(action)
+          pendingLucyActionRef.current = action
+          activeAssistantVoiceMessageId = null
+
+          const confirmationText =
+            action.confirmationPrompt ||
+            `Save ${action.flightLabel || action.flightNumber || "that flight"
+            } to your Saved Flights?`
+
+          setMessages((prev) => {
+            const lastMessage = prev[prev.length - 1]
+
+            if (
+              lastMessage?.role === "assistant" &&
+              lastMessage.text.trim() === confirmationText.trim()
+            ) {
+              return prev
+            }
+
+            return [
+              ...prev,
+              {
+                id: createMessageId(),
+                role: "assistant",
+                label: "Lucy",
+                text: confirmationText,
+              },
+            ]
+          })
+        } catch {
+          // Ignore malformed realtime save-flight tool arguments.
+        }
+      }
+
       dataChannel.addEventListener("message", (event) => {
         try {
           const data = JSON.parse(event.data)
 
           if (data?.type === "response.output_item.done") {
             handleRealtimeWatchlistToolCall(data.item)
+            handleRealtimeSaveVisibleFlightToolCall(data.item)
           }
 
           if (data?.type === "conversation.item.done") {
             handleRealtimeWatchlistToolCall(data.item)
+            handleRealtimeSaveVisibleFlightToolCall(data.item)
           }
 
           if (
