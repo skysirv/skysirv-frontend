@@ -993,9 +993,13 @@ export default function DashboardFlightAttendant({
       setPendingLucyAction(null)
       pendingLucyActionRef.current = null
 
-      await appendTypedAssistantReply(
-        successReply || "Done — I saved that preference."
-      )
+      const finalSuccessReply = successReply || "Done — I saved that preference."
+
+      await appendTypedAssistantReply(finalSuccessReply)
+
+      if (voiceStatus !== "idle") {
+        speakWithRealtimeLucyVoice(finalSuccessReply)
+      }
     } catch (error: any) {
       await appendTypedAssistantReply(
         error?.message ||
@@ -1038,6 +1042,28 @@ export default function DashboardFlightAttendant({
     utterance.volume = 1
 
     window.speechSynthesis.speak(utterance)
+  }
+
+  function speakWithRealtimeLucyVoice(text: string) {
+    const dataChannel = realtimeDataChannelRef.current
+
+    if (!dataChannel || dataChannel.readyState !== "open") return
+    if (!text.trim()) return
+
+    try {
+      dataChannel.send(
+        JSON.stringify({
+          type: "response.create",
+          response: {
+            instructions: `Say exactly this in Lucy's voice, in English, with no extra words: ${JSON.stringify(
+              text
+            )}`,
+          },
+        })
+      )
+    } catch {
+      // Ignore realtime speech errors.
+    }
   }
 
   async function startLucyVoiceSession() {
@@ -1189,6 +1215,8 @@ export default function DashboardFlightAttendant({
             ]
           })
 
+          speakWithRealtimeLucyVoice(confirmationText)
+
         } catch {
           // Ignore malformed realtime tool arguments.
         }
@@ -1254,6 +1282,9 @@ export default function DashboardFlightAttendant({
               },
             ]
           })
+
+          speakWithRealtimeLucyVoice(confirmationText)
+
         } catch {
           // Ignore malformed realtime save-flight tool arguments.
         }
