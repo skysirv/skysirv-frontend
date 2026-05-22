@@ -914,8 +914,6 @@ export default function DashboardFlightAttendant({
             ]
           })
 
-          speakLocalLucyVoice(confirmationText)
-
         } catch {
           // Ignore malformed realtime tool arguments.
         }
