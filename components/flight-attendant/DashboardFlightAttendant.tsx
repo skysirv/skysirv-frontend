@@ -78,11 +78,27 @@ type LucySaveFirstNameAction = {
   confirmationPrompt?: string
 }
 
+type LucySaveVisibleFlightAction = {
+  type: "save_visible_flight"
+  status: "needs_confirmation"
+  origin: string
+  destination: string
+  departureDate?: string | null
+  airline?: string | null
+  airlineName?: string | null
+  flightNumber?: string | null
+  price?: number | null
+  currency?: string | null
+  flightLabel?: string
+  confirmationPrompt?: string
+}
+
 type LucyAction =
   | LucyWatchlistAction
   | LucyPreferredAirportsAction
   | LucyPreferredRouteAction
   | LucySaveFirstNameAction
+  | LucySaveVisibleFlightAction
 
 type FlightAttendantApiResponse = {
   success?: boolean
@@ -256,6 +272,67 @@ function normalizeLucyAction(value: unknown): LucyAction | null {
       origin,
       destination,
       routeLabel: input.routeLabel,
+      confirmationPrompt: input.confirmationPrompt,
+    }
+  }
+
+  if (input.type === "save_visible_flight") {
+    const origin = input.origin?.trim().toUpperCase()
+    const destination = input.destination?.trim().toUpperCase()
+
+    if (!origin || !destination) return null
+    if (!/^[A-Z0-9]{3,4}$/.test(origin)) return null
+    if (!/^[A-Z0-9]{3,4}$/.test(destination)) return null
+    if (origin === destination) return null
+
+    const departureDate =
+      typeof input.departureDate === "string" && input.departureDate.trim()
+        ? input.departureDate.trim()
+        : null
+
+    const airline =
+      typeof input.airline === "string" && input.airline.trim()
+        ? input.airline.trim().toUpperCase()
+        : null
+
+    const airlineName =
+      typeof input.airlineName === "string" && input.airlineName.trim()
+        ? input.airlineName.trim()
+        : null
+
+    const flightNumber =
+      typeof input.flightNumber === "string" && input.flightNumber.trim()
+        ? input.flightNumber.trim().toUpperCase()
+        : null
+
+    const price =
+      typeof input.price === "number" && Number.isFinite(input.price)
+        ? input.price
+        : null
+
+    const currency =
+      typeof input.currency === "string" && input.currency.trim()
+        ? input.currency.trim().toUpperCase()
+        : "USD"
+
+    const flightLabel =
+      typeof input.flightLabel === "string" && input.flightLabel.trim()
+        ? input.flightLabel.trim()
+        : `${airlineName || airline || "Flight"}${flightNumber ? ` ${flightNumber}` : ""
+        }`
+
+    return {
+      type: "save_visible_flight",
+      status: "needs_confirmation",
+      origin,
+      destination,
+      departureDate,
+      airline,
+      airlineName,
+      flightNumber,
+      price,
+      currency,
+      flightLabel,
       confirmationPrompt: input.confirmationPrompt,
     }
   }
@@ -516,6 +593,56 @@ export default function DashboardFlightAttendant({
         )
 
         successReply = "Done — it’s on your watchlist."
+      }
+
+      if (action.type === "save_visible_flight") {
+        const response = await fetch(`${API_BASE_URL}/saved-flights`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            origin: action.origin,
+            destination: action.destination,
+            departureDate: action.departureDate ?? null,
+            airline: action.airline ?? null,
+            flightNumber: action.flightNumber ?? null,
+            price: action.price ?? null,
+            currency: action.currency ?? "USD",
+          }),
+        })
+
+        const data = await response.json().catch(() => null)
+
+        if (!response.ok) {
+          const message =
+            response.status === 409
+              ? "That flight is already in your Saved Flights."
+              : data?.error ||
+              "I couldn’t save that flight yet. Please try again in a moment."
+
+          throw new Error(message)
+        }
+
+        window.dispatchEvent(
+          new CustomEvent("skysirv:saved-flights-updated", {
+            detail: {
+              origin: action.origin,
+              destination: action.destination,
+              departureDate: action.departureDate,
+              airline: action.airline,
+              airlineName: action.airlineName,
+              flightNumber: action.flightNumber,
+              price: action.price,
+              currency: action.currency,
+              result: data,
+            },
+          })
+        )
+
+        successReply = `Done — I saved ${action.flightLabel || action.flightNumber || "that flight"
+          } to your Saved Flights.`
       }
 
       if (action.type === "save_preferred_airports") {
