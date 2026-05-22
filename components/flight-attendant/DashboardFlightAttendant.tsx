@@ -1318,9 +1318,57 @@ export default function DashboardFlightAttendant({
               suppressNextVoiceAssistantReplyRef.current = true
               activeAssistantVoiceMessageId = null
 
+              try {
+                realtimeDataChannelRef.current?.send(
+                  JSON.stringify({
+                    type: "response.cancel",
+                  })
+                )
+              } catch {
+                // Ignore cancel errors.
+              }
+
               window.setTimeout(() => {
                 handleConfirmPendingLucyAction(actionToConfirm, token)
               }, 0)
+
+              activeUserVoiceMessageId = null
+              return
+            }
+
+            const localVoiceSaveFlightAction = buildLocalVisibleFlightSaveAction({
+              message: completedTranscript,
+              messages,
+              dashboardRoutes,
+            })
+
+            if (localVoiceSaveFlightAction) {
+              setPendingLucyAction(localVoiceSaveFlightAction)
+              pendingLucyActionRef.current = localVoiceSaveFlightAction
+              suppressNextVoiceAssistantReplyRef.current = true
+              activeAssistantVoiceMessageId = null
+
+              try {
+                realtimeDataChannelRef.current?.send(
+                  JSON.stringify({
+                    type: "response.cancel",
+                  })
+                )
+              } catch {
+                // Ignore cancel errors.
+              }
+
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: createMessageId(),
+                  role: "assistant",
+                  label: "Lucy",
+                  text:
+                    localVoiceSaveFlightAction.confirmationPrompt ||
+                    "Would you like me to save this flight to your Saved Flights?",
+                },
+              ])
 
               activeUserVoiceMessageId = null
               return
