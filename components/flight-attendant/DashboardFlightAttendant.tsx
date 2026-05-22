@@ -590,6 +590,7 @@ export default function DashboardFlightAttendant({
   const realtimeLocalStreamRef = useRef<MediaStream | null>(null)
   const realtimeAudioElementRef = useRef<HTMLAudioElement | null>(null)
   const realtimeDataChannelRef = useRef<RTCDataChannel | null>(null)
+  const latestDashboardRoutesRef = useRef<DashboardRouteContext[]>(dashboardRoutes)
 
   useEffect(() => {
     if (!open) return
@@ -638,6 +639,10 @@ export default function DashboardFlightAttendant({
       }
     }
   }, [])
+
+  useEffect(() => {
+    latestDashboardRoutesRef.current = dashboardRoutes
+  }, [dashboardRoutes])
 
   async function typeAssistantReply(messageId: string, fullText: string) {
     setAssistantTyping(true)
@@ -1024,7 +1029,7 @@ export default function DashboardFlightAttendant({
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            dashboardRoutes,
+            dashboardRoutes: latestDashboardRoutesRef.current,
           }),
         }
       )
@@ -1339,7 +1344,7 @@ export default function DashboardFlightAttendant({
             const localVoiceSaveFlightAction = buildLocalVisibleFlightSaveAction({
               message: completedTranscript,
               messages,
-              dashboardRoutes,
+              dashboardRoutes: latestDashboardRoutesRef.current,
             })
 
             if (localVoiceSaveFlightAction) {
