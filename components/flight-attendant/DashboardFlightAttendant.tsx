@@ -469,11 +469,23 @@ function buildLocalVisibleFlightSaveAction({
     .flatMap((item) => {
       const messageText = normalizeFlightSearchText(item.text)
 
-      return visibleFlights.filter(
-        (candidate) =>
-          candidate.normalizedFlightNumber &&
-          messageText.includes(candidate.normalizedFlightNumber)
-      )
+      return visibleFlights.filter((candidate) => {
+        if (!candidate.normalizedFlightNumber) return false
+
+        const numericFlightNumber = candidate.normalizedFlightNumber.replace(
+          /^[A-Z]+/,
+          ""
+        )
+
+        return (
+          messageText.includes(candidate.normalizedFlightNumber) ||
+          Boolean(
+            numericFlightNumber &&
+            numericFlightNumber.length >= 2 &&
+            messageText.includes(numericFlightNumber)
+          )
+        )
+      })
     })
     .at(0)
 
