@@ -1257,6 +1257,17 @@ export default function DashboardFlightAttendant({
           setPendingLucyAction(action)
           pendingLucyActionRef.current = action
           activeAssistantVoiceMessageId = null
+          suppressNextVoiceAssistantReplyRef.current = true
+
+          try {
+            realtimeDataChannelRef.current?.send(
+              JSON.stringify({
+                type: "response.cancel",
+              })
+            )
+          } catch {
+            // Ignore cancel errors.
+          }
 
           const confirmationText =
             action.confirmationPrompt ||
@@ -1324,6 +1335,17 @@ export default function DashboardFlightAttendant({
           setPendingLucyAction(action)
           pendingLucyActionRef.current = action
           activeAssistantVoiceMessageId = null
+          suppressNextVoiceAssistantReplyRef.current = true
+
+          try {
+            realtimeDataChannelRef.current?.send(
+              JSON.stringify({
+                type: "response.cancel",
+              })
+            )
+          } catch {
+            // Ignore cancel errors.
+          }
 
           const confirmationText =
             action.confirmationPrompt ||
