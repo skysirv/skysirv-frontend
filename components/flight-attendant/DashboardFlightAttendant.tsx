@@ -1562,6 +1562,8 @@ export default function DashboardFlightAttendant({
           }
 
           if (data?.type === "input_audio_buffer.speech_started") {
+            suppressNextRealtimeSpeechTextRef.current = false
+
             suppressNextVoiceAssistantReplyRef.current = Boolean(
               pendingLucyActionRef.current
             )
