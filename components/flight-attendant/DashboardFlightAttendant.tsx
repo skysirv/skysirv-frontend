@@ -366,6 +366,71 @@ function isNegativeRouteConfirmation(message: string) {
   )
 }
 
+function isClearlySkysirvVoiceIntent(message: string) {
+  const normalized = message.trim().toLowerCase()
+
+  if (!normalized) return false
+
+  const skysirvSignals = [
+    "lucy",
+    "skysirv",
+    "flight",
+    "flights",
+    "fare",
+    "fares",
+    "route",
+    "routes",
+    "watchlist",
+    "watch list",
+    "saved flights",
+    "save flight",
+    "save that flight",
+    "track",
+    "tracking",
+    "airport",
+    "airline",
+    "price",
+    "prices",
+    "booking",
+    "book",
+    "alert",
+    "alerts",
+    "jfk",
+    "mia",
+    "bos",
+    "iah",
+    "ord",
+    "lax",
+    "houston",
+    "miami",
+    "boston",
+    "chicago",
+    "los angeles",
+  ]
+
+  const confirmationSignals = [
+    "yes",
+    "yeah",
+    "yep",
+    "please",
+    "confirm",
+    "go ahead",
+    "save it",
+    "add it",
+    "no",
+    "nope",
+    "cancel",
+    "not now",
+    "don't",
+    "do not",
+  ]
+
+  return (
+    skysirvSignals.some((signal) => normalized.includes(signal)) ||
+    confirmationSignals.some((signal) => normalized.includes(signal))
+  )
+}
+
 function findRecentlyConfirmedVoiceRoute({
   message,
   confirmedRoutes,
@@ -1344,6 +1409,23 @@ export default function DashboardFlightAttendant({
           ) {
             const completedTranscript = data.transcript.trim()
             suppressNextVoiceAssistantReplyRef.current = false
+
+            const hasPendingAction = Boolean(pendingLucyActionRef.current)
+
+            if (!hasPendingAction && !isClearlySkysirvVoiceIntent(completedTranscript)) {
+              suppressNextVoiceAssistantReplyRef.current = true
+              suppressNextRealtimeSpeechTextRef.current = false
+
+              if (activeUserVoiceMessageId) {
+                setMessages((prev) =>
+                  prev.filter((message) => message.id !== activeUserVoiceMessageId)
+                )
+              }
+
+              activeUserVoiceMessageId = null
+              activeAssistantVoiceMessageId = null
+              return
+            }
 
             if (completedTranscript.length < 3) {
               const emptyUserMessageId = activeUserVoiceMessageId
