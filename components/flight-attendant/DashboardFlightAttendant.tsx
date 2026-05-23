@@ -527,6 +527,34 @@ function formatVisibleFlightPrice(value?: number | null, currency = "USD") {
   }).format(value)
 }
 
+function shouldIgnoreDuplicateVoiceToolCall(
+  key: string,
+  lastCallRef: {
+    current: {
+      key: string
+      timestamp: number
+    } | null
+  }
+) {
+  const now = Date.now()
+  const lastCall = lastCallRef.current
+
+  if (
+    lastCall &&
+    lastCall.key === key &&
+    now - lastCall.timestamp < 5000
+  ) {
+    return true
+  }
+
+  lastCallRef.current = {
+    key,
+    timestamp: now,
+  }
+
+  return false
+}
+
 function buildLocalVisibleFlightSaveAction({
   message,
   messages,
@@ -683,6 +711,10 @@ export default function DashboardFlightAttendant({
   const suppressNextRealtimeSpeechTextRef = useRef(false)
   const localRealtimeSpeechMessageIdRef = useRef<string | null>(null)
   const pendingLucyActionRef = useRef<LucyAction | null>(null)
+  const lastVoiceToolCallRef = useRef<{
+    key: string
+    timestamp: number
+  } | null>(null)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const realtimePeerConnectionRef = useRef<RTCPeerConnection | null>(null)
   const realtimeLocalStreamRef = useRef<MediaStream | null>(null)
@@ -1279,6 +1311,22 @@ export default function DashboardFlightAttendant({
 
           if (!action || action.type !== "add_watchlist_route") return
 
+          const duplicateKey = [
+            action.type,
+            action.origin,
+            action.destination,
+            action.departureDate,
+          ].join(":")
+
+          if (
+            shouldIgnoreDuplicateVoiceToolCall(
+              duplicateKey,
+              lastVoiceToolCallRef
+            )
+          ) {
+            return
+          }
+
           setPendingLucyAction(action)
           pendingLucyActionRef.current = action
           activeAssistantVoiceMessageId = null
@@ -1356,6 +1404,23 @@ export default function DashboardFlightAttendant({
           })
 
           if (!action || action.type !== "save_visible_flight") return
+
+          const duplicateKey = [
+            action.type,
+            action.origin,
+            action.destination,
+            action.departureDate ?? "",
+            action.flightNumber ?? "",
+          ].join(":")
+
+          if (
+            shouldIgnoreDuplicateVoiceToolCall(
+              duplicateKey,
+              lastVoiceToolCallRef
+            )
+          ) {
+            return
+          }
 
           setPendingLucyAction(action)
           pendingLucyActionRef.current = action
