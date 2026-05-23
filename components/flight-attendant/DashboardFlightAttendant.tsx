@@ -467,19 +467,39 @@ function isVisibleFlightSaveRequest(message: string) {
 
   if (!normalized) return false
 
-  const mentionsSave =
-    normalized.includes("save") ||
-    normalized.includes("saved flights") ||
-    normalized.includes("add it to my saved flights")
+  const savedFlightQuestionSignals = [
+    "what flights do i have saved",
+    "what saved flights",
+    "show me my saved flights",
+    "do i have that flight saved",
+    "is that flight saved",
+    "have i saved that flight",
+    "which flights are saved",
+    "flights do i have saved",
+  ]
 
-  const mentionsFlight =
-    normalized.includes("flight") ||
-    normalized.includes("that one") ||
-    normalized.includes("this one") ||
-    normalized.includes("save it") ||
-    normalized.includes("save that")
+  if (
+    savedFlightQuestionSignals.some((signal) =>
+      normalized.includes(signal)
+    )
+  ) {
+    return false
+  }
 
-  return mentionsSave && mentionsFlight
+  const directSaveSignals = [
+    "save that flight",
+    "save this flight",
+    "save the flight",
+    "save flight",
+    "save it to my saved flights",
+    "save this one",
+    "save that one",
+    "add that flight to my saved flights",
+    "add this flight to my saved flights",
+    "add it to my saved flights",
+  ]
+
+  return directSaveSignals.some((signal) => normalized.includes(signal))
 }
 
 function formatReadableFlightDate(value?: string | null) {
