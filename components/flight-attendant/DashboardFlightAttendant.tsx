@@ -408,27 +408,7 @@ function isClearlySkysirvVoiceIntent(message: string) {
     "los angeles",
   ]
 
-  const confirmationSignals = [
-    "yes",
-    "yeah",
-    "yep",
-    "please",
-    "confirm",
-    "go ahead",
-    "save it",
-    "add it",
-    "no",
-    "nope",
-    "cancel",
-    "not now",
-    "don't",
-    "do not",
-  ]
-
-  return (
-    skysirvSignals.some((signal) => normalized.includes(signal)) ||
-    confirmationSignals.some((signal) => normalized.includes(signal))
-  )
+  return skysirvSignals.some((signal) => normalized.includes(signal))
 }
 
 function findRecentlyConfirmedVoiceRoute({
