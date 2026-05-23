@@ -615,6 +615,7 @@ export default function DashboardFlightAttendant({
     useState<LucyAction | null>(null)
   const [voiceStatus, setVoiceStatus] = useState<LucyVoiceStatus>("idle")
   const suppressNextVoiceAssistantReplyRef = useRef(false)
+  const suppressNextRealtimeSpeechTextRef = useRef(false)
   const pendingLucyActionRef = useRef<LucyAction | null>(null)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const realtimePeerConnectionRef = useRef<RTCPeerConnection | null>(null)
@@ -1051,6 +1052,8 @@ export default function DashboardFlightAttendant({
     if (!text.trim()) return
 
     try {
+      suppressNextRealtimeSpeechTextRef.current = true
+
       dataChannel.send(
         JSON.stringify({
           type: "response.create",
@@ -1498,6 +1501,9 @@ export default function DashboardFlightAttendant({
             data?.type === "response.output_audio_transcript.delta" &&
             typeof data.delta === "string"
           ) {
+            if (suppressNextRealtimeSpeechTextRef.current) {
+              return
+            }
 
             if (!activeAssistantVoiceMessageId) {
               const existingEmptyAssistantMessage = messages
@@ -1543,6 +1549,10 @@ export default function DashboardFlightAttendant({
           if (data?.type === "response.output_audio_transcript.done") {
             activeAssistantVoiceMessageId = null
             activeUserVoiceMessageId = null
+
+            if (suppressNextRealtimeSpeechTextRef.current) {
+              suppressNextRealtimeSpeechTextRef.current = false
+            }
 
             if (!pendingLucyActionRef.current) {
               suppressNextVoiceAssistantReplyRef.current = false
