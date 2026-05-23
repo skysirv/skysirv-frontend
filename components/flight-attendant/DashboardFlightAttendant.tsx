@@ -681,6 +681,7 @@ export default function DashboardFlightAttendant({
   const [voiceStatus, setVoiceStatus] = useState<LucyVoiceStatus>("idle")
   const suppressNextVoiceAssistantReplyRef = useRef(false)
   const suppressNextRealtimeSpeechTextRef = useRef(false)
+  const localRealtimeSpeechMessageIdRef = useRef<string | null>(null)
   const pendingLucyActionRef = useRef<LucyAction | null>(null)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const realtimePeerConnectionRef = useRef<RTCPeerConnection | null>(null)
@@ -1112,25 +1113,49 @@ export default function DashboardFlightAttendant({
 
   function speakWithRealtimeLucyVoice(text: string) {
     const dataChannel = realtimeDataChannelRef.current
+    const cleanText = text.trim()
 
     if (!dataChannel || dataChannel.readyState !== "open") return
-    if (!text.trim()) return
+    if (!cleanText) return
+
+    const messageId = createMessageId()
+    localRealtimeSpeechMessageIdRef.current = messageId
+    suppressNextRealtimeSpeechTextRef.current = false
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: messageId,
+        role: "assistant",
+        label: "Lucy",
+        text: "",
+      },
+    ])
 
     try {
-      suppressNextRealtimeSpeechTextRef.current = true
-
       dataChannel.send(
         JSON.stringify({
           type: "response.create",
           response: {
             instructions: `Say exactly this in Lucy's voice, in English, with no extra words: ${JSON.stringify(
-              text
+              cleanText
             )}`,
           },
         })
       )
     } catch {
-      // Ignore realtime speech errors.
+      localRealtimeSpeechMessageIdRef.current = null
+
+      setMessages((prev) =>
+        prev.map((message) =>
+          message.id === messageId
+            ? {
+              ...message,
+              text: cleanText,
+            }
+            : message
+        )
+      )
     }
   }
 
@@ -1609,6 +1634,24 @@ export default function DashboardFlightAttendant({
               return
             }
 
+            if (localRealtimeSpeechMessageIdRef.current) {
+              const localMessageId = localRealtimeSpeechMessageIdRef.current
+
+              setMessages((prev) =>
+                prev.map((message) =>
+                  message.id === localMessageId
+                    ? {
+                      ...message,
+                      text: `${message.text}${data.delta}`,
+                    }
+                    : message
+                )
+              )
+
+              setVoiceStatus("speaking")
+              return
+            }
+
             if (!activeAssistantVoiceMessageId) {
               const existingEmptyAssistantMessage = messages
                 .slice()
@@ -1653,6 +1696,7 @@ export default function DashboardFlightAttendant({
           if (data?.type === "response.output_audio_transcript.done") {
             activeAssistantVoiceMessageId = null
             activeUserVoiceMessageId = null
+            localRealtimeSpeechMessageIdRef.current = null
 
             if (suppressNextRealtimeSpeechTextRef.current) {
               suppressNextRealtimeSpeechTextRef.current = false
@@ -1667,6 +1711,7 @@ export default function DashboardFlightAttendant({
 
           if (data?.type === "response.done") {
             activeAssistantVoiceMessageId = null
+            localRealtimeSpeechMessageIdRef.current = null
 
             if (suppressNextRealtimeSpeechTextRef.current) {
               suppressNextRealtimeSpeechTextRef.current = false
