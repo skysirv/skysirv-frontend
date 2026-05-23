@@ -1561,6 +1561,22 @@ export default function DashboardFlightAttendant({
             setVoiceStatus("listening")
           }
 
+          if (data?.type === "response.done") {
+            activeAssistantVoiceMessageId = null
+
+            if (suppressNextRealtimeSpeechTextRef.current) {
+              suppressNextRealtimeSpeechTextRef.current = false
+            }
+
+            if (!pendingLucyActionRef.current) {
+              suppressNextVoiceAssistantReplyRef.current = false
+            }
+
+            if (voiceStatus !== "idle") {
+              setVoiceStatus("listening")
+            }
+          }
+
           if (data?.type === "input_audio_buffer.speech_started") {
             suppressNextRealtimeSpeechTextRef.current = false
 
