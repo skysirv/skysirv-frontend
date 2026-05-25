@@ -270,12 +270,18 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
 
     if (params.get('signin') !== '1') return;
 
-    const cleanUrl = `${window.location.pathname}${window.location.hash}`;
-    window.history.replaceState({}, '', cleanUrl || '/');
+    const authMode = params.get('auth');
+    const resetToken = params.get('token');
+    const isPasswordResetFlow = authMode === 'reset-password' && !!resetToken;
+
+    if (!isPasswordResetFlow) {
+      const cleanUrl = `${window.location.pathname}${window.location.hash}`;
+      window.history.replaceState({}, '', cleanUrl || '/');
+    }
 
     setAccountMenuOpen(false);
 
-    if (isLoggedIn) {
+    if (isLoggedIn && !isPasswordResetFlow) {
       window.location.href = isAdmin ? '/admin' : dashboardHref;
       return;
     }

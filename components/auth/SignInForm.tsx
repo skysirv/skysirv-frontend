@@ -24,15 +24,42 @@ type SignInFormProps = {
   onSuccess?: (payload: SignInSuccessPayload) => void
 }
 
+type AuthMode = "signin" | "forgot-password" | "reset-password"
+
 export default function SignInForm({ onSuccess }: SignInFormProps) {
   const googleButtonRef = useRef<HTMLDivElement | null>(null)
+
+  const [mode, setMode] = useState<AuthMode>("signin")
   const [email, setEmail] = useState("")
+  const [forgotEmail, setForgotEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmNewPassword, setConfirmNewPassword] = useState("")
+  const [resetToken, setResetToken] = useState("")
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [error, setError] = useState("")
+  const [forgotMessage, setForgotMessage] = useState("")
+  const [resetMessage, setResetMessage] = useState("")
   const [loading, setLoading] = useState(false)
+  const [forgotLoading, setForgotLoading] = useState(false)
+  const [resetLoading, setResetLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [googleButtonReady, setGoogleButtonReady] = useState(false)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const authMode = params.get("auth")
+    const token = params.get("token")
+
+    if (authMode === "reset-password" && token) {
+      setResetToken(token)
+      setMode("reset-password")
+      setError("")
+      setForgotMessage("")
+      setResetMessage("")
+    }
+  }, [])
 
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID) {
@@ -76,6 +103,36 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
 
     initializeGoogle()
   }, [])
+
+  function openForgotPassword() {
+    setForgotEmail(email)
+    setError("")
+    setForgotMessage("")
+    setResetMessage("")
+    setMode("forgot-password")
+  }
+
+  function backToSignIn() {
+    setError("")
+    setForgotMessage("")
+    setResetMessage("")
+    setNewPassword("")
+    setConfirmNewPassword("")
+    setShowConfirmPassword(false)
+    setMode("signin")
+  }
+
+  function cleanResetParamsFromUrl() {
+    const url = new URL(window.location.href)
+    url.searchParams.delete("auth")
+    url.searchParams.delete("token")
+    url.searchParams.delete("signin")
+
+    const cleanedSearch = url.searchParams.toString()
+    const cleanedUrl = `${url.pathname}${cleanedSearch ? `?${cleanedSearch}` : ""}${url.hash}`
+
+    window.history.replaceState({}, "", cleanedUrl)
+  }
 
   async function routeUserAfterAuth(token: string, isAdmin: boolean) {
     if (isAdmin) {
@@ -179,6 +236,95 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
     }
   }
 
+  async function handleForgotPasswordSubmit(e: React.FormEvent) {
+    e.preventDefault()
+
+    setForgotLoading(true)
+    setError("")
+    setForgotMessage("")
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: forgotEmail
+        })
+      })
+
+      const data = await res.json().catch(() => null)
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Unable to send reset instructions")
+      }
+
+      setForgotMessage(
+        data?.message ||
+        "If an account exists for this email, password reset instructions will be sent."
+      )
+    } catch (err: any) {
+      setError(err?.message || "Unable to send reset instructions")
+    } finally {
+      setForgotLoading(false)
+    }
+  }
+
+  async function handleResetPasswordSubmit(e: React.FormEvent) {
+    e.preventDefault()
+
+    setResetLoading(true)
+    setError("")
+    setResetMessage("")
+
+    try {
+      if (!resetToken) {
+        throw new Error("This password reset link is missing a valid token.")
+      }
+
+      if (newPassword.length < 8) {
+        throw new Error("Password must be at least 8 characters.")
+      }
+
+      if (newPassword !== confirmNewPassword) {
+        throw new Error("Passwords do not match.")
+      }
+
+      const res = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          token: resetToken,
+          password: newPassword
+        })
+      })
+
+      const data = await res.json().catch(() => null)
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Unable to reset password.")
+      }
+
+      setNewPassword("")
+      setConfirmNewPassword("")
+      setResetToken("")
+      setShowConfirmPassword(false)
+      setResetMessage(
+        data?.message ||
+        "Password reset successfully. You can now sign in with your new password."
+      )
+
+      cleanResetParamsFromUrl()
+    } catch (err: any) {
+      setError(err?.message || "Unable to reset password.")
+    } finally {
+      setResetLoading(false)
+    }
+  }
+
   async function handleGoogleCredentialResponse(response: { credential?: string }) {
     if (!response?.credential) {
       setError("Google sign-in failed. No credential was returned.")
@@ -213,6 +359,151 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
     }
   }
 
+  if (mode === "reset-password") {
+    return (
+      <div>
+        <button
+          type="button"
+          onClick={backToSignIn}
+          className="mb-4 text-sm font-medium text-slate-500 hover:text-slate-900 transition"
+        >
+          ← Back to sign in
+        </button>
+
+        <div className="mb-5">
+          <h3 className="text-lg font-semibold text-slate-950">
+            Create a new password
+          </h3>
+
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            Enter a new password for your Skysirv account. This reset link can only be used once.
+          </p>
+        </div>
+
+        {resetMessage ? (
+          <div className="space-y-4">
+            <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-700">
+              {resetMessage}
+            </p>
+
+            <button
+              type="button"
+              onClick={backToSignIn}
+              className="w-full rounded-xl bg-slate-900 py-3 text-sm font-medium text-white hover:bg-slate-800 transition"
+            >
+              Back to sign in
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleResetPasswordSubmit} className="space-y-4">
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="New password"
+                required
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-16 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-500 hover:text-slate-700"
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
+
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirm new password"
+                required
+                value={confirmNewPassword}
+                onChange={(e) => setConfirmNewPassword(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-16 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-500 hover:text-slate-700"
+              >
+                {showConfirmPassword ? "Hide" : "Show"}
+              </button>
+            </div>
+
+            {error && (
+              <p className="text-sm text-red-500">{error}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={resetLoading || !resetToken}
+              className="w-full rounded-xl bg-slate-900 py-3 text-sm font-medium text-white hover:bg-slate-800 transition disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {resetLoading ? "Resetting password..." : "Reset password"}
+            </button>
+          </form>
+        )}
+      </div>
+    )
+  }
+
+  if (mode === "forgot-password") {
+    return (
+      <div>
+        <button
+          type="button"
+          onClick={backToSignIn}
+          className="mb-4 text-sm font-medium text-slate-500 hover:text-slate-900 transition"
+        >
+          ← Back to sign in
+        </button>
+
+        <div className="mb-5">
+          <h3 className="text-lg font-semibold text-slate-950">
+            Reset your password
+          </h3>
+
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            Enter the email address connected to your Skysirv account and we’ll send password reset instructions.
+          </p>
+        </div>
+
+        <form onSubmit={handleForgotPasswordSubmit} className="space-y-4">
+          <input
+            type="email"
+            placeholder="Email address"
+            required
+            value={forgotEmail}
+            onChange={(e) => setForgotEmail(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+          />
+
+          {error && (
+            <p className="text-sm text-red-500">{error}</p>
+          )}
+
+          {forgotMessage && (
+            <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-700">
+              {forgotMessage}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={forgotLoading}
+            className="w-full rounded-xl bg-slate-900 py-3 text-sm font-medium text-white hover:bg-slate-800 transition disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {forgotLoading ? "Sending instructions..." : "Send reset instructions"}
+          </button>
+        </form>
+      </div>
+    )
+  }
+
   return (
     <div>
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -225,23 +516,35 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
           className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
         />
 
-        <div className="relative">
-          <input
-            type={showPassword ? "text" : "password"}
-            placeholder="Password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-16 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
-          />
+        <div className="space-y-2">
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-16 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+            />
 
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-500 hover:text-slate-700"
-          >
-            {showPassword ? "Hide" : "Show"}
-          </button>
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-500 hover:text-slate-700"
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
+
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={openForgotPassword}
+              className="text-xs font-medium text-slate-500 hover:text-slate-900 transition"
+            >
+              Forgot password?
+            </button>
+          </div>
         </div>
 
         {error && (
