@@ -720,6 +720,7 @@ export default function DashboardFlightAttendant({
   const realtimeLocalStreamRef = useRef<MediaStream | null>(null)
   const realtimeAudioElementRef = useRef<HTMLAudioElement | null>(null)
   const realtimeDataChannelRef = useRef<RTCDataChannel | null>(null)
+  const realtimeMicPausedForLucyRef = useRef(false)
   const latestDashboardRoutesRef = useRef<DashboardRouteContext[]>(dashboardRoutes)
   const confirmedVoiceWatchlistRoutesRef = useRef<
     Array<{
@@ -1109,7 +1110,30 @@ export default function DashboardFlightAttendant({
     }
   }
 
+  function setRealtimeMicrophoneEnabled(enabled: boolean) {
+    realtimeLocalStreamRef.current?.getAudioTracks().forEach((track) => {
+      track.enabled = enabled
+    })
+  }
+
+  function pauseRealtimeMicrophoneForLucy() {
+    if (realtimeMicPausedForLucyRef.current) return
+
+    realtimeMicPausedForLucyRef.current = true
+    setRealtimeMicrophoneEnabled(false)
+  }
+
+  function resumeRealtimeMicrophoneAfterLucy() {
+    if (!realtimeMicPausedForLucyRef.current) return
+
+    realtimeMicPausedForLucyRef.current = false
+    setRealtimeMicrophoneEnabled(true)
+  }
+
   function stopLucyVoiceSession() {
+    realtimeMicPausedForLucyRef.current = false
+    setRealtimeMicrophoneEnabled(true)
+
     realtimeDataChannelRef.current?.close()
     realtimeDataChannelRef.current = null
     realtimePeerConnectionRef.current?.close()
@@ -1695,6 +1719,8 @@ export default function DashboardFlightAttendant({
             data?.type === "response.output_audio_transcript.delta" &&
             typeof data.delta === "string"
           ) {
+            pauseRealtimeMicrophoneForLucy()
+
             if (suppressNextRealtimeSpeechTextRef.current) {
               return
             }
@@ -1759,6 +1785,8 @@ export default function DashboardFlightAttendant({
           }
 
           if (data?.type === "response.output_audio_transcript.done") {
+            resumeRealtimeMicrophoneAfterLucy()
+
             activeAssistantVoiceMessageId = null
             activeUserVoiceMessageId = null
             localRealtimeSpeechMessageIdRef.current = null
@@ -1775,6 +1803,8 @@ export default function DashboardFlightAttendant({
           }
 
           if (data?.type === "response.done") {
+            resumeRealtimeMicrophoneAfterLucy()
+
             activeAssistantVoiceMessageId = null
             localRealtimeSpeechMessageIdRef.current = null
 
@@ -1815,7 +1845,11 @@ export default function DashboardFlightAttendant({
             setVoiceStatus("listening")
           }
 
-          if (data?.type === "response.audio.delta") {
+          if (
+            data?.type === "response.audio.delta" ||
+            data?.type === "response.output_audio.delta"
+          ) {
+            pauseRealtimeMicrophoneForLucy()
             setVoiceStatus("speaking")
           }
         } catch {
