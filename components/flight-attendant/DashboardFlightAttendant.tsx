@@ -718,6 +718,8 @@ export default function DashboardFlightAttendant({
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const realtimePeerConnectionRef = useRef<RTCPeerConnection | null>(null)
   const realtimeLocalStreamRef = useRef<MediaStream | null>(null)
+  const realtimeMicTrackRef = useRef<MediaStreamTrack | null>(null)
+  const realtimeAudioSenderRef = useRef<RTCRtpSender | null>(null)
   const realtimeAudioElementRef = useRef<HTMLAudioElement | null>(null)
   const realtimeDataChannelRef = useRef<RTCDataChannel | null>(null)
   const realtimeMicPausedForLucyRef = useRef(false)
@@ -771,6 +773,8 @@ export default function DashboardFlightAttendant({
         track.stop()
       })
       realtimeLocalStreamRef.current = null
+      realtimeMicTrackRef.current = null
+      realtimeAudioSenderRef.current = null
 
       if (realtimeAudioElementRef.current) {
         realtimeAudioElementRef.current.pause()
@@ -1070,24 +1074,42 @@ export default function DashboardFlightAttendant({
     }
   }
 
-  function setRealtimeMicrophoneEnabled(enabled: boolean) {
+  async function setRealtimeMicrophoneEnabled(enabled: boolean) {
+    const micTrack = realtimeMicTrackRef.current
+    const audioSender = realtimeAudioSenderRef.current
+
     realtimeLocalStreamRef.current?.getAudioTracks().forEach((track) => {
       track.enabled = enabled
     })
+
+    if (!audioSender) return
+
+    try {
+      if (!enabled) {
+        await audioSender.replaceTrack(null)
+        return
+      }
+
+      if (micTrack && micTrack.readyState === "live") {
+        await audioSender.replaceTrack(micTrack)
+      }
+    } catch (error) {
+      console.warn("Lucy realtime microphone toggle failed", error)
+    }
   }
 
   function pauseRealtimeMicrophoneForLucy() {
     if (realtimeMicPausedForLucyRef.current) return
 
     realtimeMicPausedForLucyRef.current = true
-    setRealtimeMicrophoneEnabled(false)
+    void setRealtimeMicrophoneEnabled(false)
   }
 
   function resumeRealtimeMicrophoneAfterLucy() {
     if (!realtimeMicPausedForLucyRef.current) return
 
     realtimeMicPausedForLucyRef.current = false
-    setRealtimeMicrophoneEnabled(true)
+    void setRealtimeMicrophoneEnabled(true)
   }
 
   function stopLucyVoiceSession() {
@@ -1108,6 +1130,8 @@ export default function DashboardFlightAttendant({
       track.stop()
     })
     realtimeLocalStreamRef.current = null
+    realtimeMicTrackRef.current = null
+    realtimeAudioSenderRef.current = null
 
     if (realtimeAudioElementRef.current) {
       realtimeAudioElementRef.current.pause()
@@ -1232,9 +1256,15 @@ export default function DashboardFlightAttendant({
 
       realtimeLocalStreamRef.current = localStream
 
-      localStream.getAudioTracks().forEach((track) => {
-        peerConnection.addTrack(track, localStream)
-      })
+      const micTrack = localStream.getAudioTracks()[0] ?? null
+      realtimeMicTrackRef.current = micTrack
+
+      if (micTrack) {
+        realtimeAudioSenderRef.current = peerConnection.addTrack(
+          micTrack,
+          localStream
+        )
+      }
 
       const dataChannel = peerConnection.createDataChannel("oai-events")
       realtimeDataChannelRef.current = dataChannel
