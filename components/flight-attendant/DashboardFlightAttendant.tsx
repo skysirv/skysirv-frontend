@@ -948,75 +948,35 @@ export default function DashboardFlightAttendant({
 
         const data = await response.json().catch(() => null)
 
-        if (action.type === "save_visible_flight") {
-          const response = await fetch(`${API_BASE_URL}/saved-flights`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              origin: action.origin,
-              destination: action.destination,
-              departureDate: action.departureDate ?? null,
-              airline: action.airline ?? null,
-              flightNumber: action.flightNumber ?? null,
-              price: action.price ?? null,
-              currency: action.currency ?? "USD",
-            }),
-          })
-
-          const data = await response.json().catch(() => null)
-
-          if (!response.ok) {
-            if (response.status === 409) {
-              successReply = "That flight is already in your Saved Flights."
-            } else {
-              throw new Error(
-                data?.error ||
-                "I couldn’t save that flight yet. Please try again in a moment."
-              )
-            }
+        if (!response.ok) {
+          if (response.status === 409) {
+            successReply = "That flight is already in your Saved Flights."
           } else {
-            window.dispatchEvent(
-              new CustomEvent("skysirv:saved-flights-updated", {
-                detail: {
-                  origin: action.origin,
-                  destination: action.destination,
-                  departureDate: action.departureDate,
-                  airline: action.airline,
-                  airlineName: action.airlineName,
-                  flightNumber: action.flightNumber,
-                  price: action.price,
-                  currency: action.currency,
-                  result: data,
-                },
-              })
+            throw new Error(
+              data?.error ||
+              "I couldn’t save that flight yet. Please try again in a moment."
             )
-
-            successReply = `Done — I saved ${action.flightLabel || action.flightNumber || "that flight"
-              } to your Saved Flights.`
           }
+        } else {
+          window.dispatchEvent(
+            new CustomEvent("skysirv:saved-flights-updated", {
+              detail: {
+                origin: action.origin,
+                destination: action.destination,
+                departureDate: action.departureDate,
+                airline: action.airline,
+                airlineName: action.airlineName,
+                flightNumber: action.flightNumber,
+                price: action.price,
+                currency: action.currency,
+                result: data,
+              },
+            })
+          )
+
+          successReply = `Done — I saved ${action.flightLabel || action.flightNumber || "that flight"
+            } to your Saved Flights.`
         }
-
-        window.dispatchEvent(
-          new CustomEvent("skysirv:saved-flights-updated", {
-            detail: {
-              origin: action.origin,
-              destination: action.destination,
-              departureDate: action.departureDate,
-              airline: action.airline,
-              airlineName: action.airlineName,
-              flightNumber: action.flightNumber,
-              price: action.price,
-              currency: action.currency,
-              result: data,
-            },
-          })
-        )
-
-        successReply = `Done — I saved ${action.flightLabel || action.flightNumber || "that flight"
-          } to your Saved Flights.`
       }
 
       if (action.type === "save_preferred_airports") {
@@ -1132,6 +1092,11 @@ export default function DashboardFlightAttendant({
 
   function stopLucyVoiceSession() {
     realtimeMicPausedForLucyRef.current = false
+    suppressNextVoiceAssistantReplyRef.current = false
+    suppressNextRealtimeSpeechTextRef.current = false
+    localRealtimeSpeechMessageIdRef.current = null
+    lastVoiceToolCallRef.current = null
+
     setRealtimeMicrophoneEnabled(true)
 
     realtimeDataChannelRef.current?.close()
@@ -1153,40 +1118,18 @@ export default function DashboardFlightAttendant({
     setVoiceStatus("idle")
   }
 
-  function speakLocalLucyVoice(text: string) {
-    if (typeof window === "undefined") return
-    if (!("speechSynthesis" in window)) return
-
-    window.speechSynthesis.cancel()
-
-    const utterance = new SpeechSynthesisUtterance(text)
-    utterance.rate = 1
-    utterance.pitch = 1
-    utterance.volume = 1
-
-    window.speechSynthesis.speak(utterance)
-  }
-
   function speakWithRealtimeLucyVoice(text: string) {
     const dataChannel = realtimeDataChannelRef.current
     const cleanText = text.trim()
 
-    if (!dataChannel || dataChannel.readyState !== "open") return
     if (!cleanText) return
+    if (!dataChannel || dataChannel.readyState !== "open") return
 
-    const messageId = createMessageId()
-    localRealtimeSpeechMessageIdRef.current = messageId
-    suppressNextRealtimeSpeechTextRef.current = false
+    pauseRealtimeMicrophoneForLucy()
+    setVoiceStatus("speaking")
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: messageId,
-        role: "assistant",
-        label: "Lucy",
-        text: "",
-      },
-    ])
+    localRealtimeSpeechMessageIdRef.current = null
+    suppressNextRealtimeSpeechTextRef.current = true
 
     try {
       dataChannel.send(
@@ -1200,18 +1143,9 @@ export default function DashboardFlightAttendant({
         })
       )
     } catch {
-      localRealtimeSpeechMessageIdRef.current = null
-
-      setMessages((prev) =>
-        prev.map((message) =>
-          message.id === messageId
-            ? {
-              ...message,
-              text: cleanText,
-            }
-            : message
-        )
-      )
+      suppressNextRealtimeSpeechTextRef.current = false
+      resumeRealtimeMicrophoneAfterLucy()
+      setVoiceStatus("listening")
     }
   }
 
@@ -1711,6 +1645,43 @@ export default function DashboardFlightAttendant({
             activeUserVoiceMessageId = null
           }
 
+          const isLucyAudioDelta =
+            data?.type === "response.audio.delta" ||
+            data?.type === "response.output_audio.delta"
+
+          const isLucyTranscriptDelta =
+            data?.type === "response.output_audio_transcript.delta" &&
+            typeof data.delta === "string"
+
+          const isLucyAudioDone =
+            data?.type === "response.output_audio_transcript.done" ||
+            data?.type === "response.done"
+
+          if (isLucyAudioDelta || isLucyTranscriptDelta) {
+            pauseRealtimeMicrophoneForLucy()
+            setVoiceStatus("speaking")
+          }
+
+          if (isLucyAudioDone) {
+            resumeRealtimeMicrophoneAfterLucy()
+
+            activeAssistantVoiceMessageId = null
+            activeUserVoiceMessageId = null
+            localRealtimeSpeechMessageIdRef.current = null
+
+            if (suppressNextRealtimeSpeechTextRef.current) {
+              suppressNextRealtimeSpeechTextRef.current = false
+            }
+
+            if (!pendingLucyActionRef.current) {
+              suppressNextVoiceAssistantReplyRef.current = false
+            }
+
+            if (realtimePeerConnectionRef.current) {
+              setVoiceStatus("listening")
+            }
+          }
+
           if (suppressNextVoiceAssistantReplyRef.current) {
             return
           }
@@ -1719,8 +1690,6 @@ export default function DashboardFlightAttendant({
             data?.type === "response.output_audio_transcript.delta" &&
             typeof data.delta === "string"
           ) {
-            pauseRealtimeMicrophoneForLucy()
-
             if (suppressNextRealtimeSpeechTextRef.current) {
               return
             }
@@ -1784,43 +1753,6 @@ export default function DashboardFlightAttendant({
             setVoiceStatus("speaking")
           }
 
-          if (data?.type === "response.output_audio_transcript.done") {
-            resumeRealtimeMicrophoneAfterLucy()
-
-            activeAssistantVoiceMessageId = null
-            activeUserVoiceMessageId = null
-            localRealtimeSpeechMessageIdRef.current = null
-
-            if (suppressNextRealtimeSpeechTextRef.current) {
-              suppressNextRealtimeSpeechTextRef.current = false
-            }
-
-            if (!pendingLucyActionRef.current) {
-              suppressNextVoiceAssistantReplyRef.current = false
-            }
-
-            setVoiceStatus("listening")
-          }
-
-          if (data?.type === "response.done") {
-            resumeRealtimeMicrophoneAfterLucy()
-
-            activeAssistantVoiceMessageId = null
-            localRealtimeSpeechMessageIdRef.current = null
-
-            if (suppressNextRealtimeSpeechTextRef.current) {
-              suppressNextRealtimeSpeechTextRef.current = false
-            }
-
-            if (!pendingLucyActionRef.current) {
-              suppressNextVoiceAssistantReplyRef.current = false
-            }
-
-            if (voiceStatus !== "idle") {
-              setVoiceStatus("listening")
-            }
-          }
-
           if (data?.type === "input_audio_buffer.speech_started") {
             suppressNextRealtimeSpeechTextRef.current = false
 
@@ -1843,14 +1775,6 @@ export default function DashboardFlightAttendant({
             ])
 
             setVoiceStatus("listening")
-          }
-
-          if (
-            data?.type === "response.audio.delta" ||
-            data?.type === "response.output_audio.delta"
-          ) {
-            pauseRealtimeMicrophoneForLucy()
-            setVoiceStatus("speaking")
           }
         } catch {
           // Realtime events are optional for this first voice pass.
