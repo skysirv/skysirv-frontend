@@ -723,6 +723,7 @@ export default function DashboardFlightAttendant({
   const realtimeAudioElementRef = useRef<HTMLAudioElement | null>(null)
   const realtimeDataChannelRef = useRef<RTCDataChannel | null>(null)
   const realtimeMicPausedForLucyRef = useRef(false)
+  const realtimeMicResumeTimerRef = useRef<number | null>(null)
   const latestDashboardRoutesRef = useRef<DashboardRouteContext[]>(dashboardRoutes)
   const confirmedVoiceWatchlistRoutesRef = useRef<
     Array<{
@@ -766,6 +767,11 @@ export default function DashboardFlightAttendant({
 
   useEffect(() => {
     return () => {
+      if (realtimeMicResumeTimerRef.current !== null) {
+        window.clearTimeout(realtimeMicResumeTimerRef.current)
+        realtimeMicResumeTimerRef.current = null
+      }
+
       realtimePeerConnectionRef.current?.close()
       realtimePeerConnectionRef.current = null
 
@@ -1098,7 +1104,16 @@ export default function DashboardFlightAttendant({
     }
   }
 
+  function clearRealtimeMicrophoneResumeTimer() {
+    if (realtimeMicResumeTimerRef.current === null) return
+
+    window.clearTimeout(realtimeMicResumeTimerRef.current)
+    realtimeMicResumeTimerRef.current = null
+  }
+
   function pauseRealtimeMicrophoneForLucy() {
+    clearRealtimeMicrophoneResumeTimer()
+
     if (realtimeMicPausedForLucyRef.current) return
 
     realtimeMicPausedForLucyRef.current = true
@@ -1106,20 +1121,33 @@ export default function DashboardFlightAttendant({
   }
 
   function resumeRealtimeMicrophoneAfterLucy() {
+    clearRealtimeMicrophoneResumeTimer()
+
     if (!realtimeMicPausedForLucyRef.current) return
 
     realtimeMicPausedForLucyRef.current = false
     void setRealtimeMicrophoneEnabled(true)
   }
 
+  function scheduleRealtimeMicrophoneResume(delayMs = 1400) {
+    clearRealtimeMicrophoneResumeTimer()
+
+    realtimeMicResumeTimerRef.current = window.setTimeout(() => {
+      realtimeMicResumeTimerRef.current = null
+      resumeRealtimeMicrophoneAfterLucy()
+    }, delayMs)
+  }
+
   function stopLucyVoiceSession() {
+    clearRealtimeMicrophoneResumeTimer()
+
     realtimeMicPausedForLucyRef.current = false
     suppressNextVoiceAssistantReplyRef.current = false
     suppressNextRealtimeSpeechTextRef.current = false
     localRealtimeSpeechMessageIdRef.current = null
     lastVoiceToolCallRef.current = null
 
-    setRealtimeMicrophoneEnabled(true)
+    void setRealtimeMicrophoneEnabled(true)
 
     realtimeDataChannelRef.current?.close()
     realtimeDataChannelRef.current = null
@@ -1693,7 +1721,7 @@ export default function DashboardFlightAttendant({
           }
 
           if (isLucyAudioDone) {
-            resumeRealtimeMicrophoneAfterLucy()
+            scheduleRealtimeMicrophoneResume(1800)
 
             activeAssistantVoiceMessageId = null
             activeUserVoiceMessageId = null
@@ -1708,7 +1736,11 @@ export default function DashboardFlightAttendant({
             }
 
             if (realtimePeerConnectionRef.current) {
-              setVoiceStatus("listening")
+              window.setTimeout(() => {
+                if (realtimePeerConnectionRef.current) {
+                  setVoiceStatus("listening")
+                }
+              }, 1800)
             }
           }
 
