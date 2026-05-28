@@ -93,12 +93,23 @@ type LucySaveVisibleFlightAction = {
   confirmationPrompt?: string
 }
 
+type LucySaveMemoryAction = {
+  type: "save_lucy_memory"
+  status: "needs_confirmation"
+  memoryType: string
+  memoryKey: string
+  memoryText: string
+  memoryValueJson?: unknown | null
+  confirmationPrompt?: string
+}
+
 type LucyAction =
   | LucyWatchlistAction
   | LucyPreferredAirportsAction
   | LucyPreferredRouteAction
   | LucySaveFirstNameAction
   | LucySaveVisibleFlightAction
+  | LucySaveMemoryAction
 
 type FlightAttendantApiResponse = {
   success?: boolean
@@ -337,6 +348,44 @@ function normalizeLucyAction(value: unknown): LucyAction | null {
     }
   }
 
+  if (input.type === "save_lucy_memory") {
+    const memoryType =
+      typeof input.memoryType === "string" && input.memoryType.trim()
+        ? input.memoryType.trim().toLowerCase().replace(/\s+/g, "_").slice(0, 80)
+        : "general_travel_note"
+
+    const memoryKey =
+      typeof input.memoryKey === "string" && input.memoryKey.trim()
+        ? input.memoryKey
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "_")
+          .replace(/^_+|_+$/g, "")
+          .slice(0, 120)
+        : ""
+
+    const memoryText =
+      typeof input.memoryText === "string" && input.memoryText.trim()
+        ? input.memoryText.trim().replace(/\s+/g, " ").slice(0, 500)
+        : ""
+
+    if (!memoryKey || !memoryText) return null
+
+    return {
+      type: "save_lucy_memory",
+      status: "needs_confirmation",
+      memoryType,
+      memoryKey,
+      memoryText,
+      memoryValueJson: input.memoryValueJson ?? null,
+      confirmationPrompt:
+        typeof input.confirmationPrompt === "string" &&
+          input.confirmationPrompt.trim()
+          ? input.confirmationPrompt.trim()
+          : "Would you like me to remember that for future Skysirv sessions?",
+    }
+  }
+
   return null
 }
 
@@ -382,17 +431,59 @@ function isClearlySkysirvVoiceIntent(message: string) {
     "routes",
     "watchlist",
     "watch list",
+    "saved flight",
     "saved flights",
     "save flight",
     "save that flight",
     "track",
     "tracking",
     "airport",
+    "airports",
     "airline",
+    "airlines",
     "price",
     "prices",
     "booking",
     "book",
+    "ticket",
+    "tickets",
+    "trip",
+    "trips",
+    "travel",
+    "traveler",
+    "traveling",
+    "travelling",
+    "vacation",
+    "holiday",
+    "destination",
+    "destinations",
+    "itinerary",
+    "itineraries",
+    "layover",
+    "layovers",
+    "connection",
+    "connections",
+    "terminal",
+    "terminals",
+    "gate",
+    "gates",
+    "lounge",
+    "lounges",
+    "baggage",
+    "bags",
+    "carry-on",
+    "carry on",
+    "packing",
+    "passport",
+    "visa",
+    "customs",
+    "immigration",
+    "hotel",
+    "hotels",
+    "rental car",
+    "car rental",
+    "family trip",
+    "business trip",
     "alert",
     "alerts",
     "jfk",
@@ -406,6 +497,20 @@ function isClearlySkysirvVoiceIntent(message: string) {
     "boston",
     "chicago",
     "los angeles",
+    "new york",
+    "london",
+    "paris",
+    "tokyo",
+    "rome",
+    "madrid",
+    "barcelona",
+    "bolivia",
+    "santa cruz de la sierra",
+    "viru viru",
+    "panama city",
+    "panama",
+    "cancun",
+    "orlando",
   ]
 
   return skysirvSignals.some((signal) => normalized.includes(signal))
@@ -445,6 +550,10 @@ function findRecentlyConfirmedVoiceRoute({
 function getLucyActionLabel(action: LucyAction) {
   if (action.type === "save_first_name") {
     return action.firstName
+  }
+
+  if (action.type === "save_lucy_memory") {
+    return action.memoryText
   }
 
   if (action.type === "add_watchlist_route") {
@@ -881,6 +990,43 @@ export default function DashboardFlightAttendant({
         )
 
         successReply = `Done — I’ll remember your name as ${action.firstName} for future Skysirv sessions.`
+      }
+
+      if (action.type === "save_lucy_memory") {
+        const response = await fetch(
+          `${API_BASE_URL}/api/flight-attendant/memories`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              memoryType: action.memoryType,
+              memoryKey: action.memoryKey,
+              memoryText: action.memoryText,
+              memoryValueJson: action.memoryValueJson ?? null,
+            }),
+          }
+        )
+
+        const data = await response.json().catch(() => null)
+
+        if (!response.ok) {
+          throw new Error(
+            data?.error ||
+            "I couldn’t save that memory yet. Please try again in a moment."
+          )
+        }
+
+        window.dispatchEvent(
+          new CustomEvent("skysirv:lucy-memory-updated", {
+            detail: data,
+          })
+        )
+
+        successReply =
+          "Done — I’ll remember that for future Skysirv sessions."
       }
 
       if (action.type === "add_watchlist_route") {
@@ -1486,6 +1632,90 @@ export default function DashboardFlightAttendant({
         }
       }
 
+      function handleRealtimeSaveLucyMemoryToolCall(item: any) {
+        if (item?.name !== "prepare_save_lucy_memory") return
+
+        const rawArguments =
+          typeof item.arguments === "string" ? item.arguments : ""
+
+        if (!rawArguments) return
+
+        try {
+          const parsed = JSON.parse(rawArguments)
+
+          const action = normalizeLucyAction({
+            type: "save_lucy_memory",
+            status: "needs_confirmation",
+            memoryType: parsed.memoryType,
+            memoryKey: parsed.memoryKey,
+            memoryText: parsed.memoryText,
+            memoryValueJson: parsed.memoryValueJson ?? null,
+            confirmationPrompt: parsed.confirmationPrompt,
+          })
+
+          if (!action || action.type !== "save_lucy_memory") return
+
+          const duplicateKey = [
+            action.type,
+            action.memoryType,
+            action.memoryKey,
+          ].join(":")
+
+          if (
+            shouldIgnoreDuplicateVoiceToolCall(
+              duplicateKey,
+              lastVoiceToolCallRef
+            )
+          ) {
+            return
+          }
+
+          setPendingLucyAction(action)
+          pendingLucyActionRef.current = action
+          activeAssistantVoiceMessageId = null
+          suppressNextVoiceAssistantReplyRef.current = true
+
+          try {
+            realtimeDataChannelRef.current?.send(
+              JSON.stringify({
+                type: "response.cancel",
+              })
+            )
+          } catch {
+            // Ignore cancel errors.
+          }
+
+          const confirmationText =
+            action.confirmationPrompt ||
+            "Would you like me to remember that for future Skysirv sessions?"
+
+          setMessages((prev) => {
+            const lastMessage = prev[prev.length - 1]
+
+            if (
+              lastMessage?.role === "assistant" &&
+              lastMessage.text.trim() === confirmationText.trim()
+            ) {
+              return prev
+            }
+
+            return [
+              ...prev,
+              {
+                id: createMessageId(),
+                role: "assistant",
+                label: "Lucy",
+                text: confirmationText,
+              },
+            ]
+          })
+
+          speakWithRealtimeLucyVoice(confirmationText)
+        } catch {
+          // Ignore malformed realtime memory arguments.
+        }
+      }
+
       dataChannel.addEventListener("message", (event) => {
         try {
           const data = JSON.parse(event.data)
@@ -1493,11 +1723,13 @@ export default function DashboardFlightAttendant({
           if (data?.type === "response.output_item.done") {
             handleRealtimeWatchlistToolCall(data.item)
             handleRealtimeSaveVisibleFlightToolCall(data.item)
+            handleRealtimeSaveLucyMemoryToolCall(data.item)
           }
 
           if (data?.type === "conversation.item.done") {
             handleRealtimeWatchlistToolCall(data.item)
             handleRealtimeSaveVisibleFlightToolCall(data.item)
+            handleRealtimeSaveLucyMemoryToolCall(data.item)
           }
 
           if (
