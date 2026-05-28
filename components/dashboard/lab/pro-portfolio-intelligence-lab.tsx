@@ -1,12 +1,15 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { getAirlineDisplayName } from "@/lib/airlines/airlines"
 
 import type { SavedFlightCardData } from "@/components/dashboard/saved-flight-card"
 import type { ProWatchlistRouteLabData } from "@/components/dashboard/lab/pro-watchlist-intelligence-lab"
+import PortfolioDecisionStack from "@/components/dashboard/lab/portfolio-decision-stack"
 
 type RecommendedFlight = {
   airline?: string | null
+  airlineName?: string | null
   flightNumber?: string | null
   price?: number | null
   currency?: string | null
@@ -167,76 +170,7 @@ export default function ProPortfolioIntelligenceLab({
               </div>
             </div>
 
-            <div className="space-y-2 p-3">
-              {intelligence.decisionStack.map((item) => {
-                const normalizedLabel = item.label.toLowerCase()
-                const normalizedValue = item.value.toLowerCase()
-
-                const itemCount =
-                  normalizedLabel.includes("saved flight")
-                    ? normalizedValue.includes("no") ||
-                      normalizedValue.includes("none")
-                      ? "0"
-                      : "1"
-                    : normalizedLabel.includes("routes")
-                      ? item.value.match(/\d+/)?.[0] ?? "0"
-                      : normalizedLabel.includes("monitoring")
-                        ? item.value.match(/\d+/)?.[0] ?? "0"
-                        : "1"
-
-                return (
-                  <details
-                    key={item.label}
-                    className="group rounded-full border border-slate-200 bg-slate-50/80 transition open:rounded-2xl open:bg-white open:shadow-sm"
-                  >
-                    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2 [&::-webkit-details-marker]:hidden">
-                      <div className="flex min-w-0 items-center gap-2">
-                        <span className="truncate text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-600">
-                          {item.label}
-                        </span>
-
-                        <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full border border-cyan-200 bg-cyan-50 px-1.5 text-[10px] font-semibold text-cyan-700">
-                          {itemCount}
-                        </span>
-                      </div>
-
-                      <div className="flex shrink-0 items-center gap-2">
-                        <span className="hidden whitespace-nowrap rounded-full border border-cyan-200 bg-cyan-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-cyan-700 sm:inline-flex">
-                          {item.status}
-                        </span>
-
-                        <svg
-                          viewBox="0 0 20 20"
-                          aria-hidden="true"
-                          className="h-5 w-5 text-slate-400 transition group-open:rotate-180 group-open:text-cyan-700"
-                          fill="none"
-                        >
-                          <path
-                            d="M5 7.5L10 12.5L15 7.5"
-                            stroke="currentColor"
-                            strokeWidth="1.8"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </div>
-                    </summary>
-
-                    <div className="border-t border-slate-100 px-3 pb-3 pt-2">
-                      <div className="grid gap-2 sm:grid-cols-[0.8fr_1.2fr] sm:items-start">
-                        <p className="text-sm font-semibold text-slate-950">
-                          {item.value}
-                        </p>
-
-                        <p className="text-sm leading-6 text-slate-600">
-                          {item.detail}
-                        </p>
-                      </div>
-                    </div>
-                  </details>
-                )
-              })}
-            </div>
+            <PortfolioDecisionStack items={intelligence.decisionStack} />
           </div>
         </div>
       </section>
@@ -574,10 +508,11 @@ function buildOpportunities(
           : null
 
       const routeLabel = getRouteLabel(route)
-      const airlineLabel =
-        recommendedFlight?.airline ??
-        route.latest_airline ??
-        "Recommended flight"
+      const airlineLabel = getAirlineLabel({
+        airlineName: recommendedFlight?.airlineName,
+        airline: recommendedFlight?.airline ?? route.latest_airline,
+        fallback: "Recommended flight",
+      })
 
       const isBelowAverage =
         Number.isFinite(latestPrice) &&
@@ -654,6 +589,9 @@ function normalizeRecommendedFlights(route: ProWatchlistRouteLabData) {
     return [
       {
         airline: route.latest_airline,
+        airlineName: route.latest_airline
+          ? getAirlineDisplayName(route.latest_airline)
+          : null,
         flightNumber: route.latest_flight_number,
         price: route.latest_price,
         currency: "USD",
@@ -681,8 +619,31 @@ function getSavedFlightRouteLabel(flight: ProPortfolioSavedFlightData) {
   return `${origin} → ${destination}`
 }
 
+function getAirlineLabel({
+  airline,
+  airlineName,
+  fallback = "Recommended flight",
+}: {
+  airline?: string | null
+  airlineName?: string | null
+  fallback?: string
+}) {
+  const displayName = airlineName?.trim()
+
+  if (displayName) return displayName
+
+  const airlineCode = airline?.trim()
+
+  if (!airlineCode) return fallback
+
+  return getAirlineDisplayName(airlineCode)
+}
+
 function getSavedFlightLabel(flight: ProPortfolioSavedFlightData) {
-  const airline = flight.airline?.trim() || "Saved flight"
+  const airline = getAirlineLabel({
+    airline: flight.airline,
+    fallback: "Saved flight",
+  })
   const flightNumber = flight.flight_number?.trim()
 
   return flightNumber ? `${airline} · ${flightNumber}` : airline
