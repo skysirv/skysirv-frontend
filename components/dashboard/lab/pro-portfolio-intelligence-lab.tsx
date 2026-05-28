@@ -113,19 +113,40 @@ export default function ProPortfolioIntelligenceLab({
                 {intelligence.briefBody}
               </p>
 
-              <div className="mt-4 rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                  Recommended next action
-                </p>
+              <details className="group mt-4 rounded-full border border-slate-200 bg-white transition open:rounded-2xl open:shadow-sm">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2 [&::-webkit-details-marker]:hidden">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span className="whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      Recommended action
+                    </span>
 
-                <p className="mt-1 text-sm font-semibold text-slate-950">
-                  {intelligence.nextActionTitle}
-                </p>
+                    <span className="truncate text-sm font-semibold text-slate-950">
+                      {intelligence.nextActionTitle}
+                    </span>
+                  </div>
 
-                <p className="mt-1 text-sm leading-6 text-slate-600">
-                  {intelligence.nextActionDetail}
-                </p>
-              </div>
+                  <svg
+                    viewBox="0 0 20 20"
+                    aria-hidden="true"
+                    className="h-5 w-5 shrink-0 text-slate-400 transition group-open:rotate-180 group-open:text-cyan-700"
+                    fill="none"
+                  >
+                    <path
+                      d="M5 7.5L10 12.5L15 7.5"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </summary>
+
+                <div className="border-t border-slate-100 px-3 pb-3 pt-2">
+                  <p className="text-sm leading-6 text-slate-600">
+                    {intelligence.nextActionDetail}
+                  </p>
+                </div>
+              </details>
 
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
@@ -146,39 +167,75 @@ export default function ProPortfolioIntelligenceLab({
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-              <div className="border-b border-slate-200 bg-slate-50/70 px-4 py-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                  Decision stack
-                </p>
-              </div>
+            <div className="space-y-2 p-3">
+              {intelligence.decisionStack.map((item) => {
+                const normalizedLabel = item.label.toLowerCase()
+                const normalizedValue = item.value.toLowerCase()
 
-              <div className="divide-y divide-slate-200">
-                {intelligence.decisionStack.map((item) => (
-                  <div
+                const itemCount =
+                  normalizedLabel.includes("saved flight")
+                    ? normalizedValue.includes("no") ||
+                      normalizedValue.includes("none")
+                      ? "0"
+                      : "1"
+                    : normalizedLabel.includes("routes")
+                      ? item.value.match(/\d+/)?.[0] ?? "0"
+                      : normalizedLabel.includes("monitoring")
+                        ? item.value.match(/\d+/)?.[0] ?? "0"
+                        : "1"
+
+                return (
+                  <details
                     key={item.label}
-                    className="grid gap-3 px-4 py-3 sm:grid-cols-[0.8fr_1fr_auto] sm:items-center"
+                    className="group rounded-full border border-slate-200 bg-slate-50/80 transition open:rounded-2xl open:bg-white open:shadow-sm"
                   >
-                    <div>
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                        {item.label}
-                      </p>
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2 [&::-webkit-details-marker]:hidden">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span className="truncate text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-600">
+                          {item.label}
+                        </span>
 
-                      <p className="mt-1 text-sm font-semibold text-slate-950">
-                        {item.value}
-                      </p>
+                        <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full border border-cyan-200 bg-cyan-50 px-1.5 text-[10px] font-semibold text-cyan-700">
+                          {itemCount}
+                        </span>
+                      </div>
+
+                      <div className="flex shrink-0 items-center gap-2">
+                        <span className="hidden whitespace-nowrap rounded-full border border-cyan-200 bg-cyan-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-cyan-700 sm:inline-flex">
+                          {item.status}
+                        </span>
+
+                        <svg
+                          viewBox="0 0 20 20"
+                          aria-hidden="true"
+                          className="h-5 w-5 text-slate-400 transition group-open:rotate-180 group-open:text-cyan-700"
+                          fill="none"
+                        >
+                          <path
+                            d="M5 7.5L10 12.5L15 7.5"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </div>
+                    </summary>
+
+                    <div className="border-t border-slate-100 px-3 pb-3 pt-2">
+                      <div className="grid gap-2 sm:grid-cols-[0.8fr_1.2fr] sm:items-start">
+                        <p className="text-sm font-semibold text-slate-950">
+                          {item.value}
+                        </p>
+
+                        <p className="text-sm leading-6 text-slate-600">
+                          {item.detail}
+                        </p>
+                      </div>
                     </div>
-
-                    <p className="text-sm leading-6 text-slate-600">
-                      {item.detail}
-                    </p>
-
-                    <span className="inline-flex w-fit shrink-0 items-center whitespace-nowrap rounded-full border border-cyan-200 bg-cyan-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-700">
-                      {item.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
+                  </details>
+                )
+              })}
             </div>
           </div>
         </div>

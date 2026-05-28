@@ -118,19 +118,40 @@ export default function BusinessPortfolioIntelligenceLab({
                 {intelligence.briefBody}
               </p>
 
-              <div className="mt-4 rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                  Recommended next action
-                </p>
+              <details className="group mt-4 rounded-full border border-slate-200 bg-white transition open:rounded-2xl open:shadow-sm">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2 [&::-webkit-details-marker]:hidden">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span className="whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      Recommended action
+                    </span>
 
-                <p className="mt-1 text-sm font-semibold text-slate-950">
-                  {intelligence.nextActionTitle}
-                </p>
+                    <span className="truncate text-sm font-semibold text-slate-950">
+                      {intelligence.nextActionTitle}
+                    </span>
+                  </div>
 
-                <p className="mt-1 text-sm leading-6 text-slate-600">
-                  {intelligence.nextActionDetail}
-                </p>
-              </div>
+                  <svg
+                    viewBox="0 0 20 20"
+                    aria-hidden="true"
+                    className="h-5 w-5 shrink-0 text-slate-400 transition group-open:rotate-180 group-open:text-cyan-700"
+                    fill="none"
+                  >
+                    <path
+                      d="M5 7.5L10 12.5L15 7.5"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </summary>
+
+                <div className="border-t border-slate-100 px-3 pb-3 pt-2">
+                  <p className="text-sm leading-6 text-slate-600">
+                    {intelligence.nextActionDetail}
+                  </p>
+                </div>
+              </details>
 
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
@@ -199,7 +220,7 @@ export default function BusinessPortfolioIntelligenceLab({
                           <svg
                             viewBox="0 0 20 20"
                             aria-hidden="true"
-                            className="h-4 w-4 text-slate-400 transition group-open:rotate-180 group-open:text-cyan-700"
+                            className="h-5 w-5 text-slate-400 transition group-open:rotate-180 group-open:text-cyan-700"
                             fill="none"
                           >
                             <path
