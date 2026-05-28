@@ -2464,7 +2464,6 @@ export default function DashboardFlightAttendant({
                 {messages.map((message) => (
                   <AssistantBubble
                     key={message.id}
-                    label={message.label}
                     text={message.text}
                     align={message.role === "user" ? "right" : "left"}
                   />
@@ -2618,34 +2617,31 @@ export default function DashboardFlightAttendant({
 }
 
 function AssistantBubble({
-  label,
   text,
   align,
 }: {
-  label: string
   text: string
   align: "left" | "right"
 }) {
   const cleanText = sanitizeLucyText(text)
 
+  if (!cleanText) return null
+
+  if (align === "left") {
+    return (
+      <div className="flex justify-start">
+        <div className="max-w-[92%] px-1 py-1">
+          <p className="whitespace-pre-line text-sm leading-6 text-slate-100">
+            {cleanText}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div
-      className={cn(
-        "flex",
-        align === "right" ? "justify-end" : "justify-start"
-      )}
-    >
-      <div
-        className={cn(
-          "max-w-[86%] rounded-[1.4rem] border px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.22)] backdrop-blur-xl",
-          align === "right"
-            ? "border-cyan-300/20 bg-[linear-gradient(135deg,rgba(34,211,238,0.16),rgba(15,23,42,0.92))]"
-            : "border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(15,23,42,0.88))]"
-        )}
-      >
-        <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-          {label}
-        </p>
+    <div className="flex justify-end">
+      <div className="max-w-[86%] rounded-[1.4rem] border border-white/10 bg-white/[0.08] px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.18)] backdrop-blur-xl">
         <p className="whitespace-pre-line text-sm leading-6 text-slate-100">
           {cleanText}
         </p>
@@ -2657,12 +2653,8 @@ function AssistantBubble({
 function ThinkingDotsBubble() {
   return (
     <div className="flex justify-start">
-      <div className="max-w-[86%] rounded-[1.4rem] border border-white/10 bg-white/[0.06] px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.22)] backdrop-blur-xl">
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-          Lucy
-        </p>
-
-        <div className="flex items-center gap-1.5 py-1">
+      <div className="px-1 py-2">
+        <div className="flex items-center gap-1.5">
           <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300" />
           <span
             className="h-2 w-2 animate-pulse rounded-full bg-cyan-300"
