@@ -159,21 +159,21 @@ const tierConfig: Record<
     title: "Free Flight Attendant",
     welcome:
       "Hi, I’m Lucy, your Skysirv Flight Attendant. I can help explain Skysirv basics, watchlists, fare signals, and how to get started with smarter flight monitoring.",
-    placeholder: "Ask Lucy about Skysirv basics...",
+    placeholder: "Ask Lucy...",
   },
   pro: {
     badge: "Standard",
     title: "Pro Flight Attendant",
     welcome:
       "Hi, I’m Lucy, your Skysirv Flight Attendant. I can help explain your routes, fare timing, Skyscore, watchlist signals, and booking confidence.",
-    placeholder: "Ask Lucy about your trip...",
+    placeholder: "Ask Lucy...",
   },
   business: {
     badge: "Advanced",
     title: "Business Flight Attendant",
     welcome:
       "Hi, I’m Lucy, your advanced Skysirv Flight Attendant. I can help analyze route behavior, fare intelligence, saved flights, timing signals, and premium booking decisions.",
-    placeholder: "Ask Lucy for deeper flight intelligence...",
+    placeholder: "Ask Lucy...",
   },
 }
 

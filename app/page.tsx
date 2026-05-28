@@ -935,7 +935,7 @@ function LucyCommandDemo() {
       <div className="border-t border-white/10 p-3">
         <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-2">
           <span className="min-w-0 flex-1 truncate text-sm text-slate-400">
-            Ask Lucy about your trip...
+            Ask Lucy...
           </span>
 
           <button
