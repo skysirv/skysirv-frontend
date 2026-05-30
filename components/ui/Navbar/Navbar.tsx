@@ -75,11 +75,11 @@ export default function Navbar() {
       </a>
 
       {showBetaBanner ? (
-        <div className="relative z-50 flex h-9 pointer-events-auto items-center justify-center overflow-hidden bg-[#10103a]/90 backdrop-blur-xl px-10 text-center text-[11px] font-medium text-white shadow-sm sm:min-h-[40px] sm:px-12 sm:py-2 sm:text-[13px]">
-          <p className="max-w-full truncate whitespace-nowrap leading-none">
-            <span className="font-semibold">Skysirv Public Beta</span>
-            <span className="mx-1.5 text-white/45">·</span>
-            <span className="text-white/85">
+        <div className="relative z-50 flex h-9 pointer-events-auto items-center justify-center overflow-hidden border-b border-slate-200 bg-white/95 px-10 text-center text-[11px] font-medium text-slate-800 shadow-sm backdrop-blur-xl sm:min-h-[40px] sm:px-12 sm:py-2 sm:text-[13px]">
+          <p className="max-w-full truncate whitespace-nowrap leading-5">
+            <span className="font-semibold text-slate-950">Skysirv Public Beta</span>
+            <span className="mx-1.5 text-slate-300">·</span>
+            <span className="text-slate-600">
               Airfare intelligence in progress
             </span>
           </p>
@@ -88,12 +88,17 @@ export default function Navbar() {
             type="button"
             aria-label="Dismiss beta banner"
             onClick={dismissBetaBanner}
-            className="absolute right-2 top-1/2 z-[60] flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white pointer-events-auto sm:right-4"
+            className="absolute right-2 top-1/2 z-[60] flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-950 pointer-events-auto sm:right-4"
           >
             <span className="text-lg leading-none sm:text-xl">×</span>
           </button>
         </div>
-      ) : null}
+      ) : (
+        <div
+          aria-hidden="true"
+          className="h-9 pointer-events-none sm:min-h-[40px]"
+        />
+      )}
 
       <div className="mx-auto max-w-7xl px-6">
         <Navlinks isDark={isDark} />

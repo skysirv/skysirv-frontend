@@ -56,6 +56,7 @@ function getDashboardHrefFromPlan(planId?: string | null) {
 export default function Navlinks({ user, isDark = false }: NavlinksProps) {
   const pathname = usePathname();
   const isChoosePlanPage = pathname === '/choose-plan';
+  const isHomepageLab = pathname === '/dev/homepage-lab';
 
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -293,9 +294,12 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
     <>
       <div className="pointer-events-auto pt-4 md:pt-5">
         <div
-          className={`relative mx-auto flex max-w-5xl items-center justify-between rounded-full px-6 py-3 shadow-[0_12px_30px_rgba(15,23,42,0.10)] ${isDark
-            ? 'border border-white/10 bg-slate-900/80 backdrop-blur'
-            : 'border border-white/50 bg-white/75 backdrop-blur-xl'
+          className={`relative mx-auto flex items-center justify-between rounded-full ${isHomepageLab
+            ? 'max-w-5xl border border-white/80 bg-white/90 px-6 py-3 shadow-[0_18px_55px_rgba(15,23,42,0.14)] backdrop-blur-2xl'
+            : `max-w-5xl px-6 py-3 shadow-[0_12px_30px_rgba(15,23,42,0.10)] ${isDark
+              ? 'border border-white/10 bg-slate-900/80 backdrop-blur'
+              : 'border border-white/50 bg-white/75 backdrop-blur-xl'
+            }`
             }`}
         >
           <div className="flex items-center translate-y-[1px] -translate-x-3">
@@ -312,7 +316,12 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
 
           <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center justify-center">
             <div
-              className={`flex items-center gap-6 text-sm font-semibold ${isDark ? 'text-white/70' : 'text-slate-600'
+              className={`flex items-center ${isHomepageLab ? 'gap-6 text-sm' : 'gap-6 text-sm'
+                } font-semibold ${isHomepageLab
+                  ? 'text-slate-900'
+                  : isDark
+                    ? 'text-white/70'
+                    : 'text-slate-600'
                 }`}
             >
               <Link href="/pricing" className={`transition ${isDark ? 'hover:text-white' : 'hover:text-slate-900'}`}>
@@ -344,13 +353,15 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
                   onClick={() => setAccountMenuOpen((current) => !current)}
                   aria-label="Open navigation menu"
                   aria-expanded={accountMenuOpen}
-                  className={`flex h-10 w-10 items-center justify-center rounded-full border transition ${isLoggedIn
-                    ? isDark
-                      ? 'border-white/20 bg-white text-slate-950 hover:bg-slate-200'
-                      : 'border-slate-900 bg-slate-900 text-white hover:bg-slate-700'
-                    : isDark
-                      ? 'border-white/15 bg-white/10 text-white hover:bg-white/15'
-                      : 'border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100'
+                  className={`flex h-10 w-10 items-center justify-center rounded-full border transition ${isHomepageLab
+                    ? 'border-slate-200 bg-white text-slate-900 shadow-sm hover:bg-slate-50'
+                    : isLoggedIn
+                      ? isDark
+                        ? 'border-white/20 bg-white text-slate-950 hover:bg-slate-200'
+                        : 'border-slate-900 bg-slate-900 text-white hover:bg-slate-700'
+                      : isDark
+                        ? 'border-white/15 bg-white/10 text-white hover:bg-white/15'
+                        : 'border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100'
                     }`}
                 >
                   <svg
