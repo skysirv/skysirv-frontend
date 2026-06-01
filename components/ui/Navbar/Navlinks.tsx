@@ -55,6 +55,7 @@ function getDashboardHrefFromPlan(planId?: string | null) {
 
 export default function Navlinks({ user, isDark = false }: NavlinksProps) {
   const pathname = usePathname();
+  const isSkysirvLivePage = pathname.startsWith('/skysirv-live');
   const isChoosePlanPage = pathname === '/choose-plan';
   const isHomepageLab = pathname === '/dev/homepage-lab';
 
@@ -290,13 +291,17 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
     setCreateAccountModalOpen(true);
   }, [isSessionReady, isLoggedIn, isAdmin, dashboardHref]);
 
+  if (isSkysirvLivePage) {
+    return null;
+  }
+
   return (
     <>
       <div className="pointer-events-auto pt-4 md:pt-5">
         <div
           className={`relative mx-auto flex items-center justify-between rounded-full ${isHomepageLab
-            ? 'max-w-5xl border border-white/80 bg-white/90 px-6 py-3 shadow-[0_18px_55px_rgba(15,23,42,0.14)] backdrop-blur-2xl'
-            : `max-w-5xl px-6 py-3 shadow-[0_12px_30px_rgba(15,23,42,0.10)] ${isDark
+            ? 'max-w-[860px] border border-white/80 bg-white/90 px-6 py-3 shadow-[0_18px_55px_rgba(15,23,42,0.14)] backdrop-blur-2xl'
+            : `max-w-[860px] px-6 py-3 shadow-[0_12px_30px_rgba(15,23,42,0.10)] ${isDark
               ? 'border border-white/10 bg-slate-900/80 backdrop-blur'
               : 'border border-white/50 bg-white/75 backdrop-blur-xl'
             }`
@@ -333,14 +338,14 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
               </Link>
 
               <Link
-                href="/flight-attendant"
+                href="/skysirv-live"
                 className={`transition ${isDark ? 'hover:text-white' : 'hover:text-slate-900'}`}
               >
-                Skysirv Flight Attendant™
+                Skysirv Live
               </Link>
 
               <Link href="/beta" className={`transition ${isDark ? 'hover:text-white' : 'hover:text-slate-900'}`}>
-                Skysirv™ Beta
+                Skysirv Beta
               </Link>
             </div>
           </div>
@@ -432,12 +437,12 @@ export default function Navlinks({ user, isDark = false }: NavlinksProps) {
                         </Link>
 
                         <Link
-                          href="/flight-attendant"
+                          href="/skysirv-live"
                           onClick={() => setAccountMenuOpen(false)}
                           className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
                             }`}
                         >
-                          Flight Attendant
+                          Skysirv Live
                         </Link>
 
                         <Link

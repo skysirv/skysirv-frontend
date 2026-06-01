@@ -9,6 +9,7 @@ const rotatingPromptPlaceholders = [
   "Ask Lucy to compare the best nonstop options from Miami...",
   "Ask Lucy to explain what changed in your route’s fare behavior...",
   "Ask Lucy to remember your travel preferences for future trips...",
+  "Ask Lucy what the best route is to Santa Cruz de la Sierra...",
 ]
 
 type PromptPillIconName = "find" | "track" | "fare" | "memory"
@@ -148,7 +149,7 @@ export default function HomepageLabHero() {
                   onChange={(event) => setPrompt(event.target.value)}
                   placeholder={rotatingPromptPlaceholders[placeholderIndex]}
                   rows={4}
-                  className="min-h-[132px] w-full resize-none bg-transparent pr-16 text-base font-medium leading-7 text-slate-950 outline-none placeholder:text-slate-400 lg:min-h-[148px]"
+                  className="min-h-[132px] w-full resize-none bg-transparent pr-16 text-base font-medium leading-7 text-slate-950 outline-none placeholder:text-slate-950 lg:min-h-[148px]"
                 />
 
                 <button

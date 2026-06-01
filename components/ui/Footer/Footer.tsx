@@ -10,7 +10,7 @@ export default function Footer() {
     pathname === "/pricing" ||
     pathname === "/booking" ||
     pathname === "/beta" ||
-    pathname === "/flight-attendant"
+    pathname.startsWith("/skysirv-live")
   ) {
     return null;
   }
@@ -25,7 +25,7 @@ export default function Footer() {
               href="/"
               className="text-xl font-bold leading-none text-slate-900 transition hover:text-slate-700"
             >
-              Skysirv™
+              Skysirv
             </Link>
 
             <p className="mt-4 text-sm leading-6 text-slate-600">
@@ -55,7 +55,7 @@ export default function Footer() {
 
               <li>
                 <Link href="/flight-attendant" className="transition hover:text-slate-400">
-                  Skysirv Flight Attendant™
+                  Skysirv Live
                 </Link>
               </li>
             </ul>
@@ -76,7 +76,7 @@ export default function Footer() {
 
               <li>
                 <Link href="/beta" className="transition hover:text-slate-400">
-                  Skysirv™ Beta
+                  Skysirv Beta
                 </Link>
               </li>
             </ul>
@@ -112,7 +112,7 @@ export default function Footer() {
 
         <div className="mt-12 pt-6 text-center">
           <p className="text-sm text-slate-900">
-            &copy; {new Date().getFullYear()} Skysirv™. All rights reserved.
+            &copy; {new Date().getFullYear()} Skysirv. All rights reserved.
           </p>
         </div>
       </div>
