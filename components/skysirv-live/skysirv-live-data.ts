@@ -1,4 +1,4 @@
-import { usSkysirvAirportCatalog } from "./skysirv-airport-catalog"
+import { MAJOR_AIRPORTS, type AirportOption } from "@/lib/airports/major-airports"
 
 export type AirportSeverity = "normal" | "minor" | "moderate" | "major"
 
@@ -85,8 +85,18 @@ export type SkysirvAirportPressureResponse = {
   airports: SkysirvAirportPressureStatus[]
 }
 
-export const airports: SkysirvLiveAirport[] = usSkysirvAirportCatalog.map(
-  (airport) => ({
+function hasAirportCoordinates(
+  airport: AirportOption,
+): airport is AirportOption & { latitude: number; longitude: number } {
+  return (
+    typeof airport.latitude === "number" &&
+    typeof airport.longitude === "number"
+  )
+}
+
+export const airports: SkysirvLiveAirport[] = MAJOR_AIRPORTS
+  .filter(hasAirportCoordinates)
+  .map((airport) => ({
     code: airport.code,
     name: airport.name,
     city: airport.city,
@@ -99,8 +109,7 @@ export const airports: SkysirvLiveAirport[] = usSkysirvAirportCatalog.map(
     source: "mock",
     airportType: airport.airportType ?? "major",
     priorityRank: airport.priorityRank ?? 1,
-  }),
-)
+  }))
 
 export function mergeFaaStatusesWithAirports(
   baseAirports: SkysirvLiveAirport[],
@@ -182,7 +191,11 @@ export function getAirportPressureScore(airport: {
   arrivalsDelay: number
   cancellationRate: number
 }) {
-  return airport.departuresDelay + airport.arrivalsDelay + airport.cancellationRate * 10
+  return (
+    airport.departuresDelay +
+    airport.arrivalsDelay +
+    airport.cancellationRate * 10
+  )
 }
 
 export function getAirportSeverityRank(severity: AirportSeverity) {
