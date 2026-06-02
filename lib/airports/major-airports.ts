@@ -183,17 +183,24 @@ export const MAJOR_AIRPORTS: AirportOption[] = [
   // Middle East
 
   { code: "AUH", city: "Abu Dhabi", name: "Zayed International", country: "United Arab Emirates", region: "AZ", displayName: "Zayed Intl Airport", latitude: 24.433, longitude: 54.6511, airportType: "major", priorityRank: 2 },
+  { code: "BAH", city: "Bahrain", name: "Bahrain International", country: "Bahrain", displayName: "Bahrain Intl Airport", latitude: 26.2708, longitude: 50.6336, airportType: "major", priorityRank: 5 },
   { code: "DOH", city: "Doha", name: "Hamad International", country: "Qatar", region: "QA", displayName: "Hamad Intl Airport", latitude: 25.2731, longitude: 51.6081, airportType: "major", priorityRank: 1 },
   { code: "DXB", city: "Dubai", name: "Dubai International", country: "United Arab Emirates", region: "DU", displayName: "Dubai Intl Airport", latitude: 25.2532, longitude: 55.3657, airportType: "major", priorityRank: 1 },
   { code: "JED", city: "Jeddah", name: "King Abdulaziz International", country: "Saudi Arabia", region: "Makkah", displayName: "King Abdulaziz Intl Airport", latitude: 21.6796, longitude: 39.1565, airportType: "major", priorityRank: 2 },
+  { code: "KWI", city: "Kuwait City", name: "Kuwait International", country: "Kuwait", displayName: "Kuwait Intl Airport", latitude: 29.2266, longitude: 47.9689, airportType: "major", priorityRank: 5 },
   { code: "RUH", city: "Riyadh", name: "King Khalid International", country: "Saudi Arabia", region: "Riyadh", displayName: "King Khalid Intl Airport", latitude: 24.9576, longitude: 46.6988, airportType: "major", priorityRank: 2 },
+  { code: "TLV", city: "Tel Aviv-Yafo", name: "Ben Gurion International", country: "Israel", displayName: "Ben Gurion Intl Airport", latitude: 32.0114, longitude: 34.8867, airportType: "major", priorityRank: 5 },
 
   // Africa
 
+  { code: "ADD", city: "Addis Ababa", name: "Bole International", country: "Ethiopia", displayName: "Bole Intl Airport", latitude: 8.9779, longitude: 38.7993, airportType: "major", priorityRank: 5 },
+  { code: "ALG", city: "Algiers", name: "Houari Boumediene", country: "Algeria", displayName: "Houari Boumediene Airport", latitude: 36.691, longitude: 3.2154, airportType: "major", priorityRank: 5 },
   { code: "CAI", city: "Cairo", name: "Cairo International", country: "Egypt", region: "C", displayName: "Cairo Intl Airport", latitude: 30.1219, longitude: 31.4056, airportType: "major", priorityRank: 2 },
   { code: "CMN", city: "Casablanca", name: "Mohammed V International", country: "Morocco", region: "CAS", displayName: "Mohammed V Intl Airport", latitude: 33.3675, longitude: -7.5899, airportType: "major", priorityRank: 2 },
   { code: "CPT", city: "Cape Town", name: "Cape Town International", country: "South Africa", region: "WC", displayName: "Cape Town Intl Airport", latitude: -33.9715, longitude: 18.6021, airportType: "major", priorityRank: 2 },
   { code: "JNB", city: "Johannesburg", name: "O.R. Tambo International", country: "South Africa", region: "GP", displayName: "O.R. Tambo Intl Airport", latitude: -26.1337, longitude: 28.242, airportType: "major", priorityRank: 1 },
+  { code: "NBO", city: "Nairobi", name: "Jomo Kenyatta International", country: "Kenya", displayName: "Jomo Kenyatta Intl Airport", latitude: -1.3192, longitude: 36.9278, airportType: "major", priorityRank: 5 },
+  { code: "RAK", city: "Marrakesh", name: "Marrakesh Menara", country: "Morocco", displayName: "Marrakesh Menara Airport", latitude: 31.6069, longitude: -8.0363, airportType: "major", priorityRank: 5 },
 
   // Asia
 
@@ -204,6 +211,7 @@ export const MAJOR_AIRPORTS: AirportOption[] = [
   { code: "CGK", city: "Jakarta", name: "Soekarno-Hatta International", country: "Indonesia", region: "JK", displayName: "Soekarno-Hatta Intl Airport", latitude: -6.1256, longitude: 106.6559, airportType: "major", priorityRank: 2 },
   { code: "DEL", city: "Delhi", name: "Indira Gandhi International", country: "India", region: "DL", displayName: "Indira Gandhi Intl Airport", latitude: 28.5562, longitude: 77.1, airportType: "major", priorityRank: 1 },
   { code: "GMP", city: "Seoul", name: "Gimpo International", country: "South Korea", region: "KR-11", displayName: "Gimpo Intl Airport", latitude: 37.5583, longitude: 126.7906, airportType: "regional", priorityRank: 3 },
+  { code: "HGH", city: "Hangzhou", name: "Hangzhou Xiaoshan International", country: "China", displayName: "Hangzhou Xiaoshan Intl Airport", latitude: 30.2369, longitude: 120.432, airportType: "major", priorityRank: 5 },
   { code: "HKG", city: "Hong Kong", name: "Hong Kong International", country: "Hong Kong", region: "HK", displayName: "Hong Kong Intl Airport", latitude: 22.308, longitude: 113.9185, airportType: "major", priorityRank: 1 },
   { code: "HKT", city: "Phuket", name: "Phuket International", country: "Thailand", region: "TH-83", displayName: "Phuket Intl Airport", latitude: 8.1132, longitude: 98.3169, airportType: "regional", priorityRank: 3 },
   { code: "HND", city: "Tokyo", name: "Haneda", country: "Japan", region: "TK", displayName: "Haneda Airport", latitude: 35.5494, longitude: 139.7798, airportType: "major", priorityRank: 1 },
@@ -224,6 +232,7 @@ export const MAJOR_AIRPORTS: AirportOption[] = [
 
   // Oceania
 
+  { code: "ADL", city: "Adelaide", name: "Adelaide Airport", country: "Australia", displayName: "Adelaide Airport", latitude: -34.945, longitude: 138.5306, airportType: "major", priorityRank: 5 },
   { code: "AKL", city: "Auckland", name: "Auckland Airport", country: "New Zealand", region: "AUK", displayName: "Auckland Airport", latitude: -37.0082, longitude: 174.785, airportType: "major", priorityRank: 2 },
   { code: "BNE", city: "Brisbane", name: "Brisbane Airport", country: "Australia", region: "QLD", displayName: "Brisbane Airport", latitude: -27.3842, longitude: 153.1175, airportType: "major", priorityRank: 2 },
   { code: "CHC", city: "Christchurch", name: "Christchurch Airport", country: "New Zealand", region: "CAN", displayName: "Christchurch Airport", latitude: -43.4894, longitude: 172.5322, airportType: "regional", priorityRank: 3 },

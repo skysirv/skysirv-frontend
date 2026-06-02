@@ -30,8 +30,8 @@ const regionViewStates: Record<
   }
 > = {
   all: {
-    longitude: -35,
-    latitude: 28,
+    longitude: 20,
+    latitude: 22,
     zoom: 1.35,
   },
   "north-america": {
@@ -71,27 +71,244 @@ const regionViewStates: Record<
   },
 }
 
-const activeCatalogRegions = new Set(["all", "north-america"])
-const REGIONAL_AIRPORT_CARD_ZOOM_THRESHOLD = 5.25
+const DEFAULT_REGION_KEY = "north-america"
+const GLOBAL_MAJOR_PRIORITY_ZOOM_THRESHOLD = 4.25
+const REGIONAL_AIRPORT_MARKER_ZOOM_THRESHOLD = 5.35
+const EXECUTIVE_AIRPORT_MARKER_ZOOM_THRESHOLD = 7.25
+
+const regionCountryGroups: Record<string, string[]> = {
+  "north-america": [
+    "United States",
+    "Canada",
+    "Mexico",
+    "Guatemala",
+    "Panama",
+    "El Salvador",
+    "Costa Rica",
+  ],
+  europe: [
+    "Austria",
+    "Belgium",
+    "Denmark",
+    "Finland",
+    "France",
+    "Germany",
+    "Greece",
+    "Ireland",
+    "Italy",
+    "Netherlands",
+    "Norway",
+    "Portugal",
+    "Spain",
+    "Sweden",
+    "Switzerland",
+    "Turkey",
+    "United Kingdom",
+  ],
+  asia: [
+    "China",
+    "Hong Kong",
+    "India",
+    "Indonesia",
+    "Japan",
+    "Malaysia",
+    "Philippines",
+    "Singapore",
+    "South Korea",
+    "Taiwan",
+    "Thailand",
+  ],
+  africa: [
+    "Egypt",
+    "Morocco",
+    "South Africa",
+  ],
+  "south-america": [
+    "Argentina",
+    "Bolivia",
+    "Brazil",
+    "Chile",
+    "Colombia",
+    "Peru",
+  ],
+  "middle-east": [
+    "Qatar",
+    "Saudi Arabia",
+    "United Arab Emirates",
+  ],
+  pacific: [
+    "Australia",
+    "New Zealand",
+  ],
+}
+
+function isAirportInRegion(
+  airport: SkysirvLiveAirport,
+  regionKey: string,
+) {
+  if (regionKey === "all") return true
+
+  const countries = regionCountryGroups[regionKey]
+
+  if (!countries) return true
+
+  return countries.includes(airport.country)
+}
+
+function isAirportVisibleAtZoom(
+  airport: SkysirvLiveAirport,
+  zoom: number,
+) {
+  const airportType = airport.airportType ?? "major"
+  const priorityRank = airport.priorityRank ?? 99
+
+  if (airport.severity !== "normal") {
+    return true
+  }
+
+  if (airportType === "executive") {
+    return zoom >= EXECUTIVE_AIRPORT_MARKER_ZOOM_THRESHOLD
+  }
+
+  if (
+    airportType === "regional" ||
+    airportType === "cargo" ||
+    airportType === "reliever"
+  ) {
+    return zoom >= REGIONAL_AIRPORT_MARKER_ZOOM_THRESHOLD
+  }
+
+  if (zoom < GLOBAL_MAJOR_PRIORITY_ZOOM_THRESHOLD) {
+    return priorityRank <= 2
+  }
+
+  return true
+}
+
+const regionDetectionOrder = [
+  "north-america",
+  "europe",
+  "asia",
+  "africa",
+  "south-america",
+  "middle-east",
+  "pacific",
+]
+
+function getRegionKeyForAirport(airport: SkysirvLiveAirport) {
+  return (
+    regionDetectionOrder.find((regionKey) =>
+      regionCountryGroups[regionKey]?.includes(airport.country),
+    ) ?? null
+  )
+}
+
+function getDominantRegionFromAirports(airportsInView: SkysirvLiveAirport[]) {
+  const regionCounts = new globalThis.Map<string, number>()
+
+  airportsInView.forEach((airport) => {
+    const regionKey = getRegionKeyForAirport(airport)
+
+    if (!regionKey) return
+
+    regionCounts.set(regionKey, (regionCounts.get(regionKey) ?? 0) + 1)
+  })
+
+  const rankedRegions = Array.from(regionCounts.entries()).sort(
+    (a, b) => b[1] - a[1],
+  )
+
+  return rankedRegions[0]?.[0] ?? null
+}
+
+function getRegionKeyFromMapCenter(longitude: number, latitude: number) {
+  if (
+    latitude >= -50 &&
+    latitude <= 5 &&
+    ((longitude >= 110 && longitude <= 180) ||
+      (longitude >= -180 && longitude <= -130))
+  ) {
+    return "pacific"
+  }
+
+  if (
+    latitude >= -58 &&
+    latitude <= 15 &&
+    longitude >= -90 &&
+    longitude <= -30
+  ) {
+    return "south-america"
+  }
+
+  if (
+    latitude >= 12 &&
+    latitude <= 42 &&
+    longitude >= 34 &&
+    longitude <= 65
+  ) {
+    return "middle-east"
+  }
+
+  if (
+    latitude >= -38 &&
+    latitude <= 38 &&
+    longitude >= -20 &&
+    longitude <= 55
+  ) {
+    return "africa"
+  }
+
+  if (
+    latitude >= 34 &&
+    latitude <= 72 &&
+    longitude >= -25 &&
+    longitude <= 45
+  ) {
+    return "europe"
+  }
+
+  if (
+    latitude >= -10 &&
+    latitude <= 60 &&
+    longitude >= 65 &&
+    longitude <= 150
+  ) {
+    return "asia"
+  }
+
+  if (
+    latitude >= 5 &&
+    latitude <= 85 &&
+    longitude >= -170 &&
+    longitude <= -50
+  ) {
+    return "north-america"
+  }
+
+  return "all"
+}
 
 export default function SkysirvLivePage() {
   const mapRef = useRef<MapRef | null>(null)
   const suppressNextVisibleUpdateRef = useRef(false)
-  const [activeRegion, setActiveRegion] = useState("north-america")
+  const [activeRegion, setActiveRegion] = useState(DEFAULT_REGION_KEY)
   const [liveAirports, setLiveAirports] =
     useState<SkysirvLiveAirport[]>(airports)
   const [faaObservedAt, setFaaObservedAt] = useState<string | undefined>()
 
   const [currentZoom, setCurrentZoom] = useState(
-    regionViewStates["north-america"].zoom,
+    regionViewStates[DEFAULT_REGION_KEY].zoom,
   )
 
   const [visibleAirportCodes, setVisibleAirportCodes] = useState<string[] | null>(
-    null
+    null,
+  )
+
+  const [selectedAirportCode, setSelectedAirportCode] = useState<string | null>(
+    null,
   )
 
   useEffect(() => {
-
     let isMounted = true
 
     async function loadSkysirvAirportPressure() {
@@ -108,7 +325,9 @@ export default function SkysirvLivePage() {
         )
 
         if (!response.ok) {
-          throw new Error(`Skysirv airport pressure request failed with ${response.status}`)
+          throw new Error(
+            `Skysirv airport pressure request failed with ${response.status}`,
+          )
         }
 
         const data = (await response.json()) as SkysirvAirportPressureResponse
@@ -142,24 +361,49 @@ export default function SkysirvLivePage() {
     }
   }, [])
 
-  const mapAirports = useMemo(() => {
-    if (!activeCatalogRegions.has(activeRegion)) return []
+  const visibleAirportCodeSet = useMemo(() => {
+    if (!visibleAirportCodes) return null
 
-    const isZoomedIn =
-      currentZoom >= REGIONAL_AIRPORT_CARD_ZOOM_THRESHOLD
+    return new Set(visibleAirportCodes)
+  }, [visibleAirportCodes])
 
-    if (!isZoomedIn) {
-      return liveAirports.filter((airport) => airport.severity !== "normal")
-    }
+  const airportDisplayPool = useMemo(() => {
+    const visibleOrRegionPool = visibleAirportCodeSet
+      ? liveAirports.filter((airport) => visibleAirportCodeSet.has(airport.code))
+      : liveAirports.filter((airport) =>
+        isAirportInRegion(airport, activeRegion),
+      )
 
-    if (!visibleAirportCodes) {
-      return liveAirports.filter((airport) => airport.severity !== "normal")
-    }
-
-    return liveAirports.filter((airport) =>
-      visibleAirportCodes.includes(airport.code),
+    return visibleOrRegionPool.filter((airport) =>
+      isAirportVisibleAtZoom(airport, currentZoom),
     )
-  }, [activeRegion, currentZoom, liveAirports, visibleAirportCodes])
+  }, [activeRegion, currentZoom, liveAirports, visibleAirportCodeSet])
+
+  const mapAirports = useMemo(() => {
+    const disruptedAirports = airportDisplayPool.filter(
+      (airport) => airport.severity !== "normal",
+    )
+
+    if (!selectedAirportCode) {
+      return disruptedAirports
+    }
+
+    const selectedAirport = liveAirports.find(
+      (airport) => airport.code === selectedAirportCode,
+    )
+
+    if (!selectedAirport) {
+      return disruptedAirports
+    }
+
+    if (
+      disruptedAirports.some((airport) => airport.code === selectedAirport.code)
+    ) {
+      return disruptedAirports
+    }
+
+    return [...disruptedAirports, selectedAirport]
+  }, [airportDisplayPool, liveAirports, selectedAirportCode])
 
   function updateVisibleAirports() {
     if (suppressNextVisibleUpdateRef.current) {
@@ -176,19 +420,28 @@ export default function SkysirvLivePage() {
 
     if (!bounds) return
 
-    const nextVisibleCodes = liveAirports
-      .filter((airport) =>
-        bounds.contains({
-          lng: airport.longitude,
-          lat: airport.latitude,
-        })
-      )
-      .map((airport) => airport.code)
+    const nextVisibleAirports = liveAirports.filter((airport) =>
+      bounds.contains({
+        lng: airport.longitude,
+        lat: airport.latitude,
+      }),
+    )
+
+    const nextVisibleCodes = nextVisibleAirports.map((airport) => airport.code)
 
     setVisibleAirportCodes(nextVisibleCodes)
+
+    const center = map.getCenter()
+
+    const nextRegion =
+      getDominantRegionFromAirports(nextVisibleAirports) ??
+      getRegionKeyFromMapCenter(center.lng, center.lat)
+
+    setActiveRegion(nextRegion)
   }
 
   function handleAirportSelect(airport: SkysirvLiveAirport) {
+    setSelectedAirportCode(airport.code)
     setCurrentZoom(8.25)
 
     mapRef.current?.flyTo({
@@ -206,6 +459,7 @@ export default function SkysirvLivePage() {
 
     setActiveRegion(regionKey)
     suppressNextVisibleUpdateRef.current = false
+    setSelectedAirportCode(null)
     setCurrentZoom(nextViewState.zoom)
     setVisibleAirportCodes(null)
 
@@ -218,21 +472,12 @@ export default function SkysirvLivePage() {
   }
 
   const sortedAirports = useMemo(() => {
-    const regionPool = activeCatalogRegions.has(activeRegion) ? liveAirports : []
-
-    const isZoomedIn =
-      currentZoom >= REGIONAL_AIRPORT_CARD_ZOOM_THRESHOLD
-
-    const airportTypePool = isZoomedIn
-      ? regionPool
-      : regionPool.filter((airport) => airport.airportType === "major")
+    const disruptedAirports = airportDisplayPool.filter(
+      (airport) => airport.severity !== "normal",
+    )
 
     const airportPool =
-      isZoomedIn && visibleAirportCodes
-        ? airportTypePool.filter((airport) =>
-          visibleAirportCodes.includes(airport.code),
-        )
-        : airportTypePool
+      disruptedAirports.length > 0 ? disruptedAirports : airportDisplayPool
 
     return [...airportPool].sort((a, b) => {
       const severityDifference =
@@ -258,7 +503,9 @@ export default function SkysirvLivePage() {
 
       return a.code.localeCompare(b.code)
     })
-  }, [activeRegion, currentZoom, liveAirports, visibleAirportCodes])
+  }, [airportDisplayPool])
+
+  const initialViewState = regionViewStates[DEFAULT_REGION_KEY]
 
   return (
     <main className="fixed inset-0 h-[100dvh] w-screen overflow-hidden overscroll-none bg-slate-100 text-slate-950">
@@ -269,9 +516,9 @@ export default function SkysirvLivePage() {
           onLoad={updateVisibleAirports}
           onMoveEnd={updateVisibleAirports}
           initialViewState={{
-            longitude: -96,
-            latitude: 38.5,
-            zoom: 3.15,
+            longitude: initialViewState.longitude,
+            latitude: initialViewState.latitude,
+            zoom: initialViewState.zoom,
           }}
           mapStyle="mapbox://styles/mapbox/light-v11"
           projection="mercator"
@@ -296,7 +543,11 @@ export default function SkysirvLivePage() {
         onAirportSelect={handleAirportSelect}
       />
 
-      <SkysirvLiveLucyRead />
+      <SkysirvLiveLucyRead
+        airports={sortedAirports}
+        activeRegion={activeRegion}
+        lastUpdatedAt={faaObservedAt}
+      />
 
       <SkysirvLiveBottomNav
         mode="regions"

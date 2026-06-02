@@ -6,6 +6,7 @@ export type SkysirvLiveAirport = {
   code: string
   name: string
   city: string
+  country: string
   latitude: number
   longitude: number
   severity: AirportSeverity
@@ -100,6 +101,7 @@ export const airports: SkysirvLiveAirport[] = MAJOR_AIRPORTS
     code: airport.code,
     name: airport.name,
     city: airport.city,
+    country: airport.country,
     latitude: airport.latitude,
     longitude: airport.longitude,
     severity: "normal",

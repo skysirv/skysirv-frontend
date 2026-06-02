@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 
 type SkysirvLiveHeaderProps = {
@@ -64,15 +65,27 @@ export default function SkysirvLiveHeader({
                   )}
                 </div>
               ) : (
-                <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
-                  Skysirv Live
-                </h1>
+                <div className="flex items-center gap-3">
+                  <Image
+                    src="/branding/icon/skysirv-icon-white-32.png"
+                    alt=""
+                    width={32}
+                    height={32}
+                    priority
+                    className="h-8 w-8 shrink-0"
+                  />
+
+                  <h1 className="text-2xl tracking-tight sm:text-3xl">
+                    <span className="font-black">Skysirv</span>{" "}
+                    <span className="font-normal">Live</span>
+                  </h1>
+                </div>
               )}
             </div>
           </div>
 
           <div className="hidden items-center gap-3 text-xl font-bold text-white md:flex">
-            <span className="h-2.5 w-2.5 rounded-full bg-red-500 shadow-[0_0_18px_rgba(239,68,68,0.9)]" />
+            <span className="h-4 w-4 rounded-full bg-red-500 shadow-[0_0_18px_rgba(239,68,68,0.9)]" />
             {mode === "airport"
               ? "SKYSIRV.COM/LIVE"
               : `Live FAA Data · Last update: ${formatUtcUpdateTime(lastUpdatedAt)} UTC`}
