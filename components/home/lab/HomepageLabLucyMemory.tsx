@@ -45,22 +45,22 @@ export default function HomepageLabLucyMemory() {
     <section className="relative overflow-hidden bg-white px-6 py-24 sm:py-28">
       <div className="relative mx-auto grid max-w-7xl gap-14 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
         <motion.div
-          initial={{ opacity: 0, x: -28 }}
+          initial={{ opacity: 0, x: -14 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, amount: 0.22 }}
-          transition={{ duration: 0.65, ease: "easeOut" }}
+          transition={{ duration: 0.38, ease: "easeOut" }}
           className="relative mx-auto h-[520px] w-full max-w-3xl sm:h-[600px]"
         >
           {memoryCards.map((card, index) => (
             <motion.div
               key={card.label}
-              initial={{ opacity: 0, y: 22, scale: 0.96 }}
+              initial={{ opacity: 0, y: 10, scale: 0.98 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               viewport={{ once: true, amount: 0.25 }}
               transition={{
-                duration: 0.55,
+                duration: 0.32,
                 ease: "easeOut",
-                delay: index * 0.08,
+                delay: index * 0.04,
               }}
               className={`absolute overflow-visible ${card.className}`}
             >
@@ -82,10 +82,10 @@ export default function HomepageLabLucyMemory() {
           ))}
 
           <motion.div
-            initial={{ opacity: 0, y: 18, scale: 0.96 }}
+            initial={{ opacity: 0, y: 10, scale: 0.98 }}
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
             viewport={{ once: true, amount: 0.25 }}
-            transition={{ duration: 0.65, ease: "easeOut", delay: 0.18 }}
+            transition={{ duration: 0.36, ease: "easeOut", delay: 0.08 }}
             className="absolute left-[50%] top-[28%] z-30 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center"
           >
             <img
@@ -97,26 +97,26 @@ export default function HomepageLabLucyMemory() {
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, x: 28 }}
+          initial={{ opacity: 0, x: 14 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.65, ease: "easeOut", delay: 0.08 }}
+          transition={{ duration: 0.38, ease: "easeOut", delay: 0.04 }}
           className="mx-auto max-w-xl text-center lg:mx-0 lg:text-left"
         >
-          <h2 className="text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
-            Lucy learns how you like to travel.
+          <h2 className="text-4xl font-bold tracking-tight text-slate-800 sm:text-5xl">
+            Lucy remembers the way you like to travel.
           </h2>
 
-          <p className="mt-6 text-base leading-8 text-slate-600 sm:text-lg">
-            From home airports and preferred airlines to nonstop flights, family
-            trips, cabin preferences, and favorite destinations, Lucy can use
-            your travel style to make future planning feel more personal.
+          <p className="mt-6 text-base leading-8 text-slate-700 sm:text-lg">
+            From home airports and preferred airlines to hotel style, rental car
+            needs, cruise preferences, family trips, and favorite destinations,
+            Lucy can use your travel style to make future planning feel more personal.
           </p>
 
-          <p className="mt-6 text-base leading-8 text-slate-600 sm:text-lg">
+          <p className="mt-6 text-base leading-8 text-slate-700 sm:text-lg">
             The more Lucy understands your preferences, the more Skysirv can
-            help shape flight search, route tracking, and travel decisions around
-            the way you actually fly.
+            help shape flight search, hotel planning, car rentals, cruises, and
+            itineraries around the way you actually travel.
           </p>
 
           <button

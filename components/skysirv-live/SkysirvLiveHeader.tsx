@@ -45,7 +45,7 @@ export default function SkysirvLiveHeader({
         <div className="flex min-h-[76px] items-center justify-between bg-blue-700 px-6 text-white backdrop-blur-xl">
           <div className="flex items-center gap-4">
             <Link
-              href={mode === "airport" ? "/skysirv-live" : "/"}
+              href={mode === "airport" ? "/skysirv-live" : "/dev/homepage-lab"}
               className="inline-flex h-11 items-center rounded-full bg-white px-4 text-sm font-bold text-slate-950 transition hover:bg-slate-100"
             >
               {mode === "airport" ? "← Live" : "← Home"}
@@ -65,7 +65,7 @@ export default function SkysirvLiveHeader({
                   )}
                 </div>
               ) : (
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <Image
                     src="/branding/icon/skysirv-icon-white-32.png"
                     alt=""

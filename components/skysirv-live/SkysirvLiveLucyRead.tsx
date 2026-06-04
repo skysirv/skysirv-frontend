@@ -214,7 +214,7 @@ export default function SkysirvLiveLucyRead({
 
   return (
     <div className="pointer-events-auto absolute right-5 top-[118px] z-20 hidden max-w-sm rounded-[1.35rem] border border-white/70 bg-white/90 p-4 shadow-[0_20px_60px_rgba(15,23,42,0.16)] backdrop-blur-xl lg:block">
-      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-600">
+      <p className="text-[14px] font-bold uppercase tracking-[0.2em] text-blue-600">
         Lucy live read
       </p>
 

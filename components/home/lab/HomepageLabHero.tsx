@@ -1,46 +1,97 @@
 "use client"
 
-import { FormEvent, useEffect, useState } from "react"
+import Link from "next/link"
+import { FormEvent, useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
-import HomepageLabLucyModal from "@/components/home/lab/HomepageLabLucyModal"
 
 const rotatingPromptPlaceholders = [
+  "Ask Lucy to compare flights, hotels, and rental cars for your next trip...",
   "Ask Lucy if Boston to Panama is showing a smart time to book...",
-  "Ask Lucy to compare the best nonstop options from Miami...",
+  "Ask Lucy to help build a family itinerary around flights, hotels, and activities...",
+  "Ask Lucy how to think about hotel location, nightly rates, and total trip value...",
+  "Ask Lucy to compare airport rental cars versus off-airport rental options...",
+  "Ask Lucy what to consider before booking a cruise vacation...",
   "Ask Lucy to explain what changed in your route’s fare behavior...",
   "Ask Lucy to remember your travel preferences for future trips...",
-  "Ask Lucy what the best route is to Santa Cruz de la Sierra...",
 ]
 
-type PromptPillIconName = "find" | "track" | "fare" | "memory"
+type PromptPillIconName = "find" | "hotel" | "car" | "cruise" | "itinerary"
 
 const promptPills: Array<{
   label: string
   icon: PromptPillIconName
+  href: string
 }> = [
     {
       label: "Find flights",
       icon: "find",
+      href: "/dev/plan-with-lucy-lab/flights",
     },
     {
-      label: "Track a route",
-      icon: "track",
+      label: "Book hotels",
+      icon: "hotel",
+      href: "/dev/plan-with-lucy-lab/hotels",
     },
     {
-      label: "Watch fare movement",
-      icon: "fare",
+      label: "Car rentals",
+      icon: "car",
+      href: "/dev/plan-with-lucy-lab/car-rentals",
     },
     {
-      label: "Remember my travel style",
-      icon: "memory",
+      label: "Book cruises",
+      icon: "cruise",
+      href: "/dev/plan-with-lucy-lab/cruises",
+    },
+    {
+      label: "Generate itinerary",
+      icon: "itinerary",
+      href: "/dev/plan-with-lucy-lab/itinerary",
     },
   ]
 
+type HeroLucyMessage = {
+  id: string
+  role: "user" | "lucy"
+  text: string
+}
+
+function createMessageId() {
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`
+}
+
+function buildHeroLucyDemoReply(question: string) {
+  const normalized = question.toLowerCase()
+
+  if (normalized.includes("hotel") || normalized.includes("stay")) {
+    return "I can help compare hotel strategy by location, timing, flexibility, amenities, and likely price behavior. Live hotel monitoring will become more powerful as the Skysirv Network expands."
+  }
+
+  if (normalized.includes("car") || normalized.includes("rental")) {
+    return "For car rentals, I’d compare pickup location, cancellation flexibility, total fees, insurance needs, and timing. Airport rentals can be convenient, but off-airport locations may sometimes price better."
+  }
+
+  if (normalized.includes("itinerary") || normalized.includes("plan")) {
+    return "I can help shape an itinerary around flights, hotels, airport timing, ground transportation, and trip flow. For personalized saved plans, you’ll want to sign in so I can keep the context connected."
+  }
+
+  if (
+    normalized.includes("flight") ||
+    normalized.includes("fare") ||
+    normalized.includes("route") ||
+    normalized.includes("book")
+  ) {
+    return "I can help explain route options, booking timing, fare movement, stops, airline tradeoffs, and confidence signals. Signed-in Skysirv users can go deeper with live tracking and saved route intelligence."
+  }
+
+  return "I can help with flights, hotels, car rentals, itinerary planning, fare behavior, and smarter trip decisions. Ask me like you would ask a personal travel intelligence assistant."
+}
+
 export default function HomepageLabHero() {
-  const [prompt, setPrompt] = useState("")
+  const [chatInput, setChatInput] = useState("")
   const [placeholderIndex, setPlaceholderIndex] = useState(0)
-  const [lucyModalOpen, setLucyModalOpen] = useState(false)
-  const [lucyInitialQuestion, setLucyInitialQuestion] = useState("")
+  const [messages, setMessages] = useState<HeroLucyMessage[]>([])
+  const [chatLoading, setChatLoading] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -52,24 +103,44 @@ export default function HomepageLabHero() {
     return () => window.clearInterval(timer)
   }, [])
 
-  function openLucyModal(message: string) {
-    const cleanMessage = message.trim()
-
-    if (!cleanMessage) return
-
-    setLucyInitialQuestion(cleanMessage)
-    setLucyModalOpen(true)
-  }
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    })
+  }, [messages, chatLoading])
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    openLucyModal(prompt)
-  }
+    const message = chatInput.trim()
 
-  function handlePromptPillClick(value: string) {
-    setPrompt(value)
-    openLucyModal(value)
+    if (!message || chatLoading) return
+
+    setMessages((current) => [
+      ...current,
+      {
+        id: createMessageId(),
+        role: "user",
+        text: message,
+      },
+    ])
+
+    setChatInput("")
+    setChatLoading(true)
+
+    window.setTimeout(() => {
+      setMessages((current) => [
+        ...current,
+        {
+          id: createMessageId(),
+          role: "lucy",
+          text: buildHeroLucyDemoReply(message),
+        },
+      ])
+
+      setChatLoading(false)
+    }, 450)
   }
 
   return (
@@ -116,12 +187,13 @@ export default function HomepageLabHero() {
             transition={{ duration: 0.75, ease: "easeOut" }}
             className="mx-auto max-w-5xl"
           >
-            <h1 className="text-4xl font-bold tracking-tight text-white drop-shadow-[0_8px_34px_rgba(2,6,23,0.35)] sm:text-5xl md:text-6xl lg:text-6xl">
-              AI-powered flight intelligence, guided by Lucy.
+            <h1 className="text-4xl font-bold tracking-tight text-slate-800 drop-shadow-[0_8px_34px_rgba(2,6,23,0.35)] sm:text-5xl md:text-6xl lg:text-6xl">
+              AI-powered travel intelligence, guided by Lucy.
             </h1>
 
-            <p className="mx-auto mt-6 max-w-3xl text-base font-semibold leading-8 text-white drop-shadow-[0_4px_18px_rgba(2,6,23,0.35)] sm:text-xl">
+            <p className="mx-auto mt-6 max-w-3xl text-base font-semibold leading-8 text-slate-700 drop-shadow-[0_4px_18px_rgba(2,6,23,0.35)] sm:text-xl">
               Skysirv's Lucy helps you track routes, understand fare movement,
+              compare flights, explore hotels and car rentals, build smarter itineraries,
               remember how you like to travel, and decide when to book with more
               confidence.
             </p>
@@ -134,44 +206,85 @@ export default function HomepageLabHero() {
             onSubmit={handleSubmit}
             className="mx-auto mt-9 w-full max-w-[880px]"
           >
-            <div className="relative min-h-[176px] overflow-hidden rounded-[1.85rem] border border-white/70 bg-white text-left shadow-[0_24px_90px_rgba(2,6,23,0.24)] ring-1 ring-cyan-200/50 lg:grid lg:grid-cols-[190px_1fr]">
-              <div className="relative hidden overflow-hidden border-r border-slate-200 bg-gradient-to-br from-sky-50 via-white to-indigo-50 lg:block">
-                <img
-                  src="/images/stock/lucy/lucy-pos-1.png"
-                  alt="Lucy welcoming visitors"
-                  className="pointer-events-none absolute left-[50%] top-[-130px] h-[360px] w-auto -translate-x-1/2 scale-[1.4] origin-top object-contain drop-shadow-[0_22px_36px_rgba(15,23,42,0.18)] xl:h-[385px]"
-                />
-              </div>
+            <div className="relative min-h-[240px] overflow-hidden rounded-[1.85rem] border border-white/70 bg-white text-left shadow-[0_24px_90px_rgba(2,6,23,0.24)] ring-1 ring-cyan-200/50">
+              <div className="relative flex h-[240px] flex-col px-5 py-4 sm:px-7 lg:h-[250px]">
+                <div className="min-h-0 flex-1 overflow-y-auto pr-2 [scrollbar-width:thin] [scrollbar-color:rgba(148,163,184,0.35)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300/45 hover:[&::-webkit-scrollbar-thumb]:bg-slate-400/60">
+                  {messages.length === 0 ? (
+                    <div className="pt-5">
+                      <p className="max-w-xl text-base font-medium leading-7 text-slate-500">
+                        {rotatingPromptPlaceholders[placeholderIndex]}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 pb-1">
+                      {messages.map((message) =>
+                        message.role === "user" ? (
+                          <div key={message.id} className="flex justify-end">
+                            <div className="max-w-[84%] rounded-2xl rounded-br-md bg-slate-900 px-4 py-2.5 text-sm leading-6 text-white">
+                              {message.text}
+                            </div>
+                          </div>
+                        ) : (
+                          <div key={message.id} className="flex justify-start">
+                            <p className="max-w-[92%] text-sm font-medium leading-6 text-slate-700">
+                              {message.text}
+                            </p>
+                          </div>
+                        )
+                      )}
 
-              <div className="relative px-5 py-5">
-                <textarea
-                  value={prompt}
-                  onChange={(event) => setPrompt(event.target.value)}
-                  placeholder={rotatingPromptPlaceholders[placeholderIndex]}
-                  rows={4}
-                  className="min-h-[132px] w-full resize-none bg-transparent pr-16 text-base font-medium leading-7 text-slate-950 outline-none placeholder:text-slate-950 lg:min-h-[148px]"
-                />
+                      {chatLoading && (
+                        <div className="flex justify-start">
+                          <div className="flex items-center gap-1.5 px-1 py-2">
+                            <span className="h-2 w-2 animate-pulse rounded-full bg-blue-600" />
+                            <span
+                              className="h-2 w-2 animate-pulse rounded-full bg-blue-600"
+                              style={{ animationDelay: "120ms" }}
+                            />
+                            <span
+                              className="h-2 w-2 animate-pulse rounded-full bg-blue-600"
+                              style={{ animationDelay: "240ms" }}
+                            />
+                          </div>
+                        </div>
+                      )}
 
-                <button
-                  type="submit"
-                  aria-label="Ask Lucy"
-                  className="absolute bottom-5 right-5 inline-flex h-10 w-10 items-center justify-center rounded-full bg-blue-700 text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                    className="h-5 w-5"
-                    fill="none"
+                      <div ref={messagesEndRef} />
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-3 flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2">
+                  <input
+                    type="text"
+                    value={chatInput}
+                    onChange={(event) => setChatInput(event.target.value)}
+                    placeholder="Ask Lucy about flights, hotels, rentals, or trip planning..."
+                    className="min-w-0 flex-1 bg-transparent text-sm font-medium text-slate-950 outline-none placeholder:text-slate-400"
+                  />
+
+                  <button
+                    type="submit"
+                    disabled={!chatInput.trim() || chatLoading}
+                    aria-label="Ask Lucy"
+                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-700 text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-45"
                   >
-                    <path
-                      d="M5 12h13M13 6l6 6-6 6"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
+                    <svg
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                      className="h-5 w-5"
+                      fill="none"
+                    >
+                      <path
+                        d="M5 12h13M13 6l6 6-6 6"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
           </motion.form>
@@ -184,10 +297,9 @@ export default function HomepageLabHero() {
           >
             <div className="flex flex-wrap items-center justify-center gap-2 lg:flex-nowrap">
               {promptPills.map((item) => (
-                <button
+                <Link
                   key={item.label}
-                  type="button"
-                  onClick={() => handlePromptPillClick(item.label)}
+                  href={item.href}
                   className="group relative isolate inline-flex shrink-0 overflow-hidden rounded-full p-[2px] text-sm font-semibold text-slate-800 shadow-[0_10px_28px_rgba(15,23,42,0.12)] transition hover:-translate-y-0.5"
                 >
                   <span className="pointer-events-none absolute left-1/2 top-1/2 h-[190%] w-[190%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[conic-gradient(from_90deg,transparent_0deg,rgba(34,211,238,0.98)_45deg,rgba(59,130,246,0.98)_95deg,rgba(168,85,247,0.98)_150deg,rgba(236,72,153,0.98)_210deg,rgba(251,146,60,0.98)_270deg,rgba(34,197,94,0.98)_325deg,transparent_360deg)] opacity-0 transition-opacity duration-300 group-hover:animate-[spin_4.5s_linear_infinite] group-hover:opacity-100" />
@@ -196,18 +308,12 @@ export default function HomepageLabHero() {
                     <PromptPillIcon name={item.icon} />
                     {item.label}
                   </span>
-                </button>
+                </Link>
               ))}
             </div>
           </motion.div>
         </div>
       </section>
-
-      <HomepageLabLucyModal
-        open={lucyModalOpen}
-        initialQuestion={lucyInitialQuestion}
-        onClose={() => setLucyModalOpen(false)}
-      />
     </>
   )
 }
@@ -224,7 +330,7 @@ function PromptPillIcon({ name }: { name: PromptPillIconName }) {
     )
   }
 
-  if (name === "track") {
+  if (name === "hotel") {
     return (
       <svg
         viewBox="0 0 24 24"
@@ -233,39 +339,77 @@ function PromptPillIcon({ name }: { name: PromptPillIconName }) {
         fill="none"
       >
         <path
-          d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z"
+          d="M4.5 20V7.5A2.5 2.5 0 0 1 7 5h10a2.5 2.5 0 0 1 2.5 2.5V20"
           stroke="currentColor"
           strokeWidth="2"
+          strokeLinecap="round"
           strokeLinejoin="round"
         />
-        <circle
-          cx="12"
-          cy="10"
-          r="2"
+        <path
+          d="M7.5 20v-5.5A1.5 1.5 0 0 1 9 13h6a1.5 1.5 0 0 1 1.5 1.5V20"
           stroke="currentColor"
           strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M8 9h.01M12 9h.01M16 9h.01"
+          stroke="currentColor"
+          strokeWidth="2.8"
+          strokeLinecap="round"
         />
       </svg>
     )
   }
 
-  if (name === "fare") {
+  if (name === "car") {
+    return (
+      <span
+        aria-hidden="true"
+        className="h-5 w-5 bg-emerald-600"
+        style={{
+          WebkitMaskImage: "url('/images/stock/icons/car-icon.svg')",
+          maskImage: "url('/images/stock/icons/car-icon.svg')",
+          WebkitMaskRepeat: "no-repeat",
+          maskRepeat: "no-repeat",
+          WebkitMaskPosition: "center",
+          maskPosition: "center",
+          WebkitMaskSize: "contain",
+          maskSize: "contain",
+        }}
+      />
+    )
+  }
+
+  if (name === "cruise") {
     return (
       <svg
         viewBox="0 0 24 24"
         aria-hidden="true"
-        className="h-5 w-5 text-emerald-600"
+        className="h-5 w-5 text-blue-600"
         fill="none"
       >
-        <circle
-          cx="10.5"
-          cy="10.5"
-          r="5.75"
+        <path
+          d="M7 10.5V6.75A1.75 1.75 0 0 1 8.75 5h6.5A1.75 1.75 0 0 1 17 6.75v3.75"
           stroke="currentColor"
           strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
         <path
-          d="M15 15 20 20"
+          d="M5.5 10.5h13l-1.35 5.25A3 3 0 0 1 14.25 18h-4.5a3 3 0 0 1-2.9-2.25L5.5 10.5Z"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M8.5 8h7"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        <path
+          d="M4 20c1.25 0 1.25-.75 2.5-.75S7.75 20 9 20s1.25-.75 2.5-.75S12.75 20 14 20s1.25-.75 2.5-.75S17.75 20 19 20"
           stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="round"
@@ -274,19 +418,24 @@ function PromptPillIcon({ name }: { name: PromptPillIconName }) {
     )
   }
 
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      className="h-5 w-5 text-fuchsia-600"
-      fill="none"
-    >
-      <path
-        d="M7 5.5A1.5 1.5 0 0 1 8.5 4h7A1.5 1.5 0 0 1 17 5.5V20l-5-3-5 3V5.5Z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
+  if (name === "itinerary") {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        className="h-5 w-5 text-fuchsia-600"
+        fill="none"
+      >
+        <circle cx="7" cy="6" r="2" stroke="currentColor" strokeWidth="2" />
+        <circle cx="17" cy="18" r="2" stroke="currentColor" strokeWidth="2" />
+        <path
+          d="M9 6h3.5A3.5 3.5 0 0 1 16 9.5v0A3.5 3.5 0 0 1 12.5 13H11a3 3 0 0 0 0 6h4"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    )
+  }
+}  

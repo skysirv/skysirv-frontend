@@ -18,6 +18,13 @@ import SkysirvLiveBottomNav from "@/components/skysirv-live/SkysirvLiveBottomNav
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
 
+const MAP_STYLES = {
+  standard: "mapbox://styles/mapbox/standard",
+  satellite: "mapbox://styles/mapbox/standard-satellite",
+} as const
+
+type MapStyleKey = keyof typeof MAP_STYLES
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000"
 
@@ -295,6 +302,7 @@ export default function SkysirvLivePage() {
   const [liveAirports, setLiveAirports] =
     useState<SkysirvLiveAirport[]>(airports)
   const [faaObservedAt, setFaaObservedAt] = useState<string | undefined>()
+  const [mapStyleKey, setMapStyleKey] = useState<MapStyleKey>("standard")
 
   const [currentZoom, setCurrentZoom] = useState(
     regionViewStates[DEFAULT_REGION_KEY].zoom,
@@ -513,14 +521,34 @@ export default function SkysirvLivePage() {
         <Map
           ref={mapRef}
           mapboxAccessToken={MAPBOX_TOKEN}
-          onLoad={updateVisibleAirports}
+          onLoad={() => {
+            updateVisibleAirports()
+
+            const map = mapRef.current?.getMap()
+
+            if (!map) return
+
+            if (!map.getSource("mapbox-dem")) {
+              map.addSource("mapbox-dem", {
+                type: "raster-dem",
+                url: "mapbox://mapbox.mapbox-terrain-dem-v1",
+                tileSize: 512,
+                maxzoom: 14,
+              })
+            }
+
+            map.setTerrain({
+              source: "mapbox-dem",
+              exaggeration: 1.35,
+            })
+          }}
           onMoveEnd={updateVisibleAirports}
           initialViewState={{
             longitude: initialViewState.longitude,
             latitude: initialViewState.latitude,
             zoom: initialViewState.zoom,
           }}
-          mapStyle="mapbox://styles/mapbox/light-v11"
+          mapStyle={MAP_STYLES[mapStyleKey]}
           projection="mercator"
           attributionControl
           reuseMaps
@@ -537,6 +565,26 @@ export default function SkysirvLivePage() {
       <div className="pointer-events-none absolute inset-x-0 top-0 bottom-[56px] bg-gradient-to-r from-white/75 via-white/20 to-transparent" />
 
       <SkysirvLiveHeader lastUpdatedAt={faaObservedAt} />
+
+      <div className="pointer-events-auto absolute bottom-[84px] right-[58px] z-30 hidden overflow-hidden rounded-full border border-slate-200/80 bg-white/90 p-1 shadow-[0_14px_40px_rgba(15,23,42,0.16)] backdrop-blur-xl md:flex">
+        {(["standard", "satellite"] as MapStyleKey[]).map((styleKey) => {
+          const isActive = mapStyleKey === styleKey
+
+          return (
+            <button
+              key={styleKey}
+              type="button"
+              onClick={() => setMapStyleKey(styleKey)}
+              className={`rounded-full px-4 py-2 text-[11px] font-black uppercase tracking-[0.12em] transition ${isActive
+                ? "bg-blue-700 text-white"
+                : "text-slate-500 hover:bg-slate-100 hover:text-slate-950"
+                }`}
+            >
+              {styleKey === "standard" ? "Map" : "Satellite"}
+            </button>
+          )
+        })}
+      </div>
 
       <SkysirvLiveAirportList
         airports={sortedAirports}
