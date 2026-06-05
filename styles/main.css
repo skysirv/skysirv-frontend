@@ -115,3 +115,24 @@ body::-webkit-scrollbar {
 body {
   -ms-overflow-style: none;
 }
+
+.skysirv-booking-lab input[type="date"] {
+  color: rgb(30 41 59);
+  -webkit-text-fill-color: rgb(30 41 59);
+  color-scheme: light;
+}
+
+.skysirv-booking-lab input[type="date"]::-webkit-datetime-edit,
+.skysirv-booking-lab input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+.skysirv-booking-lab input[type="date"]::-webkit-datetime-edit-text,
+.skysirv-booking-lab input[type="date"]::-webkit-datetime-edit-month-field,
+.skysirv-booking-lab input[type="date"]::-webkit-datetime-edit-day-field,
+.skysirv-booking-lab input[type="date"]::-webkit-datetime-edit-year-field {
+  color: rgb(30 41 59);
+  -webkit-text-fill-color: rgb(30 41 59);
+  opacity: 1;
+}
+
+.skysirv-booking-lab input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.65;
+}

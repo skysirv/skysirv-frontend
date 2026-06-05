@@ -33,7 +33,7 @@ export default function HomepageLabFinalCTA() {
 
             <Link
               href="/create-account"
-              className="inline-flex min-h-[48px] items-center justify-center rounded-full border border-slate-200 bg-white px-6 text-sm font-bold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50"
+              className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-orange-500 px-6 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:border-orange-600 hover:bg-orange-600"
             >
               Create account
             </Link>

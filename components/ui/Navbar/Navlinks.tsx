@@ -27,25 +27,25 @@ const ACCOUNT_HREF = '/account';
 const bookMenuItems = [
   {
     label: 'Flights',
-    href: '/booking',
+    href: '/dev/booking-lab/flights',
     iconSrc: '/images/stock/icons/booking/flights-icon.png',
     description: 'Search smarter flight options with Lucy-powered travel intelligence.',
   },
   {
     label: 'Hotels',
-    href: '/hotels',
+    href: '/dev/booking-lab/hotels',
     iconSrc: '/images/stock/icons/booking/hotels-icon.png',
     description: 'Compare stays by location, comfort, flexibility, and total trip value.',
   },
   {
     label: 'Car rentals',
-    href: '/car-rentals',
+    href: '/dev/booking-lab/car-rentals',
     iconSrc: '/images/stock/icons/booking/car-icon.png',
     description: 'Plan airport or city pickup with smarter pricing context.',
   },
   {
     label: 'Cruises',
-    href: '/cruises',
+    href: '/dev/booking-lab/cruises',
     iconSrc: '/images/stock/icons/booking/cruises-icon.png',
     description: 'Explore cruise options and future Skysirv cruise planning.',
   },
@@ -116,6 +116,9 @@ export default function Navlinks({
   const pathname = usePathname();
   const isSkysirvLivePage = pathname.startsWith('/skysirv-live');
   const isPlanWithLucyLabPage = pathname.startsWith('/dev/plan-with-lucy-lab');
+  const isBookingLabPage = pathname.startsWith('/dev/booking-lab');
+  const isPlanSmarterLabPage = pathname.startsWith('/dev/plan-smarter-lab');
+  const isLucyTripLabPage = pathname.startsWith('/dev/lucy-trip-lab');
   const isChoosePlanPage = pathname === '/choose-plan';
   const isHomepageLab = pathname === '/dev/homepage-lab';
 
@@ -123,7 +126,8 @@ export default function Navlinks({
     pathname === '/booking' ||
     pathname === '/hotels' ||
     pathname === '/car-rentals' ||
-    pathname === '/cruises';
+    pathname === '/cruises' ||
+    pathname.startsWith('/dev/booking-lab');
 
   const isPlanActive =
     pathname === '/itinerary' ||
@@ -430,7 +434,13 @@ export default function Navlinks({
     setCreateAccountModalOpen(true);
   }, [isSessionReady, isLoggedIn, isAdmin, dashboardHref]);
 
-  if (isSkysirvLivePage || isPlanWithLucyLabPage) {
+  if (
+    isSkysirvLivePage ||
+    isPlanWithLucyLabPage ||
+    isBookingLabPage ||
+    isPlanSmarterLabPage ||
+    isLucyTripLabPage
+  ) {
     return null;
   }
 
@@ -605,64 +615,26 @@ export default function Navlinks({
             </div>
           </div>
 
-          <div className="relative flex items-center" ref={dropdownRef}>
+          <div className="relative flex translate-x-10 items-center gap-2" ref={dropdownRef}>
             {isSessionReady && (
               <>
                 <button
                   type="button"
                   onClick={() => setAccountMenuOpen((current) => !current)}
-                  aria-label="Open navigation menu"
+                  aria-label="Open account menu"
                   aria-expanded={accountMenuOpen}
-                  className={`flex h-10 w-10 items-center justify-center rounded-full border transition ${isHomepageLab
-                    ? 'border-slate-200 bg-white text-slate-900 shadow-sm hover:bg-slate-50'
-                    : isLoggedIn
-                      ? isDark
-                        ? 'border-white/20 bg-white text-slate-950 hover:bg-slate-200'
-                        : 'border-slate-900 bg-slate-900 text-white hover:bg-slate-700'
-                      : isDark
-                        ? 'border-white/15 bg-white/10 text-white hover:bg-white/15'
-                        : 'border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100'
-                    }`}
+                  className="inline-flex min-h-[42px] items-center justify-center rounded-lg border border-blue-700 bg-blue-700 px-4 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:border-blue-600 hover:bg-blue-600"
                 >
-                  <svg
-                    className="md:hidden"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M4 7H20M4 12H20M4 17H20"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-
-                  <svg
-                    className="hidden md:block"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M20 21C20 17.6863 16.4183 15 12 15C7.58172 15 4 17.6863 4 21"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M12 12C14.2091 12 16 10.2091 16 8C16 5.79086 14.2091 4 12 4C9.79086 4 8 5.79086 8 8C8 10.2091 9.79086 12 12 12Z"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    />
-                  </svg>
+                  <span>{isLoggedIn ? "Dashboard" : "Sign in"}</span>
                 </button>
+
+                <Link
+                  href="/dev/plan-smarter-lab"
+                  className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-lg border border-orange-500 bg-orange-500 px-4 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:border-orange-600 hover:bg-orange-600"
+                >
+                  Plan smarter
+                  <span aria-hidden="true">→</span>
+                </Link>
 
                 {accountMenuOpen && (
                   <div
@@ -674,7 +646,7 @@ export default function Navlinks({
                     {!isLoggedIn && (
                       <div className="md:hidden">
                         <Link
-                          href="/booking"
+                          href="/dev/booking-lab/flights"
                           onClick={() => setAccountMenuOpen(false)}
                           className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
                             }`}

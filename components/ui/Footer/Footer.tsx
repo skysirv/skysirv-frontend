@@ -10,6 +10,9 @@ export default function Footer() {
     pathname === "/pricing" ||
     pathname === "/dev/pricing-lab" ||
     pathname.startsWith("/dev/plan-with-lucy-lab") ||
+    pathname.startsWith("/dev/booking-lab") ||
+    pathname.startsWith("/dev/plan-smarter-lab") ||
+    pathname.startsWith("/dev/lucy-trip-lab") ||
     pathname === "/booking" ||
     pathname === "/beta" ||
     pathname.startsWith("/skysirv-live")
@@ -44,25 +47,25 @@ export default function Footer() {
 
             <ul className="mt-4 space-y-3 text-sm text-slate-700">
               <li>
-                <Link href="/booking" className="transition hover:text-slate-400">
+                <Link href="/dev/booking-lab/flights" className="transition hover:text-slate-400">
                   Flights
                 </Link>
               </li>
 
               <li>
-                <Link href="/hotels" className="transition hover:text-slate-400">
+                <Link href="/dev/booking-lab/hotels" className="transition hover:text-slate-400">
                   Hotels
                 </Link>
               </li>
 
               <li>
-                <Link href="/car-rentals" className="transition hover:text-slate-400">
+                <Link href="/dev/booking-lab/car-rentals" className="transition hover:text-slate-400">
                   Car rentals
                 </Link>
               </li>
 
               <li>
-                <Link href="/cruises" className="transition hover:text-slate-400">
+                <Link href="/dev/booking-lab/cruises" className="transition hover:text-slate-400">
                   Cruises
                 </Link>
               </li>
