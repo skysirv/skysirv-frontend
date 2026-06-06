@@ -30,7 +30,7 @@ export default function AuthPanel({ onSignupComplete, onSigninComplete }: AuthPa
       onSignupComplete?.()
       setMode('signin')
       setSignupSuccess(false)
-    }, 4200)
+    }, 8000)
 
     return () => window.clearTimeout(timer)
   }, [signupSuccess, onSignupComplete])
@@ -40,12 +40,12 @@ export default function AuthPanel({ onSignupComplete, onSigninComplete }: AuthPa
       {mode === 'signin' ? (
         <>
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-slate-900">
+            <h2 className="text-2xl font-bold text-orange-500">
               Sign in to Skysirv
             </h2>
 
             <p className="mt-2 text-sm text-slate-600">
-              Access your flight intelligence dashboard
+              Access your Skysirv travel network
             </p>
           </div>
 
@@ -55,51 +55,83 @@ export default function AuthPanel({ onSignupComplete, onSigninComplete }: AuthPa
             }}
           />
 
-          <div className="mt-6 text-center text-sm text-slate-600">
+          <div className="mt-5 text-center text-sm text-slate-600">
             Don&apos;t have an account?{' '}
             <button
               type="button"
               onClick={() => setMode('signup')}
-              className="font-semibold text-slate-900 transition hover:underline"
+              className="font-semibold text-blue-700 transition hover:underline"
             >
               Create account
             </button>
           </div>
         </>
       ) : signupSuccess ? (
-        <div className="flex flex-col items-center justify-center py-6 text-center">
+        <div className="flex flex-col items-center justify-center py-7 text-center">
           <img
             src="/branding/icon/skysirv-icon-512.png"
             alt="Skysirv"
             className="mb-5 h-14 w-14 rounded-2xl"
           />
 
-          <h2 className="text-2xl font-bold text-slate-900">
+          <h2 className="text-2xl font-bold text-orange-500">
             Account Created
           </h2>
 
-          <p className="mt-4 max-w-sm text-sm leading-6 text-slate-600">
-            You should receive an activation email shortly.
-            Please check your inbox and click the activation link to continue.
+          <p className="mt-3 max-w-sm text-sm leading-6 text-slate-600">
+            Your Skysirv account is almost ready.
           </p>
 
-          <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
-            If you don’t see the email, check your spam folder.
-          </p>
+          <div className="mt-5 w-full rounded-2xl border border-slate-100 bg-slate-50 px-5 py-4 text-left">
+            <div className="flex gap-3">
+              <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-50 text-xs font-bold text-blue-700">
+                1
+              </span>
 
-          <p className="mt-2 max-w-sm text-sm leading-6 text-slate-600">
-            Thank you for creating your Skysirv account.
+              <div>
+                <p className="text-sm font-bold text-slate-800">
+                  Check your inbox
+                </p>
+
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  We sent you an activation email. Open it and click the activation
+                  link to continue.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 flex gap-3">
+              <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-orange-50 text-xs font-bold text-orange-600">
+                2
+              </span>
+
+              <div>
+                <p className="text-sm font-bold text-slate-800">
+                  Choose your plan
+                </p>
+
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  After activation, you’ll continue into the Skysirv plan flow and
+                  unlock the right dashboard for your account.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <p className="mt-5 max-w-sm text-xs leading-5 text-slate-500">
+            Don’t see the email? Check your spam folder or try again with the correct
+            email address.
           </p>
         </div>
       ) : (
         <>
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-slate-900">
-              Create your Skysirv™ account
+            <h2 className="text-2xl font-bold text-orange-500">
+              Create your Skysirv account
             </h2>
 
             <p className="mt-2 text-sm text-slate-600">
-              Start monitoring airfare with real travel intelligence
+              Start planning smarter with real travel intelligence
             </p>
           </div>
 
@@ -109,12 +141,12 @@ export default function AuthPanel({ onSignupComplete, onSigninComplete }: AuthPa
             }}
           />
 
-          <div className="mt-6 text-center text-sm text-slate-600">
+          <div className="mt-3 text-center text-sm text-slate-600">
             Already have an account?{' '}
             <button
               type="button"
               onClick={() => setMode('signin')}
-              className="font-semibold text-slate-900 transition hover:underline"
+              className="font-semibold text-blue-700 transition hover:underline"
             >
               Sign in
             </button>

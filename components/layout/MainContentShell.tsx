@@ -10,6 +10,7 @@ export default function MainContentShell({ children }: PropsWithChildren) {
   const isFullBleedPage =
     pathname === '/pricing' ||
     pathname === '/dev/pricing-lab' ||
+    pathname === '/choose-plan' ||
     pathname.startsWith('/dev/plan-with-lucy-lab') ||
     pathname.startsWith('/dev/booking-lab') ||
     pathname.startsWith('/dev/plan-smarter-lab') ||

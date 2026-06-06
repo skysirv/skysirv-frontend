@@ -179,7 +179,7 @@ export default function PricingLabPage() {
             transition={{ duration: 0.38, ease: "easeOut" }}
             className="mx-auto max-w-4xl text-center"
           >
-            <h1 className="mt-5 text-5xl font-bold tracking-tight text-slate-800 sm:text-6xl lg:text-7xl">
+            <h1 className="mt-5 text-5xl font-bold tracking-tight text-slate-800 sm:text-6xl lg:text-6xl">
               Choose how much travel intelligence Lucy unlocks.
             </h1>
 

@@ -76,7 +76,7 @@ export default function CreateAccountForm({
         shape: "pill",
         text: "continue_with",
         logo_alignment: "left",
-        width: 320,
+        width: 300,
       })
 
       setGoogleButtonReady(true)
@@ -235,27 +235,27 @@ export default function CreateAccountForm({
           type="submit"
           disabled={loading || googleLoading || passwordsMismatch}
           aria-busy={loading}
-          className="w-full rounded-xl bg-slate-900 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-70"
+          className="w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-600 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-70"
         >
           {loading ? "Creating account..." : "Create account"}
         </button>
       </form>
 
-      <div className="my-6 flex items-center gap-4 text-xs text-slate-400">
+      <div className="my-5 flex items-center gap-4 text-xs text-slate-400">
         <div className="h-px flex-1 bg-slate-200" />
         or
         <div className="h-px flex-1 bg-slate-200" />
       </div>
 
-      <div className="min-h-[84px]">
-        <div className="relative flex h-[44px] w-full justify-center">
+      <div>
+        <div className="relative flex h-[44px] w-full justify-center overflow-visible">
           {!googleButtonReady && GOOGLE_CLIENT_ID && (
-            <div className="absolute h-[44px] w-[320px] rounded-full border border-slate-200 bg-slate-50" />
+            <div className="absolute h-[44px] w-[300px] rounded-full border border-slate-200 bg-slate-50" />
           )}
 
           <div
             ref={googleButtonRef}
-            className={`h-[44px] w-[320px] transition-opacity duration-200 ${googleButtonReady ? "opacity-100" : "opacity-0"
+            className={`h-[44px] w-[300px] overflow-visible transition-opacity duration-200 ${googleButtonReady ? "opacity-100" : "opacity-0"
               }`}
           />
         </div>

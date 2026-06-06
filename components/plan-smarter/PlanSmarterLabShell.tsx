@@ -397,10 +397,10 @@ export default function PlanSmarterLabShell() {
               onClick={handleAskLucyClick}
               className="group flex min-h-[310px] flex-col rounded-[1.75rem] border border-slate-100 bg-white p-6 text-left shadow-[0_22px_65px_rgba(15,23,42,0.07)] transition hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.12)]"
             >
-              <h2 className="text-xl font-bold text-slate-900">Ask Lucy</h2>
+              <h2 className="text-xl font-bold text-slate-900">Not sure? Ask Lucy!</h2>
 
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Let Lucy suggest the best starting point based on your trip goals.
+                Let Lucy suggest a great trip, step by step.
               </p>
 
               <div className="flex flex-1 items-center justify-center pt-5">

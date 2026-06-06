@@ -95,7 +95,7 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
         shape: "pill",
         text: "continue_with",
         logo_alignment: "left",
-        width: 320
+        width: 300
       })
 
       setGoogleButtonReady(true)
@@ -554,7 +554,7 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
         <button
           type="submit"
           disabled={loading || googleLoading}
-          className="w-full rounded-xl bg-slate-900 py-3 text-sm font-medium text-white hover:bg-slate-800 transition disabled:cursor-not-allowed disabled:opacity-70"
+          className="w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white hover:bg-blue-600 transition disabled:cursor-not-allowed disabled:opacity-70"
         >
           {loading ? "Signing in..." : "Sign in"}
         </button>
@@ -566,14 +566,14 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
         <div className="h-px flex-1 bg-slate-200"></div>
       </div>
 
-      <div className="relative flex h-[56px] w-full justify-center">
+      <div className="relative flex h-[44px] w-full justify-center overflow-visible">
         {!googleButtonReady && GOOGLE_CLIENT_ID && (
-          <div className="absolute h-[56px] w-[320px] rounded-xl border border-slate-200 bg-slate-50" />
+          <div className="absolute h-[44px] w-[300px] rounded-full border border-slate-200 bg-slate-50" />
         )}
 
         <div
           ref={googleButtonRef}
-          className={`h-[56px] w-[320px] overflow-hidden transition-opacity duration-200 ${googleButtonReady ? "opacity-100" : "opacity-0"
+          className={`h-[44px] w-[300px] overflow-visible transition-opacity duration-200 ${googleButtonReady ? "opacity-100" : "opacity-0"
             }`}
         />
       </div>

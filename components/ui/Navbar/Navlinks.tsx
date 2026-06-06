@@ -620,9 +620,16 @@ export default function Navlinks({
               <>
                 <button
                   type="button"
-                  onClick={() => setAccountMenuOpen((current) => !current)}
-                  aria-label="Open account menu"
-                  aria-expanded={accountMenuOpen}
+                  onClick={() => {
+                    if (!isLoggedIn) {
+                      openSigninModal()
+                      return
+                    }
+
+                    setAccountMenuOpen((current) => !current)
+                  }}
+                  aria-label={isLoggedIn ? "Open account menu" : "Sign in"}
+                  aria-expanded={isLoggedIn ? accountMenuOpen : undefined}
                   className="inline-flex min-h-[42px] items-center justify-center rounded-lg border border-blue-700 bg-blue-700 px-4 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:border-blue-600 hover:bg-blue-600"
                 >
                   <span>{isLoggedIn ? "Dashboard" : "Sign in"}</span>
@@ -754,6 +761,8 @@ export default function Navlinks({
         onClose={() => setCreateAccountModalOpen(false)}
         maxWidthClassName="max-w-sm"
         disableBackdropClose={false}
+        heroImageSrc="/images/stock/onboarding-hero.jpg"
+        heroImageAlt="Ready for adventure"
       >
         <AuthPanel
           onSigninComplete={async (payload) => {
