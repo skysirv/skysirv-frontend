@@ -17,9 +17,18 @@ type AuthSuccessPayload = {
 type AuthPanelProps = {
   onSignupComplete?: () => void
   onSigninComplete?: (payload: AuthSuccessPayload) => void
+  requireConsent?: boolean
+  consentAccepted?: boolean
+  onRequestConsent?: (afterAccept: () => void) => void
 }
 
-export default function AuthPanel({ onSignupComplete, onSigninComplete }: AuthPanelProps) {
+export default function AuthPanel({
+  onSignupComplete,
+  onSigninComplete,
+  requireConsent = false,
+  consentAccepted = false,
+  onRequestConsent,
+}: AuthPanelProps) {
   const [mode, setMode] = useState<AuthMode>('signin')
   const [signupSuccess, setSignupSuccess] = useState(false)
 
@@ -50,12 +59,15 @@ export default function AuthPanel({ onSignupComplete, onSigninComplete }: AuthPa
           </div>
 
           <SignInForm
+            requireConsent={requireConsent}
+            consentAccepted={consentAccepted}
+            onRequestConsent={onRequestConsent}
             onSuccess={(payload) => {
               onSigninComplete?.(payload)
             }}
           />
 
-          <div className="mt-5 text-center text-sm text-slate-600">
+          <div className="mt-3 text-center text-sm text-slate-600">
             Don&apos;t have an account?{' '}
             <button
               type="button"
@@ -94,8 +106,8 @@ export default function AuthPanel({ onSignupComplete, onSigninComplete }: AuthPa
                 </p>
 
                 <p className="mt-1 text-xs leading-5 text-slate-500">
-                  We sent you an activation email. Open it and click the activation
-                  link to continue.
+                  We sent you an activation email. Open it and click the
+                  activation link to continue.
                 </p>
               </div>
             </div>
@@ -111,16 +123,16 @@ export default function AuthPanel({ onSignupComplete, onSigninComplete }: AuthPa
                 </p>
 
                 <p className="mt-1 text-xs leading-5 text-slate-500">
-                  After activation, you’ll continue into the Skysirv plan flow and
-                  unlock the right dashboard for your account.
+                  After activation, you’ll continue into the Skysirv plan flow
+                  and unlock the right dashboard for your account.
                 </p>
               </div>
             </div>
           </div>
 
           <p className="mt-5 max-w-sm text-xs leading-5 text-slate-500">
-            Don’t see the email? Check your spam folder or try again with the correct
-            email address.
+            Don’t see the email? Check your spam folder or try again with the
+            correct email address.
           </p>
         </div>
       ) : (
@@ -129,13 +141,12 @@ export default function AuthPanel({ onSignupComplete, onSigninComplete }: AuthPa
             <h2 className="text-2xl font-bold text-orange-500">
               Create your Skysirv account
             </h2>
-
-            <p className="mt-2 text-sm text-slate-600">
-              Start planning smarter with real travel intelligence
-            </p>
           </div>
 
           <CreateAccountForm
+            requireConsent={requireConsent}
+            consentAccepted={consentAccepted}
+            onRequestConsent={onRequestConsent}
             onSuccess={() => {
               setSignupSuccess(true)
             }}

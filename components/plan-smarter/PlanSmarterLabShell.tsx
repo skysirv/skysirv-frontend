@@ -395,7 +395,7 @@ export default function PlanSmarterLabShell() {
             <button
               type="button"
               onClick={handleAskLucyClick}
-              className="group flex min-h-[310px] flex-col rounded-[1.75rem] border border-slate-100 bg-white p-6 text-left shadow-[0_22px_65px_rgba(15,23,42,0.07)] transition hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.12)]"
+              className="group flex min-h-[310px] flex-col rounded-[1.75rem] border border-slate-200 bg-white p-6 text-left shadow-[0_22px_65px_rgba(15,23,42,0.07)] transition hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.12)]"
             >
               <h2 className="text-xl font-bold text-slate-900">Not sure? Ask Lucy!</h2>
 
@@ -404,12 +404,22 @@ export default function PlanSmarterLabShell() {
               </p>
 
               <div className="flex flex-1 items-center justify-center pt-5">
-                <img
-                  src="/images/stock/plan-smarter/not-sure-icon.png"
-                  alt=""
+                <span
+                  className="relative block shrink-0 overflow-hidden"
                   aria-hidden="true"
-                  className="h-50 w-50 object-contain transition group-hover:scale-105"
-                />
+                  style={{ width: "230px", height: "230px" }}
+                >
+                  <video
+                    src="/images/stock/plan-smarter/not-sure-lucy-animated.mp4"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    preload="auto"
+                    aria-hidden="true"
+                    className="h-50 w-50 object-contain transition group-hover:scale-105"
+                  />
+                </span>
               </div>
             </button>
           </div>

@@ -14,10 +14,16 @@ const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""
 
 type CreateAccountFormProps = {
   onSuccess?: () => void
+  requireConsent?: boolean
+  consentAccepted?: boolean
+  onRequestConsent?: (afterAccept: () => void) => void
 }
 
 export default function CreateAccountForm({
   onSuccess,
+  requireConsent = false,
+  consentAccepted = false,
+  onRequestConsent,
 }: CreateAccountFormProps) {
   const googleButtonRef = useRef<HTMLDivElement | null>(null)
 
@@ -85,16 +91,20 @@ export default function CreateAccountForm({
     initializeGoogle()
   }, [])
 
-  async function handleSubmit(event: React.FormEvent) {
-    event.preventDefault()
-
-    if (loading || googleLoading) return
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match")
-      return
+  function requestConsentIfNeeded(afterAccept: () => void) {
+    if (!requireConsent || consentAccepted) {
+      return false
     }
 
+    if (!onRequestConsent) {
+      return false
+    }
+
+    onRequestConsent(afterAccept)
+    return true
+  }
+
+  async function submitCreateAccount() {
     setLoading(true)
     setError("")
 
@@ -124,12 +134,26 @@ export default function CreateAccountForm({
     }
   }
 
-  async function handleGoogleCredentialResponse(response: { credential?: string }) {
-    if (!response?.credential) {
-      setError("Google sign-up failed. No credential was returned.")
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault()
+
+    if (loading || googleLoading) return
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match")
       return
     }
 
+    const consentWasRequested = requestConsentIfNeeded(() => {
+      void submitCreateAccount()
+    })
+
+    if (consentWasRequested) return
+
+    await submitCreateAccount()
+  }
+
+  async function continueGoogleSignup(credential: string) {
     setGoogleLoading(true)
     setError("")
 
@@ -140,7 +164,7 @@ export default function CreateAccountForm({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          credential: response.credential,
+          credential,
           mode: "signup",
         }),
       })
@@ -159,6 +183,23 @@ export default function CreateAccountForm({
       setError(err?.message || "Unable to continue with Google")
       setGoogleLoading(false)
     }
+  }
+
+  async function handleGoogleCredentialResponse(response: { credential?: string }) {
+    if (!response?.credential) {
+      setError("Google sign-up failed. No credential was returned.")
+      return
+    }
+
+    const credential = response.credential
+
+    const consentWasRequested = requestConsentIfNeeded(() => {
+      void continueGoogleSignup(credential)
+    })
+
+    if (consentWasRequested) return
+
+    await continueGoogleSignup(credential)
   }
 
   return (

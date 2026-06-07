@@ -22,11 +22,19 @@ type SignInSuccessPayload = {
 
 type SignInFormProps = {
   onSuccess?: (payload: SignInSuccessPayload) => void
+  requireConsent?: boolean
+  consentAccepted?: boolean
+  onRequestConsent?: (afterAccept: () => void) => void
 }
 
 type AuthMode = "signin" | "forgot-password" | "reset-password"
 
-export default function SignInForm({ onSuccess }: SignInFormProps) {
+export default function SignInForm({
+  onSuccess,
+  requireConsent = false,
+  consentAccepted = false,
+  onRequestConsent,
+}: SignInFormProps) {
   const googleButtonRef = useRef<HTMLDivElement | null>(null)
 
   const [mode, setMode] = useState<AuthMode>("signin")
@@ -85,7 +93,7 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
 
       window.google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
-        callback: handleGoogleCredentialResponse
+        callback: handleGoogleCredentialResponse,
       })
 
       window.google.accounts.id.renderButton(googleButtonRef.current, {
@@ -95,7 +103,7 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
         shape: "pill",
         text: "continue_with",
         logo_alignment: "left",
-        width: 300
+        width: 300,
       })
 
       setGoogleButtonReady(true)
@@ -103,6 +111,19 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
 
     initializeGoogle()
   }, [])
+
+  function requestConsentIfNeeded(afterAccept: () => void) {
+    if (!requireConsent || consentAccepted) {
+      return false
+    }
+
+    if (!onRequestConsent) {
+      return false
+    }
+
+    onRequestConsent(afterAccept)
+    return true
+  }
 
   function openForgotPassword() {
     setForgotEmail(email)
@@ -142,8 +163,8 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
 
     const sessionRes = await fetch(`${API_BASE_URL}/auth/session`, {
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     })
 
     const sessionData = await sessionRes.json().catch(() => null)
@@ -196,7 +217,7 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
     if (onSuccess) {
       onSuccess({
         token: data.token,
-        user: data.user
+        user: data.user,
       })
       return
     }
@@ -204,9 +225,7 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
     await routeUserAfterAuth(data.token, data.user?.is_admin === true)
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-
+  async function submitSignin() {
     setLoading(true)
     setError("")
 
@@ -214,12 +233,12 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
       const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           email,
-          password
-        })
+          password,
+        }),
       })
 
       const data = await res.json().catch(() => null)
@@ -236,6 +255,18 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
     }
   }
 
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+
+    const consentWasRequested = requestConsentIfNeeded(() => {
+      void submitSignin()
+    })
+
+    if (consentWasRequested) return
+
+    await submitSignin()
+  }
+
   async function handleForgotPasswordSubmit(e: React.FormEvent) {
     e.preventDefault()
 
@@ -247,11 +278,11 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
       const res = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: forgotEmail
-        })
+          email: forgotEmail,
+        }),
       })
 
       const data = await res.json().catch(() => null)
@@ -294,12 +325,12 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
       const res = await fetch(`${API_BASE_URL}/auth/reset-password`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           token: resetToken,
-          password: newPassword
-        })
+          password: newPassword,
+        }),
       })
 
       const data = await res.json().catch(() => null)
@@ -325,12 +356,7 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
     }
   }
 
-  async function handleGoogleCredentialResponse(response: { credential?: string }) {
-    if (!response?.credential) {
-      setError("Google sign-in failed. No credential was returned.")
-      return
-    }
-
+  async function continueGoogleAuth(credential: string) {
     setGoogleLoading(true)
     setError("")
 
@@ -338,12 +364,12 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
       const res = await fetch(`${API_BASE_URL}/auth/google`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          credential: response.credential,
-          mode: "signin"
-        })
+          credential,
+          mode: "signin",
+        }),
       })
 
       const data = await res.json().catch(() => null)
@@ -359,13 +385,30 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
     }
   }
 
+  async function handleGoogleCredentialResponse(response: { credential?: string }) {
+    if (!response?.credential) {
+      setError("Google sign-in failed. No credential was returned.")
+      return
+    }
+
+    const credential = response.credential
+
+    const consentWasRequested = requestConsentIfNeeded(() => {
+      void continueGoogleAuth(credential)
+    })
+
+    if (consentWasRequested) return
+
+    await continueGoogleAuth(credential)
+  }
+
   if (mode === "reset-password") {
     return (
       <div>
         <button
           type="button"
           onClick={backToSignIn}
-          className="mb-4 text-sm font-medium text-slate-500 hover:text-slate-900 transition"
+          className="mb-4 text-sm font-medium text-slate-500 transition hover:text-slate-900"
         >
           ← Back to sign in
         </button>
@@ -389,7 +432,7 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
             <button
               type="button"
               onClick={backToSignIn}
-              className="w-full rounded-xl bg-slate-900 py-3 text-sm font-medium text-white hover:bg-slate-800 transition"
+              className="w-full rounded-xl bg-slate-900 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
             >
               Back to sign in
             </button>
@@ -403,7 +446,7 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
                 required
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-16 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-16 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
               />
 
               <button
@@ -422,7 +465,7 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
                 required
                 value={confirmNewPassword}
                 onChange={(e) => setConfirmNewPassword(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-16 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-16 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
               />
 
               <button
@@ -434,14 +477,12 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
               </button>
             </div>
 
-            {error && (
-              <p className="text-sm text-red-500">{error}</p>
-            )}
+            {error && <p className="text-sm text-red-500">{error}</p>}
 
             <button
               type="submit"
               disabled={resetLoading || !resetToken}
-              className="w-full rounded-xl bg-slate-900 py-3 text-sm font-medium text-white hover:bg-slate-800 transition disabled:cursor-not-allowed disabled:opacity-70"
+              className="w-full rounded-xl bg-slate-900 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
             >
               {resetLoading ? "Resetting password..." : "Reset password"}
             </button>
@@ -457,7 +498,7 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
         <button
           type="button"
           onClick={backToSignIn}
-          className="mb-4 text-sm font-medium text-slate-500 hover:text-slate-900 transition"
+          className="mb-4 text-sm font-medium text-slate-500 transition hover:text-slate-900"
         >
           ← Back to sign in
         </button>
@@ -479,12 +520,10 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
             required
             value={forgotEmail}
             onChange={(e) => setForgotEmail(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+            className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
           />
 
-          {error && (
-            <p className="text-sm text-red-500">{error}</p>
-          )}
+          {error && <p className="text-sm text-red-500">{error}</p>}
 
           {forgotMessage && (
             <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-700">
@@ -495,7 +534,7 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
           <button
             type="submit"
             disabled={forgotLoading}
-            className="w-full rounded-xl bg-slate-900 py-3 text-sm font-medium text-white hover:bg-slate-800 transition disabled:cursor-not-allowed disabled:opacity-70"
+            className="w-full rounded-xl bg-slate-900 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {forgotLoading ? "Sending instructions..." : "Send reset instructions"}
           </button>
@@ -513,7 +552,7 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+          className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
         />
 
         <div className="space-y-2">
@@ -524,7 +563,7 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-16 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 transition"
+              className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-16 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
             />
 
             <button
@@ -540,21 +579,19 @@ export default function SignInForm({ onSuccess }: SignInFormProps) {
             <button
               type="button"
               onClick={openForgotPassword}
-              className="text-xs font-medium text-slate-500 hover:text-slate-900 transition"
+              className="text-xs font-medium text-slate-500 transition hover:text-slate-900"
             >
               Forgot password?
             </button>
           </div>
         </div>
 
-        {error && (
-          <p className="text-sm text-red-500">{error}</p>
-        )}
+        {error && <p className="text-sm text-red-500">{error}</p>}
 
         <button
           type="submit"
           disabled={loading || googleLoading}
-          className="w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white hover:bg-blue-600 transition disabled:cursor-not-allowed disabled:opacity-70"
+          className="w-full rounded-xl bg-blue-700 py-3 text-sm font-bold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-70"
         >
           {loading ? "Signing in..." : "Sign in"}
         </button>
