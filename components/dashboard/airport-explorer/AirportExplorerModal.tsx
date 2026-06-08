@@ -5,138 +5,25 @@ import mapboxgl from "mapbox-gl"
 import "mapbox-gl/dist/mapbox-gl.css"
 
 import type { AirportOption } from "@/lib/airports/major-airports"
+import type {
+  AirportSearchResult,
+  MapViewStyle,
+} from "@/components/dashboard/airport-explorer/airportExplorerTypes"
+import {
+  addIndoorAirportLayers,
+  addIndoorControlIfAvailable,
+  buildApiUrl,
+  enableMapboxIndoorMapping,
+  getAirportResultTypeLabel,
+  MAP_2D_CAMERA,
+  MAP_3D_CAMERA,
+  MAPBOX_STYLES,
+} from "@/components/dashboard/airport-explorer/airportExplorerUtils"
 
 type AirportExplorerModalProps = {
   open: boolean
   airport: AirportOption | null
   onClose: () => void
-}
-
-type MapViewStyle = "standard" | "satellite"
-
-type AirportSearchResult = {
-  id: string
-  name: string
-  type?: string
-  class?: string
-  floorId?: string
-  areaName?: string
-  category?: string
-  coordinates: [number, number]
-}
-
-const MAPBOX_STYLES: Record<MapViewStyle, string> = {
-  standard: "mapbox://styles/mapbox/standard",
-  satellite: "mapbox://styles/mapbox/standard-satellite",
-}
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? ""
-
-const MAP_2D_CAMERA = {
-  pitch: 0,
-  bearing: 0,
-}
-
-const MAP_3D_CAMERA = {
-  pitch: 55,
-  bearing: -18,
-}
-
-function buildApiUrl(path: string) {
-  if (!API_BASE_URL) return path
-
-  return `${API_BASE_URL.replace(/\/$/, "")}${path}`
-}
-
-function getAirportResultTypeLabel(result: AirportSearchResult) {
-  if (result.category === "gate" || result.type === "gates") return "Gate"
-  if (result.category === "baggage") return "Baggage claim"
-  if (result.category === "restroom") return "Restroom"
-  if (result.category === "security") return "Security"
-  if (result.category === "lounge") return "Lounge"
-  if (result.category === "food") return "Food & dining"
-  if (result.category === "shopping") return "Shopping"
-  if (result.category === "transport") return "Airport transport"
-  if (result.category === "parking") return "Parking"
-  if (result.category === "terminal") return "Terminal area"
-
-  return result.type || result.class || "Airport location"
-}
-
-function enableMapboxIndoorMapping(map: mapboxgl.Map) {
-  try {
-    map.setConfigProperty("basemap", "showIndoor", true)
-  } catch (error) {
-    console.warn("Mapbox indoor config is unavailable for this style.", error)
-  }
-}
-
-function addIndoorControlIfAvailable(
-  map: mapboxgl.Map,
-  indoorControlRef: React.MutableRefObject<unknown>
-) {
-  if (indoorControlRef.current) return
-
-  const IndoorControl = (mapboxgl as unknown as {
-    IndoorControl?: new () => mapboxgl.IControl
-  }).IndoorControl
-
-  if (!IndoorControl) {
-    console.warn("Mapbox IndoorControl is not available in this mapbox-gl build.")
-    return
-  }
-
-  const indoorControl = new IndoorControl()
-
-  map.addControl(indoorControl, "top-right")
-  indoorControlRef.current = indoorControl
-}
-
-function addIndoorAirportLayers(map: mapboxgl.Map) {
-  if (map.getSource("indoor")) return
-
-  map.addSource("indoor", {
-    type: "vector",
-    url: "mapbox://mapbox.indoor-v3",
-  })
-
-  map.addLayer({
-    id: "indoor-floorplan",
-    type: "fill",
-    source: "indoor",
-    "source-layer": "indoor_floorplan",
-    paint: {
-      "fill-color": [
-        "match",
-        ["get", "class"],
-        "security",
-        "#fde68a",
-        "restaurants",
-        "#bbf7d0",
-        "retail",
-        "#bfdbfe",
-        "services",
-        "#e9d5ff",
-        "#e5e7eb",
-      ],
-      "fill-opacity": 0.6,
-    },
-  })
-
-  map.addLayer({
-    id: "indoor-labels",
-    type: "symbol",
-    source: "indoor",
-    "source-layer": "indoor_label",
-    layout: {
-      "text-field": ["get", "name"],
-      "text-size": 11,
-      "text-allow-overlap": false,
-    },
-    paint: {
-      "text-color": "#0f172a",
-    },
-  })
 }
 
 export default function AirportExplorerModal({
@@ -425,8 +312,12 @@ export default function AirportExplorerModal({
                             mapRef.current.flyTo({
                               center: result.coordinates,
                               zoom: 18.2,
-                              pitch: is3DView ? MAP_3D_CAMERA.pitch : MAP_2D_CAMERA.pitch,
-                              bearing: is3DView ? MAP_3D_CAMERA.bearing : MAP_2D_CAMERA.bearing,
+                              pitch: is3DView
+                                ? MAP_3D_CAMERA.pitch
+                                : MAP_2D_CAMERA.pitch,
+                              bearing: is3DView
+                                ? MAP_3D_CAMERA.bearing
+                                : MAP_2D_CAMERA.bearing,
                               essential: true,
                             })
 
@@ -438,7 +329,8 @@ export default function AirportExplorerModal({
                               "group flex items-center gap-2 rounded-full border border-cyan-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-950 shadow-[0_14px_35px_rgba(15,23,42,0.22)] ring-4 ring-cyan-100/70 transition hover:border-cyan-300 hover:bg-cyan-50"
 
                             const markerDot = document.createElement("span")
-                            markerDot.className = "h-2 w-2 rounded-full bg-cyan-500 shadow-[0_0_0_4px_rgba(6,182,212,0.16)]"
+                            markerDot.className =
+                              "h-2 w-2 rounded-full bg-cyan-500 shadow-[0_0_0_4px_rgba(6,182,212,0.16)]"
 
                             const markerLabel = document.createElement("span")
                             markerLabel.textContent = result.name
@@ -477,6 +369,7 @@ export default function AirportExplorerModal({
                             <div className="text-sm font-semibold text-slate-900">
                               {result.name}
                             </div>
+
                             <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
                               <span>{getAirportResultTypeLabel(result)}</span>
 
@@ -524,9 +417,11 @@ export default function AirportExplorerModal({
               <p className="text-sm font-semibold text-slate-950">
                 Airport map
               </p>
+
               <p className="mt-1 text-xs text-slate-500">
                 Indoor terminals, labels, and airport floorplan layers.
               </p>
+
               {is3DView && (
                 <p className="mt-1 text-[11px] font-medium text-cyan-700">
                   3D enabled · Right-click + drag to orbit
