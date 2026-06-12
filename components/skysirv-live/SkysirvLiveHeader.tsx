@@ -13,7 +13,7 @@ type SkysirvLiveHeaderProps = {
   lastUpdatedAt?: string
 }
 
-function formatUtcUpdateTime(timestamp?: string) {
+function formatLocalUpdateTime(timestamp?: string) {
   if (!timestamp) return "Loading..."
 
   const date = new Date(timestamp)
@@ -23,10 +23,9 @@ function formatUtcUpdateTime(timestamp?: string) {
   }
 
   return new Intl.DateTimeFormat("en-US", {
-    hour: "2-digit",
+    hour: "numeric",
     minute: "2-digit",
-    hour12: false,
-    timeZone: "UTC",
+    hour12: true,
   }).format(date)
 }
 
@@ -46,9 +45,22 @@ export default function SkysirvLiveHeader({
           <div className="flex items-center gap-4">
             <Link
               href={mode === "airport" ? "/skysirv-live" : "/dev/homepage-lab"}
-              className="inline-flex h-11 items-center rounded-full bg-white px-4 text-sm font-bold text-slate-950 transition hover:bg-slate-100"
+              className="inline-flex h-11 items-center gap-1.5 rounded-full bg-white py-0 pl-3 pr-4 text-sm font-bold text-slate-800 transition hover:bg-slate-100"
             >
-              {mode === "airport" ? "← Live" : "← Home"}
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                className="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+
+              {mode === "airport" ? "Live" : "Home"}
             </Link>
 
             <div>
@@ -88,7 +100,7 @@ export default function SkysirvLiveHeader({
             <span className="h-4 w-4 rounded-full bg-red-500 shadow-[0_0_18px_rgba(239,68,68,0.9)]" />
             {mode === "airport"
               ? "SKYSIRV.COM/LIVE"
-              : `Live FAA Data · Last update: ${formatUtcUpdateTime(lastUpdatedAt)} UTC`}
+              : `Live FAA Data · Last update: ${formatLocalUpdateTime(lastUpdatedAt)}`}
           </div>
         </div>
 
