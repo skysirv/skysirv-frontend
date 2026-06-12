@@ -6,6 +6,7 @@ import { toast } from "@/components/ui/Toasts/use-toast"
 import { useRouter } from "next/navigation"
 import { clearAuthSession, getAuthToken } from "@/utils/auth-storage"
 import FeedbackModal from "@/components/feedback/FeedbackModal"
+import LargeChevron from "@/components/ui/LargeChevron"
 
 type SessionUser = {
   id: string
@@ -624,7 +625,10 @@ export default function AccountPage() {
             }}
             className="relative top-6 inline-flex text-sm font-medium text-slate-600 transition hover:text-slate-900"
           >
-            ← Back to Dashboard
+            <>
+              <LargeChevron direction="left" />
+              Back to Dashboard
+            </>
           </button>
         </div>
 

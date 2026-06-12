@@ -14,12 +14,16 @@ import {
   regionOptions,
 } from "@/components/plan-smarter/shared/regionCurrencyOptions"
 import OnboardingPanel from "@/components/plan-with-lucy/shared/OnboardingPanel"
+import LargeChevron from "@/components/ui/LargeChevron"
 
 type ActivePicker = "region" | "currency" | null
 
 export default function PlanSmarterLabShell() {
   const router = useRouter()
-  const [showOnboardingPanel, setShowOnboardingPanel] = useState(true)
+  const [showOnboardingPanel, setShowOnboardingPanel] = useState(false)
+  const [initialAuthMode, setInitialAuthMode] = useState<"signin" | "signup">(
+    "signin",
+  )
   const [regionMenuOpen, setRegionMenuOpen] = useState(false)
   const [activePicker, setActivePicker] = useState<ActivePicker>(null)
   const [selectedRegionId, setSelectedRegionId] = useState(defaultRegionId)
@@ -64,11 +68,16 @@ export default function PlanSmarterLabShell() {
     setActivePicker((current) => (current === picker ? null : picker))
   }
 
+  function openOnboardingPanel(mode: "signin" | "signup") {
+    setInitialAuthMode(mode)
+    setShowOnboardingPanel(true)
+  }
+
   function handleAskLucyClick() {
     const token = getAuthToken()
 
     if (!token) {
-      setShowOnboardingPanel(true)
+      openOnboardingPanel("signin")
       return
     }
 
@@ -82,7 +91,7 @@ export default function PlanSmarterLabShell() {
           href="/dev/homepage-lab"
           className="fixed left-5 top-5 z-50 inline-flex min-h-[42px] items-center gap-2 rounded-full border border-blue-700 bg-blue-700 px-4 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-600"
         >
-          <span aria-hidden="true">←</span>
+          <LargeChevron direction="left" />
           Home
         </Link>
 
@@ -292,14 +301,17 @@ export default function PlanSmarterLabShell() {
 
           <button
             type="button"
-            onClick={() => setShowOnboardingPanel(true)}
+            onClick={() => openOnboardingPanel("signin")}
             className="inline-flex min-h-[38px] items-center justify-center rounded-lg border border-blue-700 bg-blue-700 px-4 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:border-blue-600 hover:bg-blue-600"
           >
             Sign in
           </button>
         </div>
 
-        <div className="mx-auto flex h-full max-w-4xl flex-col justify-start pt-[48px]">
+        <div
+          className={`mx-auto flex h-full max-w-4xl flex-col justify-start pt-[48px] transition-transform duration-300 ${showOnboardingPanel ? "xl:-translate-x-[220px]" : "xl:translate-x-0"
+            }`}
+        >
           <div className="text-center sm:text-left">
             <h1 className="mt-4 text-4xl font-bold tracking-tight text-slate-800 sm:text-5xl">
               Begin your next trip with the right first step.
@@ -425,7 +437,12 @@ export default function PlanSmarterLabShell() {
           </div>
         </div>
 
-        <div className="fixed bottom-6 left-1/2 z-40 w-[min(760px,calc(100vw-40px))] -translate-x-1/2">
+        <div
+          className={`fixed bottom-6 z-40 w-[min(760px,calc(100vw-40px))] transition-all duration-300 ${showOnboardingPanel
+            ? "left-[calc(50%-220px)] -translate-x-1/2"
+            : "left-1/2 -translate-x-1/2"
+            }`}
+        >
           <div className="flex min-h-[74px] items-center justify-between gap-5 rounded-[1.35rem] border border-orange-100 bg-white/90 px-5 py-3 shadow-[0_18px_55px_rgba(15,23,42,0.12)] backdrop-blur-xl">
             <div className="flex min-w-0 items-center gap-4">
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-orange-50 text-2xl text-orange-500 ring-8 ring-orange-100/70">
@@ -442,7 +459,7 @@ export default function PlanSmarterLabShell() {
 
             <button
               type="button"
-              onClick={() => setShowOnboardingPanel(true)}
+              onClick={() => openOnboardingPanel("signup")}
               className="inline-flex min-h-[42px] shrink-0 items-center justify-center rounded-lg border border-orange-500 bg-orange-500 px-5 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:border-orange-600 hover:bg-orange-600"
             >
               Sign up now
@@ -451,7 +468,11 @@ export default function PlanSmarterLabShell() {
         </div>
 
         {showOnboardingPanel && (
-          <OnboardingPanel onClose={() => setShowOnboardingPanel(false)} />
+          <OnboardingPanel
+            variant="drawer"
+            initialAuthMode={initialAuthMode}
+            onClose={() => setShowOnboardingPanel(false)}
+          />
         )}
       </section>
     </main>

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { setAuthAdmin, setAuthToken } from "@/utils/auth-storage"
+import LargeChevron from "@/components/ui/LargeChevron"
 
 declare global {
   interface Window {
@@ -410,7 +411,10 @@ export default function SignInForm({
           onClick={backToSignIn}
           className="mb-4 text-sm font-medium text-slate-500 transition hover:text-slate-900"
         >
-          ← Back to sign in
+          <>
+            <LargeChevron direction="left" />
+            Back to sign in
+          </>
         </button>
 
         <div className="mb-5">
@@ -500,7 +504,10 @@ export default function SignInForm({
           onClick={backToSignIn}
           className="mb-4 text-sm font-medium text-slate-500 transition hover:text-slate-900"
         >
-          ← Back to sign in
+          <>
+            <LargeChevron direction="left" />
+            Back to sign in
+          </>
         </button>
 
         <div className="mb-5">
