@@ -1,7 +1,5 @@
 "use client"
 
-import { motion } from "framer-motion"
-
 const memoryCards = [
   {
     label: "Panama",
@@ -44,29 +42,15 @@ export default function HomepageLabLucyMemory() {
   return (
     <section className="relative overflow-hidden bg-white px-6 py-24 sm:py-28">
       <div className="relative mx-auto grid max-w-7xl gap-14 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
-        <motion.div
-          initial={{ opacity: 0, x: -14 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, amount: 0.22 }}
-          transition={{ duration: 0.38, ease: "easeOut" }}
-          className="relative mx-auto h-[520px] w-full max-w-3xl sm:h-[600px]"
-        >
-          {memoryCards.map((card, index) => (
-            <motion.div
+        <div className="relative mx-auto h-[520px] w-full max-w-3xl sm:h-[600px]">
+          {memoryCards.map((card) => (
+            <div
               key={card.label}
-              initial={{ opacity: 0, y: 10, scale: 0.98 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{
-                duration: 0.32,
-                ease: "easeOut",
-                delay: index * 0.04,
-              }}
               className={`absolute overflow-visible ${card.className}`}
             >
               <div className="relative h-full w-full overflow-hidden rounded-[1.4rem] bg-slate-200 shadow-[0_22px_60px_rgba(15,23,42,0.13)]">
                 <div
-                  className="absolute inset-0 bg-cover bg-center bg-no-repeat brightness-[0.9] transition duration-700 hover:scale-105"
+                  className="absolute inset-0 bg-cover bg-center bg-no-repeat brightness-[0.9]"
                   style={{ backgroundImage: `url('${card.image}')` }}
                 />
 
@@ -78,31 +62,19 @@ export default function HomepageLabLucyMemory() {
               >
                 {card.label}
               </div>
-            </motion.div>
+            </div>
           ))}
 
-          <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.98 }}
-            whileInView={{ opacity: 1, y: 0, scale: 1 }}
-            viewport={{ once: true, amount: 0.25 }}
-            transition={{ duration: 0.36, ease: "easeOut", delay: 0.08 }}
-            className="absolute left-[50%] top-[28%] z-30 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center"
-          >
+          <div className="absolute left-[50%] top-[28%] z-30 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
             <img
               src="/images/stock/lucy/lucy-pos-1.png"
               alt="Lucy"
               className="h-52 w-auto object-contain drop-shadow-[0_22px_45px_rgba(15,23,42,0.18)] sm:h-60"
             />
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, x: 14 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.38, ease: "easeOut", delay: 0.04 }}
-          className="mx-auto max-w-xl text-center lg:mx-0 lg:text-left"
-        >
+        <div className="mx-auto max-w-xl text-center lg:mx-0 lg:text-left">
           <h2 className="text-4xl font-bold tracking-tight text-slate-800 sm:text-5xl">
             Lucy remembers the way you like to travel.
           </h2>
@@ -118,7 +90,7 @@ export default function HomepageLabLucyMemory() {
             help shape flight search, hotel planning, car rentals, cruises, and
             itineraries around the way you actually travel.
           </p>
-        </motion.div>
+        </div>
       </div>
     </section>
   )
