@@ -35,6 +35,8 @@ type BookingDealsContent = {
   travelerExperiences?: BookingTravelerExperiencesSection
 }
 
+const BOOKING_MODES_COMING_SOON = true
+
 function getBookingModeSlug(mode: BookingMode): string {
   const slugs: Record<BookingMode, string> = {
     flights: "flights",
@@ -482,6 +484,68 @@ function FeaturedExperiencesHeroIntro() {
   )
 }
 
+function BookingComingSoonPanel({
+  activeMode,
+  modeLabel,
+}: {
+  activeMode: BookingMode
+  modeLabel: string
+}) {
+  const isExperiences = activeMode === "experiences"
+
+  return (
+    <div className="mx-auto flex h-full max-w-5xl flex-col items-center justify-center px-4 pt-8 text-center">
+      <div className="rounded-[2.25rem] border border-white/75 bg-white/92 px-6 py-10 shadow-[0_24px_90px_rgba(15,23,42,0.16)] backdrop-blur-xl sm:px-10 sm:py-12">
+        <div className="mx-auto inline-flex rounded-full border border-blue-100 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-blue-700">
+          Coming soon
+        </div>
+
+        <h1 className="mx-auto mt-6 max-w-3xl text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+          {isExperiences
+            ? "Featured Experiences are preparing for takeoff."
+            : `${modeLabel} are preparing for takeoff.`}
+        </h1>
+
+        <p className="mx-auto mt-6 max-w-2xl text-base font-medium leading-8 text-white sm:text-lg">
+          We are putting the final touches on Skysirv Booking before opening it
+          to travelers. Soon you will be able to explore flights, hotels, car
+          rentals, cruises, and featured experiences with Lucy guiding the trip
+          decisions around the whole journey.
+        </p>
+
+        <div className="mx-auto mt-8 grid max-w-3xl gap-3 sm:grid-cols-3">
+          <div className="flex min-h-[104px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-blue-700">
+              Status
+            </p>
+            <p className="mt-2 text-sm font-bold text-slate-900">
+              Final build phase
+            </p>
+          </div>
+
+          <div className="flex min-h-[104px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-blue-700">
+              Lucy
+            </p>
+            <p className="mt-2 text-sm font-bold text-slate-900">
+              Booking guidance coming
+            </p>
+          </div>
+
+          <div className="flex min-h-[104px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-blue-700">
+              Access
+            </p>
+            <p className="mt-2 text-sm font-bold text-slate-900">
+              Public launch soon
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function BookingLabShell({
   initialMode = "flights",
 }: {
@@ -693,7 +757,13 @@ export default function BookingLabShell({
             </div>
           </div>
 
-          <aside className={activeMode === "experiences" ? "hidden" : "hidden lg:block"}>
+          <aside
+            className={
+              BOOKING_MODES_COMING_SOON || activeMode === "experiences"
+                ? "hidden"
+                : "hidden lg:block"
+            }
+          >
             <div className="fixed left-4 top-1/2 z-40 flex -translate-y-1/2 flex-col items-center gap-5 rounded-3xl border border-slate-200 bg-white px-3 py-5 shadow-[0_18px_45px_rgba(15,23,42,0.10)]">
               <button
                 type="button"
@@ -723,8 +793,13 @@ export default function BookingLabShell({
             </div>
           </aside>
 
-          <div className="relative z-10 h-[540px] overflow-visible">
-            {activeMode === "experiences" ? (
+          <div className="relative z-10 h-[620px] overflow-visible">
+            {BOOKING_MODES_COMING_SOON ? (
+              <BookingComingSoonPanel
+                activeMode={activeMode}
+                modeLabel={activeConfig.label}
+              />
+            ) : activeMode === "experiences" ? (
               <FeaturedExperiencesHeroIntro />
             ) : (
               <div className="mx-auto mt-6 max-w-3xl">
@@ -733,13 +808,15 @@ export default function BookingLabShell({
             )}
           </div>
 
-          <div className="relative z-10">
-            <BookingDealsSection
-              {...activeDealsContent}
-              className={activeMode === "experiences" ? "mt-16" : "mt-12"}
-              variant={activeMode === "experiences" ? "featureGrid" : "standard"}
-            />
-          </div>
+          {BOOKING_MODES_COMING_SOON ? null : (
+            <div className="relative z-10">
+              <BookingDealsSection
+                {...activeDealsContent}
+                className={activeMode === "experiences" ? "mt-16" : "mt-12"}
+                variant={activeMode === "experiences" ? "featureGrid" : "standard"}
+              />
+            </div>
+          )}
         </section>
       </main>
     </BookingLucyComposerProvider>
