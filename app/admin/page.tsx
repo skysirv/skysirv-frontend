@@ -47,6 +47,27 @@ type UserFeedback = {
   createdAt: string
 }
 
+type TravelerExperienceSubmissionStatus =
+  | "pending_review"
+  | "approved"
+  | "rejected"
+
+type TravelerExperienceSubmission = {
+  id: string
+  destination: string
+  feedback: string
+  travelerName: string
+  rating: number
+  mediaUrl: string
+  mediaKey: string
+  mediaType: "image" | "video"
+  status: TravelerExperienceSubmissionStatus
+  reviewedBy: string | null
+  reviewedAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
 export default function AdminPage() {
   const router = useRouter()
 
@@ -65,6 +86,14 @@ export default function AdminPage() {
   const [selectedFeedback, setSelectedFeedback] = useState<UserFeedback | null>(null)
   const [feedbackResponseMessage, setFeedbackResponseMessage] = useState("")
   const [feedbackResponseSending, setFeedbackResponseSending] = useState(false)
+  const [travelerExperienceStatus, setTravelerExperienceStatus] =
+    useState<TravelerExperienceSubmissionStatus>("pending_review")
+  const [travelerExperienceSubmissions, setTravelerExperienceSubmissions] =
+    useState<TravelerExperienceSubmission[]>([])
+  const [travelerExperienceLoading, setTravelerExperienceLoading] =
+    useState(false)
+  const [travelerExperienceActionId, setTravelerExperienceActionId] =
+    useState<string | null>(null)
 
   const adminUsers = useMemo(
     () => users.filter((user) => user.plan === "admin"),
@@ -129,6 +158,28 @@ export default function AdminPage() {
     }
 
     return "bg-amber-100 text-amber-700"
+  }
+
+  function getTravelerExperienceStatusBadgeClasses(
+    status: TravelerExperienceSubmissionStatus
+  ) {
+    if (status === "approved") {
+      return "bg-green-100 text-green-700"
+    }
+
+    if (status === "rejected") {
+      return "bg-red-100 text-red-700"
+    }
+
+    return "bg-amber-100 text-amber-700"
+  }
+
+  function formatTravelerExperienceStatus(
+    status: TravelerExperienceSubmissionStatus
+  ) {
+    if (status === "pending_review") return "Pending Review"
+    if (status === "approved") return "Approved"
+    return "Rejected"
   }
 
   async function deleteUser(userId: string) {
@@ -339,6 +390,115 @@ export default function AdminPage() {
     }
   }
 
+  async function loadTravelerExperienceSubmissions(
+    status: TravelerExperienceSubmissionStatus = travelerExperienceStatus
+  ) {
+    const token = getAuthToken()
+
+    if (!token) {
+      toast({
+        title: "Missing admin session",
+        description: "Please sign in again.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setTravelerExperienceLoading(true)
+
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/api/admin/traveler-experience-submissions?status=${status}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const data = await res.json().catch(() => null)
+
+      if (!res.ok) {
+        throw new Error(
+          data?.error || "Failed to load traveler experience submissions"
+        )
+      }
+
+      setTravelerExperienceSubmissions(data.submissions || [])
+    } catch (error: any) {
+      toast({
+        title: "Failed to load traveler submissions",
+        description: error?.message || "Please try again in a moment.",
+        variant: "destructive",
+      })
+    } finally {
+      setTravelerExperienceLoading(false)
+    }
+  }
+
+  async function updateTravelerExperienceSubmissionStatus(
+    submission: TravelerExperienceSubmission,
+    nextStatus: TravelerExperienceSubmissionStatus
+  ) {
+    const token = getAuthToken()
+
+    if (!token) {
+      toast({
+        title: "Missing admin session",
+        description: "Please sign in again.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const confirmed = window.confirm(
+      `${formatTravelerExperienceStatus(nextStatus)} this traveler experience for ${submission.destination}?`
+    )
+
+    if (!confirmed) return
+
+    setTravelerExperienceActionId(submission.id)
+
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/api/admin/traveler-experience-submissions/${submission.id}/status`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            status: nextStatus,
+          }),
+        }
+      )
+
+      const data = await res.json().catch(() => null)
+
+      if (!res.ok) {
+        throw new Error(
+          data?.error || "Failed to update traveler experience submission"
+        )
+      }
+
+      toast({
+        title: "Traveler experience updated",
+        description: `Submission marked as ${formatTravelerExperienceStatus(nextStatus).toLowerCase()}.`,
+      })
+
+      await loadTravelerExperienceSubmissions(travelerExperienceStatus)
+    } catch (error: any) {
+      toast({
+        title: "Failed to update submission",
+        description: error?.message || "Please try again in a moment.",
+        variant: "destructive",
+      })
+    } finally {
+      setTravelerExperienceActionId(null)
+    }
+  }
+
   useEffect(() => {
     const token = getAuthToken()
 
@@ -456,6 +616,8 @@ export default function AdminPage() {
           .then((data) => {
             setUserFeedback(data.feedback || [])
           })
+
+        loadTravelerExperienceSubmissions("pending_review")
 
         eventSource.onmessage = (event) => {
           try {
@@ -876,6 +1038,163 @@ export default function AdminPage() {
                       </div>
                     </div>
                   </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-md transition-shadow hover:shadow-lg">
+          <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold">Traveler Experiences</h2>
+
+              <p className="mt-1 text-sm text-slate-500">
+                Review submitted traveler stories before they appear on the Featured Experiences page.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {(["pending_review", "approved", "rejected"] as TravelerExperienceSubmissionStatus[]).map(
+                (status) => (
+                  <button
+                    key={status}
+                    type="button"
+                    onClick={() => {
+                      setTravelerExperienceStatus(status)
+                      loadTravelerExperienceSubmissions(status)
+                    }}
+                    className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${travelerExperienceStatus === status
+                      ? "bg-blue-700 text-white"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      }`}
+                  >
+                    {formatTravelerExperienceStatus(status)}
+                  </button>
+                )
+              )}
+            </div>
+          </div>
+
+          <div className="max-h-[620px] overflow-y-auto pr-2">
+            {travelerExperienceLoading ? (
+              <div className="rounded-lg border border-slate-100 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
+                Loading traveler experience submissions...
+              </div>
+            ) : travelerExperienceSubmissions.length === 0 ? (
+              <div className="rounded-lg border border-slate-100 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
+                No {formatTravelerExperienceStatus(travelerExperienceStatus).toLowerCase()} traveler experiences found.
+              </div>
+            ) : (
+              <div className="grid gap-4 lg:grid-cols-2">
+                {travelerExperienceSubmissions.map((submission) => (
+                  <article
+                    key={submission.id}
+                    className="overflow-hidden rounded-2xl border border-slate-100 bg-slate-50"
+                  >
+                    <div className="grid gap-0 md:grid-cols-[220px_minmax(0,1fr)]">
+                      <div className="relative h-[220px] bg-slate-200 md:h-full">
+                        {submission.mediaType === "video" ? (
+                          <video
+                            src={submission.mediaUrl}
+                            controls
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <img
+                            src={submission.mediaUrl}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                        )}
+                      </div>
+
+                      <div className="p-4">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span
+                            className={`rounded-full px-2.5 py-1 text-xs font-medium ${getTravelerExperienceStatusBadgeClasses(
+                              submission.status
+                            )}`}
+                          >
+                            {formatTravelerExperienceStatus(submission.status)}
+                          </span>
+
+                          <span className="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-amber-600">
+                            {"★".repeat(submission.rating)}
+                            {"☆".repeat(5 - submission.rating)}
+                          </span>
+
+                          <span className="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-slate-500">
+                            {submission.mediaType}
+                          </span>
+                        </div>
+
+                        <h3 className="mt-3 text-base font-bold text-slate-900">
+                          {submission.destination}
+                        </h3>
+
+                        <p className="mt-1 text-sm font-medium text-slate-600">
+                          Traveler: {submission.travelerName}
+                        </p>
+
+                        <p className="mt-3 text-sm leading-6 text-slate-700">
+                          “{submission.feedback}”
+                        </p>
+
+                        <p className="mt-3 text-xs text-slate-400">
+                          Submitted{" "}
+                          {submission.createdAt
+                            ? new Date(submission.createdAt).toLocaleString()
+                            : "-"}
+                        </p>
+
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <a
+                            href={submission.mediaUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
+                          >
+                            Open media
+                          </a>
+
+                          {submission.status !== "approved" && (
+                            <button
+                              type="button"
+                              disabled={travelerExperienceActionId === submission.id}
+                              onClick={() =>
+                                updateTravelerExperienceSubmissionStatus(
+                                  submission,
+                                  "approved"
+                                )
+                              }
+                              className="rounded-md bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              Approve
+                            </button>
+                          )}
+
+                          {submission.status !== "rejected" && (
+                            <button
+                              type="button"
+                              disabled={travelerExperienceActionId === submission.id}
+                              onClick={() =>
+                                updateTravelerExperienceSubmissionStatus(
+                                  submission,
+                                  "rejected"
+                                )
+                              }
+                              className="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              Reject
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </article>
                 ))}
               </div>
             )}

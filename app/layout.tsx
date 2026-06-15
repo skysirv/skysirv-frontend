@@ -9,6 +9,7 @@ import { Inter } from 'next/font/google';
 import MainContentShell from '@/components/layout/MainContentShell';
 import 'styles/main.css';
 import "mapbox-gl/dist/mapbox-gl.css"
+import "flag-icons/css/flag-icons.min.css"
 
 const inter = Inter({
   subsets: ['latin'],

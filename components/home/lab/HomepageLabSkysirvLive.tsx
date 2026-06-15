@@ -1,6 +1,8 @@
 "use client"
 
+import Link from "next/link"
 import { motion } from "framer-motion"
+import LargeChevron from "@/components/ui/LargeChevron"
 
 const airportPins = [
   {
@@ -50,11 +52,11 @@ export default function HomepageLabSkysirvLive() {
           transition={{ duration: 0.65, ease: "easeOut" }}
           className="mx-auto max-w-xl text-center lg:order-2 lg:mx-0 lg:text-left"
         >
-          <h2 className="mt-4 text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
+          <h2 className="mt-4 text-4xl font-bold tracking-tight text-slate-800 sm:text-5xl">
             Live airport intelligence, explained by Lucy.
           </h2>
 
-          <p className="mt-6 text-base leading-8 text-slate-600 sm:text-lg">
+          <p className="mt-6 text-base leading-8 text-slate-700 sm:text-lg">
             Skysirv Live will help travelers see airport disruption, delay
             pressure, weather impact, and route risk in one calm view — with
             Lucy translating the signal before travel gets messy.
@@ -83,13 +85,13 @@ export default function HomepageLabSkysirvLive() {
             ))}
           </div>
 
-          <button
-            type="button"
-            className="mt-7 inline-flex items-center gap-2 text-medium font-bold text-blue-600 transition hover:gap-3 hover:text-blue-700"
+          <Link
+            href="/skysirv-live"
+            className="mt-7 inline-flex items-center gap-2 text-xl font-bold text-blue-600 transition hover:gap-3 hover:text-blue-700"
           >
             View Skysirv Live
-            <span aria-hidden="true">→</span>
-          </button>
+            <LargeChevron direction="right" />
+          </Link>
         </motion.div>
 
         <motion.div
@@ -100,16 +102,18 @@ export default function HomepageLabSkysirvLive() {
           className="relative mx-auto w-full max-w-3xl pb-28 lg:order-1"
         >
           <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_24px_75px_rgba(15,23,42,0.10)]">
-            <div className="flex items-center justify-between bg-blue-700 px-5 py-4 text-white sm:px-6">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white">
-                  Skysirv Live
-                </p>
+            <div className="flex h-[70px] items-center justify-between bg-blue-700 px-5 py-0 text-white sm:px-6">
+              <span className="relative flex h-12 w-[230px] items-center overflow-visible">
+                <img
+                  src="/branding/logo/skysirv-live-logo-white.svg"
+                  alt="Skysirv Live"
+                  className="relative -left-8 top-1 h-auto w-[240px]"
+                />
+              </span>
 
-                <h3 className="mt-1 text-xl font-bold tracking-tight sm:text-2xl">
-                  Today’s airport pulse
-                </h3>
-              </div>
+              <h3 className="text-xl font-bold tracking-tight sm:text-2xl">
+                Today’s airport pulse
+              </h3>
             </div>
 
             <div className="flex items-center gap-3 overflow-hidden bg-orange-500 px-5 py-2 text-sm font-semibold text-white sm:px-6">

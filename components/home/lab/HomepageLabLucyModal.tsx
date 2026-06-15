@@ -152,16 +152,8 @@ export default function HomepageLabLucyModal({
 
               <div className="relative flex items-start justify-between gap-4">
                 <div className="flex min-w-0 items-center gap-3">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-xl shadow-sm">
-                    ✈️
-                  </div>
-
                   <div className="min-w-0">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700">
-                      Skysirv AI Flight Attendant
-                    </p>
-
-                    <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-950">
+                    <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-800">
                       Ask Lucy
                     </h2>
                   </div>
@@ -176,7 +168,7 @@ export default function HomepageLabLucyModal({
                 </button>
               </div>
 
-              <p className="relative mt-4 max-w-xl text-sm leading-6 text-slate-600">
+              <p className="relative mt-4 max-w-xl text-sm leading-6 text-slate-700">
                 Lucy can answer public travel questions now. Sign in when you
                 want her to track routes, save flights, or remember preferences
                 for future Skysirv sessions.
@@ -188,7 +180,7 @@ export default function HomepageLabLucyModal({
                 {messages.map((message) =>
                   message.role === "user" ? (
                     <div key={message.id} className="flex justify-end">
-                      <div className="max-w-[86%] rounded-2xl rounded-br-md bg-slate-950 px-4 py-3 text-sm leading-6 text-white shadow-sm">
+                      <div className="max-w-[86%] rounded-2xl rounded-br-md bg-slate-800 px-4 py-3 text-sm leading-6 text-white shadow-sm">
                         {message.text}
                       </div>
                     </div>

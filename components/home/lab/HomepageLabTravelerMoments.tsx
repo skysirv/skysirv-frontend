@@ -6,23 +6,23 @@ const travelerMoments = [
   {
     label: "Frequent travelers",
     code: "FREQ",
-    quote: "I want to know if this fare is actually worth booking.",
-    title: "Understand the why behind the price.",
-    text: "Track important routes and let Lucy explain whether movement looks strong, high, stable, or worth watching.",
+    quote: "I want Lucy to help me compare the whole trip, not just the fare.",
+    title: "Understand the why behind the trip.",
+    text: "Lucy can help compare flights, stays, timing, and trip value so every booking decision has more context.",
   },
   {
     label: "Families",
     code: "FAM",
-    quote: "I need flights that work for how my family actually travels.",
+    quote: "I need travel plans that work for how my family actually moves.",
     title: "Plan around real preferences.",
-    text: "Lucy can remember nonstop flights, comfortable layovers, home airports, and the way your family likes to travel.",
+    text: "Lucy can remember nonstop flights, hotel comfort, rental car needs, flexible timing, and family travel style.",
   },
   {
     label: "Business travelers",
     code: "BIZ",
-    quote: "I do not want to keep checking the same routes every day.",
-    title: "Monitor important routes calmly.",
-    text: "Skysirv helps keep an eye on recurring routes so travelers and teams can make faster decisions with less noise.",
+    quote: "I do not want to keep checking the same routes and trip options every day.",
+    title: "Monitor important travel calmly.",
+    text: "Skysirv helps keep an eye on recurring routes, pricing signals, and planning details so teams can move faster with less noise.",
   },
 ]
 
@@ -31,49 +31,41 @@ export default function HomepageLabTravelerMoments() {
     <section className="relative overflow-hidden bg-white px-6 py-24 sm:py-28">
       <div className="relative mx-auto grid max-w-7xl gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
         <motion.div
-          initial={{ opacity: 0, x: -28 }}
+          initial={{ opacity: 0, x: -14 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.65, ease: "easeOut" }}
+          transition={{ duration: 0.38, ease: "easeOut" }}
           className="mx-auto max-w-xl text-center lg:mx-0 lg:text-left"
         >
-          <h2 className="mt-4 text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
-            For travelers who want the why behind the price.
+          <h2 className="mt-4 text-4xl font-bold tracking-tight text-slate-800 sm:text-5xl">
+            For travelers who want the why behind the trip.
           </h2>
 
-          <p className="mt-6 text-base leading-8 text-slate-600 sm:text-lg">
+          <p className="mt-6 text-base leading-8 text-slate-700 sm:text-lg">
             Skysirv is built for people who do not just want another list of
-            fares. Lucy helps bring context, timing, and personal travel style
-            into the decision before you book.
+            options. Lucy helps bring context, timing, preferences, and full-trip
+            planning into the decision before you book.
           </p>
-
-          <button
-            type="button"
-            className="mt-7 inline-flex items-center gap-2 text-medium font-bold text-blue-600 transition hover:gap-3 hover:text-blue-700"
-          >
-            See who Skysirv is for
-            <span aria-hidden="true">→</span>
-          </button>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, x: 28 }}
+          initial={{ opacity: 0, x: 14 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true, amount: 0.22 }}
-          transition={{ duration: 0.65, ease: "easeOut", delay: 0.08 }}
+          transition={{ duration: 0.38, ease: "easeOut", delay: 0.04 }}
           className="relative mx-auto w-full max-w-3xl"
         >
           <div className="grid gap-3">
             {travelerMoments.map((item, index) => (
               <motion.article
                 key={item.label}
-                initial={{ opacity: 0, y: 18 }}
+                initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.25 }}
                 transition={{
-                  duration: 0.48,
+                  duration: 0.32,
                   ease: "easeOut",
-                  delay: index * 0.08,
+                  delay: index * 0.04,
                 }}
                 className="group relative overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-[0_16px_45px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_60px_rgba(15,23,42,0.10)]"
               >
@@ -121,11 +113,11 @@ export default function HomepageLabTravelerMoments() {
                     </div>
 
                     <div className="mt-4 grid gap-2 sm:grid-cols-[0.9fr_1.1fr] sm:items-start">
-                      <h3 className="text-base font-bold tracking-tight text-slate-950">
+                      <h3 className="text-base font-bold tracking-tight text-slate-800">
                         {item.title}
                       </h3>
 
-                      <p className="text-sm leading-6 text-slate-600">
+                      <p className="text-sm leading-6 text-slate-700">
                         {item.text}
                       </p>
                     </div>

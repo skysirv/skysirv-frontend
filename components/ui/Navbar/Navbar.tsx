@@ -1,15 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import s from './Navbar.module.css';
 import Navlinks from './Navlinks';
 
-const BETA_BANNER_STORAGE_KEY = 'skysirv_beta_banner_dismissed';
-
 export default function Navbar() {
-  const [hidden, setHidden] = useState(false);
-  const [showBetaBanner, setShowBetaBanner] = useState(false);
-  const lastScrollY = useRef(0);
+  const [hasScrolled, setHasScrolled] = useState(false);
 
   /**
    * Public-site direction:
@@ -21,32 +17,11 @@ export default function Navbar() {
   const isDark = false;
 
   useEffect(() => {
-    const dismissed =
-      window.sessionStorage.getItem(BETA_BANNER_STORAGE_KEY) === 'true';
-
-    setShowBetaBanner(!dismissed);
-  }, []);
-
-  useEffect(() => {
     const handleScroll = () => {
-      const currentScrollY =
-        window.scrollY ||
-        document.documentElement.scrollTop ||
-        document.body.scrollTop ||
-        0;
-
-      setHidden(false);
-      lastScrollY.current = currentScrollY;
-      return;
-
-      lastScrollY.current = currentScrollY;
+      setHasScrolled(window.scrollY > 8);
     };
 
-    lastScrollY.current =
-      window.scrollY ||
-      document.documentElement.scrollTop ||
-      document.body.scrollTop ||
-      0;
+    handleScroll();
 
     window.addEventListener('scroll', handleScroll, { passive: true });
 
@@ -55,53 +30,23 @@ export default function Navbar() {
     };
   }, []);
 
-  const dismissBetaBanner = () => {
-    window.sessionStorage.setItem(BETA_BANNER_STORAGE_KEY, 'true');
-    setShowBetaBanner(false);
-  };
-
   return (
     <nav
       className={s.root}
       style={{
-        transform: hidden ? 'translateY(-64px)' : 'translateY(0)',
+        transform: 'translateY(0)',
         opacity: 1,
+        pointerEvents: 'auto',
         transition:
-          'transform 320ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms ease',
+          'background-color 260ms ease, border-color 260ms ease, box-shadow 260ms ease, backdrop-filter 260ms ease',
       }}
     >
       <a href="#skip" className="sr-only focus:not-sr-only">
         Skip to content
       </a>
 
-      {showBetaBanner ? (
-        <div className="relative z-50 flex h-9 pointer-events-auto items-center justify-center overflow-hidden border-b border-slate-200 bg-white/95 px-10 text-center text-[11px] font-medium text-slate-800 shadow-sm backdrop-blur-xl sm:min-h-[40px] sm:px-12 sm:py-2 sm:text-[13px]">
-          <p className="max-w-full truncate whitespace-nowrap leading-5">
-            <span className="font-semibold text-slate-950">Skysirv Public Beta</span>
-            <span className="mx-1.5 text-slate-300">·</span>
-            <span className="text-slate-600">
-              Airfare intelligence in progress
-            </span>
-          </p>
-
-          <button
-            type="button"
-            aria-label="Dismiss beta banner"
-            onClick={dismissBetaBanner}
-            className="absolute right-2 top-1/2 z-[60] flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-950 pointer-events-auto sm:right-4"
-          >
-            <span className="text-lg leading-none sm:text-xl">×</span>
-          </button>
-        </div>
-      ) : (
-        <div
-          aria-hidden="true"
-          className="h-9 pointer-events-none sm:min-h-[40px]"
-        />
-      )}
-
-      <div className="mx-auto max-w-7xl px-6">
-        <Navlinks isDark={isDark} />
+      <div className="w-full">
+        <Navlinks isDark={isDark} hasScrolled={hasScrolled} />
       </div>
     </nav>
   );

@@ -28,61 +28,53 @@ export default function HomepageLabMarketFlow() {
     <section className="relative overflow-hidden bg-white px-6 pb-24 pt-6 sm:pb-28 sm:pt-8">
       <div className="relative mx-auto max-w-7xl">
         <motion.div
-          initial={{ opacity: 0, y: 28 }}
+          initial={{ opacity: 0, y: 14 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.65, ease: "easeOut" }}
+          transition={{ duration: 0.38, ease: "easeOut" }}
           className="mx-auto max-w-4xl text-center"
         >
-          <h2 className="text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
-            How Skysirv reads the market.
+          <h2 className="text-4xl font-bold tracking-tight text-slate-800 sm:text-5xl lg:text-6xl">
+            How Skysirv reads travel signals.
           </h2>
 
-          <p className="mt-6 text-base leading-8 text-slate-600 sm:text-lg">
-            Lucy helps turn changing airfare into clearer signals, so travelers
-            can understand what is moving, what is worth watching, and when a
-            route may be entering a stronger booking window.
+          <p className="mt-6 text-base leading-8 text-slate-700 sm:text-lg">
+            Lucy helps turn changing prices, availability, timing, and trip context
+            into clearer signals, so travelers can understand what is worth watching,
+            comparing, or booking with more confidence.
           </p>
         </motion.div>
 
         <div className="mx-auto mt-20 grid max-w-6xl gap-14 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
           <motion.div
-            initial={{ opacity: 0, x: -28 }}
+            initial={{ opacity: 0, x: -14 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, amount: 0.25 }}
-            transition={{ duration: 0.65, ease: "easeOut" }}
+            transition={{ duration: 0.38, ease: "easeOut" }}
             className="mx-auto max-w-xl text-center lg:mx-0 lg:text-left"
           >
-            <h3 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-              Watch routes without chasing every price change.
+            <h3 className="mt-4 text-3xl font-bold tracking-tight text-slate-800 sm:text-4xl">
+              Plan travel without chasing every price change.
             </h3>
 
-            <p className="mt-6 text-base leading-8 text-slate-600 sm:text-lg">
-              Skysirv is designed to monitor route behavior, compare recent fare
-              movement, and help Lucy explain what the market may be signaling
-              before you book.
+            <p className="mt-6 text-base leading-8 text-slate-700 sm:text-lg">
+              Skysirv is designed to help Lucy compare travel behavior across flights,
+              stays, car rentals, cruises, and itinerary timing — so the signal feels
+              clear before you book.
             </p>
 
-            <p className="mt-6 text-base leading-8 text-slate-600 sm:text-lg">
-              Instead of giving travelers another wall of fares, Lucy turns route
-              movement into simple guidance: watch, compare, wait, or review a
-              stronger opportunity.
+            <p className="mt-6 text-base leading-8 text-slate-700 sm:text-lg">
+              Instead of giving travelers another wall of options, Lucy turns travel
+              movement into simple guidance: watch, compare, wait, adjust the plan,
+              or review a stronger opportunity.
             </p>
-
-            <button
-              type="button"
-              className="mt-7 inline-flex items-center gap-2 text-medium font-bold text-blue-600 transition hover:gap-3 hover:text-blue-700"
-            >
-              See how fare movement works
-              <span aria-hidden="true">→</span>
-            </button>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, x: 28, y: 40 }}
+            initial={{ opacity: 0, x: 14, y: 40 }}
             whileInView={{ opacity: 1, x: 0, y: 40 }}
             viewport={{ once: true, amount: 0.22 }}
-            transition={{ duration: 0.65, ease: "easeOut", delay: 0.08 }}
+            transition={{ duration: 0.38, ease: "easeOut", delay: 0.04 }}
             className="relative mx-auto h-[430px] w-full max-w-3xl sm:h-[500px]"
           >
             <div className="absolute left-[4%] top-[9%] z-10 h-[64%] w-[44%] overflow-hidden rounded-[1.75rem] bg-slate-200 shadow-[0_24px_70px_rgba(15,23,42,0.18)]">
@@ -147,18 +139,6 @@ export default function HomepageLabMarketFlow() {
               >
                 ✈
               </text>
-
-              <text
-                x="526"
-                y="213"
-                fill="white"
-                fontSize="20"
-                fontWeight="700"
-                className="drop-shadow-[0_3px_8px_rgba(2,6,23,0.5)]"
-                transform="rotate(8 526 213)"
-              >
-                ✈
-              </text>
             </svg>
 
             <div className="absolute left-[26%] top-[76%] z-40 flex items-center gap-2">
@@ -168,7 +148,7 @@ export default function HomepageLabMarketFlow() {
                 </p>
 
                 <p className="mt-1 whitespace-nowrap text-sm font-semibold italic leading-5 text-slate-900">
-                  “Miami is pricing below recent route behavior.”
+                  “Miami is showing a stronger trip-value signal right now.”
                 </p>
               </div>
 

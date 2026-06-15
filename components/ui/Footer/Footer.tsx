@@ -8,9 +8,11 @@ export default function Footer() {
 
   if (
     pathname === "/pricing" ||
-    pathname === "/booking" ||
-    pathname === "/beta" ||
-    pathname === "/flight-attendant"
+    pathname.startsWith("/plan-with-lucy") ||
+    pathname.startsWith("/booking") ||
+    pathname.startsWith("/plan-smarter") ||
+    pathname.startsWith("/lucy-trip") ||
+    pathname.startsWith("/skysirv-live")
   ) {
     return null;
   }
@@ -18,44 +20,83 @@ export default function Footer() {
   return (
     <footer className="bg-white">
       <div className="mx-auto max-w-6xl px-6 py-16 text-center md:max-w-4xl md:text-left">
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-4 md:justify-items-center md:text-center">
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-5 md:justify-items-center md:text-center">
           {/* Brand */}
           <div className="flex max-w-xs flex-col justify-start text-center md:text-left">
             <Link
               href="/"
-              className="text-xl font-bold leading-none text-slate-900 transition hover:text-slate-700"
+              className="text-xl font-bold leading-none text-slate-800 transition hover:text-slate-700"
             >
-              Skysirv™
+              Skysirv
             </Link>
 
-            <p className="mt-4 text-sm leading-6 text-slate-600">
-              Flight intelligence that helps travelers understand pricing and
-              book with more confidence.
+            <p className="mt-4 text-sm leading-6 text-slate-700">
+              AI-powered travel intelligence that helps travelers compare trips,
+              understand signals, and plan with more confidence.
             </p>
           </div>
 
-          {/* Products */}
+          {/* Book */}
           <div className="text-center md:text-left">
-            <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-slate-900">
-              Products
+            <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-slate-800">
+              Book
             </h3>
 
-            <ul className="mt-4 space-y-3 text-sm text-slate-600">
+            <ul className="mt-4 space-y-3 text-sm text-slate-700">
               <li>
-                <Link href="/pricing" className="transition hover:text-slate-400">
-                  Pricing
+                <Link href="/booking/flights" className="transition hover:text-slate-400">
+                  Flights
                 </Link>
               </li>
 
               <li>
-                <Link href="/booking" className="transition hover:text-slate-400">
-                  Booking
+                <Link href="/booking/hotels" className="transition hover:text-slate-400">
+                  Hotels
                 </Link>
               </li>
 
               <li>
-                <Link href="/flight-attendant" className="transition hover:text-slate-400">
-                  Skysirv Flight Attendant™
+                <Link href="/booking/car-rentals" className="transition hover:text-slate-400">
+                  Car rentals
+                </Link>
+              </li>
+
+              <li>
+                <Link href="/booking/cruises" className="transition hover:text-slate-400">
+                  Cruises
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Plan */}
+          <div className="text-center md:text-left">
+            <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-slate-800">
+              Plan
+            </h3>
+
+            <ul className="mt-4 space-y-3 text-sm text-slate-700">
+              <li>
+                <Link href="/plan-with-lucy/itinerary" className="transition hover:text-slate-400">
+                  Generate itinerary
+                </Link>
+              </li>
+
+              <li>
+                <Link href="/plan-with-lucy/itinerary" className="transition hover:text-slate-400">
+                  Travel preferences
+                </Link>
+              </li>
+
+              <li>
+                <Link href="/plan-with-lucy/itinerary" className="transition hover:text-slate-400">
+                  Lucy memory
+                </Link>
+              </li>
+
+              <li>
+                <Link href="/plan-with-lucy/itinerary" className="transition hover:text-slate-400">
+                  Trip ideas
                 </Link>
               </li>
             </ul>
@@ -63,11 +104,23 @@ export default function Footer() {
 
           {/* Company */}
           <div className="text-center md:text-left">
-            <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-slate-900">
+            <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-slate-800">
               Company
             </h3>
 
-            <ul className="mt-4 space-y-3 text-sm text-slate-600">
+            <ul className="mt-4 space-y-3 text-sm text-slate-700">
+              <li>
+                <Link href="/skysirv-live" className="transition hover:text-slate-400">
+                  Skysirv Live
+                </Link>
+              </li>
+
+              <li>
+                <Link href="/pricing" className="transition hover:text-slate-400">
+                  Pricing
+                </Link>
+              </li>
+
               <li>
                 <Link href="/about" className="transition hover:text-slate-400">
                   About
@@ -75,8 +128,8 @@ export default function Footer() {
               </li>
 
               <li>
-                <Link href="/beta" className="transition hover:text-slate-400">
-                  Skysirv™ Beta
+                <Link href="/pricing" className="transition hover:text-slate-400">
+                  Careers
                 </Link>
               </li>
             </ul>
@@ -84,11 +137,11 @@ export default function Footer() {
 
           {/* Legal */}
           <div className="text-center md:text-left">
-            <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-slate-900">
+            <h3 className="text-sm font-bold uppercase tracking-[0.14em] text-slate-800">
               Legal
             </h3>
 
-            <ul className="mt-4 space-y-3 text-sm text-slate-600">
+            <ul className="mt-4 space-y-3 text-sm text-slate-700">
               <li>
                 <Link href="/privacy" className="transition hover:text-slate-400">
                   Privacy
@@ -111,8 +164,8 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 pt-6 text-center">
-          <p className="text-sm text-slate-900">
-            &copy; {new Date().getFullYear()} Skysirv™. All rights reserved.
+          <p className="text-sm text-slate-800">
+            &copy; {new Date().getFullYear()} Skysirv. All rights reserved.
           </p>
         </div>
       </div>
