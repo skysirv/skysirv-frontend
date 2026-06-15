@@ -39,7 +39,7 @@ export default function HomepageLabMarketFlow() {
 
         <div className="mx-auto mt-20 grid max-w-6xl gap-14 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
           <div className="mx-auto max-w-xl text-center lg:mx-0 lg:text-left">
-            <h3 className="mt-4 text-3xl font-bold tracking-tight text-slate-800 sm:text-4xl">
+            <h3 className="mt-4 text-3xl font-bold tracking-tight text-slate-800 sm:text-5xl">
               Plan travel without chasing every price change.
             </h3>
 
