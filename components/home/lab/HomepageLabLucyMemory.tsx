@@ -65,7 +65,7 @@ export default function HomepageLabLucyMemory() {
             </div>
           ))}
 
-          <div className="absolute left-[50%] top-[28%] z-30 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
+          <div className="absolute right-[17%] bottom-[32%] z-30 flex items-center justify-center">
             <img
               src="/images/stock/lucy/lucy-pos-1.png"
               alt="Lucy"
