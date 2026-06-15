@@ -9,14 +9,11 @@ export default function MainContentShell({ children }: PropsWithChildren) {
   const isHomePage = pathname === '/';
   const isFullBleedPage =
     pathname === '/pricing' ||
-    pathname === '/dev/pricing-lab' ||
     pathname === '/choose-plan' ||
-    pathname.startsWith('/dev/plan-with-lucy-lab') ||
-    pathname.startsWith('/dev/booking-lab') ||
-    pathname.startsWith('/dev/plan-smarter-lab') ||
-    pathname.startsWith('/dev/lucy-trip-lab') ||
-    pathname === '/booking' ||
-    pathname === '/beta';
+    pathname.startsWith('/plan-with-lucy') ||
+    pathname.startsWith('/booking') ||
+    pathname.startsWith('/plan-smarter') ||
+    pathname.startsWith('/lucy-trip')
 
   return (
     <main

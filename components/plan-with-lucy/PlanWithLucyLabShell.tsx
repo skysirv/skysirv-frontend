@@ -238,12 +238,12 @@ export default function PlanWithLucyLabShell({
   }
 
   function getBookingHandoffPath(mode: PlanningMode) {
-    if (mode === "flights") return "/dev/booking-lab/flights"
-    if (mode === "hotels") return "/dev/booking-lab/hotels"
-    if (mode === "cars") return "/dev/booking-lab/car-rentals"
-    if (mode === "cruises") return "/dev/booking-lab/cruises"
+    if (mode === "flights") return "/booking/flights"
+    if (mode === "hotels") return "/booking/hotels"
+    if (mode === "cars") return "/booking/car-rentals"
+    if (mode === "cruises") return "/booking/cruises"
 
-    return "/dev/booking-lab/flights"
+    return "/booking/flights"
   }
 
   function handleSendToBooking() {
@@ -274,7 +274,7 @@ export default function PlanWithLucyLabShell({
     <main className="min-h-screen overflow-hidden bg-white text-slate-950">
       <section className="relative min-h-screen overflow-hidden bg-white px-5 pb-44 pt-24 sm:px-8 sm:pt-24">
         <Link
-          href="/dev/homepage-lab"
+          href="/"
           className="fixed left-5 top-5 z-50 inline-flex min-h-[42px] items-center gap-2 rounded-full border border-blue-700 bg-blue-700 px-4 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-600"
         >
           <LargeChevron direction="left" />

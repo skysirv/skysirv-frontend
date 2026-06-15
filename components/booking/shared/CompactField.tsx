@@ -5,10 +5,14 @@ export default function CompactField({
   placeholder,
   type = "text",
   icon = "search",
+  value,
+  onChange,
 }: {
   placeholder: string
   type?: "text" | "number"
   icon?: FieldIconName
+  value?: string
+  onChange?: (value: string) => void
 }) {
   return (
     <label className="relative block">
@@ -18,6 +22,8 @@ export default function CompactField({
 
       <input
         type={type}
+        value={value}
+        onChange={(event) => onChange?.(event.target.value)}
         placeholder={placeholder}
         className="h-[58px] w-full rounded-2xl border border-slate-200 bg-white py-2 pl-12 pr-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-200 focus:ring-4 focus:ring-blue-100"
       />

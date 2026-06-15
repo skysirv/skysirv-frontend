@@ -1,4 +1,5 @@
 export type PlanningMode = "flights" | "hotels" | "cars" | "cruises" | "itinerary"
+export type ItineraryBookingMode = "flights" | "hotels" | "cars" | "cruises"
 
 export type ChoiceOption = {
   icon: string
@@ -12,8 +13,21 @@ export type ChoiceStep = {
   title: string
   helper?: string
   variant?: "card" | "pill"
+  requiresTripInclude?: ItineraryBookingMode[]
   options: ChoiceOption[]
   prompt: (value: string) => string
+}
+
+export type MultiChoiceStep = {
+  id: string
+  type: "multi-choice"
+  title: string
+  helper?: string
+  variant?: "card" | "pill"
+  icon: string
+  requiresTripInclude?: ItineraryBookingMode[]
+  options: ChoiceOption[]
+  prompt: (values: string[]) => string
 }
 
 export type RangeStep = {
@@ -21,6 +35,7 @@ export type RangeStep = {
   type: "range"
   title: string
   helper?: string
+  requiresTripInclude?: ItineraryBookingMode[]
   min: number
   max: number
   step?: number
@@ -31,7 +46,7 @@ export type RangeStep = {
   prompt: (value: string) => string
 }
 
-export type FlowStep = ChoiceStep | RangeStep
+export type FlowStep = ChoiceStep | MultiChoiceStep | RangeStep
 
 export type ModeFlow = {
   id: PlanningMode
@@ -45,4 +60,5 @@ export type ModeFlow = {
 export type ConfirmedAnswer = {
   icon: string
   label: string
+  values?: string[]
 }

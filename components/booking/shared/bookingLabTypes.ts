@@ -1,4 +1,9 @@
-export type BookingMode = "flights" | "hotels" | "cars" | "cruises"
+export type BookingMode =
+  | "flights"
+  | "hotels"
+  | "cars"
+  | "cruises"
+  | "experiences"
 
 export type FlightTripType = "round-trip" | "one-way" | "multi-city"
 
@@ -44,3 +49,20 @@ export type FieldIconName =
   | "map"
   | "clock"
   | "bag"
+
+export type PlanToBookingHandoff = {
+  source?: string
+  mode?: string
+  modeLabel?: string
+  prompt?: string
+  confirmedAnswers?: Record<
+    string,
+    {
+      icon: string
+      label: string
+      values?: string[]
+    }
+  >
+  confirmedStepIds?: string[]
+  createdAt?: string
+}

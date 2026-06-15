@@ -11,15 +11,23 @@ export default function BottomLucyComposer({
   confirmedSteps,
   confirmedAnswers,
   onComposerChange,
+  onSend,
 }: {
   modeLabel: string
   composerText: string
   confirmedSteps: FlowStep[]
   confirmedAnswers: Record<string, ConfirmedAnswer>
   onComposerChange: (value: string) => void
+  onSend?: () => void
 }) {
+  const visibleConfirmedSteps = confirmedSteps.slice(0, 9)
+  const hiddenConfirmedStepCount = Math.max(
+    0,
+    confirmedSteps.length - visibleConfirmedSteps.length,
+  )
+
   return (
-    <div className="fixed bottom-6 left-1/2 z-50 w-[min(760px,calc(100vw-40px))] -translate-x-1/2">
+    <div className="fixed bottom-6 left-1/2 z-50 w-[calc(100vw-40px)] max-w-3xl -translate-x-1/2">
       <div className="rounded-[1.35rem] border border-slate-200 bg-white p-3 shadow-[0_18px_55px_rgba(15,23,42,0.16)]">
         <textarea
           value={composerText}
@@ -47,28 +55,39 @@ export default function BottomLucyComposer({
             {modeLabel}
           </span>
 
-          {confirmedSteps.map((step) => {
-            const answer = confirmedAnswers[step.id]
+          <div className="flex flex-nowrap items-center -space-x-2">
+            {visibleConfirmedSteps.map((step) => {
+              const answer = confirmedAnswers[step.id]
 
-            if (!answer) return null
+              if (!answer) return null
 
-            return (
-              <motion.span
-                key={step.id}
-                initial={{ opacity: 0, y: 8, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.24, ease: "easeOut" }}
-                title={answer.label}
-                aria-label={answer.label}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-blue-100 bg-blue-50 text-base text-blue-700"
+              return (
+                <motion.span
+                  key={step.id}
+                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.24, ease: "easeOut" }}
+                  title={answer.label}
+                  aria-label={answer.label}
+                  className="relative inline-flex h-7 w-7 items-center justify-center rounded-full border border-blue-100 bg-blue-50 text-sm text-blue-700 shadow-sm ring-2 ring-white"
+                >
+                  {answer.icon}
+                </motion.span>
+              )
+            })}
+
+            {hiddenConfirmedStepCount > 0 && (
+              <span
+                title={`${hiddenConfirmedStepCount} more confirmed prompt selections`}
+                className="relative inline-flex h-7 min-w-7 items-center justify-center rounded-full border border-slate-200 bg-slate-100 px-2 text-[10px] font-black text-slate-500 shadow-sm ring-2 ring-white"
               >
-                {answer.icon}
-              </motion.span>
-            )
-          })}
-
+                +{hiddenConfirmedStepCount}
+              </span>
+            )}
+          </div>
           <button
             type="button"
+            onClick={onSend}
             className="ml-auto flex h-10 w-10 items-center justify-center rounded-full bg-blue-700 text-lg font-bold text-white shadow-sm transition hover:bg-blue-800"
             aria-label="Send to Lucy"
           >

@@ -568,11 +568,11 @@ export default function FreeDashboardPage() {
               <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
                 <div>
                   <div className="mb-4 flex flex-wrap items-center gap-2">
-                    <p className="inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-cyan-700">
+                    <p className="inline-flex rounded-full border border-blue-700 bg-blue-700 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-white">
                       Free Dashboard
                     </p>
 
-                    <p className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                    <p className="inline-flex rounded-full border border-orange-500 bg-orange-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white">
                       Basic Tracking
                     </p>
                   </div>

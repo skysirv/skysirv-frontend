@@ -6,9 +6,9 @@ export default function BundleSaveStrip({
   secondOption: string
 }) {
   return (
-    <div className="flex w-fit max-w-full flex-wrap items-center gap-3 rounded-xl border border-lime-200 bg-lime-100 px-4 py-3">
+    <div className="flex w-fit max-w-full flex-wrap items-center gap-3 px-1 py-2">
       <span className="inline-flex items-center gap-2 text-sm font-bold text-slate-800">
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-lime-200 text-green-700">
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-lime-100 text-green-700">
           $
         </span>
         Bundle + save

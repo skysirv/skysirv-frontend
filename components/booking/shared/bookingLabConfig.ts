@@ -37,6 +37,15 @@ export const bookingModes: Record<BookingMode, BookingModeConfig> = {
     panelSubtitle:
       "Enter your cruise basics, then compare sailing options by region, duration, cabin style, and trip vibe.",
   },
+  experiences: {
+    id: "experiences",
+    label: "Featured Experiences",
+    title: "Explore featured experiences with Skysirv.",
+    subtitle:
+      "Discover curated travel partners, destination experiences, premium services, and hand-picked offers that complement the full Skysirv booking network.",
+    panelSubtitle:
+      "Browse featured travel experiences, partners, and curated offers selected for the Skysirv network.",
+  },
 }
 
 export const bookingModeOrder: BookingMode[] = [
@@ -44,6 +53,7 @@ export const bookingModeOrder: BookingMode[] = [
   "hotels",
   "cars",
   "cruises",
+  "experiences",
 ]
 
 export const quickOptionLabels: Record<BookingMode, string[]> = {
@@ -51,6 +61,7 @@ export const quickOptionLabels: Record<BookingMode, string[]> = {
   hotels: ["Free cancellation", "Breakfast included", "Good location"],
   cars: ["Airport pickup", "Extra luggage space", "Flexible return"],
   cruises: ["Family friendly", "Balcony cabin", "Flexible dates"],
+  experiences: ["Curated partners", "Local experiences", "Premium travel"],
 }
 
 export const compactTrustLabels = [

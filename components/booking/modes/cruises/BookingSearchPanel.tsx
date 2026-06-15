@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import CompactDateField from "@/components/booking/shared/CompactDateField"
 import CompactDatePicker from "@/components/booking/shared/CompactDatePicker"
@@ -9,11 +9,20 @@ import type {
   CalendarMode,
   CalendarRequest,
   DateRange,
+  PlanToBookingHandoff,
   TravelersState,
 } from "@/components/booking/shared/bookingLabTypes"
 import { formatBookingDate } from "@/components/booking/shared/bookingLabUtils"
 
-export default function BookingSearchPanel() {
+export default function BookingSearchPanel({
+  onSearch,
+  loading = false,
+  planHandoff,
+}: {
+  onSearch?: () => void
+  loading?: boolean
+  planHandoff?: PlanToBookingHandoff | null
+}) {
   const [calendarRequest, setCalendarRequest] = useState<CalendarRequest | null>(
     null,
   )
@@ -25,6 +34,39 @@ export default function BookingSearchPanel() {
     children: 0,
     infants: 0,
   })
+
+  const [destinationRegion, setDestinationRegion] = useState("")
+  const [cabinStyle, setCabinStyle] = useState("")
+
+  useEffect(() => {
+    if (!planHandoff) return
+
+    const directRegionLabel =
+      planHandoff.confirmedAnswers?.["cruise-region"]?.label
+
+    const itineraryRegionLabel =
+      planHandoff.confirmedAnswers?.["itinerary-cruise-region"]?.label
+
+    const regionLabel =
+      planHandoff.mode === "cruises" ? directRegionLabel : itineraryRegionLabel
+
+    const directCabinLabel =
+      planHandoff.confirmedAnswers?.["cruise-style"]?.label
+
+    const itineraryCabinLabel =
+      planHandoff.confirmedAnswers?.["itinerary-cruise-cabin"]?.label
+
+    const cabinLabel =
+      planHandoff.mode === "cruises" ? directCabinLabel : itineraryCabinLabel
+
+    if (regionLabel && regionLabel !== "Not sure") {
+      setDestinationRegion(regionLabel)
+    }
+
+    if (cabinLabel) {
+      setCabinStyle(cabinLabel)
+    }
+  }, [planHandoff])
 
   function renderCalendarPopover({
     calendarKey,
@@ -55,7 +97,12 @@ export default function BookingSearchPanel() {
   return (
     <div className="space-y-3">
       <div className="grid gap-3 sm:grid-cols-2">
-        <CompactField placeholder="Destination region" icon="cruise" />
+        <CompactField
+          placeholder="Destination region"
+          icon="cruise"
+          value={destinationRegion}
+          onChange={setDestinationRegion}
+        />
         <CompactField placeholder="Departure port" icon="map" />
       </div>
 
@@ -95,9 +142,18 @@ export default function BookingSearchPanel() {
         />
       </div>
 
-      <CompactField placeholder="Cabin style" icon="seat" />
+      <CompactField
+        placeholder="Cabin style"
+        icon="seat"
+        value={cabinStyle}
+        onChange={setCabinStyle}
+      />
 
-      <SearchOptionsAndButton mode="cruises" />
+      <SearchOptionsAndButton
+        mode="cruises"
+        onSearch={onSearch}
+        loading={loading}
+      />
     </div>
   )
 }

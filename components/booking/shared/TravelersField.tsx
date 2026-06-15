@@ -9,9 +9,11 @@ import { formatTravelers } from "./bookingLabUtils"
 export default function TravelersField({
   travelers,
   onChange,
+  compact = false,
 }: {
   travelers: TravelersState
   onChange: (travelers: TravelersState) => void
+  compact?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement | null>(null)
@@ -43,17 +45,30 @@ export default function TravelersField({
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
-        className="relative flex h-[58px] w-full items-center rounded-2xl border border-slate-200 bg-white py-2 pl-12 pr-4 text-left text-sm font-semibold transition hover:border-blue-200 hover:ring-4 hover:ring-blue-100"
+        className={
+          compact
+            ? "relative flex h-[46px] w-full items-center rounded-lg border border-slate-300 bg-white py-0 pl-12 pr-4 text-left text-sm font-semibold transition hover:border-blue-200 hover:ring-4 hover:ring-blue-100"
+            : "relative flex h-[58px] w-full items-center rounded-2xl border border-slate-200 bg-white py-2 pl-12 pr-4 text-left text-sm font-semibold transition hover:border-blue-200 hover:ring-4 hover:ring-blue-100"
+        }
       >
         <span className="pointer-events-none absolute left-4 top-1/2 flex -translate-y-1/2 text-blue-700">
           <FieldIcon name="traveler" />
         </span>
 
         <span className="flex min-w-0 flex-col">
-          <span className="text-[11px] font-bold leading-4 text-slate-400">
-            Travelers
-          </span>
-          <span className="truncate text-sm leading-5 text-slate-800">
+          {!compact ? (
+            <span className="text-[11px] font-bold leading-4 text-slate-400">
+              Travelers
+            </span>
+          ) : null}
+
+          <span
+            className={
+              compact
+                ? "truncate text-sm font-semibold leading-5 text-slate-800"
+                : "truncate text-sm leading-5 text-slate-800"
+            }
+          >
             {formatTravelers(travelers)}
           </span>
         </span>

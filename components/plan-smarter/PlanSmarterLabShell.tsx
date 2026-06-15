@@ -81,14 +81,14 @@ export default function PlanSmarterLabShell() {
       return
     }
 
-    router.push("/dev/lucy-trip-lab")
+    router.push("/lucy-trip")
   }
 
   return (
     <main className="h-screen overflow-hidden bg-white text-slate-950">
       <section className="relative h-screen overflow-hidden bg-white px-5 pb-10 pt-10 sm:px-8">
         <Link
-          href="/dev/homepage-lab"
+          href="/"
           className="fixed left-5 top-5 z-50 inline-flex min-h-[42px] items-center gap-2 rounded-full border border-blue-700 bg-blue-700 px-4 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-600"
         >
           <LargeChevron direction="left" />
@@ -326,7 +326,7 @@ export default function PlanSmarterLabShell() {
 
           <div className="mt-8 grid gap-4 md:grid-cols-[1.05fr_1fr_0.9fr]">
             <Link
-              href="/dev/plan-with-lucy-lab/itinerary"
+              href="/plan-with-lucy/itinerary"
               className="group flex min-h-[310px] flex-col overflow-hidden rounded-[1.75rem] border border-orange-100 bg-gradient-to-br from-orange-100 via-yellow-50 to-white p-6 shadow-[0_22px_65px_rgba(15,23,42,0.08)] transition hover:-translate-y-1 hover:shadow-[0_28px_80px_rgba(15,23,42,0.12)]"
             >
               <h2 className="text-xl font-bold text-slate-900">
@@ -350,7 +350,7 @@ export default function PlanSmarterLabShell() {
 
             <div className="grid gap-4">
               <Link
-                href="/dev/booking-lab/flights"
+                href="/booking/flights"
                 className="group grid min-h-[147px] grid-cols-[1fr_130px] items-center gap-4 overflow-hidden rounded-[1.5rem] border border-blue-100 bg-gradient-to-br from-blue-100 via-sky-50 to-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.07)] transition hover:-translate-y-1 hover:shadow-[0_24px_65px_rgba(15,23,42,0.11)]"
               >
                 <span>
@@ -377,7 +377,7 @@ export default function PlanSmarterLabShell() {
               </Link>
 
               <Link
-                href="/dev/booking-lab/hotels"
+                href="/booking/hotels"
                 className="group grid min-h-[147px] grid-cols-[130px_1fr] items-center gap-4 overflow-hidden rounded-[1.5rem] border border-purple-100 bg-gradient-to-br from-purple-100 via-pink-50 to-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.07)] transition hover:-translate-y-1 hover:shadow-[0_24px_65px_rgba(15,23,42,0.11)]"
               >
                 <span

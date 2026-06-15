@@ -25,27 +25,27 @@ const promptPills: Array<{
     {
       label: "Find flights",
       icon: "find",
-      href: "/dev/plan-with-lucy-lab/flights",
+      href: "/plan-with-lucy/flights",
     },
     {
       label: "Book hotels",
       icon: "hotel",
-      href: "/dev/plan-with-lucy-lab/hotels",
+      href: "/plan-with-lucy/hotels",
     },
     {
       label: "Car rentals",
       icon: "car",
-      href: "/dev/plan-with-lucy-lab/car-rentals",
+      href: "/plan-with-lucy/car-rentals",
     },
     {
       label: "Book cruises",
       icon: "cruise",
-      href: "/dev/plan-with-lucy-lab/cruises",
+      href: "/plan-with-lucy/cruises",
     },
     {
       label: "Generate itinerary",
       icon: "itinerary",
-      href: "/dev/plan-with-lucy-lab/itinerary",
+      href: "/plan-with-lucy/itinerary",
     },
   ]
 

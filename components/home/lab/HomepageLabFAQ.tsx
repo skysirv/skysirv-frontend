@@ -7,12 +7,12 @@ const faqs = [
   {
     question: "What is Skysirv?",
     answer:
-      "Skysirv is an AI-powered travel intelligence platform designed to help travelers compare flights, explore hotels and car rentals, plan cruises and itineraries, understand pricing signals, and make calmer travel decisions with Lucy.",
+      "Skysirv is a fully AI-powered travel intelligence network designed to help travelers compare flights, explore hotels and car rentals, plan cruises and itineraries, understand pricing signals, and make calmer travel decisions with Lucy.",
   },
   {
     question: "Is Skysirv a booking site?",
     answer:
-      "Skysirv includes booking pathways for flights and future travel products, but its bigger purpose is intelligence. The goal is to help travelers understand the why behind trip options, pricing movement, timing, and travel decisions — not just show another list of prices.",
+      "Skysirv includes booking for flights, hotels, car rentals, cruises and future travel products, but its bigger purpose is intelligence. The goal is to help travelers understand the why behind trip options, pricing movement, timing, and travel decisions — not just show another list of prices.",
   },
   {
     question: "Who is Lucy?",

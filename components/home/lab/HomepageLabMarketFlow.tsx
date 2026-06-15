@@ -68,14 +68,6 @@ export default function HomepageLabMarketFlow() {
               movement into simple guidance: watch, compare, wait, adjust the plan,
               or review a stronger opportunity.
             </p>
-
-            <button
-              type="button"
-              className="mt-7 inline-flex items-center gap-2 text-medium font-bold text-blue-600 transition hover:gap-3 hover:text-blue-700"
-            >
-              See how Skysirv reads travel signals
-              <span aria-hidden="true">→</span>
-            </button>
           </motion.div>
 
           <motion.div

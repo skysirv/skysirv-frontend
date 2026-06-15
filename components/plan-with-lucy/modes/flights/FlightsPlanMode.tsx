@@ -3,6 +3,7 @@ import type {
   ChoiceOption,
   ChoiceStep,
   FlowStep,
+  MultiChoiceStep,
   RangeStep,
 } from "@/components/plan-with-lucy/shared/planWithLucyTypes"
 
@@ -11,12 +12,14 @@ export default function FlightsPlanMode({
   rangeValues,
   onRangeChange,
   onChoiceSelect,
+  onMultiChoiceConfirm,
   onRangeConfirm,
 }: {
   visibleSteps: FlowStep[]
   rangeValues: Record<string, number>
   onRangeChange: (stepId: string, value: number) => void
   onChoiceSelect: (step: ChoiceStep, option: ChoiceOption) => void
+  onMultiChoiceConfirm: (step: MultiChoiceStep, options: ChoiceOption[]) => void
   onRangeConfirm: (step: RangeStep) => void
 }) {
   return (
@@ -25,6 +28,7 @@ export default function FlightsPlanMode({
       rangeValues={rangeValues}
       onRangeChange={onRangeChange}
       onChoiceSelect={onChoiceSelect}
+      onMultiChoiceConfirm={onMultiChoiceConfirm}
       onRangeConfirm={onRangeConfirm}
     />
   )

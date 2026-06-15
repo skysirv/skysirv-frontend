@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { getAuthToken } from "@/utils/auth-storage"
 
@@ -266,9 +266,12 @@ export default function ProDashboardPage() {
   const [airportExplorerResults, setAirportExplorerResults] = useState<
     AirportOption[]
   >([])
+  const [airportExplorerDropdownOpen, setAirportExplorerDropdownOpen] =
+    useState(false)
   const [selectedAirportForExplorer, setSelectedAirportForExplorer] =
     useState<AirportOption | null>(null)
   const [isAirportExplorerOpen, setIsAirportExplorerOpen] = useState(false)
+  const airportExplorerSearchRef = useRef<HTMLFormElement | null>(null)
 
   const isLifetimePro = subscription?.plan_id === "pro_lifetime"
 
@@ -826,27 +829,52 @@ export default function ProDashboardPage() {
     })
   }
 
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (!airportExplorerSearchRef.current) return
+
+      if (!airportExplorerSearchRef.current.contains(event.target as Node)) {
+        setAirportExplorerDropdownOpen(false)
+        setAirportExplorerResults([])
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [])
+
   function handleAirportExplorerQueryChange(value: string) {
-    const nextValue = value.toUpperCase()
+    const nextValue = value
+    const trimmedValue = nextValue.trim()
 
     setAirportExplorerQuery(nextValue)
     setSelectedAirportForExplorer(null)
 
-    if (!nextValue.trim()) {
+    if (!trimmedValue) {
       setAirportExplorerResults([])
+      setAirportExplorerDropdownOpen(false)
       return
     }
 
-    setAirportExplorerResults(searchAirports(nextValue, 8))
+    const results = searchAirports(trimmedValue, 8)
+
+    setAirportExplorerResults(results)
+    setAirportExplorerDropdownOpen(results.length > 0)
   }
 
   function handleAirportExplorerSubmit(event: React.FormEvent) {
     event.preventDefault()
 
+    const trimmedQuery = airportExplorerQuery.trim()
+
     const airport =
       selectedAirportForExplorer ??
-      getAirportByCode(airportExplorerQuery) ??
+      getAirportByCode(trimmedQuery.toUpperCase()) ??
       airportExplorerResults[0] ??
+      searchAirports(trimmedQuery, 1)[0] ??
       null
 
     if (!airport) {
@@ -860,6 +888,7 @@ export default function ProDashboardPage() {
     setSelectedAirportForExplorer(airport)
     setAirportExplorerQuery(`${airport.city} (${airport.code})`)
     setAirportExplorerResults([])
+    setAirportExplorerDropdownOpen(false)
     setIsAirportExplorerOpen(true)
   }
 
@@ -1240,33 +1269,26 @@ export default function ProDashboardPage() {
               <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
                 <div>
                   <div className="mb-4 flex flex-wrap items-center gap-2">
-                    <p className="inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-cyan-700">
+                    <p className="inline-flex rounded-full border border-blue-700 bg-blue-700 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-white">
                       {dashboardLabel}
                     </p>
 
                     {isLifetimePro ? (
-                      <p className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-amber-700">
+                      <p className="inline-flex rounded-full border border-orange-500 bg-orange-500 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white">
                         Gifted Lifetime Pro Access
                       </p>
                     ) : null}
                   </div>
 
-                  <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-slate-950 sm:text-6xl">
+                  <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-slate-800 sm:text-6xl">
                     Your personal flight intelligence dashboard
                   </h1>
 
-                  <p className="mt-6 max-w-2xl text-base leading-7 text-slate-600">
-                    Monitor up to 25 routes, track pricing behavior, review
-                    saved flights, and use Skysirv intelligence to make calmer,
-                    better timed booking decisions.
+                  <p className="mt-6 max-w-2xl text-base leading-7 text-slate-700">
+                    Access to your Skysirv Network for flights, hotels, car rentals, cruises,
+                    monitored routes, saved flights, airport intelligence, Lucy context, and
+                    smarter timing and booking signals up to 25 tracked routes.
                   </p>
-
-                  <div className="mt-7 flex flex-wrap gap-2">
-                    <ProHeroPill label="25 monitored routes" />
-                    <ProHeroPill label="High-frequency monitoring" />
-                    <ProHeroPill label="Standard AI intelligence" />
-                    <ProHeroPill label="Full Skyscore" />
-                  </div>
                 </div>
 
                 <DashboardFlightAttendant
@@ -1309,21 +1331,22 @@ export default function ProDashboardPage() {
             <div className="mb-10 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700">
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-orange-500">
                     Airport Explorer
                   </p>
 
-                  <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+                  <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-800">
                     Explore terminals, gates, lounges, and airport services
                   </h2>
 
-                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-700">
                     Search supported airports and open an indoor terminal map with 3D view,
                     satellite mode, gate search, and airport location intelligence.
                   </p>
                 </div>
 
                 <form
+                  ref={airportExplorerSearchRef}
                   onSubmit={handleAirportExplorerSubmit}
                   className="relative w-full lg:max-w-md"
                 >
@@ -1334,19 +1357,27 @@ export default function ProDashboardPage() {
                       onChange={(event) =>
                         handleAirportExplorerQueryChange(event.target.value)
                       }
+                      onFocus={() => {
+                        if (!selectedAirportForExplorer && airportExplorerQuery.trim()) {
+                          const results = searchAirports(airportExplorerQuery.trim(), 8)
+
+                          setAirportExplorerResults(results)
+                          setAirportExplorerDropdownOpen(results.length > 0)
+                        }
+                      }}
                       placeholder="Search airport, e.g. JFK or Miami"
-                      className="min-w-0 flex-1 bg-transparent px-4 py-2.5 text-sm font-medium text-slate-950 outline-none placeholder:text-slate-400"
+                      className="min-w-0 flex-1 bg-transparent px-4 py-2.5 text-sm font-medium normal-case text-slate-950 outline-none placeholder:text-slate-400"
                     />
 
                     <button
                       type="submit"
-                      className="shrink-0 rounded-full bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+                      className="shrink-0 rounded-full bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-600"
                     >
                       Explore
                     </button>
                   </div>
 
-                  {airportExplorerResults.length > 0 && (
+                  {airportExplorerDropdownOpen && airportExplorerResults.length > 0 && (
                     <div className="absolute left-0 right-0 top-full z-40 mt-2 max-h-72 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_18px_45px_rgba(15,23,42,0.14)]">
                       {airportExplorerResults.map((airport) => (
                         <button
@@ -1356,6 +1387,7 @@ export default function ProDashboardPage() {
                             setSelectedAirportForExplorer(airport)
                             setAirportExplorerQuery(`${airport.city} (${airport.code})`)
                             setAirportExplorerResults([])
+                            setAirportExplorerDropdownOpen(false)
                           }}
                           className="flex w-full items-start justify-between rounded-xl px-3 py-3 text-left transition hover:bg-slate-50"
                         >

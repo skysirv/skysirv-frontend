@@ -948,114 +948,20 @@ export default function BusinessDashboardPage() {
             <section className="pb-14">
               <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
                 <div>
-                  <p className="mb-4 inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-cyan-700">
+                  <p className="mb-4 inline-flex rounded-full border border-blue-700 bg-blue-700 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-white">
                     Business Plan Dashboard
                   </p>
 
-                  <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-slate-950 sm:text-6xl">
+                  <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-slate-800 sm:text-6xl">
                     Your full flight intelligence dashboard
                   </h1>
 
                   <p className="mt-6 max-w-2xl text-base leading-7 text-slate-600">
-                    Monitor tracked routes, build pricing history over time, and
-                    unlock a fuller intelligence layer designed to surface richer
-                    route context as real data begins to accumulate.
+                    Unlimited access across your Skysirv Network — flights, hotels,
+                    car rentals, cruises, monitored routes, saved trips, airport intelligence,
+                    travel history, Lucy context, and deeper signals built for high-volume
+                    travelers and business users.
                   </p>
-
-                  <div className="mt-8 max-w-2xl rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_18px_50px_rgba(15,23,42,0.08)]">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-slate-950">
-                          Explore Airport
-                        </p>
-                        <p className="mt-1 text-sm leading-6 text-slate-500">
-                          Search for gates, airport lounges, restaurants, and more.
-                        </p>
-                      </div>
-
-                      <div
-                        ref={airportSearchRef}
-                        className="relative flex w-full gap-2 sm:max-w-sm"
-                      >
-                        <input
-                          value={airportSearch}
-                          onChange={(event) => {
-                            const value = event.target.value
-                            setAirportSearch(value)
-                            setSelectedAirport(null)
-                            setAirportSearchOpen(value.trim().length >= 2)
-                          }}
-                          onFocus={() => {
-                            if (airportSearch.trim().length >= 2) {
-                              setAirportSearchOpen(true)
-                            }
-                          }}
-                          placeholder="Airport, city, or code"
-                          className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-cyan-300 focus:bg-white focus:ring-4 focus:ring-cyan-100"
-                        />
-
-                        {airportSearchOpen && (
-                          <div className="absolute left-0 top-full z-30 mt-2 max-h-72 w-full overflow-y-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_18px_45px_rgba(15,23,42,0.10)]">
-                            {airportSearchResults.length === 0 ? (
-                              <div className="px-3 py-3 text-sm text-slate-500">
-                                No matching airports found.
-                              </div>
-                            ) : (
-                              airportSearchResults.map((airport) => (
-                                <button
-                                  key={airport.code}
-                                  type="button"
-                                  onClick={() => {
-                                    setSelectedAirport(airport)
-                                    setAirportSearch(`${airport.city} (${airport.code})`)
-                                    setAirportSearchOpen(false)
-                                  }}
-                                  className="flex w-full items-start justify-between rounded-xl px-3 py-3 text-left transition hover:bg-slate-50"
-                                >
-                                  <div>
-                                    <div className="text-sm font-semibold text-slate-900">
-                                      {airport.city} — {airport.code}
-                                    </div>
-                                    <div className="mt-1 text-xs text-slate-500">
-                                      {airport.name}
-                                    </div>
-                                  </div>
-
-                                  <div className="ml-4 text-[11px] uppercase tracking-[0.14em] text-slate-400">
-                                    {airport.country}
-                                  </div>
-                                </button>
-                              ))
-                            )}
-                          </div>
-                        )}
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const airportToExplore = selectedAirport
-
-                            if (!airportToExplore) {
-                              toast({
-                                title: "Search an airport first",
-                                description: "Choose an airport from the dropdown before exploring.",
-                              })
-                              return
-                            }
-
-                            setAirportExplorerTarget(airportToExplore)
-                            setIsAirportExplorerOpen(true)
-                            setAirportSearch("")
-                            setSelectedAirport(null)
-                            setAirportSearchOpen(false)
-                          }}
-                          className="shrink-0 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
-                        >
-                          Explore
-                        </button>
-                      </div>
-                    </div>
-                  </div>
                 </div>
 
                 <DashboardFlightAttendant
@@ -1094,6 +1000,110 @@ export default function BusinessDashboardPage() {
                 />
               </div>
             </section>
+
+            <div className="mb-10 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-orange-500">
+                    Airport Explorer
+                  </p>
+
+                  <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-800">
+                    Explore terminals, gates, lounges, and airport services
+                  </h2>
+
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-700">
+                    Search supported airports and open an indoor terminal map with 3D view,
+                    satellite mode, gate search, and airport location intelligence.
+                  </p>
+                </div>
+
+                <div
+                  ref={airportSearchRef}
+                  className="relative w-full lg:max-w-md"
+                >
+                  <div className="flex rounded-full border border-slate-200 bg-slate-50 p-1 shadow-inner">
+                    <input
+                      value={airportSearch}
+                      onChange={(event) => {
+                        const value = event.target.value
+                        setAirportSearch(value)
+                        setSelectedAirport(null)
+                        setAirportSearchOpen(value.trim().length >= 2)
+                      }}
+                      onFocus={() => {
+                        if (airportSearch.trim().length >= 2) {
+                          setAirportSearchOpen(true)
+                        }
+                      }}
+                      placeholder="Search airport, e.g. JFK or Miami"
+                      className="min-w-0 flex-1 bg-transparent px-4 py-2.5 text-sm font-medium text-slate-950 outline-none placeholder:text-slate-400"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const airportToExplore = selectedAirport
+
+                        if (!airportToExplore) {
+                          toast({
+                            title: "Search an airport first",
+                            description: "Choose an airport from the dropdown before exploring.",
+                          })
+                          return
+                        }
+
+                        setAirportExplorerTarget(airportToExplore)
+                        setIsAirportExplorerOpen(true)
+                        setAirportSearch("")
+                        setSelectedAirport(null)
+                        setAirportSearchOpen(false)
+                      }}
+                      className="shrink-0 rounded-full bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-600"
+                    >
+                      Explore
+                    </button>
+                  </div>
+
+                  {airportSearchOpen && (
+                    <div className="absolute left-0 right-0 top-full z-40 mt-2 max-h-72 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_18px_45px_rgba(15,23,42,0.14)]">
+                      {airportSearchResults.length === 0 ? (
+                        <div className="px-3 py-3 text-sm text-slate-500">
+                          No matching airports found.
+                        </div>
+                      ) : (
+                        airportSearchResults.map((airport) => (
+                          <button
+                            key={airport.code}
+                            type="button"
+                            onClick={() => {
+                              setSelectedAirport(airport)
+                              setAirportSearch(`${airport.city} (${airport.code})`)
+                              setAirportSearchOpen(false)
+                            }}
+                            className="flex w-full items-start justify-between rounded-xl px-3 py-3 text-left transition hover:bg-slate-50"
+                          >
+                            <div>
+                              <div className="text-sm font-semibold text-slate-900">
+                                {airport.city} ({airport.code})
+                              </div>
+
+                              <div className="mt-1 text-xs text-slate-500">
+                                {airport.name} · {airport.country}
+                              </div>
+                            </div>
+
+                            <div className="ml-4 shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                              {airport.region ?? "Airport"}
+                            </div>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
 
             <div className="mb-10">
               <RouteSearch theme="light" onRouteAdded={handleRouteAdded} />

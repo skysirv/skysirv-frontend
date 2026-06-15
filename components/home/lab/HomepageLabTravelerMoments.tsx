@@ -46,14 +46,6 @@ export default function HomepageLabTravelerMoments() {
             options. Lucy helps bring context, timing, preferences, and full-trip
             planning into the decision before you book.
           </p>
-
-          <button
-            type="button"
-            className="mt-7 inline-flex items-center gap-2 text-medium font-bold text-blue-600 transition hover:gap-3 hover:text-blue-700"
-          >
-            See how Skysirv helps travelers
-            <span aria-hidden="true">→</span>
-          </button>
         </motion.div>
 
         <motion.div

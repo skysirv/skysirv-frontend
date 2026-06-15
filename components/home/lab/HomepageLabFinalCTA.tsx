@@ -3,7 +3,13 @@
 import Link from "next/link"
 import { motion } from "framer-motion"
 
-export default function HomepageLabFinalCTA() {
+type HomepageLabFinalCTAProps = {
+  onCreateAccountClick?: () => void
+}
+
+export default function HomepageLabFinalCTA({
+  onCreateAccountClick,
+}: HomepageLabFinalCTAProps) {
   return (
     <section className="relative overflow-hidden bg-white px-6 pb-28 pt-16 sm:pb-32 sm:pt-20">
       <motion.div
@@ -25,18 +31,25 @@ export default function HomepageLabFinalCTA() {
 
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
-              href="/booking"
+              href="/plan-with-lucy/itinerary"
               className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-blue-600 px-6 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-700"
             >
               Start planning your trip
             </Link>
 
-            <Link
-              href="/create-account"
+            <button
+              type="button"
+              onClick={() => {
+                window.dispatchEvent(
+                  new CustomEvent("skysirv-open-auth-modal", {
+                    detail: { mode: "signup" },
+                  })
+                )
+              }}
               className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-orange-500 px-6 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:border-orange-600 hover:bg-orange-600"
             >
               Create account
-            </Link>
+            </button>
           </div>
         </div>
       </motion.div>

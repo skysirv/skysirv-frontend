@@ -8,13 +8,10 @@ export default function Footer() {
 
   if (
     pathname === "/pricing" ||
-    pathname === "/dev/pricing-lab" ||
-    pathname.startsWith("/dev/plan-with-lucy-lab") ||
-    pathname.startsWith("/dev/booking-lab") ||
-    pathname.startsWith("/dev/plan-smarter-lab") ||
-    pathname.startsWith("/dev/lucy-trip-lab") ||
-    pathname === "/booking" ||
-    pathname === "/beta" ||
+    pathname.startsWith("/plan-with-lucy") ||
+    pathname.startsWith("/booking") ||
+    pathname.startsWith("/plan-smarter") ||
+    pathname.startsWith("/lucy-trip") ||
     pathname.startsWith("/skysirv-live")
   ) {
     return null;
@@ -47,25 +44,25 @@ export default function Footer() {
 
             <ul className="mt-4 space-y-3 text-sm text-slate-700">
               <li>
-                <Link href="/dev/booking-lab/flights" className="transition hover:text-slate-400">
+                <Link href="/booking/flights" className="transition hover:text-slate-400">
                   Flights
                 </Link>
               </li>
 
               <li>
-                <Link href="/dev/booking-lab/hotels" className="transition hover:text-slate-400">
+                <Link href="/booking/hotels" className="transition hover:text-slate-400">
                   Hotels
                 </Link>
               </li>
 
               <li>
-                <Link href="/dev/booking-lab/car-rentals" className="transition hover:text-slate-400">
+                <Link href="/booking/car-rentals" className="transition hover:text-slate-400">
                   Car rentals
                 </Link>
               </li>
 
               <li>
-                <Link href="/dev/booking-lab/cruises" className="transition hover:text-slate-400">
+                <Link href="/booking/cruises" className="transition hover:text-slate-400">
                   Cruises
                 </Link>
               </li>
@@ -80,25 +77,25 @@ export default function Footer() {
 
             <ul className="mt-4 space-y-3 text-sm text-slate-700">
               <li>
-                <Link href="/dev/plan-with-lucy-lab/itinerary" className="transition hover:text-slate-400">
+                <Link href="/plan-with-lucy/itinerary" className="transition hover:text-slate-400">
                   Generate itinerary
                 </Link>
               </li>
 
               <li>
-                <Link href="/dev/plan-with-lucy-lab/itinerary" className="transition hover:text-slate-400">
+                <Link href="/plan-with-lucy/itinerary" className="transition hover:text-slate-400">
                   Travel preferences
                 </Link>
               </li>
 
               <li>
-                <Link href="/dev/plan-with-lucy-lab/itinerary" className="transition hover:text-slate-400">
+                <Link href="/plan-with-lucy/itinerary" className="transition hover:text-slate-400">
                   Lucy memory
                 </Link>
               </li>
 
               <li>
-                <Link href="/dev/plan-with-lucy-lab/itinerary" className="transition hover:text-slate-400">
+                <Link href="/plan-with-lucy/itinerary" className="transition hover:text-slate-400">
                   Trip ideas
                 </Link>
               </li>

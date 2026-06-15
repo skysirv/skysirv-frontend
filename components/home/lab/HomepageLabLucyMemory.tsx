@@ -118,14 +118,6 @@ export default function HomepageLabLucyMemory() {
             help shape flight search, hotel planning, car rentals, cruises, and
             itineraries around the way you actually travel.
           </p>
-
-          <button
-            type="button"
-            className="mt-7 inline-flex items-center gap-2 text-medium font-bold text-blue-600 transition hover:gap-3 hover:text-blue-700"
-          >
-            Explore Lucy’s memory
-            <span aria-hidden="true">→</span>
-          </button>
         </motion.div>
       </div>
     </section>

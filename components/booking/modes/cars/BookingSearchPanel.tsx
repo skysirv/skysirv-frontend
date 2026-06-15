@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import CompactDateField from "@/components/booking/shared/CompactDateField"
 import CompactDatePicker from "@/components/booking/shared/CompactDatePicker"
@@ -8,10 +8,19 @@ import type {
   CalendarMode,
   CalendarRequest,
   DateRange,
+  PlanToBookingHandoff,
 } from "@/components/booking/shared/bookingLabTypes"
 import { formatDateRange } from "@/components/booking/shared/bookingLabUtils"
 
-export default function BookingSearchPanel() {
+export default function BookingSearchPanel({
+  onSearch,
+  loading = false,
+  planHandoff,
+}: {
+  onSearch?: () => void
+  loading?: boolean
+  planHandoff?: PlanToBookingHandoff | null
+}) {
   const [calendarRequest, setCalendarRequest] = useState<CalendarRequest | null>(
     null,
   )
@@ -20,6 +29,25 @@ export default function BookingSearchPanel() {
     start: null,
     end: null,
   })
+
+  const [vehicleType, setVehicleType] = useState("")
+
+  useEffect(() => {
+    if (!planHandoff) return
+
+    const directVehicleType =
+      planHandoff.confirmedAnswers?.["vehicle-type"]?.label
+
+    const itineraryVehicleType =
+      planHandoff.confirmedAnswers?.["itinerary-car-type"]?.label
+
+    const vehicleTypeLabel =
+      planHandoff.mode === "cars" ? directVehicleType : itineraryVehicleType
+
+    if (vehicleTypeLabel) {
+      setVehicleType(vehicleTypeLabel)
+    }
+  }, [planHandoff])
 
   function handleRangeSelect(
     date: Date,
@@ -108,11 +136,20 @@ export default function BookingSearchPanel() {
           })}
         </div>
 
-        <CompactField placeholder="Vehicle type" icon="car" />
+        <CompactField
+          placeholder="Vehicle type"
+          icon="car"
+          value={vehicleType}
+          onChange={setVehicleType}
+        />
         <CompactField placeholder="Driver age" type="number" icon="traveler" />
       </div>
 
-      <SearchOptionsAndButton mode="cars" />
+      <SearchOptionsAndButton
+        mode="cars"
+        onSearch={onSearch}
+        loading={loading}
+      />
     </div>
   )
 }

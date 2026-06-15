@@ -4,9 +4,8 @@ import type React from "react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "@/components/ui/Toasts/use-toast"
 import { AirportOption, searchAirports } from "@/lib/airports/major-airports"
-import { DayPicker } from "react-day-picker"
-import "react-day-picker/dist/style.css"
 import { getAuthToken } from "@/utils/auth-storage"
+import CompactDatePicker from "@/components/booking/shared/CompactDatePicker"
 
 type WatchlistRoute = {
   id: string
@@ -39,6 +38,7 @@ type AirportPickerProps = {
   dropdownClassName?: string
   dropdownItemClassName?: string
   dropdownMetaClassName?: string
+  icon?: React.ReactNode
 }
 
 type MultiCitySegment = {
@@ -62,6 +62,7 @@ function AirportPicker({
   dropdownClassName,
   dropdownItemClassName,
   dropdownMetaClassName,
+  icon,
 }: AirportPickerProps) {
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -92,25 +93,33 @@ function AirportPicker({
         {label}
       </label>
 
-      <input
-        type="text"
-        placeholder={placeholder}
-        value={query}
-        onFocus={() => {
-          if (query.trim().length >= 2) {
-            setOpen(true)
+      <div className="relative">
+        {icon && (
+          <span className="pointer-events-none absolute left-4 top-1/2 flex -translate-y-1/2 items-center text-blue-700">
+            {icon}
+          </span>
+        )}
+
+        <input
+          type="text"
+          placeholder={placeholder}
+          value={query}
+          onFocus={() => {
+            if (query.trim().length >= 2) {
+              setOpen(true)
+            }
+          }}
+          onChange={(e) => {
+            const value = e.target.value
+            onQueryChange(value)
+            setOpen(value.trim().length >= 2)
+          }}
+          className={
+            inputClassName ??
+            "w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
           }
-        }}
-        onChange={(e) => {
-          const value = e.target.value
-          onQueryChange(value)
-          setOpen(value.trim().length >= 2)
-        }}
-        className={
-          inputClassName ??
-          "w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
-        }
-      />
+        />
+      </div>
 
       {open && (
         <div
@@ -170,6 +179,58 @@ function AirportPicker({
   )
 }
 
+function SearchFieldIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle
+        cx="10.75"
+        cy="10.75"
+        r="6.25"
+        stroke="currentColor"
+        strokeWidth="2.35"
+      />
+      <path
+        d="M15.5 15.5 20 20"
+        stroke="currentColor"
+        strokeWidth="2.35"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+function CalendarFieldIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M7 4v3M17 4v3M5.5 9.5h13"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+      />
+      <rect
+        x="4"
+        y="6"
+        width="16"
+        height="14"
+        rx="3"
+        stroke="currentColor"
+        strokeWidth="2.2"
+      />
+    </svg>
+  )
+}
+
 function formatDateForStorage(date: Date): string {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, "0")
@@ -205,36 +266,44 @@ export default function RouteSearch({
   const isDark = theme === "dark"
 
   const cardClassName = isDark
-    ? "rounded-2xl border border-white/10 bg-slate-950/50 p-6 shadow-md transition-shadow hover:shadow-lg"
-    : "rounded-2xl border border-slate-200 bg-white p-6 shadow-md transition-shadow hover:shadow-lg"
+    ? "rounded-[2rem] border border-white/10 bg-slate-950/50 p-6 shadow-[0_22px_65px_rgba(0,0,0,0.28)] transition-shadow hover:shadow-[0_28px_80px_rgba(0,0,0,0.34)]"
+    : "rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.06)] transition-shadow hover:shadow-[0_24px_65px_rgba(15,23,42,0.09)]"
 
   const titleClassName = isDark
-    ? "text-lg font-semibold text-white"
-    : "text-lg font-semibold text-slate-900"
+    ? "text-lg font-bold text-white"
+    : "text-lg font-semibold text-slate-800"
 
   const descriptionClassName = isDark
-    ? "mt-1 text-sm text-slate-400"
-    : "mt-1 text-sm text-slate-500"
+    ? "mt-1 text-sm leading-6 text-slate-400"
+    : "mt-1 text-sm leading-6 text-slate-700"
 
   const inactiveTabClassName = isDark
-    ? "bg-white/[0.06] text-slate-300 hover:bg-white/[0.1]"
-    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+    ? "text-slate-300 hover:text-white"
+    : "text-slate-700 hover:text-slate-950"
 
   const activeTabClassName = isDark
-    ? "bg-white text-slate-950"
-    : "bg-slate-900 text-white"
+    ? "text-white"
+    : "text-slate-950"
+
+  const inactiveTabDotClassName = isDark
+    ? "border-white/25 bg-transparent"
+    : "border-slate-300 bg-white"
+
+  const activeTabDotClassName = isDark
+    ? "border-blue-400 bg-blue-400"
+    : "border-blue-700 bg-blue-700"
 
   const labelClassName = isDark
     ? "mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500"
     : "mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500"
 
   const inputClassName = isDark
-    ? "w-full rounded-lg border border-white/10 bg-white/[0.06] px-4 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-300/20"
-    : "w-full rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+    ? "w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 pl-12 text-sm font-semibold text-white placeholder:font-semibold placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-300/20"
+    : "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 pl-12 text-sm font-semibold text-slate-950 placeholder:font-semibold placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-100"
 
   const readOnlyInputClassName = isDark
-    ? "w-full cursor-pointer rounded-lg border border-white/10 bg-white/[0.06] px-4 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-300/20"
-    : "w-full cursor-pointer rounded-lg border border-slate-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+    ? "w-full cursor-pointer rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 pl-12 text-sm font-semibold text-white placeholder:font-semibold placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-300/20"
+    : "w-full cursor-pointer rounded-2xl border border-slate-200 bg-white px-4 py-3 pl-12 text-sm font-semibold text-slate-950 placeholder:font-semibold placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-100"
 
   const dropdownClassName = isDark
     ? "absolute z-20 mt-2 max-h-72 w-full overflow-y-auto rounded-xl border border-white/10 bg-slate-950 p-2 shadow-[0_18px_45px_rgba(0,0,0,0.35)]"
@@ -247,22 +316,6 @@ export default function RouteSearch({
   const dropdownMetaClassName = isDark
     ? "mt-1 text-xs text-slate-400"
     : undefined
-
-  const singleDateCalendarClassName = isDark
-    ? "absolute z-30 mt-2 rounded-2xl border border-white/10 bg-slate-950 p-4 text-slate-200 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm"
-    : "absolute z-30 mt-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)] backdrop-blur-sm"
-
-  const rangeCalendarPanelClassName = isDark
-    ? "rounded-2xl border border-white/10 bg-slate-950 p-4 text-slate-200 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-sm"
-    : "rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.12)] backdrop-blur-sm"
-
-  const calendarTitleClassName = isDark
-    ? "text-sm font-semibold text-white"
-    : "text-sm font-semibold text-slate-900"
-
-  const calendarStepClassName = isDark
-    ? "text-xs font-semibold uppercase tracking-[0.14em] text-slate-500"
-    : "text-xs font-semibold uppercase tracking-[0.14em] text-slate-500"
 
   const multiCityBuilderClassName = isDark
     ? "mt-6 rounded-2xl border border-dashed border-white/10 bg-white/[0.04] p-5"
@@ -280,33 +333,6 @@ export default function RouteSearch({
     ? "text-sm font-semibold text-cyan-200 hover:text-white"
     : "text-sm font-semibold text-slate-700 hover:text-slate-900"
 
-  const calendarDayPickerClassNames = {
-    day_selected: isDark
-      ? "bg-white text-slate-950 hover:bg-slate-200"
-      : "bg-slate-900 text-white hover:bg-slate-800",
-    day_today: isDark
-      ? "border border-cyan-300/40"
-      : "border border-slate-400",
-    day: isDark
-      ? "rounded-md text-slate-200 hover:bg-white/[0.08] transition"
-      : "rounded-md hover:bg-slate-100 transition",
-    head_cell: isDark
-      ? "text-xs font-semibold text-slate-500"
-      : "text-xs font-semibold text-slate-500",
-    caption: isDark
-      ? "text-sm font-semibold text-white"
-      : "text-sm font-semibold text-slate-900",
-    caption_label: isDark
-      ? "text-sm font-semibold text-white"
-      : "text-sm font-semibold text-slate-900",
-    nav_button: isDark
-      ? "text-slate-400 hover:text-white"
-      : "text-slate-600 hover:text-slate-900",
-    table: "w-full border-collapse space-y-1",
-    row: "flex w-full mt-1",
-    cell: "text-center text-sm p-0 relative",
-  }
-
   const [tripType, setTripType] = useState<"oneway" | "roundtrip" | "multicity">("oneway")
 
   const [originQuery, setOriginQuery] = useState("")
@@ -316,7 +342,6 @@ export default function RouteSearch({
 
   const [departureDate, setDepartureDate] = useState("")
   const [returnDate, setReturnDate] = useState("")
-  const [hoveredDate, setHoveredDate] = useState<Date | undefined>(undefined)
   const [showDepartureCalendar, setShowDepartureCalendar] = useState(false)
   const [showRoundtripCalendar, setShowRoundtripCalendar] = useState(false)
   const [roundtripSelectionPhase, setRoundtripSelectionPhase] = useState<"departure" | "return">("departure")
@@ -333,53 +358,6 @@ export default function RouteSearch({
   ])
   const [multiCityCalendarIndex, setMultiCityCalendarIndex] = useState<number | null>(null)
 
-  const [departureCalendarMonth, setDepartureCalendarMonth] = useState<Date | undefined>(undefined)
-  const [roundtripCalendarMonth, setRoundtripCalendarMonth] = useState<Date | undefined>(undefined)
-  const [multiCityCalendarMonth, setMultiCityCalendarMonth] = useState<Date | undefined>(undefined)
-
-  const departureCalendarRef = useRef<HTMLDivElement | null>(null)
-  const roundtripCalendarRef = useRef<HTMLDivElement | null>(null)
-  const multiCityCalendarRef = useRef<HTMLDivElement | null>(null)
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (!departureCalendarRef.current) return
-
-      if (!departureCalendarRef.current.contains(event.target as Node)) {
-        setShowDepartureCalendar(false)
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (!roundtripCalendarRef.current) return
-
-      if (!roundtripCalendarRef.current.contains(event.target as Node)) {
-        setShowRoundtripCalendar(false)
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (!multiCityCalendarRef.current) return
-
-      if (!multiCityCalendarRef.current.contains(event.target as Node)) {
-        setMultiCityCalendarIndex(null)
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
-
   function resetMultiCitySegments() {
     setMultiCitySegments([
       {
@@ -391,7 +369,6 @@ export default function RouteSearch({
       },
     ])
     setMultiCityCalendarIndex(null)
-    setMultiCityCalendarMonth(undefined)
   }
 
   async function createWatchlistRoute({
@@ -579,8 +556,6 @@ export default function RouteSearch({
       setShowDepartureCalendar(false)
       setShowRoundtripCalendar(false)
       setRoundtripSelectionPhase("departure")
-      setDepartureCalendarMonth(undefined)
-      setRoundtripCalendarMonth(undefined)
 
       return
     }
@@ -630,8 +605,6 @@ export default function RouteSearch({
       setShowDepartureCalendar(false)
       setShowRoundtripCalendar(false)
       setRoundtripSelectionPhase("departure")
-      setDepartureCalendarMonth(undefined)
-      setRoundtripCalendarMonth(undefined)
     } catch (error) {
       console.error("Watchlist create request failed", error)
 
@@ -655,16 +628,25 @@ export default function RouteSearch({
         Search major airports worldwide and start monitoring airfare intelligence.
       </p>
 
-      <div className="mt-6 flex flex-wrap gap-2">
+      <div className="mt-5 flex flex-wrap items-center gap-5">
         <button
           type="button"
           onClick={() => {
             resetMultiCitySegments()
             setTripType("oneway")
           }}
-          className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "oneway" ? activeTabClassName : inactiveTabClassName
+          className={`inline-flex items-center gap-2 text-sm font-semibold transition ${tripType === "oneway" ? activeTabClassName : inactiveTabClassName
             }`}
         >
+          <span
+            className={`flex h-4 w-4 items-center justify-center rounded-full border transition ${tripType === "oneway" ? activeTabDotClassName : inactiveTabDotClassName
+              }`}
+            aria-hidden="true"
+          >
+            {tripType === "oneway" && (
+              <span className="h-1.5 w-1.5 rounded-full bg-white" />
+            )}
+          </span>
           One-way
         </button>
 
@@ -674,18 +656,36 @@ export default function RouteSearch({
             resetMultiCitySegments()
             setTripType("roundtrip")
           }}
-          className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "roundtrip" ? activeTabClassName : inactiveTabClassName
+          className={`inline-flex items-center gap-2 text-sm font-semibold transition ${tripType === "roundtrip" ? activeTabClassName : inactiveTabClassName
             }`}
         >
+          <span
+            className={`flex h-4 w-4 items-center justify-center rounded-full border transition ${tripType === "roundtrip" ? activeTabDotClassName : inactiveTabDotClassName
+              }`}
+            aria-hidden="true"
+          >
+            {tripType === "roundtrip" && (
+              <span className="h-1.5 w-1.5 rounded-full bg-white" />
+            )}
+          </span>
           Round-trip
         </button>
 
         <button
           type="button"
           onClick={() => setTripType("multicity")}
-          className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] transition ${tripType === "multicity" ? activeTabClassName : inactiveTabClassName
+          className={`inline-flex items-center gap-2 text-sm font-semibold transition ${tripType === "multicity" ? activeTabClassName : inactiveTabClassName
             }`}
         >
+          <span
+            className={`flex h-4 w-4 items-center justify-center rounded-full border transition ${tripType === "multicity" ? activeTabDotClassName : inactiveTabDotClassName
+              }`}
+            aria-hidden="true"
+          >
+            {tripType === "multicity" && (
+              <span className="h-1.5 w-1.5 rounded-full bg-white" />
+            )}
+          </span>
           Multi-city
         </button>
       </div>
@@ -725,6 +725,7 @@ export default function RouteSearch({
                   dropdownClassName={dropdownClassName}
                   dropdownItemClassName={dropdownItemClassName}
                   dropdownMetaClassName={dropdownMetaClassName}
+                  icon={<SearchFieldIcon />}
                 />
 
                 <AirportPicker
@@ -750,6 +751,7 @@ export default function RouteSearch({
                   dropdownItemClassName={dropdownItemClassName}
                   dropdownMetaClassName={dropdownMetaClassName}
                   excludeCode={segment.origin?.code ?? null}
+                  icon={<SearchFieldIcon />}
                 />
 
                 <div className="relative">
@@ -757,41 +759,37 @@ export default function RouteSearch({
                     Leg {index + 1} Departure Date
                   </label>
 
-                  <input
-                    type="text"
-                    readOnly
-                    value={formatDateForDisplay(segment.date)}
-                    placeholder="Select date"
-                    onClick={() =>
-                      setMultiCityCalendarIndex((prev) => (prev === index ? null : index))
-                    }
-                    className={readOnlyInputClassName}
-                  />
+                  <div className="relative">
+                    <span className="pointer-events-none absolute left-4 top-1/2 flex -translate-y-1/2 items-center text-blue-700">
+                      <CalendarFieldIcon />
+                    </span>
+
+                    <input
+                      type="text"
+                      readOnly
+                      value={formatDateForDisplay(segment.date)}
+                      placeholder="Select date"
+                      onClick={() =>
+                        setMultiCityCalendarIndex((prev) => (prev === index ? null : index))
+                      }
+                      className={readOnlyInputClassName}
+                    />
+                  </div>
 
                   {multiCityCalendarIndex === index && (
-                    <div
-                      ref={multiCityCalendarRef}
-                      className={singleDateCalendarClassName}
-                    >
-                      <DayPicker
-                        mode="single"
-                        month={multiCityCalendarMonth ?? parseStoredDate(segment.date)}
-                        onMonthChange={setMultiCityCalendarMonth}
-                        selected={parseStoredDate(segment.date)}
-                        className="text-sm"
-                        classNames={calendarDayPickerClassNames}
-                        onSelect={(date) => {
-                          if (!date) return
-                          const iso = formatDateForStorage(date)
+                    <CompactDatePicker
+                      mode="single"
+                      range={{ start: null, end: null }}
+                      singleDate={parseStoredDate(segment.date) ?? null}
+                      onSelectDate={(date) => {
+                        const iso = formatDateForStorage(date)
 
-                          const updated = [...multiCitySegments]
-                          updated[index].date = iso
-                          setMultiCitySegments(updated)
-
-                          setMultiCityCalendarIndex(null)
-                        }}
-                      />
-                    </div>
+                        const updated = [...multiCitySegments]
+                        updated[index].date = iso
+                        setMultiCitySegments(updated)
+                      }}
+                      onClose={() => setMultiCityCalendarIndex(null)}
+                    />
                   )}
                 </div>
               </div>
@@ -842,6 +840,7 @@ export default function RouteSearch({
               dropdownItemClassName={dropdownItemClassName}
               dropdownMetaClassName={dropdownMetaClassName}
               excludeCode={selectedDestination?.code ?? null}
+              icon={<SearchFieldIcon />}
             />
 
             <AirportPicker
@@ -863,200 +862,144 @@ export default function RouteSearch({
               dropdownItemClassName={dropdownItemClassName}
               dropdownMetaClassName={dropdownMetaClassName}
               excludeCode={selectedOrigin?.code ?? null}
+              icon={<SearchFieldIcon />}
             />
 
-            <div className="relative">
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                Departure Date
-              </label>
+            {tripType === "roundtrip" ? (
+              <div className="relative grid gap-4 md:col-span-2 md:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    Departure Date
+                  </label>
 
-              <input
-                type="text"
-                readOnly
-                value={formatDateForDisplay(departureDate)}
-                placeholder="Select date"
-                onClick={() => {
-                  if (tripType === "roundtrip") {
-                    setRoundtripSelectionPhase("departure")
-                    setRoundtripCalendarMonth(
-                      parseStoredDate(departureDate) ?? parseStoredDate(returnDate)
-                    )
-                    setShowRoundtripCalendar(true)
-                    return
-                  }
+                  <div className="relative">
+                    <span className="pointer-events-none absolute left-4 top-1/2 flex -translate-y-1/2 items-center text-blue-700">
+                      <CalendarFieldIcon />
+                    </span>
 
-                  setShowDepartureCalendar((prev) => !prev)
-                }}
-                className={readOnlyInputClassName}
-              />
+                    <input
+                      type="text"
+                      readOnly
+                      value={formatDateForDisplay(departureDate)}
+                      placeholder="Select date"
+                      onClick={() => {
+                        setRoundtripSelectionPhase("departure")
+                        setShowRoundtripCalendar(true)
+                      }}
+                      className={readOnlyInputClassName}
+                    />
+                  </div>
+                </div>
 
-              {showDepartureCalendar && (
-                <div
-                  ref={departureCalendarRef}
-                  className={singleDateCalendarClassName}
-                >
-                  <DayPicker
-                    mode="single"
-                    month={departureCalendarMonth ?? parseStoredDate(departureDate)}
-                    onMonthChange={setDepartureCalendarMonth}
-                    selected={parseStoredDate(departureDate)}
-                    className="text-sm"
-                    classNames={calendarDayPickerClassNames}
-                    onSelect={(date) => {
-                      if (!date) return
+                <div>
+                  <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    Return Date
+                  </label>
+
+                  <div className="relative">
+                    <span className="pointer-events-none absolute left-4 top-1/2 flex -translate-y-1/2 items-center text-blue-700">
+                      <CalendarFieldIcon />
+                    </span>
+
+                    <input
+                      type="text"
+                      readOnly
+                      value={formatDateForDisplay(returnDate)}
+                      placeholder="Select date"
+                      onClick={() => {
+                        setRoundtripSelectionPhase("return")
+                        setShowRoundtripCalendar(true)
+                      }}
+                      className={
+                        showRoundtripCalendar && roundtripSelectionPhase === "return"
+                          ? `${readOnlyInputClassName} border-blue-700 ring-4 ring-blue-100`
+                          : readOnlyInputClassName
+                      }
+                    />
+                  </div>
+                </div>
+
+                {showRoundtripCalendar && (
+                  <CompactDatePicker
+                    mode="range"
+                    range={{
+                      start: parseStoredDate(departureDate) ?? null,
+                      end: parseStoredDate(returnDate) ?? null,
+                    }}
+                    singleDate={null}
+                    onSelectDate={(date) => {
                       const iso = formatDateForStorage(date)
+
+                      if (!departureDate || returnDate) {
+                        setDepartureDate(iso)
+                        setReturnDate("")
+                        setRoundtripSelectionPhase("return")
+                        return
+                      }
+
+                      if (iso < departureDate) {
+                        setDepartureDate(iso)
+                        setReturnDate("")
+                        setRoundtripSelectionPhase("return")
+                        return
+                      }
+
+                      setReturnDate(iso)
+                    }}
+                    onClose={() => setShowRoundtripCalendar(false)}
+                  />
+                )}
+              </div>
+            ) : (
+              <div className="relative">
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  Departure Date
+                </label>
+
+                <div className="relative">
+                  <span className="pointer-events-none absolute left-4 top-1/2 flex -translate-y-1/2 items-center text-blue-700">
+                    <CalendarFieldIcon />
+                  </span>
+
+                  <input
+                    type="text"
+                    readOnly
+                    value={formatDateForDisplay(departureDate)}
+                    placeholder="Select date"
+                    onClick={() => {
+                      setShowDepartureCalendar((prev) => !prev)
+                    }}
+                    className={readOnlyInputClassName}
+                  />
+                </div>
+
+                {showDepartureCalendar && (
+                  <CompactDatePicker
+                    mode="single"
+                    range={{ start: null, end: null }}
+                    singleDate={parseStoredDate(departureDate) ?? null}
+                    onSelectDate={(date) => {
+                      const iso = formatDateForStorage(date)
+
                       setDepartureDate(iso)
 
                       if (returnDate && returnDate < iso) {
                         setReturnDate("")
                       }
-
-                      setShowDepartureCalendar(false)
                     }}
+                    onClose={() => setShowDepartureCalendar(false)}
                   />
-                </div>
-              )}
-            </div>
-
-            {tripType === "roundtrip" && (
-              <div>
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                  Return Date
-                </label>
-
-                <input
-                  type="text"
-                  readOnly
-                  value={formatDateForDisplay(returnDate)}
-                  placeholder="Select date"
-                  onClick={() => {
-                    setRoundtripSelectionPhase("return")
-                    setRoundtripCalendarMonth(
-                      parseStoredDate(departureDate) ?? parseStoredDate(returnDate)
-                    )
-                    setShowRoundtripCalendar(true)
-                  }}
-                  className={
-                    showRoundtripCalendar && roundtripSelectionPhase === "return"
-                      ? isDark
-                        ? `${readOnlyInputClassName} border-cyan-300/40 ring-2 ring-cyan-300/20`
-                        : "w-full cursor-pointer rounded-lg border border-slate-900 px-4 py-2 text-sm outline-none ring-2 ring-slate-300"
-                      : readOnlyInputClassName
-                  }
-                />
+                )}
               </div>
             )}
           </div>
-
-          {tripType === "roundtrip" && showRoundtripCalendar && (
-            <div
-              ref={roundtripCalendarRef}
-              className="absolute right-0 top-full z-40 mt-3"
-            >
-              <div className={rangeCalendarPanelClassName}>
-                <div className="mb-3 flex items-center justify-between">
-                  <div className={calendarTitleClassName}>
-                    {roundtripSelectionPhase === "departure"
-                      ? "Select departure date"
-                      : "Select return date"}
-                  </div>
-
-                  <div className={calendarStepClassName}>
-                    {roundtripSelectionPhase === "departure" ? "Step 1 of 2" : "Step 2 of 2"}
-                  </div>
-                </div>
-
-                <DayPicker
-                  mode="range"
-                  style={
-                    isDark
-                      ? ({
-                        "--rdp-accent-color": "#2563eb",
-                        "--rdp-accent-background-color": "rgba(255, 255, 255, 0.07)",
-                      } as React.CSSProperties)
-                      : undefined
-                  }
-                  month={
-                    roundtripCalendarMonth ??
-                    parseStoredDate(departureDate) ??
-                    parseStoredDate(returnDate)
-                  }
-                  onMonthChange={setRoundtripCalendarMonth}
-                  numberOfMonths={2}
-                  pagedNavigation
-                  fixedWeeks
-                  selected={
-                    departureDate
-                      ? {
-                        from: parseStoredDate(departureDate),
-                        to:
-                          returnDate
-                            ? parseStoredDate(returnDate)
-                            : roundtripSelectionPhase === "return"
-                              ? hoveredDate
-                              : undefined,
-                      }
-                      : undefined
-                  }
-                  disabled={
-                    roundtripSelectionPhase === "return" && departureDate
-                      ? { before: parseStoredDate(departureDate)! }
-                      : undefined
-                  }
-                  className="text-sm"
-                  classNames={{
-                    ...calendarDayPickerClassNames,
-                    months: "flex flex-col gap-4 sm:flex-row sm:gap-8",
-                    month: "space-y-4",
-                    day_selected: isDark
-                      ? "!bg-transparent !text-slate-200"
-                      : "bg-slate-900 text-white hover:bg-slate-800",
-                    day_range_start: isDark
-                      ? "!bg-blue-600 !text-white rounded-md"
-                      : "bg-slate-900 text-white rounded-md",
-                    day_range_end: isDark
-                      ? "!bg-blue-600 !text-white rounded-md"
-                      : "bg-slate-900 text-white rounded-md",
-                    day_range_middle: isDark
-                      ? "!bg-white/[0.07] !text-slate-200"
-                      : "bg-slate-100 text-slate-900",
-                  }}
-                  onSelect={(range, selectedDay) => {
-                    if (!selectedDay) return
-
-                    const selectedIso = formatDateForStorage(selectedDay)
-
-                    if (roundtripSelectionPhase === "departure") {
-                      setDepartureDate(selectedIso)
-                      setReturnDate("")
-                      setHoveredDate(undefined)
-                      setRoundtripSelectionPhase("return")
-                      setRoundtripCalendarMonth(parseStoredDate(selectedIso))
-                      return
-                    }
-
-                    if (departureDate && selectedIso < departureDate) return
-
-                    setReturnDate(selectedIso)
-                    setHoveredDate(undefined)
-                    setShowRoundtripCalendar(false)
-                  }}
-                  onDayMouseEnter={(date) => {
-                    if (roundtripSelectionPhase === "return") {
-                      setHoveredDate(date)
-                    }
-                  }}
-                />
-              </div>
-            </div>
-          )}
         </div>
       )}
 
       <button
         onClick={handleMonitorRoute}
         disabled={isMonitoring}
-        className="mt-6 rounded-lg bg-slate-900 px-5 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-6 rounded-lg bg-blue-700 px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isMonitoring ? "Monitoring..." : "Start Monitoring"}
       </button>

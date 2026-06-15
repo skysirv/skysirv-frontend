@@ -44,7 +44,7 @@ export default function SkysirvLiveHeader({
         <div className="flex min-h-[76px] items-center justify-between bg-blue-700 px-6 text-white backdrop-blur-xl">
           <div className="flex items-center gap-4">
             <Link
-              href={mode === "airport" ? "/skysirv-live" : "/dev/homepage-lab"}
+              href={mode === "airport" ? "/skysirv-live" : "/"}
               className="inline-flex h-11 items-center gap-1.5 rounded-full bg-white py-0 pl-3 pr-4 text-sm font-bold text-slate-800 transition hover:bg-slate-100"
             >
               <svg

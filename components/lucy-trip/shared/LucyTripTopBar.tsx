@@ -5,7 +5,7 @@ export default function LucyTripTopBar() {
     <>
       <div className="fixed left-5 top-5 z-50 flex items-center gap-3">
         <Link
-          href="/dev/plan-smarter-lab"
+          href="/plan-smarter"
           className="inline-flex min-h-[38px] items-center gap-2 rounded-full border border-blue-700 bg-blue-700 px-4 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-600"
         >
           <span aria-hidden="true">←</span>

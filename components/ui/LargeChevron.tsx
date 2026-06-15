@@ -1,28 +1,36 @@
 type LargeChevronProps = {
-  direction: "left" | "right"
+  direction?: "left" | "right" | "up" | "down"
   className?: string
 }
 
+const directionClassNames: Record<
+  NonNullable<LargeChevronProps["direction"]>,
+  string
+> = {
+  right: "rotate-0",
+  down: "rotate-90",
+  left: "rotate-180",
+  up: "-rotate-90",
+}
+
 export default function LargeChevron({
-  direction,
-  className = "h-6 w-6",
+  direction = "right",
+  className = "",
 }: LargeChevronProps) {
   return (
     <svg
-      aria-hidden="true"
       viewBox="0 0 24 24"
-      className={className}
+      aria-hidden="true"
+      className={`h-4 w-4 shrink-0 transition-transform ${directionClassNames[direction]} ${className}`}
       fill="none"
-      stroke="currentColor"
-      strokeWidth="3"
-      strokeLinecap="round"
-      strokeLinejoin="round"
     >
-      {direction === "left" ? (
-        <path d="M15 18l-6-6 6-6" />
-      ) : (
-        <path d="M9 6l6 6-6 6" />
-      )}
+      <path
+        d="M9 5L16 12L9 19"
+        stroke="currentColor"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   )
 }

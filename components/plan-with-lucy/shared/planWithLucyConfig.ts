@@ -442,6 +442,39 @@ export const modeFlows: Record<PlanningMode, ModeFlow> = {
     promptStart: "I want to plan a trip",
     steps: [
       {
+        id: "trip-includes",
+        type: "multi-choice",
+        title: "What should this trip include?",
+        helper:
+          "Choose every part of the trip you want Lucy to help prepare for booking.",
+        variant: "card",
+        icon: "🧭",
+        options: [
+          {
+            icon: "✈️",
+            label: "Flights",
+            value: "flights",
+          },
+          {
+            icon: "🏨",
+            label: "Hotels",
+            value: "hotels",
+          },
+          {
+            icon: "🚗",
+            label: "Car rental",
+            value: "cars",
+          },
+          {
+            icon: "🚢",
+            label: "Cruises",
+            value: "cruises",
+          },
+        ],
+        prompt: (values) =>
+          `including ${values.join(", ").toLowerCase()} planning`,
+      },
+      {
         id: "pace",
         type: "choice",
         title: "Pace level",
@@ -519,6 +552,313 @@ export const modeFlows: Record<PlanningMode, ModeFlow> = {
           },
         ],
         prompt: (value) => value,
+      },
+      {
+        id: "itinerary-flight-priority",
+        type: "choice",
+        title: "Flight planning priority",
+        helper: "Lucy will use this to prepare smarter flight booking context.",
+        variant: "pill",
+        requiresTripInclude: ["flights"],
+        options: [
+          {
+            icon: "💸",
+            label: "Budget first",
+            value: "with budget-friendly flight options prioritized",
+          },
+          {
+            icon: "⚡",
+            label: "Shortest duration",
+            value: "with shorter flight duration preferred",
+          },
+          {
+            icon: "🛋️",
+            label: "Comfort first",
+            value: "with comfort and easier timing prioritized",
+          },
+          {
+            icon: "🌙",
+            label: "Red-eye friendly",
+            value: "and I am open to red-eye flights",
+          },
+        ],
+        prompt: (value) => value,
+      },
+      {
+        id: "itinerary-flight-cabin",
+        type: "choice",
+        title: "Flight cabin comfort",
+        helper: "Choose the cabin level Lucy should keep in mind for flight booking.",
+        variant: "pill",
+        requiresTripInclude: ["flights"],
+        options: [
+          { icon: "💺", label: "Economy", value: "in economy" },
+          {
+            icon: "✨",
+            label: "Premium economy",
+            value: "with premium economy considered",
+          },
+          {
+            icon: "💼",
+            label: "Business class",
+            value: "with business class considered",
+          },
+          {
+            icon: "👨‍👩‍👧‍👦",
+            label: "Family timing",
+            value: "with family-friendly flight timing",
+          },
+        ],
+        prompt: (value) => value,
+      },
+      {
+        id: "itinerary-flight-stops",
+        type: "choice",
+        title: "Flight stops",
+        helper: "Tell Lucy how flexible the flight routing should be.",
+        variant: "pill",
+        requiresTripInclude: ["flights"],
+        options: [
+          {
+            icon: "🎯",
+            label: "Nonstop only",
+            value: "with nonstop flights preferred",
+          },
+          {
+            icon: "1️⃣",
+            label: "Up to 1 stop",
+            value: "with up to one stop acceptable",
+          },
+          {
+            icon: "🔁",
+            label: "Flexible stops",
+            value: "with flexible stops if the value is better",
+          },
+        ],
+        prompt: (value) => value,
+      },
+      {
+        id: "itinerary-hotel-style",
+        type: "choice",
+        title: "Hotel stay style",
+        helper: "Lucy will use this to prepare hotel booking context.",
+        variant: "pill",
+        requiresTripInclude: ["hotels"],
+        options: [
+          {
+            icon: "🏖️",
+            label: "Resort comfort",
+            value: "with resort-style hotel comfort preferred",
+          },
+          {
+            icon: "🎨",
+            label: "Boutique hotel",
+            value: "with boutique hotel options preferred",
+          },
+          {
+            icon: "👨‍👩‍👧‍👦",
+            label: "Family comfort",
+            value: "with family-friendly hotel comfort prioritized",
+          },
+          {
+            icon: "🧳",
+            label: "Budget smart stay",
+            value: "with budget-smart hotel options prioritized",
+          },
+        ],
+        prompt: (value) => value,
+      },
+      {
+        id: "itinerary-hotel-location",
+        type: "choice",
+        title: "Hotel location preference",
+        helper: "Choose the location style Lucy should prioritize.",
+        variant: "pill",
+        requiresTripInclude: ["hotels"],
+        options: [
+          { icon: "🏙️", label: "Downtown", value: "near the city center" },
+          { icon: "✈️", label: "Near airport", value: "near the airport" },
+          {
+            icon: "🍽️",
+            label: "Food district",
+            value: "near restaurants and food areas",
+          },
+          {
+            icon: "🏝️",
+            label: "Beach / resort area",
+            value: "near beach or resort areas",
+          },
+        ],
+        prompt: (value) => value,
+      },
+      {
+        id: "itinerary-hotel-amenities",
+        type: "multi-choice",
+        title: "Hotel amenities",
+        helper: "Choose any amenities Lucy should keep in the hotel search context.",
+        variant: "pill",
+        icon: "🏨",
+        requiresTripInclude: ["hotels"],
+        options: [
+          {
+            icon: "☕",
+            label: "Breakfast",
+            value: "breakfast included",
+          },
+          {
+            icon: "🏊",
+            label: "Pool",
+            value: "pool preferred",
+          },
+          {
+            icon: "🧺",
+            label: "Laundry",
+            value: "laundry or longer-stay convenience",
+          },
+          {
+            icon: "🐾",
+            label: "Pet friendly",
+            value: "pet-friendly hotel options",
+          },
+        ],
+        prompt: (values) =>
+          `with hotel amenities like ${values.join(", ").toLowerCase()}`,
+      },
+      {
+        id: "itinerary-car-pickup",
+        type: "choice",
+        title: "Car rental pickup plan",
+        helper: "Lucy will use this to prepare car rental booking context.",
+        variant: "pill",
+        requiresTripInclude: ["cars"],
+        options: [
+          { icon: "✈️", label: "Airport pickup", value: "with airport car pickup" },
+          { icon: "🏙️", label: "City pickup", value: "with city car pickup" },
+          {
+            icon: "🔁",
+            label: "One-way return",
+            value: "with one-way car return considered",
+          },
+          {
+            icon: "🕒",
+            label: "Flexible timing",
+            value: "with flexible pickup and return timing",
+          },
+        ],
+        prompt: (value) => value,
+      },
+      {
+        id: "itinerary-car-type",
+        type: "choice",
+        title: "Car rental vehicle type",
+        helper: "Choose the vehicle style Lucy should keep in mind.",
+        variant: "pill",
+        requiresTripInclude: ["cars"],
+        options: [
+          { icon: "🚗", label: "Compact", value: "with a compact rental car preferred" },
+          { icon: "🚙", label: "SUV", value: "with an SUV rental preferred" },
+          {
+            icon: "👨‍👩‍👧",
+            label: "Family vehicle",
+            value: "with a family-friendly rental vehicle",
+          },
+          {
+            icon: "🧳",
+            label: "Large luggage",
+            value: "with enough rental car space for luggage",
+          },
+          {
+            icon: "⚡",
+            label: "Electric",
+            value: "with electric rental car options considered",
+          },
+        ],
+        prompt: (value) => value,
+      },
+      {
+        id: "itinerary-cruise-region",
+        type: "choice",
+        title: "Cruise region",
+        helper: "Lucy will use this to prepare cruise booking context.",
+        variant: "pill",
+        requiresTripInclude: ["cruises"],
+        options: [
+          { icon: "🌴", label: "Caribbean", value: "with Caribbean cruise options" },
+          {
+            icon: "🏛️",
+            label: "Mediterranean",
+            value: "with Mediterranean cruise options",
+          },
+          { icon: "❄️", label: "Alaska", value: "with Alaska cruise options" },
+          {
+            icon: "🚢",
+            label: "Europe river cruise",
+            value: "with Europe river cruise options considered",
+          },
+          {
+            icon: "🧭",
+            label: "Not sure",
+            value: "and I am open to cruise region suggestions",
+          },
+        ],
+        prompt: (value) => value,
+      },
+      {
+        id: "itinerary-cruise-cabin",
+        type: "choice",
+        title: "Cruise cabin style",
+        helper: "Choose the cabin style Lucy should keep in mind.",
+        variant: "pill",
+        requiresTripInclude: ["cruises"],
+        options: [
+          { icon: "🛏️", label: "Interior", value: "with interior cabin options" },
+          { icon: "🌊", label: "Ocean view", value: "with ocean view cabin options" },
+          { icon: "🌅", label: "Balcony", value: "with balcony cabin options" },
+          {
+            icon: "✨",
+            label: "Suite / premium",
+            value: "with suite or premium cabin options considered",
+          },
+        ],
+        prompt: (value) => value,
+      },
+      {
+        id: "itinerary-cruise-vibe",
+        type: "multi-choice",
+        title: "Cruise vibe",
+        helper: "Choose any cruise priorities Lucy should use when planning.",
+        variant: "pill",
+        icon: "🚢",
+        requiresTripInclude: ["cruises"],
+        options: [
+          {
+            icon: "👨‍👩‍👧‍👦",
+            label: "Family friendly",
+            value: "family-friendly cruise",
+          },
+          {
+            icon: "🧘",
+            label: "Relaxed luxury",
+            value: "relaxed luxury cruise pace",
+          },
+          {
+            icon: "🎭",
+            label: "Entertainment",
+            value: "entertainment-focused cruise",
+          },
+          {
+            icon: "🍽️",
+            label: "Food and dining",
+            value: "food and dining focused cruise",
+          },
+          {
+            icon: "🧭",
+            label: "Excursions",
+            value: "excursion and adventure focused cruise",
+          },
+        ],
+        prompt: (values) =>
+          `with cruise priorities like ${values.join(", ").toLowerCase()}`,
       },
     ],
   },

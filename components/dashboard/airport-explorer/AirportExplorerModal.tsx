@@ -1,5 +1,3 @@
-"use client"
-
 import { useEffect, useRef, useState } from "react"
 import mapboxgl from "mapbox-gl"
 import "mapbox-gl/dist/mapbox-gl.css"
@@ -9,21 +7,91 @@ import type {
   AirportSearchResult,
   MapViewStyle,
 } from "@/components/dashboard/airport-explorer/airportExplorerTypes"
+import type {
+  IndoorCoverageDetectionResult,
+  IndoorMapSetupResult,
+} from "@/components/dashboard/airport-explorer/airportExplorerUtils"
 import {
-  addIndoorAirportLayers,
-  addIndoorControlIfAvailable,
   buildApiUrl,
-  enableMapboxIndoorMapping,
+  detectMapboxIndoorAirportCoverage,
   getAirportResultTypeLabel,
   MAP_2D_CAMERA,
   MAP_3D_CAMERA,
   MAPBOX_STYLES,
+  setupIndoorAirportMap,
 } from "@/components/dashboard/airport-explorer/airportExplorerUtils"
 
 type AirportExplorerModalProps = {
   open: boolean
   airport: AirportOption | null
   onClose: () => void
+}
+
+function getIndoorMapStatusLabel(setup: IndoorMapSetupResult | null) {
+  if (!setup) {
+    return "Indoor maps loading..."
+  }
+
+  if (setup.indoorConfigEnabled && setup.indoorControlAdded) {
+    return "Indoor maps enabled · Floor selector available"
+  }
+
+  if (setup.indoorConfigEnabled && !setup.indoorControlAdded) {
+    return "Indoor maps enabled · Floor selector unavailable"
+  }
+
+  if (setup.fallbackLayersAdded) {
+    return "Fallback indoor layers enabled"
+  }
+
+  return "Indoor maps unavailable for this airport or map style"
+}
+
+function getIndoorCoverageStatusLabel(
+  coverage: IndoorCoverageDetectionResult | null,
+  loading: boolean
+) {
+  if (loading) {
+    return "Checking Mapbox indoor coverage..."
+  }
+
+  if (!coverage) {
+    return "Indoor coverage not checked yet"
+  }
+
+  if (coverage.status === "available") {
+    const facilityLabel =
+      coverage.facilityCode || coverage.facilityName
+        ? ` · ${coverage.facilityCode || coverage.facilityName}`
+        : ""
+
+    return `Indoor coverage detected${facilityLabel}`
+  }
+
+  if (coverage.status === "unavailable") {
+    return "Outdoor map only · Indoor coverage not detected near this airport"
+  }
+
+  if (coverage.status === "missing-coordinates") {
+    return "Outdoor map only · Airport coordinates unavailable"
+  }
+
+  if (coverage.status === "missing-token") {
+    return "Indoor coverage check unavailable · Missing Mapbox token"
+  }
+
+  return "Indoor coverage check unavailable right now"
+}
+
+function getIndoorCoverageStatusClass(
+  coverage: IndoorCoverageDetectionResult | null,
+  loading: boolean
+) {
+  if (loading) return "text-cyan-700"
+  if (!coverage) return "text-slate-500"
+  if (coverage.status === "available") return "text-emerald-700"
+  if (coverage.status === "unavailable") return "text-amber-700"
+  return "text-slate-500"
 }
 
 export default function AirportExplorerModal({
@@ -49,6 +117,14 @@ export default function AirportExplorerModal({
   )
   const [selectedIndoorResult, setSelectedIndoorResult] =
     useState<AirportSearchResult | null>(null)
+  const [indoorMapSetup, setIndoorMapSetup] =
+    useState<IndoorMapSetupResult | null>(null)
+  const [indoorCoverage, setIndoorCoverage] =
+    useState<IndoorCoverageDetectionResult | null>(null)
+  const [isIndoorCoverageLoading, setIsIndoorCoverageLoading] = useState(false)
+  function handleClose() {
+    onClose()
+  }
 
   useEffect(() => {
     if (!open) return
@@ -72,6 +148,43 @@ export default function AirportExplorerModal({
   }, [open])
 
   useEffect(() => {
+    if (!open || !airport) return
+
+    const airportForCoverage = airport
+    let cancelled = false
+
+    async function checkIndoorCoverage() {
+      const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+
+      setIsIndoorCoverageLoading(true)
+      setIndoorCoverage(null)
+
+      try {
+        const result = await detectMapboxIndoorAirportCoverage({
+          airportCode: airportForCoverage.code,
+          airportName: airportForCoverage.name,
+          longitude: airportForCoverage.longitude ?? null,
+          latitude: airportForCoverage.latitude ?? null,
+          accessToken: token,
+        })
+        if (!cancelled) {
+          setIndoorCoverage(result)
+        }
+      } finally {
+        if (!cancelled) {
+          setIsIndoorCoverageLoading(false)
+        }
+      }
+    }
+
+    void checkIndoorCoverage()
+
+    return () => {
+      cancelled = true
+    }
+  }, [open, airport?.code, airport?.name, airport?.longitude, airport?.latitude])
+
+  useEffect(() => {
     if (!open || !airport || !mapContainerRef.current) return
 
     const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
@@ -89,6 +202,8 @@ export default function AirportExplorerModal({
         : [-80.287, 25.7959]
 
     if (mapRef.current) {
+      setIndoorMapSetup(null)
+
       mapRef.current.setStyle(MAPBOX_STYLES[mapViewStyle], {
         config: {
           basemap: {
@@ -100,16 +215,20 @@ export default function AirportExplorerModal({
       mapRef.current.once("style.load", () => {
         if (!mapRef.current) return
 
-        enableMapboxIndoorMapping(mapRef.current)
-        addIndoorControlIfAvailable(mapRef.current, indoorControlRef)
+        const setupResult = setupIndoorAirportMap(
+          mapRef.current,
+          indoorControlRef,
+          {
+            enableFallbackLayers: true,
+          }
+        )
 
-        // Temporary fallback while we verify Mapbox built-in indoor rendering.
-        addIndoorAirportLayers(mapRef.current)
+        setIndoorMapSetup(setupResult)
       })
 
       mapRef.current.flyTo({
         center,
-        zoom: airport.longitude != null && airport.latitude != null ? 15.5 : 8,
+        zoom: airport.longitude != null && airport.latitude != null ? 17.2 : 8,
         pitch: is3DView ? MAP_3D_CAMERA.pitch : MAP_2D_CAMERA.pitch,
         bearing: is3DView ? MAP_3D_CAMERA.bearing : MAP_2D_CAMERA.bearing,
         essential: true,
@@ -128,7 +247,7 @@ export default function AirportExplorerModal({
       },
       projection: "globe",
       center,
-      zoom: airport.longitude != null && airport.latitude != null ? 15.5 : 8,
+      zoom: airport.longitude != null && airport.latitude != null ? 17.2 : 8,
       pitch: is3DView ? MAP_3D_CAMERA.pitch : MAP_2D_CAMERA.pitch,
       bearing: is3DView ? MAP_3D_CAMERA.bearing : MAP_2D_CAMERA.bearing,
     } as mapboxgl.MapOptions)
@@ -136,17 +255,18 @@ export default function AirportExplorerModal({
     map.addControl(new mapboxgl.NavigationControl(), "top-right")
 
     map.on("load", () => {
-      enableMapboxIndoorMapping(map)
-      addIndoorControlIfAvailable(map, indoorControlRef)
+      const setupResult = setupIndoorAirportMap(map, indoorControlRef, {
+        enableFallbackLayers: true,
+      })
 
-      // Temporary fallback while we verify Mapbox built-in indoor rendering.
-      addIndoorAirportLayers(map)
+      setIndoorMapSetup(setupResult)
     })
 
     mapRef.current = map
 
     return () => {
       indoorControlRef.current = null
+      setIndoorMapSetup(null)
       map.remove()
       mapRef.current = null
     }
@@ -171,6 +291,9 @@ export default function AirportExplorerModal({
     setAirportSearchError(null)
     setIsAirportSearchLoading(false)
     setSelectedIndoorResult(null)
+    setIndoorMapSetup(null)
+    setIndoorCoverage(null)
+    setIsIndoorCoverageLoading(false)
 
     selectedMarkerRef.current?.remove()
     selectedMarkerRef.current = null
@@ -255,7 +378,7 @@ export default function AirportExplorerModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm"
-      onMouseDown={onClose}
+      onMouseDown={handleClose}
     >
       <div
         className={`w-full border border-slate-200 bg-white shadow-[0_30px_90px_rgba(15,23,42,0.28)] ${isFullscreen
@@ -266,12 +389,12 @@ export default function AirportExplorerModal({
       >
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-orange-500">
               Airport Explorer
             </p>
 
             <div className="mt-3 flex w-full flex-col gap-3 lg:flex-row lg:items-center">
-              <h2 className="shrink-0 text-2xl font-semibold tracking-tight text-slate-950">
+              <h2 className="shrink-0 text-2xl font-semibold tracking-tight text-slate-800">
                 {airport.city} ({airport.code})
               </h2>
 
@@ -400,7 +523,7 @@ export default function AirportExplorerModal({
 
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close airport explorer"
             className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-2xl font-light leading-none text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"
           >
@@ -421,6 +544,21 @@ export default function AirportExplorerModal({
               <p className="mt-1 text-xs text-slate-500">
                 Indoor terminals, labels, and airport floorplan layers.
               </p>
+
+              <p
+                className={`mt-1 text-[11px] font-medium ${getIndoorCoverageStatusClass(
+                  indoorCoverage,
+                  isIndoorCoverageLoading
+                )}`}
+              >
+                {getIndoorCoverageStatusLabel(indoorCoverage, isIndoorCoverageLoading)}
+              </p>
+
+              {indoorCoverage?.hasIndoorCoverage === true && (
+                <p className="mt-1 text-[11px] font-medium text-cyan-700">
+                  {getIndoorMapStatusLabel(indoorMapSetup)}
+                </p>
+              )}
 
               {is3DView && (
                 <p className="mt-1 text-[11px] font-medium text-cyan-700">

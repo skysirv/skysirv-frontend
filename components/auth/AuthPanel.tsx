@@ -15,22 +15,28 @@ type AuthSuccessPayload = {
 }
 
 type AuthPanelProps = {
+  initialMode?: AuthMode
   onSignupComplete?: () => void
   onSigninComplete?: (payload: AuthSuccessPayload) => void
   requireConsent?: boolean
   consentAccepted?: boolean
   onRequestConsent?: (afterAccept: () => void) => void
 }
-
 export default function AuthPanel({
+  initialMode = 'signin',
   onSignupComplete,
   onSigninComplete,
   requireConsent = false,
   consentAccepted = false,
   onRequestConsent,
 }: AuthPanelProps) {
-  const [mode, setMode] = useState<AuthMode>('signin')
+  const [mode, setMode] = useState<AuthMode>(initialMode)
   const [signupSuccess, setSignupSuccess] = useState(false)
+
+  useEffect(() => {
+    setMode(initialMode)
+    setSignupSuccess(false)
+  }, [initialMode])
 
   useEffect(() => {
     if (!signupSuccess) return
@@ -141,6 +147,11 @@ export default function AuthPanel({
             <h2 className="text-2xl font-bold text-orange-500">
               Create your Skysirv account
             </h2>
+
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              Start with a free account to save your planning sessions, booking context,
+              and Lucy travel preferences.
+            </p>
           </div>
 
           <CreateAccountForm

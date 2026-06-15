@@ -5,6 +5,7 @@ import type {
   ChoiceOption,
   ChoiceStep,
   FlowStep,
+  MultiChoiceStep,
   RangeStep,
 } from "@/components/plan-with-lucy/shared/planWithLucyTypes"
 
@@ -14,11 +15,13 @@ export default function PlanPromptPanel({
   onRangeChange,
   onChoiceSelect,
   onRangeConfirm,
+  onMultiChoiceConfirm,
 }: {
   visibleSteps: FlowStep[]
   rangeValues: Record<string, number>
   onRangeChange: (stepId: string, value: number) => void
   onChoiceSelect: (step: ChoiceStep, option: ChoiceOption) => void
+  onMultiChoiceConfirm: (step: MultiChoiceStep, options: ChoiceOption[]) => void
   onRangeConfirm: (step: RangeStep) => void
 }) {
   return (
@@ -45,6 +48,11 @@ export default function PlanPromptPanel({
               onChoiceSelect={(option) => {
                 if (step.type === "choice") {
                   onChoiceSelect(step, option)
+                }
+              }}
+              onMultiChoiceConfirm={(options) => {
+                if (step.type === "multi-choice") {
+                  onMultiChoiceConfirm(step, options)
                 }
               }}
               onRangeConfirm={() => {

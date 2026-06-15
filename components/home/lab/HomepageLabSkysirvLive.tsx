@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { motion } from "framer-motion"
+import LargeChevron from "@/components/ui/LargeChevron"
 
 const airportPins = [
   {
@@ -86,10 +87,10 @@ export default function HomepageLabSkysirvLive() {
 
           <Link
             href="/skysirv-live"
-            className="mt-7 inline-flex items-center gap-2 text-medium font-bold text-blue-600 transition hover:gap-3 hover:text-blue-700"
+            className="mt-7 inline-flex items-center gap-2 text-xl font-bold text-blue-600 transition hover:gap-3 hover:text-blue-700"
           >
             View Skysirv Live
-            <span aria-hidden="true">→</span>
+            <LargeChevron direction="right" />
           </Link>
         </motion.div>
 

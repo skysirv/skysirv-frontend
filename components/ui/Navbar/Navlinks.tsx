@@ -13,6 +13,7 @@ import {
   getAuthToken,
   setAuthAdmin,
 } from '@/utils/auth-storage';
+import LargeChevron from "@/components/ui/LargeChevron"
 
 interface NavlinksProps {
   user?: any;
@@ -24,55 +25,63 @@ const SESSION_TIMEOUT_MS = 30 * 60 * 1000;
 
 const ACCOUNT_HREF = '/account';
 
+const PLAN_WITH_LUCY_DIRECT_LINK_ONLY = true;
+
 const bookMenuItems = [
   {
     label: 'Flights',
-    href: '/dev/booking-lab/flights',
+    href: '/booking/flights',
     iconSrc: '/images/stock/icons/booking/flights-icon.png',
     description: 'Search smarter flight options with Lucy-powered travel intelligence.',
   },
   {
     label: 'Hotels',
-    href: '/dev/booking-lab/hotels',
+    href: '/booking/hotels',
     iconSrc: '/images/stock/icons/booking/hotels-icon.png',
     description: 'Compare stays by location, comfort, flexibility, and total trip value.',
   },
   {
     label: 'Car rentals',
-    href: '/dev/booking-lab/car-rentals',
+    href: '/booking/car-rentals',
     iconSrc: '/images/stock/icons/booking/car-icon.png',
     description: 'Plan airport or city pickup with smarter pricing context.',
   },
   {
     label: 'Cruises',
-    href: '/dev/booking-lab/cruises',
+    href: '/booking/cruises',
     iconSrc: '/images/stock/icons/booking/cruises-icon.png',
     description: 'Explore cruise options and future Skysirv cruise planning.',
+  },
+  {
+    label: 'Featured Experiences',
+    href: '/booking/featured-experiences',
+    iconSrc: '/images/stock/icons/booking/experiences-icon.png',
+    description: 'Discover curated travel companies, hidden gems, local experiences, and premium partners.',
   },
 ];
 
 const planMenuItems = [
   {
     label: 'Generate itinerary',
-    href: '/dev/plan-with-lucy-lab/itinerary',
+    href: '/plan-with-lucy/itinerary',
     iconSrc: '/images/stock/icons/lucy-plan/itinerary-icon.png',
     description: 'Build smarter trip flow around flights, stays, cars, cruises, and activities.',
   },
   {
     label: 'Travel preferences',
-    href: '/dev/plan-with-lucy-lab/itinerary',
+    href: '/plan-with-lucy/itinerary',
     iconSrc: '/images/stock/icons/lucy-plan/preferences-icon.png',
     description: 'Let Lucy understand how you like to travel and what matters most.',
   },
   {
     label: 'Lucy memory',
-    href: '/dev/plan-with-lucy-lab/itinerary',
+    href: '/plan-with-lucy/itinerary',
     iconSrc: '/images/stock/icons/lucy-plan/lucy-memory-icon.png',
     description: 'Personalized planning that improves as Lucy learns your travel style.',
   },
   {
     label: 'Trip ideas',
-    href: '/dev/plan-with-lucy-lab/itinerary',
+    href: '/plan-with-lucy/itinerary',
     iconSrc: '/images/stock/icons/lucy-plan/trip-ideas-icon.png',
     description: 'Explore destination ideas, timing strategy, and smarter travel inspiration.',
   },
@@ -109,27 +118,26 @@ function getDashboardHrefFromPlan(planId?: string | null) {
 }
 
 export default function Navlinks({
-  user,
   isDark = false,
   hasScrolled = false,
 }: NavlinksProps) {
   const pathname = usePathname();
   const isSkysirvLivePage = pathname.startsWith('/skysirv-live');
-  const isPlanWithLucyLabPage = pathname.startsWith('/dev/plan-with-lucy-lab');
-  const isBookingLabPage = pathname.startsWith('/dev/booking-lab');
-  const isPlanSmarterLabPage = pathname.startsWith('/dev/plan-smarter-lab');
-  const isLucyTripLabPage = pathname.startsWith('/dev/lucy-trip-lab');
+  const isPlanWithLucyLabPage = pathname.startsWith('/plan-with-lucy');
+  const isBookingLabPage = pathname.startsWith('/booking');
+  const isPlanSmarterLabPage = pathname.startsWith('/plan-smarter');
+  const isLucyTripLabPage = pathname.startsWith('/lucy-trip');
+  const isHomepageLab = pathname === '/';
   const isChoosePlanPage = pathname === '/choose-plan';
-  const isHomepageLab = pathname === '/dev/homepage-lab';
 
   const isBookActive =
-    pathname === '/booking' ||
+    pathname.startsWith('/booking') ||
     pathname === '/hotels' ||
     pathname === '/car-rentals' ||
-    pathname === '/cruises' ||
-    pathname.startsWith('/dev/booking-lab');
+    pathname === '/cruises';
 
   const isPlanActive =
+    pathname.startsWith('/plan-with-lucy') ||
     pathname === '/itinerary' ||
     pathname === '/travel-preferences' ||
     pathname === '/lucy-memory' ||
@@ -137,8 +145,7 @@ export default function Navlinks({
 
   const isLiveActive = pathname.startsWith('/skysirv-live');
 
-  const isPricingActive =
-    pathname === '/pricing' || pathname === '/dev/pricing-lab';
+  const isPricingActive = pathname === '/pricing';
 
   const navItemClass = (active: boolean) =>
     `transition ${active
@@ -155,6 +162,7 @@ export default function Navlinks({
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [createAccountModalOpen, setCreateAccountModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [isSessionReady, setIsSessionReady] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [bookMenuOpen, setBookMenuOpen] = useState(false);
@@ -177,6 +185,13 @@ export default function Navlinks({
 
   function openSigninModal() {
     setAccountMenuOpen(false);
+    setAuthMode('signin');
+    setCreateAccountModalOpen(true);
+  }
+
+  function openSignupModal() {
+    setAccountMenuOpen(false);
+    setAuthMode('signup');
     setCreateAccountModalOpen(true);
   }
 
@@ -409,6 +424,25 @@ export default function Navlinks({
   }, [pathname]);
 
   useEffect(() => {
+    function handleOpenAuthModal(event: Event) {
+      const customEvent = event as CustomEvent<{ mode?: 'signin' | 'signup' }>;
+
+      if (customEvent.detail?.mode === 'signup') {
+        openSignupModal();
+        return;
+      }
+
+      openSigninModal();
+    }
+
+    window.addEventListener('skysirv-open-auth-modal', handleOpenAuthModal as EventListener);
+
+    return () => {
+      window.removeEventListener('skysirv-open-auth-modal', handleOpenAuthModal as EventListener);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!isSessionReady) return;
 
     const params = new URLSearchParams(window.location.search);
@@ -449,19 +483,19 @@ export default function Navlinks({
       <div
         className={`relative w-full border-b transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300 ease-out ${hasScrolled
           ? isDark
-            ? 'border-white/10 bg-slate-900/80 shadow-[0_10px_35px_rgba(15,23,42,0.08)] backdrop-blur-2xl'
+            ? 'border-white/10 bg-slate-800 shadow-[0_10px_35px_rgba(15,23,42,0.08)] backdrop-blur-2xl'
             : 'border-slate-200/70 bg-white/94 shadow-[0_10px_35px_rgba(15,23,42,0.08)] backdrop-blur-2xl'
           : 'border-transparent bg-transparent shadow-none backdrop-blur-0'
           }`}
       >
         <div className="relative mx-auto flex min-h-[72px] w-full max-w-5xl items-center justify-between px-6 sm:px-8 lg:px-0">
           <div className="flex items-center translate-y-[1px] -translate-x-3">
-            <Link href="/dev/homepage-lab" className={s.logo} aria-label="Skysirv" style={{ marginLeft: '-22px' }}>
+            <Link href="/" className={s.logo} aria-label="Skysirv" style={{ marginLeft: '-22px' }}>
               <span style={{ display: 'flex', alignItems: 'center', height: '40px' }}>
                 <img
                   src={isDark ? '/branding/logo/skysirv-logo-white.svg' : '/branding/logo/skysirv-logo.svg'}
                   alt="Skysirv"
-                  style={{ width: '180px', height: 'auto', display: 'block' }}
+                  style={{ width: '220px', height: 'auto', display: 'block' }}
                 />
               </span>
             </Link>
@@ -540,30 +574,43 @@ export default function Navlinks({
               </div>
 
               <div className="relative">
-                <button
-                  type="button"
-                  onClick={togglePlanMenu}
-                  className={`inline-flex items-center gap-1.5 ${navItemClass(isPlanActive)}`}
-                  aria-expanded={planMenuOpen}
-                >
-                  Plan with Lucy
-                  <svg
-                    viewBox="0 0 20 20"
-                    aria-hidden="true"
-                    className={`h-4 w-4 transition-transform ${planMenuOpen ? 'rotate-180' : ''}`}
-                    fill="none"
+                {PLAN_WITH_LUCY_DIRECT_LINK_ONLY ? (
+                  <Link
+                    href="/plan-with-lucy/itinerary"
+                    onClick={() => {
+                      setBookMenuOpen(false);
+                      setPlanMenuOpen(false);
+                    }}
+                    className={navItemClass(isPlanActive)}
                   >
-                    <path
-                      d="M5 7.5 10 12.5 15 7.5"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
+                    Plan with Lucy
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={togglePlanMenu}
+                    className={`inline-flex items-center gap-1.5 ${navItemClass(isPlanActive)}`}
+                    aria-expanded={planMenuOpen}
+                  >
+                    Plan with Lucy
+                    <svg
+                      viewBox="0 0 20 20"
+                      aria-hidden="true"
+                      className={`h-4 w-4 transition-transform ${planMenuOpen ? 'rotate-180' : ''}`}
+                      fill="none"
+                    >
+                      <path
+                        d="M5 7.5 10 12.5 15 7.5"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                )}
 
-                {planMenuOpen && (
+                {!PLAN_WITH_LUCY_DIRECT_LINK_ONLY && planMenuOpen && (
                   <div
                     onMouseEnter={clearPlanMenuCloseTimer}
                     onMouseLeave={scheduleClosePlanMenu}
@@ -587,7 +634,7 @@ export default function Navlinks({
                           </span>
 
                           <span className="min-w-0">
-                            <span className="block text-sm font-bold text-slate-950">
+                            <span className="block text-sm font-bold text-slate-800">
                               {item.label}
                             </span>
 
@@ -609,7 +656,7 @@ export default function Navlinks({
                 Skysirv Live
               </Link>
 
-              <Link href="/dev/pricing-lab" className={navItemClass(isPricingActive)}>
+              <Link href="/pricing" className={navItemClass(isPricingActive)}>
                 Pricing
               </Link>
             </div>
@@ -636,11 +683,11 @@ export default function Navlinks({
                 </button>
 
                 <Link
-                  href="/dev/plan-smarter-lab"
+                  href="/plan-smarter"
                   className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-lg border border-orange-500 bg-orange-500 px-4 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:border-orange-600 hover:bg-orange-600"
                 >
                   Plan smarter
-                  <span aria-hidden="true">→</span>
+                  <LargeChevron direction="right" />
                 </Link>
 
                 {accountMenuOpen && (
@@ -653,7 +700,7 @@ export default function Navlinks({
                     {!isLoggedIn && (
                       <div className="md:hidden">
                         <Link
-                          href="/dev/booking-lab/flights"
+                          href="/booking/flights"
                           onClick={() => setAccountMenuOpen(false)}
                           className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
                             }`}
@@ -662,7 +709,7 @@ export default function Navlinks({
                         </Link>
 
                         <Link
-                          href="/itinerary"
+                          href="/plan-with-lucy/itinerary"
                           onClick={() => setAccountMenuOpen(false)}
                           className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
                             }`}
@@ -680,7 +727,7 @@ export default function Navlinks({
                         </Link>
 
                         <Link
-                          href="/dev/pricing-lab"
+                          href="/pricing"
                           onClick={() => setAccountMenuOpen(false)}
                           className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
                             }`}
@@ -765,6 +812,7 @@ export default function Navlinks({
         heroImageAlt="Ready for adventure"
       >
         <AuthPanel
+          initialMode={authMode}
           onSigninComplete={async (payload) => {
             setCreateAccountModalOpen(false);
 
