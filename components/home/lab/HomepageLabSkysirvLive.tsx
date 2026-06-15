@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { motion } from "framer-motion"
 import LargeChevron from "@/components/ui/LargeChevron"
 
 const airportPins = [
@@ -45,13 +44,7 @@ export default function HomepageLabSkysirvLive() {
   return (
     <section className="relative overflow-hidden bg-white px-6 py-24 sm:py-28">
       <div className="relative mx-auto grid max-w-7xl gap-14 lg:grid-cols-[1.12fr_0.88fr] lg:items-center">
-        <motion.div
-          initial={{ opacity: 0, x: 28 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.65, ease: "easeOut" }}
-          className="mx-auto max-w-xl text-center lg:order-2 lg:mx-0 lg:text-left"
-        >
+        <div className="mx-auto max-w-xl text-center lg:order-2 lg:mx-0 lg:text-left">
           <h2 className="mt-4 text-4xl font-bold tracking-tight text-slate-800 sm:text-5xl">
             Live airport intelligence, explained by Lucy.
           </h2>
@@ -87,20 +80,14 @@ export default function HomepageLabSkysirvLive() {
 
           <Link
             href="/skysirv-live"
-            className="mt-7 inline-flex items-center gap-2 text-xl font-bold text-blue-600 transition hover:gap-3 hover:text-blue-700"
+            className="mt-7 inline-flex items-center gap-2 text-xl font-bold text-blue-600"
           >
             View Skysirv Live
             <LargeChevron direction="right" />
           </Link>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, x: -28 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, amount: 0.22 }}
-          transition={{ duration: 0.65, ease: "easeOut", delay: 0.08 }}
-          className="relative mx-auto w-full max-w-3xl pb-28 lg:order-1"
-        >
+        <div className="relative mx-auto w-full max-w-3xl pb-28 lg:order-1">
           <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_24px_75px_rgba(15,23,42,0.10)]">
             <div className="flex h-[70px] items-center justify-between bg-blue-700 px-5 py-0 text-white sm:px-6">
               <span className="relative flex h-12 w-[230px] items-center overflow-visible">
@@ -165,7 +152,7 @@ export default function HomepageLabSkysirvLive() {
                 <div className="absolute inset-0 bg-white/35" />
                 <div className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-white/60 to-transparent" />
 
-                <div className="absolute bottom-2 left-2 z-20 rounded-md bg-white/85 px-2 py-1 text-[9px] font-semibold text-slate-500 shadow-sm backdrop-blur">
+                <div className="absolute bottom-2 left-2 z-20 rounded-md bg-white/85 px-2 py-1 text-[9px] font-semibold text-slate-500 shadow-sm">
                   © Mapbox © OpenStreetMap
                 </div>
 
@@ -176,15 +163,17 @@ export default function HomepageLabSkysirvLive() {
                       className={`absolute ${airport.className}`}
                     >
                       <div className="relative flex flex-col items-center">
-                        <span
-                          className={`absolute h-10 w-10 animate-ping rounded-full ${airport.tone} opacity-20`}
-                        />
+                        <div className="relative flex h-10 w-10 items-center justify-center">
+                          <span
+                            className={`absolute inset-0 animate-ping rounded-full ${airport.tone} opacity-20`}
+                          />
 
-                        <span
-                          className={`relative h-4 w-4 rounded-full border-2 border-white ${airport.tone} shadow-[0_8px_18px_rgba(15,23,42,0.20)]`}
-                        />
+                          <span
+                            className={`relative h-4 w-4 rounded-full border-2 border-white ${airport.tone} shadow-[0_8px_18px_rgba(15,23,42,0.20)]`}
+                          />
+                        </div>
 
-                        <span className="mt-1 rounded-full bg-white px-2.5 py-1 text-xs font-bold text-slate-800 shadow-[0_8px_18px_rgba(15,23,42,0.12)]">
+                        <span className="-mt-2 rounded-full bg-white px-2.5 py-1 text-xs font-bold text-slate-800 shadow-[0_8px_18px_rgba(15,23,42,0.12)]">
                           {airport.code}
                         </span>
                       </div>
@@ -195,7 +184,7 @@ export default function HomepageLabSkysirvLive() {
             </div>
           </div>
 
-          <div className="absolute -bottom-14 left-6 right-6 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-[0_18px_55px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:left-12 sm:right-12">
+          <div className="absolute -bottom-14 left-6 right-6 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-[0_18px_55px_rgba(15,23,42,0.12)] sm:left-12 sm:right-12">
             <img
               src="/images/stock/lucy/lucy-headset.png"
               alt="Lucy explaining live airport intelligence"
@@ -213,7 +202,7 @@ export default function HomepageLabSkysirvLive() {
               </p>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   )

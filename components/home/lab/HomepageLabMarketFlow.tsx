@@ -1,7 +1,5 @@
 "use client"
 
-import { motion } from "framer-motion"
-
 const marketCards = [
   {
     route: "Boston",
@@ -27,13 +25,7 @@ export default function HomepageLabMarketFlow() {
   return (
     <section className="relative overflow-hidden bg-white px-6 pb-24 pt-6 sm:pb-28 sm:pt-8">
       <div className="relative mx-auto max-w-7xl">
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.38, ease: "easeOut" }}
-          className="mx-auto max-w-4xl text-center"
-        >
+        <div className="mx-auto max-w-4xl text-center">
           <h2 className="text-4xl font-bold tracking-tight text-slate-800 sm:text-5xl lg:text-6xl">
             How Skysirv reads travel signals.
           </h2>
@@ -43,16 +35,10 @@ export default function HomepageLabMarketFlow() {
             into clearer signals, so travelers can understand what is worth watching,
             comparing, or booking with more confidence.
           </p>
-        </motion.div>
+        </div>
 
         <div className="mx-auto mt-20 grid max-w-6xl gap-14 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -14 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.25 }}
-            transition={{ duration: 0.38, ease: "easeOut" }}
-            className="mx-auto max-w-xl text-center lg:mx-0 lg:text-left"
-          >
+          <div className="mx-auto max-w-xl text-center lg:mx-0 lg:text-left">
             <h3 className="mt-4 text-3xl font-bold tracking-tight text-slate-800 sm:text-4xl">
               Plan travel without chasing every price change.
             </h3>
@@ -68,15 +54,9 @@ export default function HomepageLabMarketFlow() {
               movement into simple guidance: watch, compare, wait, adjust the plan,
               or review a stronger opportunity.
             </p>
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, x: 14, y: 40 }}
-            whileInView={{ opacity: 1, x: 0, y: 40 }}
-            viewport={{ once: true, amount: 0.22 }}
-            transition={{ duration: 0.38, ease: "easeOut", delay: 0.04 }}
-            className="relative mx-auto h-[430px] w-full max-w-3xl sm:h-[500px]"
-          >
+          <div className="relative mx-auto h-[430px] w-full max-w-3xl sm:h-[500px] lg:translate-y-10">
             <div className="absolute left-[4%] top-[9%] z-10 h-[64%] w-[44%] overflow-hidden rounded-[1.75rem] bg-slate-200 shadow-[0_24px_70px_rgba(15,23,42,0.18)]">
               <MarketImageCard item={marketCards[0]} />
             </div>
@@ -158,7 +138,7 @@ export default function HomepageLabMarketFlow() {
                 className="h-36 w-36 shrink-0 object-contain drop-shadow-[0_14px_28px_rgba(15,23,42,0.22)]"
               />
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { motion } from "framer-motion"
 
 const faqs = [
   {
@@ -42,13 +41,7 @@ export default function HomepageLabFAQ() {
   return (
     <section className="relative overflow-hidden bg-white px-6 pb-12 pt-12 sm:pb-16 sm:pt-10">
       <div className="relative mx-auto grid max-w-7xl gap-14 lg:min-h-[620px] lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
-        <motion.div
-          initial={{ opacity: 0, x: -14 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.38, ease: "easeOut" }}
-          className="mx-auto max-w-xl text-center lg:mx-0 lg:text-left"
-        >
+        <div className="mx-auto max-w-xl text-center lg:mx-0 lg:text-left">
           <h2 className="mt-4 text-4xl font-bold tracking-tight text-slate-800 sm:text-5xl">
             A calmer way to understand what Skysirv does.
           </h2>
@@ -58,15 +51,9 @@ export default function HomepageLabFAQ() {
             helping travelers understand the signal behind flights, stays, cars,
             cruises, itineraries, and live travel conditions.
           </p>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, x: 14 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, amount: 0.22 }}
-          transition={{ duration: 0.38, ease: "easeOut", delay: 0.04 }}
-          className="mx-auto w-full max-w-3xl"
-        >
+        <div className="mx-auto w-full max-w-3xl">
           <div className="divide-y divide-slate-200 rounded-[2rem] border border-slate-200 bg-white shadow-[0_18px_55px_rgba(15,23,42,0.06)]">
             {faqs.map((item, index) => {
               const isOpen = openIndex === index
@@ -98,7 +85,7 @@ export default function HomepageLabFAQ() {
               )
             })}
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   )

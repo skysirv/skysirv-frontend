@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 import { FormEvent, useEffect, useRef, useState } from "react"
-import { motion } from "framer-motion"
 
 const rotatingPromptPlaceholders = [
   "Ask Lucy to compare flights, hotels, and rental cars for your next trip...",
@@ -145,173 +144,137 @@ export default function HomepageLabHero() {
 
   return (
     <>
-      <section className="relative isolate min-h-[calc(100dvh+156px)] overflow-hidden bg-slate-950">
+      <section className="relative isolate min-h-[calc(100dvh+220px)] overflow-hidden bg-[#dbeafe]">
         <div className="absolute inset-0">
-          <div
-            className="absolute inset-0 bg-[length:100%_auto] bg-center bg-no-repeat"
-            style={{
-              backgroundImage: "url('/images/stock/lucy-hero-13.jpg')",
-            }}
+          <img
+            src="/images/stock/lucy-hero-13.jpg"
+            alt=""
+            loading="eager"
+            fetchPriority="high"
+            className="absolute inset-0 h-full w-full object-cover"
+            style={{ objectPosition: "center 42%" }}
           />
 
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/5 via-slate-950/5 to-slate-950/25" />
-          <div className="absolute inset-0 bg-gradient-to-r from-sky-950/5 via-transparent to-indigo-950/5" />
-
-          <motion.div
-            aria-hidden="true"
-            animate={{
-              x: [0, 36, 0],
-              y: [0, -24, 0],
-              opacity: [0.22, 0.42, 0.22],
-            }}
-            transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute left-[-90px] top-20 h-80 w-80 rounded-full bg-cyan-300/30 blur-3xl"
-          />
-
-          <motion.div
-            aria-hidden="true"
-            animate={{
-              x: [0, -42, 0],
-              y: [0, 28, 0],
-              opacity: [0.16, 0.32, 0.16],
-            }}
-            transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute bottom-10 right-[-120px] h-[26rem] w-[26rem] rounded-full bg-indigo-300/30 blur-3xl"
-          />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-white/0 to-slate-950/10" />
         </div>
 
-        <div className="relative z-10 mx-auto flex min-h-[100dvh] max-w-7xl flex-col items-center justify-center px-6 pb-16 pt-32 text-center sm:px-8 lg:px-12">
-          <motion.div
-            initial={{ opacity: 0, y: 26 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.75, ease: "easeOut" }}
-            className="mx-auto max-w-5xl"
-          >
-            <h1 className="text-4xl font-bold tracking-tight text-slate-800 drop-shadow-[0_8px_34px_rgba(2,6,23,0.35)] sm:text-5xl md:text-6xl lg:text-6xl">
-              AI-powered travel intelligence, guided by Lucy.
-            </h1>
+        <div className="absolute inset-0 z-10 flex items-center justify-center px-6 pb-10 pt-24 text-center sm:px-8 lg:px-12">
+          <div className="flex w-full max-w-7xl flex-col items-center" style={{ transform: "translateY(32px)" }}>
+            <div className="mx-auto max-w-5xl">
+              <h1 className="text-4xl font-bold tracking-tight text-slate-800 drop-shadow-[0_8px_34px_rgba(2,6,23,0.35)] sm:text-5xl md:text-6xl lg:text-6xl">
+                AI-powered travel intelligence, guided by Lucy.
+              </h1>
 
-            <p className="mx-auto mt-6 max-w-3xl text-base font-semibold leading-8 text-slate-700 drop-shadow-[0_4px_18px_rgba(2,6,23,0.35)] sm:text-xl">
-              Skysirv's Lucy helps you track routes, understand fare movement,
-              compare flights, explore hotels and car rentals, build smarter itineraries,
-              remember how you like to travel, and decide when to book with more
-              confidence.
-            </p>
-          </motion.div>
+              <p className="mx-auto mt-6 max-w-3xl text-base font-semibold leading-8 text-slate-700 drop-shadow-[0_4px_18px_rgba(2,6,23,0.35)] sm:text-xl">
+                Skysirv's Lucy helps you track routes, understand fare movement,
+                compare flights, explore hotels and car rentals, build smarter itineraries,
+                remember how you like to travel, and decide when to book with more
+                confidence.
+              </p>
+            </div>
 
-          <motion.form
-            initial={{ opacity: 0, y: 22 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.18, duration: 0.7, ease: "easeOut" }}
-            onSubmit={handleSubmit}
-            className="mx-auto mt-9 w-full max-w-[880px]"
-          >
-            <div className="relative min-h-[240px] overflow-hidden rounded-[1.85rem] border border-white/70 bg-white text-left shadow-[0_24px_90px_rgba(2,6,23,0.24)] ring-1 ring-cyan-200/50">
-              <div className="relative flex h-[240px] flex-col px-5 py-4 sm:px-7 lg:h-[250px]">
-                <div className="min-h-0 flex-1 overflow-y-auto pr-2 [scrollbar-width:thin] [scrollbar-color:rgba(148,163,184,0.35)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300/45 hover:[&::-webkit-scrollbar-thumb]:bg-slate-400/60">
-                  {messages.length === 0 ? (
-                    <div className="pt-5">
-                      <p className="max-w-xl text-base font-medium leading-7 text-slate-500">
-                        {rotatingPromptPlaceholders[placeholderIndex]}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3 pb-1">
-                      {messages.map((message) =>
-                        message.role === "user" ? (
-                          <div key={message.id} className="flex justify-end">
-                            <div className="max-w-[84%] rounded-2xl rounded-br-md bg-slate-900 px-4 py-2.5 text-sm leading-6 text-white">
-                              {message.text}
+            <form
+              onSubmit={handleSubmit}
+              className="mx-auto mt-9 w-full max-w-[880px]"
+            >
+              <div className="relative min-h-[240px] overflow-hidden rounded-[1.85rem] border border-white/70 bg-white text-left shadow-[0_24px_90px_rgba(2,6,23,0.24)] ring-1 ring-cyan-200/50">
+                <div className="relative flex h-[240px] flex-col px-5 py-4 sm:px-7 lg:h-[250px]">
+                  <div className="min-h-0 flex-1 overflow-y-auto pr-2 [scrollbar-width:thin] [scrollbar-color:rgba(148,163,184,0.35)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300/45 hover:[&::-webkit-scrollbar-thumb]:bg-slate-400/60">
+                    {messages.length === 0 ? (
+                      <div className="pt-5">
+                        <p className="max-w-xl text-base font-medium leading-7 text-slate-500">
+                          {rotatingPromptPlaceholders[placeholderIndex]}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3 pb-1">
+                        {messages.map((message) =>
+                          message.role === "user" ? (
+                            <div key={message.id} className="flex justify-end">
+                              <div className="max-w-[84%] rounded-2xl rounded-br-md bg-slate-900 px-4 py-2.5 text-sm leading-6 text-white">
+                                {message.text}
+                              </div>
+                            </div>
+                          ) : (
+                            <div key={message.id} className="flex justify-start">
+                              <p className="max-w-[92%] text-sm font-medium leading-6 text-slate-700">
+                                {message.text}
+                              </p>
+                            </div>
+                          )
+                        )}
+
+                        {chatLoading && (
+                          <div className="flex justify-start">
+                            <div className="flex items-center gap-1.5 px-1 py-2">
+                              <span className="h-2 w-2 animate-pulse rounded-full bg-blue-600" />
+                              <span
+                                className="h-2 w-2 animate-pulse rounded-full bg-blue-600"
+                                style={{ animationDelay: "120ms" }}
+                              />
+                              <span
+                                className="h-2 w-2 animate-pulse rounded-full bg-blue-600"
+                                style={{ animationDelay: "240ms" }}
+                              />
                             </div>
                           </div>
-                        ) : (
-                          <div key={message.id} className="flex justify-start">
-                            <p className="max-w-[92%] text-sm font-medium leading-6 text-slate-700">
-                              {message.text}
-                            </p>
-                          </div>
-                        )
-                      )}
+                        )}
 
-                      {chatLoading && (
-                        <div className="flex justify-start">
-                          <div className="flex items-center gap-1.5 px-1 py-2">
-                            <span className="h-2 w-2 animate-pulse rounded-full bg-blue-600" />
-                            <span
-                              className="h-2 w-2 animate-pulse rounded-full bg-blue-600"
-                              style={{ animationDelay: "120ms" }}
-                            />
-                            <span
-                              className="h-2 w-2 animate-pulse rounded-full bg-blue-600"
-                              style={{ animationDelay: "240ms" }}
-                            />
-                          </div>
-                        </div>
-                      )}
+                        <div ref={messagesEndRef} />
+                      </div>
+                    )}
+                  </div>
 
-                      <div ref={messagesEndRef} />
-                    </div>
-                  )}
-                </div>
+                  <div className="mt-3 flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2">
+                    <input
+                      type="text"
+                      value={chatInput}
+                      onChange={(event) => setChatInput(event.target.value)}
+                      placeholder="Ask Lucy about flights, hotels, rentals, or trip planning..."
+                      className="min-w-0 flex-1 bg-transparent text-sm font-medium text-slate-950 outline-none placeholder:text-slate-400"
+                    />
 
-                <div className="mt-3 flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2">
-                  <input
-                    type="text"
-                    value={chatInput}
-                    onChange={(event) => setChatInput(event.target.value)}
-                    placeholder="Ask Lucy about flights, hotels, rentals, or trip planning..."
-                    className="min-w-0 flex-1 bg-transparent text-sm font-medium text-slate-950 outline-none placeholder:text-slate-400"
-                  />
-
-                  <button
-                    type="submit"
-                    disabled={!chatInput.trim() || chatLoading}
-                    aria-label="Ask Lucy"
-                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-700 text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-45"
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                      className="h-5 w-5"
-                      fill="none"
+                    <button
+                      type="submit"
+                      disabled={!chatInput.trim() || chatLoading}
+                      aria-label="Ask Lucy"
+                      className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-700 text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-45"
                     >
-                      <path
-                        d="M5 12h13M13 6l6 6-6 6"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
+                      <svg
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                        className="h-5 w-5"
+                        fill="none"
+                      >
+                        <path
+                          d="M5 12h13M13 6l6 6-6 6"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </motion.form>
+            </form>
 
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.65, ease: "easeOut" }}
-            className="mt-5 flex w-full max-w-5xl flex-col items-center gap-2"
-          >
-            <div className="flex flex-wrap items-center justify-center gap-2 lg:flex-nowrap">
-              {promptPills.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="group relative isolate inline-flex shrink-0 overflow-hidden rounded-full p-[2px] text-sm font-semibold text-slate-800 shadow-[0_10px_28px_rgba(15,23,42,0.12)] transition hover:-translate-y-0.5"
-                >
-                  <span className="pointer-events-none absolute left-1/2 top-1/2 h-[190%] w-[190%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[conic-gradient(from_90deg,transparent_0deg,rgba(34,211,238,0.98)_45deg,rgba(59,130,246,0.98)_95deg,rgba(168,85,247,0.98)_150deg,rgba(236,72,153,0.98)_210deg,rgba(251,146,60,0.98)_270deg,rgba(34,197,94,0.98)_325deg,transparent_360deg)] opacity-0 transition-opacity duration-300 group-hover:animate-[spin_4.5s_linear_infinite] group-hover:opacity-100" />
-
-                  <span className="relative z-10 inline-flex items-center gap-2 rounded-full border border-white/80 bg-white px-4 py-2 text-slate-800 backdrop-blur-xl transition group-hover:border-cyan-200 group-hover:bg-white">
+            <div className="mt-5 flex w-full max-w-5xl flex-col items-center gap-2">
+              <div className="flex flex-wrap items-center justify-center gap-2 lg:flex-nowrap">
+                {promptPills.map((item) => (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/80 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-[0_10px_28px_rgba(15,23,42,0.12)]"
+                  >
                     <PromptPillIcon name={item.icon} />
                     {item.label}
-                  </span>
-                </Link>
-              ))}
+                  </Link>
+                ))}
+              </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
     </>

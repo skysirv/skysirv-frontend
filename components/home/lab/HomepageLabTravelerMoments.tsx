@@ -1,7 +1,5 @@
 "use client"
 
-import { motion } from "framer-motion"
-
 const travelerMoments = [
   {
     label: "Frequent travelers",
@@ -30,13 +28,7 @@ export default function HomepageLabTravelerMoments() {
   return (
     <section className="relative overflow-hidden bg-white px-6 py-24 sm:py-28">
       <div className="relative mx-auto grid max-w-7xl gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-        <motion.div
-          initial={{ opacity: 0, x: -14 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.38, ease: "easeOut" }}
-          className="mx-auto max-w-xl text-center lg:mx-0 lg:text-left"
-        >
+        <div className="mx-auto max-w-xl text-center lg:mx-0 lg:text-left">
           <h2 className="mt-4 text-4xl font-bold tracking-tight text-slate-800 sm:text-5xl">
             For travelers who want the why behind the trip.
           </h2>
@@ -46,28 +38,14 @@ export default function HomepageLabTravelerMoments() {
             options. Lucy helps bring context, timing, preferences, and full-trip
             planning into the decision before you book.
           </p>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, x: 14 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, amount: 0.22 }}
-          transition={{ duration: 0.38, ease: "easeOut", delay: 0.04 }}
-          className="relative mx-auto w-full max-w-3xl"
-        >
+        <div className="relative mx-auto w-full max-w-3xl">
           <div className="grid gap-3">
             {travelerMoments.map((item, index) => (
-              <motion.article
+              <article
                 key={item.label}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.25 }}
-                transition={{
-                  duration: 0.32,
-                  ease: "easeOut",
-                  delay: index * 0.04,
-                }}
-                className="group relative overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-[0_16px_45px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_60px_rgba(15,23,42,0.10)]"
+                className="relative overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-[0_16px_45px_rgba(15,23,42,0.06)]"
               >
                 <div className="pointer-events-none absolute left-[112px] top-[-10px] h-5 w-5 rounded-full border border-slate-200 bg-white" />
                 <div className="pointer-events-none absolute left-[112px] bottom-[-10px] h-5 w-5 rounded-full border border-slate-200 bg-white" />
@@ -123,10 +101,10 @@ export default function HomepageLabTravelerMoments() {
                     </div>
                   </div>
                 </div>
-              </motion.article>
+              </article>
             ))}
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   )

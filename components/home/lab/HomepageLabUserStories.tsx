@@ -1,7 +1,5 @@
 "use client"
 
-import { motion } from "framer-motion"
-
 const userStories = [
   {
     person: "The frequent flyer",
@@ -36,13 +34,7 @@ export default function HomepageLabUserStories() {
   return (
     <section className="relative overflow-hidden bg-white px-6 py-24 sm:py-28">
       <div className="relative mx-auto max-w-7xl">
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.25 }}
-          transition={{ duration: 0.38, ease: "easeOut" }}
-          className="mx-auto max-w-4xl text-center"
-        >
+        <div className="mx-auto max-w-4xl text-center">
           <h2 className="mt-4 text-4xl font-bold tracking-tight text-slate-800 sm:text-5xl">
             Built around the moments travelers actually feel.
           </h2>
@@ -52,21 +44,13 @@ export default function HomepageLabUserStories() {
             they book flights, compare stays, plan transportation, build itineraries,
             and react when travel conditions start changing.
           </p>
-        </motion.div>
+        </div>
 
         <div className="mx-auto mt-14 grid max-w-6xl gap-4 lg:grid-cols-3">
-          {userStories.map((story, index) => (
-            <motion.article
+          {userStories.map((story) => (
+            <article
               key={story.person}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{
-                duration: 0.32,
-                ease: "easeOut",
-                delay: index * 0.04,
-              }}
-              className="group relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_18px_55px_rgba(15,23,42,0.06)] transition hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(15,23,42,0.10)]"
+              className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_18px_55px_rgba(15,23,42,0.06)]"
             >
               <div className="flex items-center justify-between gap-3">
                 <p className="rounded-full border border-blue-700 bg-blue-700 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-white">
@@ -87,7 +71,7 @@ export default function HomepageLabUserStories() {
                   {story.details}
                 </p>
               </div>
-            </motion.article>
+            </article>
           ))}
         </div>
       </div>
