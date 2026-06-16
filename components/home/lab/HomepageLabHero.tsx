@@ -101,21 +101,6 @@ export default function HomepageLabHero() {
           data?.code === "PUBLIC_LUCY_LIMIT_REACHED"
         ) {
           setPublicLucyLimitReached(true)
-
-          setMessages((current) => {
-            if (current.length > 0) return current
-
-            return [
-              {
-                id: createMessageId(),
-                role: "lucy",
-                text:
-                  typeof data?.reply === "string" && data.reply.trim()
-                    ? data.reply.trim()
-                    : PUBLIC_LUCY_LIMIT_REACHED_MESSAGE,
-              },
-            ]
-          })
         }
       } catch {
         // Keep the public preview usable if the status check fails.
