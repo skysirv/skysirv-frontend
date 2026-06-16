@@ -40,7 +40,7 @@ const memoryCards = [
 
 export default function HomepageLabLucyMemory() {
   return (
-    <section className="relative overflow-hidden bg-white px-6 py-24 sm:py-28">
+    <section className="relative hidden overflow-hidden bg-white px-6 py-24 sm:block sm:py-28">
       <div className="relative mx-auto grid max-w-7xl gap-14 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
         <div className="relative mx-auto h-[520px] w-full max-w-3xl sm:h-[600px]">
           {memoryCards.map((card) => (

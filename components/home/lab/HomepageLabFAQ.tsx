@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import LargeChevron from "@/components/ui/LargeChevron"
 
 const faqs = [
   {
@@ -39,7 +40,7 @@ export default function HomepageLabFAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
   return (
-    <section className="relative overflow-hidden bg-white px-6 pb-12 pt-12 sm:pb-16 sm:pt-10">
+    <section className="relative overflow-hidden bg-white px-6 pb-12 pt-4 sm:pb-16 sm:pt-10">
       <div className="relative mx-auto grid max-w-7xl gap-14 lg:min-h-[620px] lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
         <div className="mx-auto max-w-xl text-center lg:mx-0 lg:text-left">
           <h2 className="mt-4 text-4xl font-bold tracking-tight text-slate-800 sm:text-5xl">
@@ -69,8 +70,11 @@ export default function HomepageLabFAQ() {
                       {item.question}
                     </span>
 
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-lg font-bold text-white">
-                      {isOpen ? "−" : "+"}
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white">
+                      <LargeChevron
+                        direction={isOpen ? "up" : "down"}
+                        className="h-5 w-5"
+                      />
                     </span>
                   </button>
 

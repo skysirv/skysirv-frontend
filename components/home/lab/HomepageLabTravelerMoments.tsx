@@ -26,7 +26,7 @@ const travelerMoments = [
 
 export default function HomepageLabTravelerMoments() {
   return (
-    <section className="relative overflow-hidden bg-white px-6 py-24 sm:py-28">
+    <section className="relative overflow-hidden bg-white px-6 pb-24 pt-2 sm:py-28">
       <div className="relative mx-auto grid max-w-7xl gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
         <div className="mx-auto max-w-xl text-center lg:mx-0 lg:text-left">
           <h2 className="mt-4 text-4xl font-bold tracking-tight text-slate-800 sm:text-5xl">

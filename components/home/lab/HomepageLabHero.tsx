@@ -69,6 +69,7 @@ export default function HomepageLabHero() {
   const [messages, setMessages] = useState<HeroLucyMessage[]>([])
   const [chatLoading, setChatLoading] = useState(false)
   const [publicLucyLimitReached, setPublicLucyLimitReached] = useState(false)
+  const [isMobileViewport, setIsMobileViewport] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -79,6 +80,22 @@ export default function HomepageLabHero() {
     }, 6000)
 
     return () => window.clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 639px)")
+
+    function updateMobileViewport() {
+      setIsMobileViewport(mediaQuery.matches)
+    }
+
+    updateMobileViewport()
+
+    mediaQuery.addEventListener("change", updateMobileViewport)
+
+    return () => {
+      mediaQuery.removeEventListener("change", updateMobileViewport)
+    }
   }, [])
 
   useEffect(() => {
@@ -235,7 +252,7 @@ export default function HomepageLabHero() {
           <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-white/0 to-slate-950/10" />
         </div>
 
-        <div className="absolute inset-0 z-10 flex items-center justify-center px-6 pb-10 pt-24 text-center sm:px-8 lg:px-12">
+        <div className="absolute inset-0 z-10 flex items-center justify-center px-6 pb-10 pt-44 text-center sm:px-8 sm:pt-24 lg:px-12">
           <div className="flex w-full max-w-7xl flex-col items-center" style={{ transform: "translateY(32px)" }}>
             <div className="mx-auto max-w-5xl">
               <h1 className="text-4xl font-bold tracking-tight text-slate-800 drop-shadow-[0_8px_34px_rgba(2,6,23,0.35)] sm:text-5xl md:text-6xl lg:text-6xl">
@@ -310,8 +327,12 @@ export default function HomepageLabHero() {
                       disabled={publicLucyLimitReached}
                       placeholder={
                         publicLucyLimitReached
-                          ? "Public preview limit reached. Sign in or create an account to continue."
-                          : "Ask Lucy about flights, hotels, rentals, or trip planning..."
+                          ? isMobileViewport
+                            ? "Public preview limit reached."
+                            : "Public preview limit reached. Sign in or create an account to continue."
+                          : isMobileViewport
+                            ? "Ask Lucy..."
+                            : "Ask Lucy about flights, hotels, rentals, or trip planning..."
                       }
                       className="min-w-0 flex-1 bg-transparent text-sm font-medium text-slate-950 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:text-slate-400"
                     />

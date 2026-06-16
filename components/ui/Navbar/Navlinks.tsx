@@ -167,6 +167,7 @@ export default function Navlinks({
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [bookMenuOpen, setBookMenuOpen] = useState(false);
   const [planMenuOpen, setPlanMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dashboardHref, setDashboardHref] = useState('/choose-plan');
 
   function expireSessionAndReturnHome() {
@@ -421,6 +422,7 @@ export default function Navlinks({
     setAccountMenuOpen(false);
     setBookMenuOpen(false);
     setPlanMenuOpen(false);
+    setMobileMenuOpen(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -489,7 +491,7 @@ export default function Navlinks({
           }`}
       >
         <div className="relative mx-auto flex min-h-[72px] w-full max-w-5xl items-center justify-between px-6 sm:px-8 lg:px-0">
-          <div className="flex items-center translate-y-[1px] -translate-x-3">
+          <div className="flex items-center translate-y-[5px] -translate-x-3 md:translate-y-[1px]">
             <Link href="/" className={s.logo} aria-label="Skysirv" style={{ marginLeft: '-22px' }}>
               <span style={{ display: 'flex', alignItems: 'center', height: '40px' }}>
                 <img
@@ -662,7 +664,7 @@ export default function Navlinks({
             </div>
           </div>
 
-          <div className="relative flex translate-x-10 items-center gap-2" ref={dropdownRef}>
+          <div className="relative hidden translate-x-10 items-center gap-2 md:flex" ref={dropdownRef}>
             {isSessionReady && (
               <>
                 <button
@@ -800,8 +802,107 @@ export default function Navlinks({
               </>
             )}
           </div>
+
+          <div className="flex items-center md:hidden">
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen((current) => !current)}
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileMenuOpen}
+              className="inline-flex h-11 w-11 items-center justify-center text-slate-800 transition hover:text-slate-800"
+            >
+              <span className="sr-only">Open menu</span>
+              <span className="relative h-5 w-5">
+                <span
+                  className={`absolute left-0 top-[4px] h-0.5 w-5 rounded-full bg-current transition-transform ${mobileMenuOpen ? "translate-y-[6px] rotate-45" : ""
+                    }`}
+                />
+                <span
+                  className={`absolute left-0 top-[10px] h-0.5 w-5 rounded-full bg-current transition-opacity ${mobileMenuOpen ? "opacity-0" : "opacity-100"
+                    }`}
+                />
+                <span
+                  className={`absolute left-0 top-[16px] h-0.5 w-5 rounded-full bg-current transition-transform ${mobileMenuOpen ? "-translate-y-[6px] -rotate-45" : ""
+                    }`}
+                />
+              </span>
+            </button>
+          </div>
         </div>
       </div>
+
+      {mobileMenuOpen && (
+        <div className="md:hidden">
+          <div className="mx-auto w-full max-w-5xl px-4 pb-4">
+            <div className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.16)]">
+              <div className="grid gap-1 p-3">
+                <Link
+                  href="/booking/flights"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-2xl px-4 py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50"
+                >
+                  Book
+                </Link>
+
+                <Link
+                  href="/plan-with-lucy/itinerary"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-2xl px-4 py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50"
+                >
+                  Plan with Lucy
+                </Link>
+
+                <Link
+                  href="/skysirv-live"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-2xl px-4 py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50"
+                >
+                  Skysirv Live
+                </Link>
+
+                <Link
+                  href="/pricing"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-2xl px-4 py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50"
+                >
+                  Pricing
+                </Link>
+              </div>
+
+              <div className="border-t border-slate-100 p-3">
+                {isLoggedIn ? (
+                  <Link
+                    href={isAdmin ? "/admin" : dashboardHref}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex min-h-[44px] w-full items-center justify-center rounded-2xl bg-blue-700 px-4 text-sm font-bold text-white transition hover:bg-blue-600"
+                  >
+                    {isAdmin ? "Admin" : "Dashboard"}
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false)
+                      openSigninModal()
+                    }}
+                    className="flex min-h-[44px] w-full items-center justify-center rounded-2xl bg-blue-700 px-4 text-sm font-bold text-white transition hover:bg-blue-600"
+                  >
+                    Sign in
+                  </button>
+                )}
+
+                <Link
+                  href="/plan-smarter"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="mt-2 flex min-h-[44px] w-full items-center justify-center rounded-2xl bg-orange-500 px-4 text-sm font-bold text-white transition hover:bg-orange-600"
+                >
+                  Plan smarter
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <AuthModal
         open={createAccountModalOpen}

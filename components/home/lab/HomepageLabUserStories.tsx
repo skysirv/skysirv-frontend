@@ -1,5 +1,7 @@
 "use client"
 
+import { useEffect, useState } from "react"
+
 const userStories = [
   {
     person: "The frequent flyer",
@@ -31,11 +33,24 @@ const userStories = [
 ]
 
 export default function HomepageLabUserStories() {
+  const [activeStoryIndex, setActiveStoryIndex] = useState(0)
+  const activeStory = userStories[activeStoryIndex]
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActiveStoryIndex((current) =>
+        current === userStories.length - 1 ? 0 : current + 1
+      )
+    }, 4500)
+
+    return () => window.clearInterval(timer)
+  }, [])
+
   return (
-    <section className="relative overflow-hidden bg-white px-6 py-24 sm:py-28">
+    <section className="relative overflow-hidden bg-white px-6 pb-10 pt-8 sm:py-28">
       <div className="relative mx-auto max-w-7xl">
         <div className="mx-auto max-w-4xl text-center">
-          <h2 className="mt-4 text-4xl font-bold tracking-tight text-slate-800 sm:text-5xl">
+          <h2 className="mt-0 text-4xl font-bold tracking-tight text-slate-800 sm:mt-4 sm:text-5xl">
             Built around the moments travelers actually feel.
           </h2>
 
@@ -46,7 +61,58 @@ export default function HomepageLabUserStories() {
           </p>
         </div>
 
-        <div className="mx-auto mt-14 grid max-w-6xl gap-4 lg:grid-cols-3">
+        <div className="mx-auto mt-10 max-w-sm sm:hidden">
+          <div className="relative rounded-[2rem] border border-slate-200 bg-white px-5 pb-5 pt-0">
+            <article
+              key={activeStory.person}
+              className="animate-[skysirvStoryFlip_420ms_ease-out]"
+              style={{
+                transformOrigin: "left center",
+                transformStyle: "preserve-3d",
+              }}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <p className="mt-8 text-center rounded-full border border-blue-700 bg-blue-700 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-white">
+                  {activeStory.person}
+                </p>
+
+                <p className="mt-8 text-center text-xs font-bold text-slate-800">
+                  {activeStory.route}
+                </p>
+              </div>
+
+              <p className="mt-8 text-center text-xl font-bold italic leading-8 tracking-tight text-slate-800">
+                “{activeStory.quote}”
+              </p>
+
+              <div className="mt-7 border-t border-slate-200 pt-5 text-center">
+                <h3 className="text-base font-bold leading-6 text-orange-500">
+                  {activeStory.title}
+                </h3>
+
+                <p className="mt-3 text-sm leading-6 text-slate-800">
+                  {activeStory.details}
+                </p>
+              </div>
+            </article>
+          </div>
+
+          <style>{`
+            @keyframes skysirvStoryFlip {
+              from {
+                opacity: 0;
+                transform: rotateY(-12deg) translateX(10px);
+              }
+
+              to {
+                opacity: 1;
+                transform: rotateY(0deg) translateX(0);
+              }
+            }
+          `}</style>
+        </div>
+
+        <div className="mx-auto mt-14 hidden max-w-6xl gap-4 sm:grid lg:grid-cols-3">
           {userStories.map((story) => (
             <article
               key={story.person}

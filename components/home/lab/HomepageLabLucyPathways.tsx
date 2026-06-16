@@ -30,7 +30,7 @@ const pathwayItems = [
 
 export default function HomepageLabLucyPathways() {
   return (
-    <section className="relative overflow-hidden bg-white px-6 pb-12 pt-24 sm:pb-16 sm:pt-28">
+    <section className="relative overflow-hidden bg-white px-6 pb-12 pt-14 sm:pb-16 sm:pt-28">
       <div className="relative mx-auto max-w-7xl">
         <div className="mx-auto max-w-4xl text-center">
           <h2 className="text-4xl font-bold tracking-tight text-slate-800 sm:text-5xl lg:text-6xl">
@@ -43,16 +43,19 @@ export default function HomepageLabLucyPathways() {
           </p>
         </div>
 
-        <div className="relative mx-auto mt-20 max-w-7xl">
+        <div className="relative mx-auto mt-12 max-w-7xl sm:mt-20">
           <div className="relative grid gap-5 md:grid-cols-2 lg:grid-cols-5">
             {pathwayItems.map((item) => (
               <article
                 key={item.title}
-                className="relative isolate h-[360px] overflow-hidden rounded-[1.75rem] border border-white/70 bg-slate-950 p-5 text-left shadow-sm"
+                className="relative isolate h-[240px] overflow-hidden rounded-[1.75rem] border border-white/70 bg-slate-950 p-5 text-left shadow-sm sm:h-[360px]"
               >
                 <div
-                  className="absolute inset-0 bg-cover bg-center bg-no-repeat brightness-[0.7]"
-                  style={{ backgroundImage: `url('${item.image}')` }}
+                  className="absolute inset-0 bg-cover bg-no-repeat brightness-[0.7]"
+                  style={{
+                    backgroundImage: `url('${item.image}')`,
+                    backgroundPosition: "center 75%",
+                  }}
                 />
 
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-950/72 via-slate-950/28 to-slate-950/10" />

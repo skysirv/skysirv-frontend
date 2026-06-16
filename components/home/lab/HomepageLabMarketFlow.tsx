@@ -23,9 +23,9 @@ const marketCards = [
 
 export default function HomepageLabMarketFlow() {
   return (
-    <section className="relative overflow-hidden bg-white px-6 pb-24 pt-6 sm:pb-28 sm:pt-8">
+    <section className="relative hidden overflow-hidden bg-white px-6 pb-24 pt-6 sm:block sm:pb-28 sm:pt-8">
       <div className="relative mx-auto max-w-7xl">
-        <div className="mx-auto max-w-4xl text-center">
+        <div className="mx-auto hidden max-w-4xl text-center sm:block">
           <h2 className="text-4xl font-bold tracking-tight text-slate-800 sm:text-5xl lg:text-6xl">
             How Skysirv reads travel signals.
           </h2>
@@ -37,7 +37,7 @@ export default function HomepageLabMarketFlow() {
           </p>
         </div>
 
-        <div className="mx-auto mt-20 grid max-w-6xl gap-14 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
+        <div className="mx-auto mt-0 grid max-w-6xl gap-14 sm:mt-20 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
           <div className="mx-auto max-w-xl text-center lg:mx-0 lg:text-left">
             <h3 className="mt-4 text-3xl font-bold tracking-tight text-slate-800 sm:text-5xl">
               Plan travel without chasing every price change.
