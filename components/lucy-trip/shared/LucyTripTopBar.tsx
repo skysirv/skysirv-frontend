@@ -29,21 +29,6 @@ export default function LucyTripTopBar() {
       <div className="fixed right-5 top-5 z-50 flex items-center gap-3">
         <button
           type="button"
-          className="inline-flex min-h-[38px] items-center gap-2 rounded-lg border border-slate-200 bg-white/95 px-3 text-sm font-bold text-slate-700 shadow-sm backdrop-blur-xl transition hover:bg-white"
-        >
-          <span
-            aria-hidden="true"
-            className="fi fi-us rounded-[2px]"
-            style={{ width: "20px", height: "15px" }}
-          />
-          USD
-          <span aria-hidden="true" className="text-slate-400">
-            ⌄
-          </span>
-        </button>
-
-        <button
-          type="button"
           className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-700 text-sm font-bold text-white shadow-sm"
           aria-label="Account"
           title="Account"

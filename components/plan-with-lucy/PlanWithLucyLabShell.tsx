@@ -10,7 +10,7 @@ import {
   getCurrencyByCode,
   getRegionById,
   regionOptions,
-} from "@/components/plan-smarter/shared/regionCurrencyOptions"
+} from "@/components/shared/regionCurrencyOptions"
 import CarsPlanMode from "@/components/plan-with-lucy/modes/cars/CarsPlanMode"
 import CruisesPlanMode from "@/components/plan-with-lucy/modes/cruises/CruisesPlanMode"
 import FlightsPlanMode from "@/components/plan-with-lucy/modes/flights/FlightsPlanMode"

@@ -2,71 +2,49 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { getAuthToken } from "@/utils/auth-storage"
-
-import {
-  currencyOptions,
-  defaultCurrencyCode,
-  defaultRegionId,
-  getCurrencyByCode,
-  getRegionById,
-  regionOptions,
-} from "@/components/plan-smarter/shared/regionCurrencyOptions"
+import LucyTripComposer from "@/components/lucy-trip/shared/LucyTripComposer"
 import OnboardingPanel from "@/components/plan-with-lucy/shared/OnboardingPanel"
 import LargeChevron from "@/components/ui/LargeChevron"
 
-type ActivePicker = "region" | "currency" | null
-
 export default function PlanSmarterLabShell() {
   const router = useRouter()
+
   const [showOnboardingPanel, setShowOnboardingPanel] = useState(false)
+  const [isSignedIn, setIsSignedIn] = useState(false)
+  const [lucyPrompt, setLucyPrompt] = useState("")
   const [initialAuthMode, setInitialAuthMode] = useState<"signin" | "signup">(
     "signin",
   )
-  const [regionMenuOpen, setRegionMenuOpen] = useState(false)
-  const [activePicker, setActivePicker] = useState<ActivePicker>(null)
-  const [selectedRegionId, setSelectedRegionId] = useState(defaultRegionId)
-  const [selectedCurrencyCode, setSelectedCurrencyCode] =
-    useState(defaultCurrencyCode)
-
-  const regionMenuRef = useRef<HTMLDivElement | null>(null)
-
-  const selectedRegion = getRegionById(selectedRegionId)
-  const selectedCurrency = getCurrencyByCode(selectedCurrencyCode)
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (!regionMenuRef.current) return
+    function syncAuthState() {
+      const signedIn = Boolean(getAuthToken())
 
-      if (!regionMenuRef.current.contains(event.target as Node)) {
-        setRegionMenuOpen(false)
-        setActivePicker(null)
+      setIsSignedIn(signedIn)
+
+      if (!signedIn) {
+        setInitialAuthMode("signin")
+        setShowOnboardingPanel(true)
       }
     }
 
-    document.addEventListener("mousedown", handleClickOutside)
+    syncAuthState()
+
+    window.addEventListener("focus", syncAuthState)
+    window.addEventListener("storage", syncAuthState)
+    window.addEventListener("skysirv-auth-changed", syncAuthState as EventListener)
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
+      window.removeEventListener("focus", syncAuthState)
+      window.removeEventListener("storage", syncAuthState)
+      window.removeEventListener(
+        "skysirv-auth-changed",
+        syncAuthState as EventListener,
+      )
     }
   }, [])
-
-  function toggleMainMenu() {
-    setRegionMenuOpen((current) => {
-      const nextOpen = !current
-
-      if (!nextOpen) {
-        setActivePicker(null)
-      }
-
-      return nextOpen
-    })
-  }
-
-  function togglePicker(picker: Exclude<ActivePicker, null>) {
-    setActivePicker((current) => (current === picker ? null : picker))
-  }
 
   function openOnboardingPanel(mode: "signin" | "signup") {
     setInitialAuthMode(mode)
@@ -82,6 +60,16 @@ export default function PlanSmarterLabShell() {
     }
 
     router.push("/lucy-trip")
+  }
+
+  function handleLucyComposerSubmit() {
+    const prompt = lucyPrompt.trim()
+
+    if (prompt) {
+      window.sessionStorage.setItem("skysirv-plan-smarter-lucy-prompt", prompt)
+    }
+
+    handleAskLucyClick()
   }
 
   return (
@@ -123,190 +111,6 @@ export default function PlanSmarterLabShell() {
             </button>
           </div>
         </aside>
-
-        <div className="fixed right-5 top-5 z-50 flex items-start gap-3">
-          <div
-            ref={regionMenuRef}
-            className="relative"
-            onMouseDown={(event) => event.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={toggleMainMenu}
-              className="inline-flex min-h-[38px] items-center gap-2 rounded-lg border border-slate-200 bg-white/95 px-3 text-sm font-bold text-slate-700 shadow-sm backdrop-blur-xl transition hover:bg-white"
-              aria-expanded={regionMenuOpen}
-            >
-              <span
-                aria-hidden="true"
-                className={`fi fi-${selectedRegion.flagCode} rounded-[2px]`}
-                style={{ width: "20px", height: "15px" }}
-              />
-
-              <span>{selectedCurrency.code}</span>
-
-              <svg
-                viewBox="0 0 20 20"
-                aria-hidden="true"
-                className={`h-4 w-4 text-slate-400 transition-transform ${regionMenuOpen ? "rotate-180" : ""
-                  }`}
-                fill="none"
-              >
-                <path
-                  d="M5.5 7.5 10 12l4.5-4.5"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-
-            {regionMenuOpen && (
-              <div className="absolute right-0 top-full z-50 mt-2 w-[330px] rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-[0_22px_60px_rgba(15,23,42,0.14)]">
-                <div>
-                  <p className="text-sm font-bold text-slate-800">
-                    Country / Region
-                  </p>
-
-                  <button
-                    type="button"
-                    onClick={() => togglePicker("region")}
-                    className={`mt-3 flex min-h-[42px] w-full items-center justify-between rounded-xl border px-3 text-sm font-medium transition ${activePicker === "region"
-                      ? "border-orange-200 ring-2 ring-orange-100"
-                      : "border-slate-200 hover:border-slate-300"
-                      }`}
-                  >
-                    <span className="inline-flex items-center gap-3">
-                      <span
-                        aria-hidden="true"
-                        className={`fi fi-${selectedRegion.flagCode} rounded-[2px]`}
-                        style={{ width: "20px", height: "15px" }}
-                      />
-                      <span className="text-slate-700">
-                        {selectedRegion.countryName}
-                      </span>
-                    </span>
-
-                    <svg
-                      viewBox="0 0 20 20"
-                      aria-hidden="true"
-                      className={`h-4 w-4 text-slate-400 transition-transform ${activePicker === "region" ? "rotate-180" : ""
-                        }`}
-                      fill="none"
-                    >
-                      <path
-                        d="M5.5 7.5 10 12l4.5-4.5"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-
-                  {activePicker === "region" && (
-                    <div className="mt-2 max-h-[230px] overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 shadow-[0_12px_35px_rgba(15,23,42,0.08)]">
-                      {regionOptions.map((region) => {
-                        const isSelected = region.id === selectedRegion.id
-
-                        return (
-                          <button
-                            key={region.id}
-                            type="button"
-                            onClick={() => {
-                              setSelectedRegionId(region.id)
-                              setSelectedCurrencyCode(region.defaultCurrencyCode)
-                              setActivePicker(null)
-                            }}
-                            className={`flex min-h-[42px] w-full items-center gap-3 px-3 text-sm font-medium transition ${isSelected
-                              ? "bg-slate-50 text-slate-900"
-                              : "text-slate-700 hover:bg-slate-50"
-                              }`}
-                          >
-                            <span
-                              aria-hidden="true"
-                              className={`fi fi-${region.flagCode} rounded-[2px]`}
-                              style={{ width: "20px", height: "15px" }}
-                            />
-
-                            <span>{region.countryName}</span>
-                          </button>
-                        )
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-5">
-                  <p className="text-sm font-bold text-slate-800">Currency</p>
-
-                  <button
-                    type="button"
-                    onClick={() => togglePicker("currency")}
-                    className={`mt-3 flex min-h-[42px] w-full items-center justify-between rounded-xl border px-3 text-sm font-medium transition ${activePicker === "currency"
-                      ? "border-slate-300 ring-2 ring-slate-100"
-                      : "border-slate-200 hover:border-slate-300"
-                      }`}
-                  >
-                    <span className="text-slate-700">
-                      {selectedCurrency.code} - {selectedCurrency.name}
-                    </span>
-
-                    <svg
-                      viewBox="0 0 20 20"
-                      aria-hidden="true"
-                      className={`h-4 w-4 text-slate-400 transition-transform ${activePicker === "currency" ? "rotate-180" : ""
-                        }`}
-                      fill="none"
-                    >
-                      <path
-                        d="M5.5 7.5 10 12l4.5-4.5"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-
-                  {activePicker === "currency" && (
-                    <div className="mt-2 max-h-[190px] overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 shadow-[0_12px_35px_rgba(15,23,42,0.08)]">
-                      {currencyOptions.map((currency) => {
-                        const isSelected =
-                          currency.code === selectedCurrency.code
-
-                        return (
-                          <button
-                            key={currency.code}
-                            type="button"
-                            onClick={() => {
-                              setSelectedCurrencyCode(currency.code)
-                              setActivePicker(null)
-                            }}
-                            className={`flex min-h-[42px] w-full items-center px-3 text-sm font-medium transition ${isSelected
-                              ? "bg-slate-50 text-slate-900"
-                              : "text-slate-700 hover:bg-slate-50"
-                              }`}
-                          >
-                            {currency.code} - {currency.name}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => openOnboardingPanel("signin")}
-            className="inline-flex min-h-[38px] items-center justify-center rounded-lg border border-blue-700 bg-blue-700 px-4 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:border-blue-600 hover:bg-blue-600"
-          >
-            Sign in
-          </button>
-        </div>
 
         <div
           className={`mx-auto flex h-full max-w-4xl flex-col justify-start pt-[48px] transition-transform duration-300 ${showOnboardingPanel ? "xl:-translate-x-[220px]" : "xl:translate-x-0"
@@ -443,35 +247,48 @@ export default function PlanSmarterLabShell() {
             : "left-1/2 -translate-x-1/2"
             }`}
         >
-          <div className="flex min-h-[74px] items-center justify-between gap-5 rounded-[1.35rem] border border-orange-100 bg-white/90 px-5 py-3 shadow-[0_18px_55px_rgba(15,23,42,0.12)] backdrop-blur-xl">
-            <div className="flex min-w-0 items-center gap-4">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-orange-50 text-2xl text-orange-500 ring-8 ring-orange-100/70">
-                🔒
-              </span>
-
-              <span className="min-w-0">
-                <span className="block text-xs font-bold text-slate-800">
-                  Sign up to save planning sessions and unlock Lucy’s deeper
-                  travel memory.
+          {isSignedIn ? (
+            <LucyTripComposer
+              fixed={false}
+              value={lucyPrompt}
+              onChange={setLucyPrompt}
+              onSubmit={handleLucyComposerSubmit}
+              placeholder="Ask Lucy to shape the next part of your trip..."
+            />
+          ) : (
+            <div className="flex min-h-[74px] items-center justify-between gap-5 rounded-[1.35rem] border border-orange-100 bg-white/90 px-5 py-3 shadow-[0_18px_55px_rgba(15,23,42,0.12)] backdrop-blur-xl">
+              <div className="flex min-w-0 items-center gap-4">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-orange-50 text-2xl text-orange-500 ring-8 ring-orange-100/70">
+                  🔒
                 </span>
-              </span>
-            </div>
 
-            <button
-              type="button"
-              onClick={() => openOnboardingPanel("signup")}
-              className="inline-flex min-h-[42px] shrink-0 items-center justify-center rounded-lg border border-orange-500 bg-orange-500 px-5 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:border-orange-600 hover:bg-orange-600"
-            >
-              Sign up now
-            </button>
-          </div>
+                <span className="min-w-0">
+                  <span className="block text-xs font-bold text-slate-800">
+                    Sign up to save planning sessions and unlock Lucy’s deeper
+                    travel memory.
+                  </span>
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => openOnboardingPanel("signup")}
+                className="inline-flex min-h-[42px] shrink-0 items-center justify-center rounded-lg border border-orange-500 bg-orange-500 px-5 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:border-orange-600 hover:bg-orange-600"
+              >
+                Sign up now
+              </button>
+            </div>
+          )}
         </div>
 
         {showOnboardingPanel && (
           <OnboardingPanel
             variant="drawer"
             initialAuthMode={initialAuthMode}
-            onClose={() => setShowOnboardingPanel(false)}
+            onClose={() => {
+              setShowOnboardingPanel(false)
+              setIsSignedIn(Boolean(getAuthToken()))
+            }}
           />
         )}
       </section>

@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
+import RegionCurrencyPicker from "@/components/shared/RegionCurrencyPicker"
 import CarsBookingMode from "@/components/booking/modes/cars/CarsBookingMode"
 import CruisesBookingMode from "@/components/booking/modes/cruises/CruisesBookingMode"
 import ExperiencesBookingMode from "@/components/booking/modes/experiences/ExperiencesBookingMode"
@@ -717,7 +718,7 @@ export default function BookingLabShell({
           </Link>
 
           <div className="fixed left-1/2 top-5 z-50 flex -translate-x-1/2 justify-center">
-            <div className="flex w-fit max-w-[calc(100vw-160px)] items-center justify-center gap-1 overflow-x-auto rounded-xl border border-slate-200/70 bg-white p-1 shadow-sm">
+            <div className="flex w-fit max-w-[calc(100vw-320px)] items-center justify-center gap-1 overflow-x-auto rounded-xl border border-slate-200/70 bg-white p-1 shadow-sm">
               {bookingModeOrder.map((modeId) => {
                 const mode = bookingModes[modeId]
                 const itineraryModeIndex = itineraryIncludedModes.indexOf(modeId)
@@ -755,6 +756,10 @@ export default function BookingLabShell({
                 )
               })}
             </div>
+          </div>
+
+          <div className="fixed right-5 top-5 z-50">
+            <RegionCurrencyPicker />
           </div>
 
           <aside
