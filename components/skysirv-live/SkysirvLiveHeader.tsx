@@ -83,8 +83,24 @@ export default function SkysirvLiveHeader({
     router.push(`/skysirv-live/${airport.code}`)
   }
 
+  const airportTickerText =
+    tickerItems.length > 0
+      ? tickerItems.join(" · ")
+      : `${airportCode} is showing elevated airport pressure right now.`
+
   return (
     <>
+      <style>{`
+        @keyframes skysirv-mobile-airport-ticker-marquee {
+          0% {
+            transform: translate3d(0, 0, 0);
+          }
+
+          100% {
+            transform: translate3d(-50%, 0, 0);
+          }
+        }
+      `}</style>
       {mode !== "airport" && (
         <header className="pointer-events-auto absolute left-4 right-4 top-4 z-50 md:hidden">
           <div className="mx-auto flex w-full max-w-[360px] items-center gap-2">
@@ -174,23 +190,25 @@ export default function SkysirvLiveHeader({
       )}
 
       <header
-        className={`pointer-events-auto absolute left-5 right-5 top-5 z-30 ${mode === "airport" ? "" : "hidden md:block"
+        className={`pointer-events-auto absolute z-30 ${mode === "airport"
+          ? "left-4 right-4 top-4 md:left-5 md:right-5 md:top-5"
+          : "left-5 right-5 top-5 hidden md:block"
           }`}
       >
         <div className="rounded-[1.35rem] shadow-[0_18px_50px_rgba(15,23,42,0.28)]">
           <div
-            className={`flex min-h-[76px] flex-col gap-3 bg-blue-700 px-4 py-4 text-white backdrop-blur-xl md:flex-row md:items-center md:justify-between md:px-6 md:py-0 ${mode === "airport" ? "rounded-t-[1.35rem]" : "rounded-[1.35rem]"
+            className={`flex min-h-[62px] flex-col gap-2 bg-blue-700 px-4 py-3 text-white backdrop-blur-xl md:min-h-[76px] md:flex-row md:items-center md:justify-between md:gap-3 md:px-6 md:py-0 ${mode === "airport" ? "rounded-t-[1.35rem]" : "rounded-[1.35rem]"
               }`}
           >
             <div className="flex items-center gap-4">
               <Link
                 href={mode === "airport" ? "/skysirv-live" : "/"}
-                className="inline-flex h-11 items-center gap-1.5 rounded-full bg-white py-0 pl-3 pr-4 text-sm font-bold text-slate-800 transition hover:bg-slate-100"
+                className="inline-flex h-9 items-center gap-1 rounded-full bg-white py-0 pl-2 pr-3 text-xs font-bold text-slate-800 transition hover:bg-slate-100 md:h-11 md:gap-1.5 md:pl-3 md:pr-4 md:text-sm"
               >
                 <svg
                   aria-hidden="true"
                   viewBox="0 0 24 24"
-                  className="h-6 w-6"
+                  className="h-5 w-5 md:h-6 md:w-6"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="3"
@@ -206,12 +224,12 @@ export default function SkysirvLiveHeader({
               <div>
                 {mode === "airport" ? (
                   <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                    <h1 className="text-2xl font-black tracking-tight sm:text-4xl">
+                    <h1 className="text-[18px] font-black leading-[1.04] tracking-tight sm:text-4xl sm:leading-tight">
                       {airportName}
                     </h1>
 
                     {localTimeLabel && (
-                      <span className="text-sm font-bold text-white/55 sm:text-base">
+                      <span className="hidden text-sm font-bold text-white/55 sm:inline sm:text-base">
                         {localTimeLabel}
                       </span>
                     )}
@@ -314,15 +332,34 @@ export default function SkysirvLiveHeader({
 
           {mode === "airport" && (
             <div
-              className={`flex h-9 items-center overflow-hidden rounded-b-[1.35rem] px-5 text-sm font-bold text-white ${alertBarClassName}`}
+              className={`flex h-8 items-center overflow-hidden rounded-b-[1.35rem] px-4 text-xs font-bold text-white md:h-9 md:px-5 md:text-sm ${alertBarClassName}`}
             >
-              <span className="mr-3 h-2 w-2 shrink-0 rounded-full bg-white" />
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <div
+                  className="flex w-max md:hidden"
+                  style={{
+                    animation: "skysirv-mobile-airport-ticker-marquee 58s linear infinite",
+                  }}
+                >
+                  <span className="inline-flex items-center whitespace-nowrap pr-10">
+                    <span className="mr-3 h-2 w-2 shrink-0 rounded-full bg-white" />
+                    {airportTickerText}
+                  </span>
 
-              <span className="whitespace-nowrap">
-                {tickerItems.length > 0
-                  ? tickerItems.join(" · ")
-                  : `${airportCode} is showing elevated airport pressure right now.`}
-              </span>
+                  <span
+                    className="inline-flex items-center whitespace-nowrap pr-10"
+                    aria-hidden="true"
+                  >
+                    <span className="mr-3 h-2 w-2 shrink-0 rounded-full bg-white" />
+                    {airportTickerText}
+                  </span>
+                </div>
+
+                <span className="hidden items-center whitespace-nowrap md:inline-flex">
+                  <span className="mr-3 h-2 w-2 shrink-0 rounded-full bg-white" />
+                  {airportTickerText}
+                </span>
+              </div>
             </div>
           )}
         </div>

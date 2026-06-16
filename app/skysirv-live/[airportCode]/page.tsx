@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import Map, { Marker, NavigationControl } from "react-map-gl/mapbox"
 import SkysirvLiveBottomNav from "@/components/skysirv-live/SkysirvLiveBottomNav"
@@ -26,6 +26,16 @@ const validViews = [
   "weather",
   "routes",
   "airlines",
+]
+
+const airportViewTabs = [
+  { key: "overview", label: "Summary" },
+  { key: "delays", label: "Delays" },
+  { key: "departures", label: "Departures" },
+  { key: "arrivals", label: "Arrivals" },
+  { key: "weather", label: "Weather" },
+  { key: "routes", label: "Routes" },
+  { key: "airlines", label: "Airlines" },
 ]
 
 type SkysirvLiveWeatherSnapshot = {
@@ -65,6 +75,8 @@ export default function SkysirvLiveAirportPage({
     ? requestedView
     : "overview"
 
+  const [mobileActiveView, setMobileActiveView] = useState(activeView)
+
   const airport = getAirportByCode(params.airportCode)
 
   const [weather, setWeather] = useState<SkysirvLiveWeatherSnapshot | null>(null)
@@ -73,6 +85,36 @@ export default function SkysirvLiveAirportPage({
 
   const [pressureAirport, setPressureAirport] =
     useState<SkysirvLiveAirport | null>(null)
+
+  useEffect(() => {
+    setMobileActiveView(activeView)
+  }, [activeView])
+
+  const airportDrawerTouchStartYRef = useRef<number | null>(null)
+  const [isAirportDrawerExpanded, setIsAirportDrawerExpanded] = useState(false)
+
+  function handleAirportDrawerTouchStart(event: React.TouchEvent<HTMLDivElement>) {
+    airportDrawerTouchStartYRef.current = event.touches[0]?.clientY ?? null
+  }
+
+  function handleAirportDrawerTouchEnd(event: React.TouchEvent<HTMLDivElement>) {
+    const startY = airportDrawerTouchStartYRef.current
+    const endY = event.changedTouches[0]?.clientY ?? null
+
+    airportDrawerTouchStartYRef.current = null
+
+    if (startY === null || endY === null) return
+
+    const distance = startY - endY
+
+    if (distance > 36) {
+      setIsAirportDrawerExpanded(true)
+    }
+
+    if (distance < -36) {
+      setIsAirportDrawerExpanded(false)
+    }
+  }
 
   useEffect(() => {
     if (!airport) return
@@ -264,13 +306,75 @@ export default function SkysirvLiveAirportPage({
         ]}
       />
 
-      <aside className="pointer-events-auto absolute bottom-[76px] left-5 top-[150px] z-20 w-[390px] max-w-[calc(100vw-40px)]">
+      <aside className="pointer-events-auto absolute bottom-[76px] left-5 top-[150px] z-20 hidden w-[390px] max-w-[calc(100vw-40px)] md:block">
         <div className="h-full overflow-y-auto pb-10 [mask-image:linear-gradient(to_bottom,black_0%,black_calc(100%-72px),transparent_100%)] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {renderAirportPanel(activeView, displayAirport, {
             weather,
             weatherLoading,
             weatherError,
           })}
+        </div>
+      </aside>
+
+      <aside
+        className={`pointer-events-auto absolute inset-x-0 bottom-0 z-40 rounded-t-[2rem] bg-white shadow-[0_-18px_55px_rgba(15,23,42,0.22)] transition-[height] duration-300 ease-out md:hidden ${isAirportDrawerExpanded ? "h-[64svh]" : "h-[88px]"
+          }`}
+        onTouchStart={handleAirportDrawerTouchStart}
+        onTouchEnd={handleAirportDrawerTouchEnd}
+      >
+        <div className="flex h-full flex-col overflow-hidden px-5 pb-5 pt-3">
+          <button
+            type="button"
+            onClick={() => setIsAirportDrawerExpanded((current) => !current)}
+            className="mx-auto h-1.5 w-12 rounded-full bg-slate-300"
+            aria-label="Resize airport details drawer"
+          />
+
+          <button
+            type="button"
+            onClick={() => setIsAirportDrawerExpanded((current) => !current)}
+            className="mt-4 flex w-full items-center justify-between gap-4 text-left"
+          >
+            <h2 className="min-w-0 truncate text-xl font-black tracking-tight text-slate-950">
+              {displayAirport.name}
+            </h2>
+
+            <span className={`h-4 w-4 shrink-0 rounded-full ${styles.dot}`} />
+          </button>
+
+          {isAirportDrawerExpanded && (
+            <>
+              <div className="mt-3 overflow-x-auto border-b border-slate-200 pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                <div className="flex min-w-max items-center gap-5">
+                  {airportViewTabs.map((tab) => {
+                    const isActive = mobileActiveView === tab.key
+
+                    return (
+                      <button
+                        key={tab.key}
+                        type="button"
+                        onClick={() => setMobileActiveView(tab.key)}
+                        className={`shrink-0 border-b-2 pb-1.5 text-[11px] font-black uppercase tracking-[0.1em] transition ${isActive
+                          ? "border-blue-700 text-blue-700"
+                          : "border-transparent text-slate-400"
+                          }`}
+                      >
+                        {tab.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className="min-h-0 flex-1 overflow-y-auto pt-3 [zoom:0.78] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                {renderAirportPanel(mobileActiveView, displayAirport, {
+                  weather,
+                  weatherLoading,
+                  weatherError,
+                })}
+              </div>
+            </>
+          )}
         </div>
       </aside>
 
@@ -284,11 +388,13 @@ export default function SkysirvLiveAirportPage({
         </p>
       </div>
 
-      <SkysirvLiveBottomNav
-        mode="airport"
-        airportCode={displayAirport.code}
-        activeKey={activeView}
-      />
+      <div className="hidden md:block">
+        <SkysirvLiveBottomNav
+          mode="airport"
+          airportCode={displayAirport.code}
+          activeKey={activeView}
+        />
+      </div>
     </main>
   )
 }
