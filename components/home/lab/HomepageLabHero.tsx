@@ -252,7 +252,7 @@ export default function HomepageLabHero() {
           <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-white/0 to-slate-950/10" />
         </div>
 
-        <div className="absolute inset-0 z-10 flex items-center justify-center px-6 pb-10 pt-56 text-center sm:px-8 sm:pt-24 lg:px-12">
+        <div className="absolute inset-0 z-10 flex items-start justify-center px-6 pb-10 pt-60 text-center sm:items-center sm:px-8 sm:pt-24 lg:px-12">
           <div className="flex w-full max-w-7xl flex-col items-center" style={{ transform: "translateY(32px)" }}>
             <div className="mx-auto max-w-5xl">
               <h1 className="text-4xl font-bold tracking-tight text-slate-800 drop-shadow-[0_8px_34px_rgba(2,6,23,0.35)] sm:text-5xl md:text-6xl lg:text-6xl">
