@@ -79,6 +79,7 @@ const regionViewStates: Record<
 }
 
 const DEFAULT_REGION_KEY = "north-america"
+const MOBILE_DEFAULT_REGION_ZOOM = 1.75
 const GLOBAL_MAJOR_PRIORITY_ZOOM_THRESHOLD = 4.25
 const REGIONAL_AIRPORT_MARKER_ZOOM_THRESHOLD = 5.35
 const EXECUTIVE_AIRPORT_MARKER_ZOOM_THRESHOLD = 7.25
@@ -304,9 +305,13 @@ export default function SkysirvLivePage() {
   const [faaObservedAt, setFaaObservedAt] = useState<string | undefined>()
   const [mapStyleKey, setMapStyleKey] = useState<MapStyleKey>("standard")
 
-  const [currentZoom, setCurrentZoom] = useState(
-    regionViewStates[DEFAULT_REGION_KEY].zoom,
-  )
+  const [currentZoom, setCurrentZoom] = useState(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      return MOBILE_DEFAULT_REGION_ZOOM
+    }
+
+    return regionViewStates[DEFAULT_REGION_KEY].zoom
+  })
 
   const [visibleAirportCodes, setVisibleAirportCodes] = useState<string[] | null>(
     null,
@@ -513,7 +518,13 @@ export default function SkysirvLivePage() {
     })
   }, [airportDisplayPool])
 
-  const initialViewState = regionViewStates[DEFAULT_REGION_KEY]
+  const initialViewState = {
+    ...regionViewStates[DEFAULT_REGION_KEY],
+    zoom:
+      typeof window !== "undefined" && window.innerWidth < 768
+        ? MOBILE_DEFAULT_REGION_ZOOM
+        : regionViewStates[DEFAULT_REGION_KEY].zoom,
+  }
 
   return (
     <main className="fixed inset-0 h-[100dvh] w-screen overflow-hidden overscroll-none bg-slate-100 text-slate-950">
@@ -561,8 +572,6 @@ export default function SkysirvLivePage() {
           ))}
         </Map>
       </div>
-
-      <div className="pointer-events-none absolute inset-x-0 top-0 bottom-[56px] bg-gradient-to-r from-white/75 via-white/20 to-transparent" />
 
       <SkysirvLiveHeader lastUpdatedAt={faaObservedAt} />
 
