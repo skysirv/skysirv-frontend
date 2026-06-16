@@ -80,6 +80,18 @@ const regionViewStates: Record<
 
 const DEFAULT_REGION_KEY = "north-america"
 const MOBILE_DEFAULT_REGION_ZOOM = 1.75
+
+const mobileRegionZoomOverrides: Record<string, number> = {
+  all: 1.05,
+  "north-america": MOBILE_DEFAULT_REGION_ZOOM,
+  europe: 2.45,
+  asia: 2.05,
+  africa: 2.1,
+  "south-america": 2.05,
+  "middle-east": 2.65,
+  pacific: 2.05,
+}
+
 const GLOBAL_MAJOR_PRIORITY_ZOOM_THRESHOLD = 4.25
 const REGIONAL_AIRPORT_MARKER_ZOOM_THRESHOLD = 5.35
 const EXECUTIVE_AIRPORT_MARKER_ZOOM_THRESHOLD = 7.25
@@ -296,6 +308,18 @@ function getRegionKeyFromMapCenter(longitude: number, latitude: number) {
   return "all"
 }
 
+function isMobileViewport() {
+  return typeof window !== "undefined" && window.innerWidth < 768
+}
+
+function getRegionZoomForViewport(regionKey: string) {
+  if (isMobileViewport()) {
+    return mobileRegionZoomOverrides[regionKey] ?? MOBILE_DEFAULT_REGION_ZOOM
+  }
+
+  return regionViewStates[regionKey]?.zoom ?? regionViewStates[DEFAULT_REGION_KEY].zoom
+}
+
 export default function SkysirvLivePage() {
   const mapRef = useRef<MapRef | null>(null)
   const suppressNextVisibleUpdateRef = useRef(false)
@@ -305,13 +329,9 @@ export default function SkysirvLivePage() {
   const [faaObservedAt, setFaaObservedAt] = useState<string | undefined>()
   const [mapStyleKey, setMapStyleKey] = useState<MapStyleKey>("standard")
 
-  const [currentZoom, setCurrentZoom] = useState(() => {
-    if (typeof window !== "undefined" && window.innerWidth < 768) {
-      return MOBILE_DEFAULT_REGION_ZOOM
-    }
-
-    return regionViewStates[DEFAULT_REGION_KEY].zoom
-  })
+  const [currentZoom, setCurrentZoom] = useState(() =>
+    getRegionZoomForViewport(DEFAULT_REGION_KEY),
+  )
 
   const [visibleAirportCodes, setVisibleAirportCodes] = useState<string[] | null>(
     null,
@@ -473,12 +493,14 @@ export default function SkysirvLivePage() {
     setActiveRegion(regionKey)
     suppressNextVisibleUpdateRef.current = false
     setSelectedAirportCode(null)
-    setCurrentZoom(nextViewState.zoom)
+    const nextZoom = getRegionZoomForViewport(regionKey)
+
+    setCurrentZoom(nextZoom)
     setVisibleAirportCodes(null)
 
     mapRef.current?.flyTo({
       center: [nextViewState.longitude, nextViewState.latitude],
-      zoom: nextViewState.zoom,
+      zoom: nextZoom,
       duration: 950,
       essential: true,
     })
@@ -520,10 +542,7 @@ export default function SkysirvLivePage() {
 
   const initialViewState = {
     ...regionViewStates[DEFAULT_REGION_KEY],
-    zoom:
-      typeof window !== "undefined" && window.innerWidth < 768
-        ? MOBILE_DEFAULT_REGION_ZOOM
-        : regionViewStates[DEFAULT_REGION_KEY].zoom,
+    zoom: getRegionZoomForViewport(DEFAULT_REGION_KEY),
   }
 
   return (
@@ -597,7 +616,9 @@ export default function SkysirvLivePage() {
 
       <SkysirvLiveAirportList
         airports={sortedAirports}
+        activeRegion={activeRegion}
         onAirportSelect={handleAirportSelect}
+        onRegionSelect={handleRegionSelect}
       />
 
       <SkysirvLiveLucyRead
@@ -606,11 +627,13 @@ export default function SkysirvLivePage() {
         lastUpdatedAt={faaObservedAt}
       />
 
-      <SkysirvLiveBottomNav
-        mode="regions"
-        activeKey={activeRegion}
-        onRegionSelect={handleRegionSelect}
-      />
+      <div className="hidden md:block">
+        <SkysirvLiveBottomNav
+          mode="regions"
+          activeKey={activeRegion}
+          onRegionSelect={handleRegionSelect}
+        />
+      </div>
     </main>
   )
 }
