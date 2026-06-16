@@ -47,7 +47,7 @@ export default function HomepageLabFAQ() {
             A calmer way to understand what Skysirv does.
           </h2>
 
-          <p className="mt-6 text-base leading-8 text-slate-700 sm:text-lg">
+          <p className="mt-6 text-base leading-6 text-slate-700 sm:text-lg">
             Skysirv is being built as an AI travel intelligence layer — with Lucy
             helping travelers understand the signal behind flights, stays, cars,
             cruises, itineraries, and live travel conditions.

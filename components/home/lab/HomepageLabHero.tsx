@@ -252,14 +252,14 @@ export default function HomepageLabHero() {
           <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-white/0 to-slate-950/10" />
         </div>
 
-        <div className="absolute inset-0 z-10 flex items-center justify-center px-6 pb-10 pt-44 text-center sm:px-8 sm:pt-24 lg:px-12">
+        <div className="absolute inset-0 z-10 flex items-center justify-center px-6 pb-10 pt-56 text-center sm:px-8 sm:pt-24 lg:px-12">
           <div className="flex w-full max-w-7xl flex-col items-center" style={{ transform: "translateY(32px)" }}>
             <div className="mx-auto max-w-5xl">
               <h1 className="text-4xl font-bold tracking-tight text-slate-800 drop-shadow-[0_8px_34px_rgba(2,6,23,0.35)] sm:text-5xl md:text-6xl lg:text-6xl">
                 AI-powered travel intelligence, guided by Lucy.
               </h1>
 
-              <p className="mx-auto mt-6 max-w-3xl text-base font-semibold leading-8 text-slate-700 drop-shadow-[0_4px_18px_rgba(2,6,23,0.35)] sm:text-xl">
+              <p className="mx-auto mt-6 max-w-3xl text-base font-semibold leading-6 text-slate-700 drop-shadow-[0_4px_18px_rgba(2,6,23,0.35)] sm:text-xl">
                 Skysirv's Lucy helps you track routes, understand fare movement,
                 compare flights, explore hotels and car rentals, build smarter itineraries,
                 remember how you like to travel, and decide when to book with more
@@ -276,7 +276,7 @@ export default function HomepageLabHero() {
                   <div className="min-h-0 flex-1 overflow-y-auto pr-2 [scrollbar-width:thin] [scrollbar-color:rgba(148,163,184,0.35)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300/45 hover:[&::-webkit-scrollbar-thumb]:bg-slate-400/60">
                     {messages.length === 0 ? (
                       <div className="pt-5">
-                        <p className="max-w-xl text-base font-medium leading-7 text-slate-500">
+                        <p className="max-w-xl text-base font-medium leading-6 text-slate-500">
                           {rotatingPromptPlaceholders[placeholderIndex]}
                         </p>
                       </div>

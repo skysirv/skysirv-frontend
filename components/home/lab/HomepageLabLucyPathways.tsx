@@ -37,7 +37,7 @@ export default function HomepageLabLucyPathways() {
             Let Lucy guide the way you travel.
           </h2>
 
-          <p className="mx-auto mt-6 max-w-3xl text-base leading-8 text-slate-700 sm:text-lg">
+          <p className="mx-auto mt-6 max-w-3xl text-base leading-6 text-slate-700 sm:text-lg">
             From flights and hotels to car rentals, cruises, and complete itineraries,
             Lucy helps turn travel decisions into a calmer, more informed experience.
           </p>

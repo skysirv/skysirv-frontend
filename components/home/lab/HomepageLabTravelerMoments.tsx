@@ -26,14 +26,14 @@ const travelerMoments = [
 
 export default function HomepageLabTravelerMoments() {
   return (
-    <section className="relative overflow-hidden bg-white px-6 pb-24 pt-2 sm:py-28">
+    <section className="relative overflow-hidden bg-white px-6 pb-20 pt-2 sm:py-28">
       <div className="relative mx-auto grid max-w-7xl gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
         <div className="mx-auto max-w-xl text-center lg:mx-0 lg:text-left">
           <h2 className="mt-4 text-4xl font-bold tracking-tight text-slate-800 sm:text-5xl">
             For travelers who want the why behind the trip.
           </h2>
 
-          <p className="mt-6 text-base leading-8 text-slate-700 sm:text-lg">
+          <p className="mt-6 text-base leading-6 text-slate-700 sm:text-lg">
             Skysirv is built for people who do not just want another list of
             options. Lucy helps bring context, timing, preferences, and full-trip
             planning into the decision before you book.

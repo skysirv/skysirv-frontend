@@ -54,8 +54,8 @@ export default function HomepageLabUserStories() {
             Built around the moments travelers actually feel.
           </h2>
 
-          <p className="mx-auto mt-6 max-w-3xl text-base leading-8 text-slate-700 sm:text-lg">
-            Skysirv is being designed for the questions travelers ask before
+          <p className="mx-auto mt-6 max-w-3xl text-base leading-6 text-slate-700 sm:text-lg">
+            Skysirv is designed for the questions travelers ask before
             they book flights, compare stays, plan transportation, build itineraries,
             and react when travel conditions start changing.
           </p>

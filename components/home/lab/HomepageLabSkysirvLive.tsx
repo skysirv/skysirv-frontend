@@ -49,7 +49,7 @@ export default function HomepageLabSkysirvLive() {
             Live airport intelligence, explained by Lucy.
           </h2>
 
-          <p className="mx-auto mt-5 max-w-[330px] text-base leading-8 text-slate-700 sm:max-w-none sm:text-lg">
+          <p className="mx-auto mt-5 max-w-[330px] text-base leading-6 text-slate-700 sm:max-w-none sm:text-lg">
             Skysirv Live will help travelers see airport disruption, delay
             pressure, weather impact, and route risk in one calm view — with
             Lucy translating the signal before travel gets messy.
