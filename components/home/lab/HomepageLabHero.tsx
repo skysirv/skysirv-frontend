@@ -3,6 +3,8 @@
 import Link from "next/link"
 import { FormEvent, useEffect, useRef, useState } from "react"
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 const rotatingPromptPlaceholders = [
   "Ask Lucy to compare flights, hotels, and rental cars for your next trip...",
   "Ask Lucy if Boston to Panama is showing a smart time to book...",
@@ -58,38 +60,12 @@ function createMessageId() {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`
 }
 
-function buildHeroLucyDemoReply(question: string) {
-  const normalized = question.toLowerCase()
-
-  if (normalized.includes("hotel") || normalized.includes("stay")) {
-    return "I can help compare hotel strategy by location, timing, flexibility, amenities, and likely price behavior. Live hotel monitoring will become more powerful as the Skysirv Network expands."
-  }
-
-  if (normalized.includes("car") || normalized.includes("rental")) {
-    return "For car rentals, I’d compare pickup location, cancellation flexibility, total fees, insurance needs, and timing. Airport rentals can be convenient, but off-airport locations may sometimes price better."
-  }
-
-  if (normalized.includes("itinerary") || normalized.includes("plan")) {
-    return "I can help shape an itinerary around flights, hotels, airport timing, ground transportation, and trip flow. For personalized saved plans, you’ll want to sign in so I can keep the context connected."
-  }
-
-  if (
-    normalized.includes("flight") ||
-    normalized.includes("fare") ||
-    normalized.includes("route") ||
-    normalized.includes("book")
-  ) {
-    return "I can help explain route options, booking timing, fare movement, stops, airline tradeoffs, and confidence signals. Signed-in Skysirv users can go deeper with live tracking and saved route intelligence."
-  }
-
-  return "I can help with flights, hotels, car rentals, itinerary planning, fare behavior, and smarter trip decisions. Ask me like you would ask a personal travel intelligence assistant."
-}
-
 export default function HomepageLabHero() {
   const [chatInput, setChatInput] = useState("")
   const [placeholderIndex, setPlaceholderIndex] = useState(0)
   const [messages, setMessages] = useState<HeroLucyMessage[]>([])
   const [chatLoading, setChatLoading] = useState(false)
+  const [publicLucyLimitReached, setPublicLucyLimitReached] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -109,37 +85,101 @@ export default function HomepageLabHero() {
     })
   }, [messages, chatLoading])
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     const message = chatInput.trim()
 
-    if (!message || chatLoading) return
+    if (!message || chatLoading || publicLucyLimitReached) return
 
-    setMessages((current) => [
-      ...current,
+    const nextMessages: HeroLucyMessage[] = [
+      ...messages,
       {
         id: createMessageId(),
         role: "user",
         text: message,
       },
-    ])
+    ]
 
+    setMessages(nextMessages)
     setChatInput("")
     setChatLoading(true)
 
-    window.setTimeout(() => {
+    try {
+      if (!API_BASE_URL) {
+        throw new Error("Missing NEXT_PUBLIC_API_BASE_URL")
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/flight-attendant/public-chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          surface: "homepage_public",
+          message,
+          messages: nextMessages.map((item) => ({
+            role: item.role === "lucy" ? "assistant" : "user",
+            content: item.text,
+          })),
+        }),
+      })
+
+      const data = await response.json().catch(() => null)
+
+      if (response.status === 429 && data?.code === "PUBLIC_LUCY_LIMIT_REACHED") {
+        setPublicLucyLimitReached(true)
+
+        setMessages((current) => [
+          ...current,
+          {
+            id: createMessageId(),
+            role: "lucy",
+            text:
+              typeof data?.reply === "string" && data.reply.trim()
+                ? data.reply.trim()
+                : "I’d love to keep helping, but public previews are limited for now. Create a free Skysirv account or sign in to continue with the right level of travel support.",
+          },
+        ])
+
+        return
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          data?.reply ||
+          data?.error ||
+          "I’m having trouble reaching the public preview right now."
+        )
+      }
+
+      const lucyReply =
+        typeof data?.reply === "string" && data.reply.trim()
+          ? data.reply.trim()
+          : "I’m here, but I could not generate a clean response."
+
       setMessages((current) => [
         ...current,
         {
           id: createMessageId(),
           role: "lucy",
-          text: buildHeroLucyDemoReply(message),
+          text: lucyReply,
         },
       ])
-
+    } catch (error: any) {
+      setMessages((current) => [
+        ...current,
+        {
+          id: createMessageId(),
+          role: "lucy",
+          text:
+            error?.message ||
+            "I’m having trouble reaching Lucy right now. Please try again in a moment.",
+        },
+      ])
+    } finally {
       setChatLoading(false)
-    }, 450)
+    }
   }
 
   return (
@@ -197,7 +237,7 @@ export default function HomepageLabHero() {
                             </div>
                           ) : (
                             <div key={message.id} className="flex justify-start">
-                              <p className="max-w-[92%] text-sm font-medium leading-6 text-slate-700">
+                              <p className="max-w-[92%] whitespace-pre-line text-sm font-medium leading-6 text-slate-700">
                                 {message.text}
                               </p>
                             </div>
@@ -230,13 +270,18 @@ export default function HomepageLabHero() {
                       type="text"
                       value={chatInput}
                       onChange={(event) => setChatInput(event.target.value)}
-                      placeholder="Ask Lucy about flights, hotels, rentals, or trip planning..."
-                      className="min-w-0 flex-1 bg-transparent text-sm font-medium text-slate-950 outline-none placeholder:text-slate-400"
+                      disabled={publicLucyLimitReached}
+                      placeholder={
+                        publicLucyLimitReached
+                          ? "Public preview limit reached. Sign in or create an account to continue."
+                          : "Ask Lucy about flights, hotels, rentals, or trip planning..."
+                      }
+                      className="min-w-0 flex-1 bg-transparent text-sm font-medium text-slate-950 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:text-slate-400"
                     />
 
                     <button
                       type="submit"
-                      disabled={!chatInput.trim() || chatLoading}
+                      disabled={publicLucyLimitReached || !chatInput.trim() || chatLoading}
                       aria-label="Ask Lucy"
                       className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-700 text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-45"
                     >
