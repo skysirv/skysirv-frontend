@@ -5,6 +5,9 @@ import { FormEvent, useEffect, useRef, useState } from "react"
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
+const PUBLIC_LUCY_LIMIT_REACHED_MESSAGE =
+  "I’d love to keep helping, but public previews are limited for now. Create a free Skysirv account or sign in to continue with the right level of travel support."
+
 const rotatingPromptPlaceholders = [
   "Ask Lucy to compare flights, hotels, and rental cars for your next trip...",
   "Ask Lucy if Boston to Panama is showing a smart time to book...",
@@ -79,6 +82,55 @@ export default function HomepageLabHero() {
   }, [])
 
   useEffect(() => {
+    let isMounted = true
+
+    async function checkPublicLucyStatus() {
+      try {
+        if (!API_BASE_URL) return
+
+        const response = await fetch(
+          `${API_BASE_URL}/api/flight-attendant/public-chat/status`
+        )
+
+        const data = await response.json().catch(() => null)
+
+        if (!isMounted) return
+
+        if (
+          response.ok &&
+          data?.code === "PUBLIC_LUCY_LIMIT_REACHED"
+        ) {
+          setPublicLucyLimitReached(true)
+
+          setMessages((current) => {
+            if (current.length > 0) return current
+
+            return [
+              {
+                id: createMessageId(),
+                role: "lucy",
+                text:
+                  typeof data?.reply === "string" && data.reply.trim()
+                    ? data.reply.trim()
+                    : PUBLIC_LUCY_LIMIT_REACHED_MESSAGE,
+              },
+            ]
+          })
+        }
+      } catch {
+        // Keep the public preview usable if the status check fails.
+        // The backend POST endpoint still protects tokens.
+      }
+    }
+
+    void checkPublicLucyStatus()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
       block: "end",
@@ -138,7 +190,7 @@ export default function HomepageLabHero() {
             text:
               typeof data?.reply === "string" && data.reply.trim()
                 ? data.reply.trim()
-                : "I’d love to keep helping, but public previews are limited for now. Create a free Skysirv account or sign in to continue with the right level of travel support.",
+                : PUBLIC_LUCY_LIMIT_REACHED_MESSAGE,
           },
         ])
 
