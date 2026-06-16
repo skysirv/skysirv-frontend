@@ -238,7 +238,7 @@ export default function HomepageLabHero() {
 
   return (
     <>
-      <section className="relative isolate min-h-[calc(100svh+420px)] overflow-hidden bg-[#dbeafe] sm:min-h-[calc(100dvh+220px)]">
+      <section className="relative isolate min-h-[calc(100svh+380px)] overflow-hidden bg-[#dbeafe] sm:min-h-[calc(100dvh+220px)]">
         <div className="absolute inset-0">
           <img
             src="/images/stock/lucy-hero-13.jpg"
