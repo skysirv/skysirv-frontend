@@ -100,12 +100,10 @@ export default function HomepageLabUserStories() {
           <style>{`
             @keyframes skysirvStoryFlip {
               from {
-                opacity: 0;
-                transform: rotateY(-12deg) translateX(10px);
+                transform: rotateY(-0deg) translateX(0px);
               }
 
               to {
-                opacity: 1;
                 transform: rotateY(0deg) translateX(0);
               }
             }

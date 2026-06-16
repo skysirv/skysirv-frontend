@@ -1,5 +1,7 @@
 "use client"
 
+import { useEffect, useState } from "react"
+
 const travelerMoments = [
   {
     label: "Frequent travelers",
@@ -25,6 +27,19 @@ const travelerMoments = [
 ]
 
 export default function HomepageLabTravelerMoments() {
+  const [activeMomentIndex, setActiveMomentIndex] = useState(0)
+  const activeMoment = travelerMoments[activeMomentIndex]
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActiveMomentIndex((current) =>
+        current === travelerMoments.length - 1 ? 0 : current + 1
+      )
+    }, 4500)
+
+    return () => window.clearInterval(timer)
+  }, [])
+
   return (
     <section className="relative overflow-hidden bg-white px-6 pb-20 pt-2 sm:py-28">
       <div className="relative mx-auto grid max-w-7xl gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
@@ -41,7 +56,73 @@ export default function HomepageLabTravelerMoments() {
         </div>
 
         <div className="relative mx-auto w-full max-w-3xl">
-          <div className="grid gap-3">
+          <div className="mx-auto max-w-sm sm:hidden">
+            <article
+              key={activeMoment.label}
+              className="relative overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white animate-[skysirvTravelerFlip_420ms_ease-out]"
+              style={{
+                transformOrigin: "left center",
+                transformStyle: "preserve-3d",
+              }}
+            >
+              <div className="grid min-h-[260px] grid-cols-[88px_1fr]">
+                <div className="relative flex flex-col justify-between bg-blue-700 px-3 py-3 text-white">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white">
+                      Boarding
+                    </p>
+
+                    <p className="mt-2 text-2xl font-bold tracking-tight">
+                      {activeMoment.code}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-200">
+                      Skysirv
+                    </p>
+
+                    <p className="mt-1 text-xs font-semibold text-white/75">
+                      Lucy guided
+                    </p>
+                  </div>
+                </div>
+
+                <div className="relative border-l border-dashed border-slate-200 px-4 py-4 text-center">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    {activeMoment.label}
+                  </p>
+
+                  <p className="mt-4 text-sm font-semibold italic leading-6 text-slate-950">
+                    “{activeMoment.quote}”
+                  </p>
+
+                  <div className="mt-5 border-t border-slate-200 pt-4">
+                    <h3 className="text-base font-bold tracking-tight text-slate-800">
+                      {activeMoment.title}
+                    </h3>
+
+                    <p className="mt-3 text-sm leading-6 text-slate-700">
+                      {activeMoment.text}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <style>{`
+              @keyframes skysirvTravelerFlip {
+                from {
+                  transform: rotateY(-0deg) translateX(0px);
+                }
+
+                to {
+                  transform: rotateY(0deg) translateX(0);
+                }
+              }
+            `}</style>
+          </div>
+          <div className="hidden gap-3 sm:grid">
             {travelerMoments.map((item, index) => (
               <article
                 key={item.label}
