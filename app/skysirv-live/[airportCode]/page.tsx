@@ -91,7 +91,21 @@ export default function SkysirvLiveAirportPage({
   }, [activeView])
 
   const airportDrawerTouchStartYRef = useRef<number | null>(null)
+  const mobileAirportTabsRef = useRef<HTMLDivElement | null>(null)
   const [isAirportDrawerExpanded, setIsAirportDrawerExpanded] = useState(false)
+  const [showMobileTabsLeftHint, setShowMobileTabsLeftHint] = useState(false)
+  const [showMobileTabsRightHint, setShowMobileTabsRightHint] = useState(true)
+
+  function updateMobileAirportTabScrollHints() {
+    const tabsElement = mobileAirportTabsRef.current
+
+    if (!tabsElement) return
+
+    setShowMobileTabsLeftHint(tabsElement.scrollLeft > 6)
+    setShowMobileTabsRightHint(
+      tabsElement.scrollLeft + tabsElement.clientWidth < tabsElement.scrollWidth - 6,
+    )
+  }
 
   function handleAirportDrawerTouchStart(event: React.TouchEvent<HTMLDivElement>) {
     airportDrawerTouchStartYRef.current = event.touches[0]?.clientY ?? null
@@ -115,6 +129,17 @@ export default function SkysirvLiveAirportPage({
       setIsAirportDrawerExpanded(false)
     }
   }
+
+  useEffect(() => {
+    if (!isAirportDrawerExpanded) return
+
+    updateMobileAirportTabScrollHints()
+    window.addEventListener("resize", updateMobileAirportTabScrollHints)
+
+    return () => {
+      window.removeEventListener("resize", updateMobileAirportTabScrollHints)
+    }
+  }, [isAirportDrawerExpanded, mobileActiveView])
 
   useEffect(() => {
     if (!airport) return
@@ -317,52 +342,95 @@ export default function SkysirvLiveAirportPage({
       </aside>
 
       <aside
-        className={`pointer-events-auto absolute inset-x-0 bottom-0 z-40 rounded-t-[2rem] bg-white shadow-[0_-18px_55px_rgba(15,23,42,0.22)] transition-[height] duration-300 ease-out md:hidden ${isAirportDrawerExpanded ? "h-[64svh]" : "h-[88px]"
+        className={`pointer-events-auto absolute inset-x-0 bottom-0 z-40 rounded-t-[2rem] bg-white shadow-[0_-18px_55px_rgba(15,23,42,0.22)] transition-[height] duration-300 ease-out md:hidden ${isAirportDrawerExpanded ? "h-[48svh]" : "h-[92px]"
           }`}
-        onTouchStart={handleAirportDrawerTouchStart}
-        onTouchEnd={handleAirportDrawerTouchEnd}
       >
         <div className="flex h-full flex-col overflow-hidden px-5 pb-5 pt-3">
-          <button
-            type="button"
-            onClick={() => setIsAirportDrawerExpanded((current) => !current)}
-            className="mx-auto h-1.5 w-12 rounded-full bg-slate-300"
-            aria-label="Resize airport details drawer"
-          />
-
-          <button
-            type="button"
-            onClick={() => setIsAirportDrawerExpanded((current) => !current)}
-            className="mt-4 flex w-full items-center justify-between gap-4 text-left"
+          <div
+            onTouchStart={handleAirportDrawerTouchStart}
+            onTouchEnd={handleAirportDrawerTouchEnd}
           >
-            <h2 className="min-w-0 truncate text-xl font-black tracking-tight text-slate-950">
-              {displayAirport.name}
-            </h2>
+            <button
+              type="button"
+              onClick={() => setIsAirportDrawerExpanded((current) => !current)}
+              className="mx-auto block h-1.5 w-12 rounded-full bg-slate-400"
+              aria-label="Resize airport details drawer"
+            />
 
-            <span className={`h-4 w-4 shrink-0 rounded-full ${styles.dot}`} />
-          </button>
+            <button
+              type="button"
+              onClick={() => setIsAirportDrawerExpanded((current) => !current)}
+              className="mt-4 flex w-full items-center justify-between gap-4 text-left"
+            >
+              <h2 className="min-w-0 truncate text-xl font-black tracking-tight text-slate-800">
+                {displayAirport.name}
+              </h2>
+
+              <span className={`h-4 w-4 shrink-0 rounded-full ${styles.dot}`} />
+            </button>
+          </div>
 
           {isAirportDrawerExpanded && (
             <>
-              <div className="mt-3 overflow-x-auto border-b border-slate-200 pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                <div className="flex min-w-max items-center gap-5">
-                  {airportViewTabs.map((tab) => {
-                    const isActive = mobileActiveView === tab.key
+              <div className="relative mt-3 border-b border-slate-200 pb-2">
+                {showMobileTabsLeftHint && (
+                  <div className="pointer-events-none absolute bottom-2 left-0 top-0 z-10 flex items-center bg-gradient-to-r from-white via-white to-transparent pr-5">
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      className="h-4 w-4 text-slate-400"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                  </div>
+                )}
 
-                    return (
-                      <button
-                        key={tab.key}
-                        type="button"
-                        onClick={() => setMobileActiveView(tab.key)}
-                        className={`shrink-0 border-b-2 pb-1.5 text-[11px] font-black uppercase tracking-[0.1em] transition ${isActive
-                          ? "border-blue-700 text-blue-700"
-                          : "border-transparent text-slate-400"
-                          }`}
-                      >
-                        {tab.label}
-                      </button>
-                    )
-                  })}
+                {showMobileTabsRightHint && (
+                  <div className="pointer-events-none absolute bottom-2 right-0 top-0 z-10 flex items-center bg-gradient-to-l from-white via-white to-transparent pl-5">
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      className="h-4 w-4 text-slate-400"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M9 18l6-6-6-6" />
+                    </svg>
+                  </div>
+                )}
+
+                <div
+                  ref={mobileAirportTabsRef}
+                  onScroll={updateMobileAirportTabScrollHints}
+                  className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                >
+                  <div className="flex min-w-max items-center gap-5">
+                    {airportViewTabs.map((tab) => {
+                      const isActive = mobileActiveView === tab.key
+
+                      return (
+                        <button
+                          key={tab.key}
+                          type="button"
+                          onClick={() => setMobileActiveView(tab.key)}
+                          className={`inline-flex h-5 shrink-0 items-center text-[11px] font-semibold uppercase tracking-[0.1em] transition ${isActive
+                            ? "text-blue-700"
+                            : "text-slate-400"
+                            }`}
+                        >
+                          {tab.label}
+                        </button>
+                      )
+                    })}
+                  </div>
                 </div>
               </div>
 
