@@ -238,20 +238,7 @@ export default function HomepageLabHero() {
 
   return (
     <>
-      <section className="relative isolate min-h-[calc(100svh+380px)] overflow-hidden bg-[#dbeafe] sm:min-h-[calc(100dvh+220px)]">
-        <div className="absolute inset-0">
-          <img
-            src="/images/stock/lucy-hero-13.jpg"
-            alt=""
-            loading="eager"
-            fetchPriority="high"
-            className="absolute inset-0 h-full w-full object-cover"
-            style={{ objectPosition: "center 42%" }}
-          />
-
-          <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-white/0 to-slate-950/10" />
-        </div>
-
+      <section className="relative isolate min-h-[calc(100svh+380px)] overflow-hidden bg-white sm:min-h-[calc(100dvh+220px)]">
         <div className="absolute inset-0 z-10 flex items-start justify-center px-6 pb-10 pt-60 text-center sm:items-center sm:px-8 sm:pt-24 lg:px-12">
           <div className="flex w-full max-w-7xl flex-col items-center" style={{ transform: "translateY(32px)" }}>
             <div className="mx-auto max-w-5xl">
