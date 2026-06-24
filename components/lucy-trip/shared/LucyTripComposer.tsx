@@ -1,3 +1,5 @@
+import LargeChevron from "@/components/ui/LargeChevron"
+
 type LucyTripComposerProps = {
   value?: string
   onChange?: (value: string) => void
@@ -11,7 +13,7 @@ export default function LucyTripComposer({
   value,
   onChange,
   onSubmit,
-  placeholder = "Ask Lucy to shape the next part of your trip...",
+  placeholder = "Let Lucy know what you have in mind...",
   fixed = true,
   className = "",
 }: LucyTripComposerProps) {
@@ -56,10 +58,10 @@ export default function LucyTripComposer({
         <button
           type="button"
           onClick={onSubmit}
-          className="ml-auto flex h-10 w-10 items-center justify-center rounded-full bg-blue-700 text-lg font-bold text-white shadow-sm transition hover:bg-blue-800"
+          className="ml-auto flex h-10 w-10 items-center justify-center rounded-full bg-blue-700 text-white shadow-sm transition hover:bg-blue-800"
           aria-label="Send to Lucy"
         >
-          →
+          <LargeChevron direction="right" />
         </button>
       </div>
     </div>

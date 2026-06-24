@@ -1,4 +1,5 @@
 import Link from "next/link"
+import LargeChevron from "@/components/ui/LargeChevron"
 
 export default function LucyTripTopBar() {
   return (
@@ -8,7 +9,7 @@ export default function LucyTripTopBar() {
           href="/plan-smarter"
           className="inline-flex min-h-[38px] items-center gap-2 rounded-full border border-blue-700 bg-blue-700 px-4 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-600"
         >
-          <span aria-hidden="true">←</span>
+          <LargeChevron direction="left" />
           Plan smarter
         </Link>
 

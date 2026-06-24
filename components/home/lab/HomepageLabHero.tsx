@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { FormEvent, useEffect, useRef, useState } from "react"
+import LargeChevron from "@/components/ui/LargeChevron"
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
@@ -330,20 +331,7 @@ export default function HomepageLabHero() {
                       aria-label="Ask Lucy"
                       className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-700 text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-45"
                     >
-                      <svg
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                        className="h-5 w-5"
-                        fill="none"
-                      >
-                        <path
-                          d="M5 12h13M13 6l6 6-6 6"
-                          stroke="currentColor"
-                          strokeWidth="3"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                      <LargeChevron direction="right" />
                     </button>
                   </div>
                 </div>

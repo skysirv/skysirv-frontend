@@ -27,6 +27,14 @@ const ACCOUNT_HREF = '/account';
 
 const PLAN_WITH_LUCY_DIRECT_LINK_ONLY = true;
 
+function BetaText() {
+  return (
+    <span className="relative top-[1px] inline-flex items-center text-[9px] font-black uppercase tracking-[0.14em] text-orange-500">
+      Beta
+    </span>
+  );
+}
+
 const bookMenuItems = [
   {
     label: 'Flights',
@@ -152,7 +160,7 @@ export default function Navlinks({
       ? 'text-blue-700'
       : isDark
         ? 'hover:text-white'
-        : 'hover:text-slate-900'
+        : 'hover:text-orange-500'
     }`;
 
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -491,13 +499,13 @@ export default function Navlinks({
           }`}
       >
         <div className="relative mx-auto flex min-h-[72px] w-full max-w-5xl items-center justify-between px-6 sm:px-8 lg:px-0">
-          <div className="flex items-center translate-y-[5px] -translate-x-3 md:translate-y-[1px]">
-            <Link href="/" className={s.logo} aria-label="Skysirv" style={{ marginLeft: '-22px' }}>
-              <span style={{ display: 'flex', alignItems: 'center', height: '40px' }}>
+          <div className="flex items-center translate-y-[2px] md:-translate-x-3 md:translate-y-[1px]">
+            <Link href="/" className={`${s.logo} md:-ml-[8px]`} aria-label="Skysirv">
+              <span className="flex h-10 items-center">
                 <img
                   src={isDark ? '/branding/logo/skysirv-logo-white.svg' : '/branding/logo/skysirv-logo.svg'}
                   alt="Skysirv"
-                  style={{ width: '220px', height: 'auto', display: 'block' }}
+                  className="block h-auto w-[158px] md:w-[180px]"
                 />
               </span>
             </Link>
@@ -506,7 +514,7 @@ export default function Navlinks({
           <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center justify-center">
             <div
               className={`flex items-center gap-8 text-[16px] font-semibold ${isHomepageLab
-                ? 'text-slate-800'
+                ? 'text-blue-700'
                 : isDark
                   ? 'text-white/70'
                   : 'text-slate-600'
@@ -523,7 +531,7 @@ export default function Navlinks({
                   <svg
                     viewBox="0 0 20 20"
                     aria-hidden="true"
-                    className={`h-4 w-4 transition-transform ${bookMenuOpen ? 'rotate-180' : ''}`}
+                    className={`h-4 w-4 transition-transform ${bookMenuOpen ? "rotate-180" : ""}`}
                     fill="none"
                   >
                     <path
@@ -560,8 +568,9 @@ export default function Navlinks({
                           </span>
 
                           <span className="min-w-0">
-                            <span className="block text-sm font-bold text-slate-950">
-                              {item.label}
+                            <span className="flex items-center gap-2 text-sm font-bold text-slate-950">
+                              <span>{item.label}</span>
+                              <BetaText />
                             </span>
 
                             <span className="mt-1 block text-xs font-medium leading-5 text-slate-500">
@@ -814,15 +823,15 @@ export default function Navlinks({
               <span className="sr-only">Open menu</span>
               <span className="relative h-5 w-5">
                 <span
-                  className={`absolute left-0 top-[4px] h-0.5 w-5 rounded-full bg-current transition-transform ${mobileMenuOpen ? "translate-y-[6px] rotate-45" : ""
+                  className={`absolute left-0 top-[4px] h-[2.5px] w-5 rounded-full bg-blue-700 transition-transform ${mobileMenuOpen ? "translate-y-[6px] rotate-45" : ""
                     }`}
                 />
                 <span
-                  className={`absolute left-0 top-[10px] h-0.5 w-5 rounded-full bg-current transition-opacity ${mobileMenuOpen ? "opacity-0" : "opacity-100"
+                  className={`absolute left-0 top-[10px] h-[2.5px] w-5 rounded-full bg-blue-700 transition-opacity ${mobileMenuOpen ? "opacity-0" : "opacity-100"
                     }`}
                 />
                 <span
-                  className={`absolute left-0 top-[16px] h-0.5 w-5 rounded-full bg-current transition-transform ${mobileMenuOpen ? "-translate-y-[6px] -rotate-45" : ""
+                  className={`absolute left-0 top-[16px] h-[2.5px] w-5 rounded-full bg-blue-700 transition-transform ${mobileMenuOpen ? "-translate-y-[6px] -rotate-45" : ""
                     }`}
                 />
               </span>
@@ -831,78 +840,80 @@ export default function Navlinks({
         </div>
       </div>
 
-      {mobileMenuOpen && (
-        <div className="md:hidden">
-          <div className="mx-auto w-full max-w-5xl px-4 pb-4">
-            <div className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.16)]">
-              <div className="grid gap-1 p-3">
-                <Link
-                  href="/booking/flights"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="rounded-2xl px-4 py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50"
-                >
-                  Book
-                </Link>
-
-                <Link
-                  href="/plan-with-lucy/itinerary"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="rounded-2xl px-4 py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50"
-                >
-                  Plan with Lucy
-                </Link>
-
-                <Link
-                  href="/skysirv-live"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="rounded-2xl px-4 py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50"
-                >
-                  Skysirv Live
-                </Link>
-
-                <Link
-                  href="/pricing"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="rounded-2xl px-4 py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50"
-                >
-                  Pricing
-                </Link>
-              </div>
-
-              <div className="border-t border-slate-100 p-3">
-                {isLoggedIn ? (
+      {
+        mobileMenuOpen && (
+          <div className="md:hidden">
+            <div className="mx-auto w-full max-w-5xl px-4 pb-4">
+              <div className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.16)]">
+                <div className="grid gap-1 p-3">
                   <Link
-                    href={isAdmin ? "/admin" : dashboardHref}
+                    href="/booking/flights"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex min-h-[44px] w-full items-center justify-center rounded-2xl bg-blue-700 px-4 text-sm font-bold text-white transition hover:bg-blue-600"
+                    className="rounded-2xl px-4 py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50"
                   >
-                    {isAdmin ? "Admin" : "Dashboard"}
+                    Book
                   </Link>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMobileMenuOpen(false)
-                      openSigninModal()
-                    }}
-                    className="flex min-h-[44px] w-full items-center justify-center rounded-2xl bg-blue-700 px-4 text-sm font-bold text-white transition hover:bg-blue-600"
-                  >
-                    Sign in
-                  </button>
-                )}
 
-                <Link
-                  href="/plan-smarter"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="mt-2 flex min-h-[44px] w-full items-center justify-center rounded-2xl bg-orange-500 px-4 text-sm font-bold text-white transition hover:bg-orange-600"
-                >
-                  Plan smarter
-                </Link>
+                  <Link
+                    href="/plan-with-lucy/itinerary"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="rounded-2xl px-4 py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50"
+                  >
+                    Plan with Lucy
+                  </Link>
+
+                  <Link
+                    href="/skysirv-live"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="rounded-2xl px-4 py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50"
+                  >
+                    Skysirv Live
+                  </Link>
+
+                  <Link
+                    href="/pricing"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="rounded-2xl px-4 py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50"
+                  >
+                    Pricing
+                  </Link>
+                </div>
+
+                <div className="border-t border-slate-100 p-3">
+                  {isLoggedIn ? (
+                    <Link
+                      href={isAdmin ? "/admin" : dashboardHref}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex min-h-[44px] w-full items-center justify-center rounded-2xl bg-blue-700 px-4 text-sm font-bold text-white transition hover:bg-blue-600"
+                    >
+                      {isAdmin ? "Admin" : "Dashboard"}
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileMenuOpen(false)
+                        openSigninModal()
+                      }}
+                      className="flex min-h-[44px] w-full items-center justify-center rounded-2xl bg-blue-700 px-4 text-sm font-bold text-white transition hover:bg-blue-600"
+                    >
+                      Sign in
+                    </button>
+                  )}
+
+                  <Link
+                    href="/plan-smarter"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="mt-2 flex min-h-[44px] w-full items-center justify-center rounded-2xl bg-orange-500 px-4 text-sm font-bold text-white transition hover:bg-orange-600"
+                  >
+                    Plan smarter
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       <AuthModal
         open={createAccountModalOpen}
@@ -949,6 +960,6 @@ export default function Navlinks({
           onSignupComplete={() => setCreateAccountModalOpen(false)}
         />
       </AuthModal>
-    </div>
+    </div >
   );
 }

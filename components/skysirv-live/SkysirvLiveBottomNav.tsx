@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 
-type BottomNavMode = "regions" | "airport"
+type BottomNavMode = "regions" | "airport" | "aircraft"
 
 type RegionTab = {
   key: string
@@ -14,8 +14,22 @@ type AirportTab = {
   label: string
 }
 
+type AircraftViewKey =
+  | "overview"
+  | "origin"
+  | "destination"
+  | "schedule"
+  | "duration"
+  | "delay-risk"
+  | "route"
+
+type AircraftTab = {
+  key: AircraftViewKey
+  label: string
+}
+
 const regionTabs: RegionTab[] = [
-  { key: "all", label: "All" },
+  { key: "all", label: "Global" },
   { key: "north-america", label: "North America" },
   { key: "europe", label: "Europe" },
   { key: "asia", label: "Asia" },
@@ -35,18 +49,35 @@ const airportTabs: AirportTab[] = [
   { key: "airlines", label: "Airline Impact" },
 ]
 
+const aircraftTabs: AircraftTab[] = [
+  { key: "overview", label: "Summary" },
+  { key: "origin", label: "Origin Airport" },
+  { key: "destination", label: "Destination Airport" },
+  { key: "schedule", label: "Scheduled Times" },
+  { key: "duration", label: "Duration" },
+  { key: "delay-risk", label: "Delay Risk" },
+  { key: "route", label: "Route" },
+]
+
 export default function SkysirvLiveBottomNav({
   mode,
   activeKey,
   airportCode,
   onRegionSelect,
+  onAircraftViewSelect,
 }: {
   mode: BottomNavMode
   activeKey: string
   airportCode?: string
   onRegionSelect?: (regionKey: string) => void
+  onAircraftViewSelect?: (aircraftViewKey: AircraftViewKey) => void
 }) {
-  const tabs = mode === "regions" ? regionTabs : airportTabs
+  const tabs =
+    mode === "regions"
+      ? regionTabs
+      : mode === "aircraft"
+        ? aircraftTabs
+        : airportTabs
 
   return (
     <nav className="pointer-events-auto absolute bottom-0 left-0 right-0 z-30 border-t border-slate-200/70 bg-white/78 px-6 backdrop-blur-xl">
@@ -60,6 +91,20 @@ export default function SkysirvLiveBottomNav({
                 key={tab.key}
                 type="button"
                 onClick={() => onRegionSelect?.(tab.key)}
+                className={`shrink-0 uppercase transition ${isActive ? "text-slate-950" : "hover:text-slate-700"
+                  }`}
+              >
+                {tab.label}
+              </button>
+            )
+          }
+
+          if (mode === "aircraft") {
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => onAircraftViewSelect?.(tab.key as AircraftViewKey)}
                 className={`shrink-0 uppercase transition ${isActive ? "text-slate-950" : "hover:text-slate-700"
                   }`}
               >

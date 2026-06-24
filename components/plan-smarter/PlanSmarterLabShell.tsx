@@ -51,7 +51,33 @@ export default function PlanSmarterLabShell() {
     setShowOnboardingPanel(true)
   }
 
+  function prepareLucyTripLaunch(
+    mode: "continue-topic" | "discovery",
+    prompt = "",
+  ) {
+    const cleanPrompt = prompt.trim()
+
+    window.sessionStorage.setItem(
+      "skysirv-lucy-trip-launch",
+      JSON.stringify({
+        source: "plan-smarter",
+        mode,
+        initialIdea: cleanPrompt,
+        createdAt: new Date().toISOString(),
+      }),
+    )
+
+    if (mode === "continue-topic" && cleanPrompt) {
+      window.sessionStorage.setItem("skysirv-plan-smarter-lucy-prompt", cleanPrompt)
+      return
+    }
+
+    window.sessionStorage.removeItem("skysirv-plan-smarter-lucy-prompt")
+  }
+
   function handleAskLucyClick() {
+    prepareLucyTripLaunch("discovery")
+
     const token = getAuthToken()
 
     if (!token) {
@@ -65,11 +91,21 @@ export default function PlanSmarterLabShell() {
   function handleLucyComposerSubmit() {
     const prompt = lucyPrompt.trim()
 
-    if (prompt) {
-      window.sessionStorage.setItem("skysirv-plan-smarter-lucy-prompt", prompt)
+    if (!prompt) {
+      handleAskLucyClick()
+      return
     }
 
-    handleAskLucyClick()
+    prepareLucyTripLaunch("continue-topic", prompt)
+
+    const token = getAuthToken()
+
+    if (!token) {
+      openOnboardingPanel("signin")
+      return
+    }
+
+    router.push("/lucy-trip")
   }
 
   return (
@@ -253,7 +289,7 @@ export default function PlanSmarterLabShell() {
               value={lucyPrompt}
               onChange={setLucyPrompt}
               onSubmit={handleLucyComposerSubmit}
-              placeholder="Ask Lucy to shape the next part of your trip..."
+              placeholder="Let Lucy know what you have in mind..."
             />
           ) : (
             <div className="flex min-h-[74px] items-center justify-between gap-5 rounded-[1.35rem] border border-orange-100 bg-white/90 px-5 py-3 shadow-[0_18px_55px_rgba(15,23,42,0.12)] backdrop-blur-xl">

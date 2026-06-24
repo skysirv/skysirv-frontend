@@ -94,7 +94,7 @@ export default function HomepageLabSkysirvLive() {
                 <img
                   src="/branding/logo/skysirv-live-logo-white.svg"
                   alt="Skysirv Live"
-                  className="relative top-1 h-auto w-[220px] scale-[1.30] sm:-left-8 sm:w-[240px] sm:scale-100"
+                  className="relative top-1 h-auto w-[220px] scale-[1.30] sm:top-[1px] sm:-left-2 sm:w-[200px] sm:scale-100"
                 />
               </span>
 

@@ -3,12 +3,15 @@
 import {
   getAirportPressureScore,
   getAirportSeverityRank,
+  type SkysirvLiveAircraft,
   type SkysirvLiveAirport,
 } from "@/components/skysirv-live/skysirv-live-data"
 
 type SkysirvLiveLucyReadProps = {
   airports?: SkysirvLiveAirport[]
+  aircraft?: SkysirvLiveAircraft[]
   activeRegion?: string
+  activeLiveMode?: "disruptions" | "aircraft"
   lastUpdatedAt?: string
 }
 
@@ -137,14 +140,22 @@ function sortAirportsByPressure(
 
 function formatFeedTiming(lastUpdatedAt?: string) {
   if (!lastUpdatedAt) {
-    return "based on Skysirv’s current airport pressure feed"
+    return "based on Skysirv’s current live feed"
   }
 
   const updatedAt = new Date(lastUpdatedAt)
 
   if (Number.isNaN(updatedAt.getTime())) {
-    return "based on Skysirv’s current airport pressure feed"
+    return "based on Skysirv’s current live feed"
   }
+
+  const updatedTime = new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(updatedAt)
+
+  return `using live data updated at ${updatedTime}`
 }
 
 function buildLucyLiveRead(
@@ -205,12 +216,86 @@ function buildLucyLiveRead(
   return `${regionLabel} looks mostly calm ${feedTiming}. ${strongestAirportName} has the highest visible pressure${pressureScore}, but it is still marked normal, so I would not treat this as a disruption yet.`
 }
 
+function formatAircraftRoute(aircraft: SkysirvLiveAircraft) {
+  return `${aircraft.originCode} to ${aircraft.destinationCode}`
+}
+
+function formatAircraftName(aircraft: SkysirvLiveAircraft) {
+  return `${aircraft.flightNumber} from ${formatAircraftRoute(aircraft)}`
+}
+
+function sortAircraftByLiveSignal(
+  firstAircraft: SkysirvLiveAircraft,
+  secondAircraft: SkysirvLiveAircraft,
+) {
+  const delayDifference =
+    secondAircraft.delayMinutes - firstAircraft.delayMinutes
+
+  if (delayDifference !== 0) return delayDifference
+
+  const progressDifference =
+    secondAircraft.routeProgressPercent - firstAircraft.routeProgressPercent
+
+  if (progressDifference !== 0) return progressDifference
+
+  return secondAircraft.altitudeFeet - firstAircraft.altitudeFeet
+}
+
+function buildLucyAircraftRead(
+  aircraft: SkysirvLiveAircraft[] = [],
+  activeRegion = "north-america",
+  lastUpdatedAt?: string,
+) {
+  const regionLabel = regionLabels[activeRegion] ?? "this region"
+  const feedTiming = formatFeedTiming(lastUpdatedAt)
+
+  if (aircraft.length === 0) {
+    return `I’m not seeing live aircraft in the current ${regionLabel} view yet. I’d hold the map steady for a moment, then let Skysirv refresh the aircraft feed before panning again.`
+  }
+
+  const rankedAircraft = [...aircraft].sort(sortAircraftByLiveSignal)
+  const delayedAircraft = rankedAircraft.filter(
+    (flight) => flight.delayMinutes > 0,
+  )
+  const strongestAircraft = delayedAircraft[0] ?? rankedAircraft[0]
+
+  const strongestAircraftLabel = formatAircraftName(strongestAircraft)
+
+  const delayText =
+    delayedAircraft.length > 0
+      ? `${delayedAircraft.length} aircraft ${delayedAircraft.length === 1 ? "is" : "are"
+      } showing delay signals`
+      : "I’m not seeing strong delay signals in this aircraft view"
+
+  const strongestDelayText =
+    strongestAircraft.delayMinutes > 0
+      ? ` ${strongestAircraft.flightNumber} is currently showing a ${strongestAircraft.delayMinutes} minute delay signal.`
+      : ` ${strongestAircraft.flightNumber} is the most relevant aircraft on the board right now.`
+
+  const supportingAircraft = rankedAircraft
+    .filter((flight) => flight.id !== strongestAircraft.id)
+    .slice(0, 2)
+    .map((flight) => `${flight.flightNumber} (${formatAircraftRoute(flight)})`)
+    .join(", ")
+
+  const supportingText = supportingAircraft
+    ? ` I’d also keep ${supportingAircraft} visible while watching this airspace.`
+    : " I’d keep the aircraft list steady before widening the map."
+
+  return `${regionLabel} is showing ${aircraft.length} live aircraft in the current map view ${feedTiming}. ${delayText}. ${strongestAircraftLabel} is leading the live aircraft signal.${strongestDelayText}${supportingText}`
+}
+
 export default function SkysirvLiveLucyRead({
   airports = [],
+  aircraft = [],
   activeRegion = "north-america",
+  activeLiveMode = "disruptions",
   lastUpdatedAt,
 }: SkysirvLiveLucyReadProps) {
-  const liveRead = buildLucyLiveRead(airports, activeRegion, lastUpdatedAt)
+  const liveRead =
+    activeLiveMode === "aircraft"
+      ? buildLucyAircraftRead(aircraft, activeRegion, lastUpdatedAt)
+      : buildLucyLiveRead(airports, activeRegion, lastUpdatedAt)
 
   return (
     <div className="pointer-events-auto absolute right-5 top-[118px] z-20 hidden max-w-sm rounded-[1.35rem] border border-white/70 bg-white/90 p-4 shadow-[0_20px_60px_rgba(15,23,42,0.16)] backdrop-blur-xl lg:block">

@@ -1,4 +1,5 @@
 import { motion } from "framer-motion"
+import LargeChevron from "@/components/ui/LargeChevron"
 
 import type {
   ConfirmedAnswer,
@@ -91,7 +92,7 @@ export default function BottomLucyComposer({
             className="ml-auto flex h-10 w-10 items-center justify-center rounded-full bg-blue-700 text-lg font-bold text-white shadow-sm transition hover:bg-blue-800"
             aria-label="Send to Lucy"
           >
-            →
+            <LargeChevron direction="right" />
           </button>
         </div>
       </div>
