@@ -50,6 +50,37 @@ type SkysirvLiveWeatherResponse = {
   error?: string
 }
 
+function hasDelayMinutes(value: number | null | undefined): value is number {
+  return typeof value === "number" && Number.isFinite(value)
+}
+
+function getDelayMinutesValue(value: number | null | undefined) {
+  return hasDelayMinutes(value) ? value : 0
+}
+
+function formatAirportDelayDisplay(params: {
+  minutes: number | null | undefined
+  active?: boolean
+}) {
+  if (hasDelayMinutes(params.minutes)) {
+    return `${Math.round(params.minutes)}m`
+  }
+
+  if (params.active) {
+    return "Active"
+  }
+
+  return "-"
+}
+
+function formatPercent(value: number | null | undefined) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return `${Math.round(value)}%`
+  }
+
+  return "-"
+}
+
 type AirportBoardRow = {
   time: string
   scheduledTime: string
@@ -376,7 +407,10 @@ export default function SkysirvLiveAirportOverviewRoute({
                 title="Departures Delays"
                 label="Live departure pressure"
                 stats={performance.departures}
-                delayMinutes={displayAirport.departuresDelay}
+                delayLabel={formatAirportDelayDisplay({
+                  minutes: displayAirport.departuresDelay,
+                  active: displayAirport.departureDelayActive,
+                })}
                 bars={[18, 23, 29, 35, 38, 36, 31, 27, 25, 24, 22, 21, 20, 19]}
               />
 
@@ -384,7 +418,10 @@ export default function SkysirvLiveAirportOverviewRoute({
                 title="Arrivals Delays"
                 label="Live arrival pressure"
                 stats={performance.arrivals}
-                delayMinutes={displayAirport.arrivalsDelay}
+                delayLabel={formatAirportDelayDisplay({
+                  minutes: displayAirport.arrivalsDelay,
+                  active: displayAirport.arrivalDelayActive,
+                })}
                 bars={[12, 15, 16, 18, 19, 18, 16, 13, 12, 11, 10, 9, 9, 8]}
               />
             </section>
@@ -936,7 +973,10 @@ async function downloadAirportBriefPdf({
     y: 366,
     width: metricWidth,
     label: "Departures",
-    value: `${airport.departuresDelay}m`,
+    value: formatAirportDelayDisplay({
+      minutes: airport.departuresDelay,
+      active: airport.departureDelayActive,
+    }),
     detail: "Average live takeoff delay",
   })
   addMetricCard({
@@ -944,7 +984,10 @@ async function downloadAirportBriefPdf({
     y: 366,
     width: metricWidth,
     label: "Arrivals",
-    value: `${airport.arrivalsDelay}m`,
+    value: formatAirportDelayDisplay({
+      minutes: airport.arrivalsDelay,
+      active: airport.arrivalDelayActive,
+    }),
     detail: "Average live landing delay",
   })
   addMetricCard({
@@ -976,7 +1019,13 @@ async function downloadAirportBriefPdf({
   doc.setFont("helvetica", "normal")
   doc.setFontSize(10)
   addWrappedText(
-    `${airport.departuresDelay}m departure delay - ${airport.arrivalsDelay}m arrival delay - ${airport.cancellationRate}% cancellation pressure.`,
+    `${formatAirportDelayDisplay({
+      minutes: airport.departuresDelay,
+      active: airport.departureDelayActive,
+    })} departure delay - ${formatAirportDelayDisplay({
+      minutes: airport.arrivalsDelay,
+      active: airport.arrivalDelayActive,
+    })} arrival delay - ${airport.cancellationRate}% cancellation pressure.`,
     margin + 18,
     554,
     235,
@@ -1012,7 +1061,7 @@ async function downloadAirportBriefPdf({
     margin,
     145,
     performance.departures,
-    airport.departuresDelay,
+    getDelayMinutesValue(airport.departuresDelay),
   )
 
   addDelayBreakdown(
@@ -1020,7 +1069,7 @@ async function downloadAirportBriefPdf({
     margin + 282,
     145,
     performance.arrivals,
-    airport.arrivalsDelay,
+    getDelayMinutesValue(airport.arrivalsDelay),
   )
 
   addCard(margin, 330, contentWidth, 130)
@@ -1409,7 +1458,13 @@ function OperationalStatusCard({
           detail={
             isNormal
               ? "No operational issues reported."
-              : `${airport.departuresDelay}m departure delay · ${airport.arrivalsDelay}m arrival delay`
+              : `${formatAirportDelayDisplay({
+                minutes: airport.departuresDelay,
+                active: airport.departureDelayActive,
+              })} departure delay · ${formatAirportDelayDisplay({
+                minutes: airport.arrivalsDelay,
+                active: airport.arrivalDelayActive,
+              })} arrival delay`
           }
         />
 
@@ -1426,7 +1481,11 @@ function OperationalStatusCard({
 
         <OperationalSignal
           title="Live pressure model"
-          detail={`Pressure score ${airport.pressureScore ?? 0} · departure pressure ${airport.departurePressurePercent ?? 0}% · arrival pressure ${airport.arrivalPressurePercent ?? 0}% · cancellation pressure ${airport.cancellationRate}%`}
+          detail={`Pressure score ${airport.pressureScore ?? 0} · departure pressure ${formatPercent(
+            airport.departurePressurePercent,
+          )} · arrival pressure ${formatPercent(
+            airport.arrivalPressurePercent,
+          )} · cancellation pressure ${formatPercent(airport.cancellationRate)}`}
         />
       </div>
 
@@ -1461,7 +1520,7 @@ function DelaySummaryCard({
   title,
   label,
   stats,
-  delayMinutes,
+  delayLabel,
   bars,
 }: {
   title: string
@@ -1472,7 +1531,7 @@ function DelaySummaryCard({
     canceled: number
     diverted: number
   }
-  delayMinutes: number
+  delayLabel: string
   bars: number[]
 }) {
   const redWidth = Math.max(stats.delayed + stats.canceled + stats.diverted, 4)
@@ -1500,7 +1559,7 @@ function DelaySummaryCard({
 
       <div className="mt-3 flex items-center gap-2">
         <span className="h-2 w-2 rounded-full bg-emerald-500" />
-        <p className="text-xs font-black text-emerald-700">{delayMinutes}m</p>
+        <p className="text-xs font-black text-emerald-700">{delayLabel}</p>
       </div>
 
       <div className="mt-6 h-[190px] border-t border-slate-100 pt-5">
@@ -1937,8 +1996,10 @@ function AirportStatsCard({
   routes: RankedItem[]
   airlines: RankedItem[]
 }) {
-  const totalFlights =
-    520 + airport.departuresDelay * 4 + airport.arrivalsDelay * 3
+  const departureDelay = getDelayMinutesValue(airport.departuresDelay)
+  const arrivalDelay = getDelayMinutesValue(airport.arrivalsDelay)
+
+  const totalFlights = 520 + departureDelay * 4 + arrivalDelay * 3
 
   return (
     <section className="rounded-[1rem] bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.045)] ring-1 ring-slate-200">
@@ -2039,11 +2100,14 @@ function LucyAirportCard({
 }
 
 function getAirportPerformance(airport: SkysirvLiveAirport) {
+  const departureDelay = getDelayMinutesValue(airport.departuresDelay)
+  const arrivalDelay = getDelayMinutesValue(airport.arrivalsDelay)
+
   const liveDeparturePressure = clamp(
     Math.round(
       airport.departurePressurePercent ??
       airport.averageDepartureDelayMinutes ??
-      airport.departuresDelay,
+      departureDelay,
     ),
     0,
     100,
@@ -2053,7 +2117,7 @@ function getAirportPerformance(airport: SkysirvLiveAirport) {
     Math.round(
       airport.arrivalPressurePercent ??
       airport.averageArrivalDelayMinutes ??
-      airport.arrivalsDelay,
+      arrivalDelay,
     ),
     0,
     100,
@@ -2082,7 +2146,7 @@ function getAirportPerformance(airport: SkysirvLiveAirport) {
 
   return {
     pressureScore: airport.pressureScore ?? liveDeparturePressure,
-    totalFlights: 520 + airport.departuresDelay * 4 + airport.arrivalsDelay * 3,
+    totalFlights: 520 + departureDelay * 4 + arrivalDelay * 3,
     departures: {
       onTime: departureOnTime,
       delayed: liveDeparturePressure,
@@ -2099,14 +2163,19 @@ function getAirportPerformance(airport: SkysirvLiveAirport) {
 }
 
 function getDepartureBoardRows(airport: SkysirvLiveAirport): AirportBoardRow[] {
-  const heavyDelay = airport.departuresDelay >= 20
+  const departureDelay = getDelayMinutesValue(airport.departuresDelay)
+  const heavyDelay = departureDelay >= 20
 
   return [
     {
       time: heavyDelay ? "11:25 AM" : "11:05 AM",
       scheduledTime: "10:55 AM",
       route: "Honolulu",
-      detail: heavyDelay ? `${airport.departuresDelay}m late` : "On time",
+      detail: heavyDelay
+        ? `${Math.round(departureDelay)}m late`
+        : airport.departureDelayActive
+          ? "Delay active"
+          : "On time",
       flight: "SK 820",
       status: "Gate D7",
       tone: heavyDelay ? "delayed" : "normal",
@@ -2160,14 +2229,19 @@ function getDepartureBoardRows(airport: SkysirvLiveAirport): AirportBoardRow[] {
 }
 
 function getArrivalBoardRows(airport: SkysirvLiveAirport): AirportBoardRow[] {
-  const heavyDelay = airport.arrivalsDelay >= 20
+  const arrivalDelay = getDelayMinutesValue(airport.arrivalsDelay)
+  const heavyDelay = arrivalDelay >= 20
 
   return [
     {
       time: heavyDelay ? "12:02 PM" : "11:48 AM",
       scheduledTime: "11:35 AM",
       route: "New York",
-      detail: heavyDelay ? `${airport.arrivalsDelay}m late` : "On approach",
+      detail: heavyDelay
+        ? `${Math.round(arrivalDelay)}m late`
+        : airport.arrivalDelayActive
+          ? "Delay active"
+          : "On approach",
       flight: "UA 929",
       status: "Gate A7",
       tone: heavyDelay ? "delayed" : "normal",
@@ -2221,7 +2295,9 @@ function getArrivalBoardRows(airport: SkysirvLiveAirport): AirportBoardRow[] {
 }
 
 function getDisruptedRoutes(airport: SkysirvLiveAirport): RankedItem[] {
-  const boost = Math.max(1, Math.round((airport.departuresDelay + airport.arrivalsDelay) / 12))
+  const departureDelay = getDelayMinutesValue(airport.departuresDelay)
+  const arrivalDelay = getDelayMinutesValue(airport.arrivalsDelay)
+  const boost = Math.max(1, Math.round((departureDelay + arrivalDelay) / 12))
 
   return [
     { label: "ORD", value: 4 + boost },
@@ -2234,7 +2310,8 @@ function getDisruptedRoutes(airport: SkysirvLiveAirport): RankedItem[] {
 }
 
 function getDisruptedAirlines(airport: SkysirvLiveAirport): RankedItem[] {
-  const boost = Math.max(1, Math.round(airport.departuresDelay / 10))
+  const departureDelay = getDelayMinutesValue(airport.departuresDelay)
+  const boost = Math.max(1, Math.round(departureDelay / 10))
 
   return [
     { label: "DL", value: 42 + boost },
@@ -2247,7 +2324,8 @@ function getDisruptedAirlines(airport: SkysirvLiveAirport): RankedItem[] {
 }
 
 function getBusyRoutes(airport: SkysirvLiveAirport): RankedItem[] {
-  const base = Math.max(24, 44 - Math.round(airport.departuresDelay / 3))
+  const departureDelay = getDelayMinutesValue(airport.departuresDelay)
+  const base = Math.max(24, 44 - Math.round(departureDelay / 3))
 
   return [
     { label: "Los Angeles", value: base },
@@ -2259,7 +2337,8 @@ function getBusyRoutes(airport: SkysirvLiveAirport): RankedItem[] {
 }
 
 function getBusyAirlines(airport: SkysirvLiveAirport): RankedItem[] {
-  const base = Math.max(180, 240 - airport.arrivalsDelay)
+  const arrivalDelay = getDelayMinutesValue(airport.arrivalsDelay)
+  const base = Math.max(180, 240 - arrivalDelay)
 
   return [
     { label: "AA", value: base },

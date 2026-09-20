@@ -10,8 +10,10 @@ export type SkysirvLiveAirport = {
   latitude: number
   longitude: number
   severity: AirportSeverity
-  departuresDelay: number
-  arrivalsDelay: number
+  departuresDelay: number | null
+  arrivalsDelay: number | null
+  departureDelayActive?: boolean
+  arrivalDelayActive?: boolean
   cancellationRate: number
   statusLabel?: string
   groundStopActive?: boolean
@@ -23,9 +25,9 @@ export type SkysirvLiveAirport = {
   observedAt?: string
   pressureScore?: number
   departurePressurePercent?: number
-  arrivalPressurePercent?: number
+  arrivalPressurePercent?: number | null
   averageDepartureDelayMinutes?: number
-  averageArrivalDelayMinutes?: number
+  averageArrivalDelayMinutes?: number | null
   pressureSourceBreakdown?: {
     faaScore: number
     weatherScore: number
@@ -283,10 +285,12 @@ export type SkysirvAirportPressureStatus = {
   severity: AirportSeverity
   statusLabel: string
   departurePressurePercent: number
-  arrivalPressurePercent: number
+  arrivalPressurePercent: number | null
   cancellationPercent: number
   averageDepartureDelayMinutes: number
-  averageArrivalDelayMinutes: number
+  averageArrivalDelayMinutes: number | null
+  departureDelayActive?: boolean
+  arrivalDelayActive?: boolean
   primaryReason: string | null
   sourceBreakdown: {
     faaScore: number
@@ -313,6 +317,20 @@ function hasAirportCoordinates(
   )
 }
 
+function hasFaaEventType(eventType: string | null | undefined, eventTypes: string[]) {
+  if (!eventType) return false
+
+  const normalizedEventTypes = eventType
+    .toLowerCase()
+    .split(/[,\s;|]+/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+
+  return eventTypes.some((item) =>
+    normalizedEventTypes.includes(item.toLowerCase()),
+  )
+}
+
 export const airports: SkysirvLiveAirport[] = MAJOR_AIRPORTS
   .filter(hasAirportCoordinates)
   .map((airport) => ({
@@ -325,6 +343,8 @@ export const airports: SkysirvLiveAirport[] = MAJOR_AIRPORTS
     severity: "normal",
     departuresDelay: 0,
     arrivalsDelay: 0,
+    departureDelayActive: false,
+    arrivalDelayActive: false,
     cancellationRate: 0,
     source: "mock",
     airportType: airport.airportType ?? "major",
@@ -354,6 +374,13 @@ export function mergeFaaStatusesWithAirports(
       severity: faaStatus.severity,
       departuresDelay: faaStatus.departuresDelay ?? airport.departuresDelay,
       arrivalsDelay: faaStatus.arrivalsDelay ?? airport.arrivalsDelay,
+      departureDelayActive:
+        (faaStatus.departuresDelay ?? 0) > 0 ||
+        faaStatus.groundDelayActive ||
+        hasFaaEventType(faaStatus.eventType, ["departure_delay", "ground_delay"]),
+      arrivalDelayActive:
+        (faaStatus.arrivalsDelay ?? 0) > 0 ||
+        hasFaaEventType(faaStatus.eventType, ["arrival_delay"]),
       statusLabel: faaStatus.statusLabel,
       groundStopActive: faaStatus.groundStopActive,
       groundDelayActive: faaStatus.groundDelayActive,
@@ -388,8 +415,10 @@ export function mergeAirportPressureWithAirports(
     return {
       ...airport,
       severity: pressureStatus.severity,
-      departuresDelay: pressureStatus.averageDepartureDelayMinutes,
-      arrivalsDelay: pressureStatus.averageArrivalDelayMinutes,
+      departuresDelay: pressureStatus.averageDepartureDelayMinutes ?? null,
+      arrivalsDelay: pressureStatus.averageArrivalDelayMinutes ?? null,
+      departureDelayActive: pressureStatus.departureDelayActive ?? false,
+      arrivalDelayActive: pressureStatus.arrivalDelayActive ?? false,
       cancellationRate: pressureStatus.cancellationPercent,
       statusLabel: pressureStatus.statusLabel,
       disruptionReason: pressureStatus.primaryReason,
@@ -407,13 +436,13 @@ export function mergeAirportPressureWithAirports(
 }
 
 export function getAirportPressureScore(airport: {
-  departuresDelay: number
-  arrivalsDelay: number
+  departuresDelay: number | null
+  arrivalsDelay: number | null
   cancellationRate: number
 }) {
   return (
-    airport.departuresDelay +
-    airport.arrivalsDelay +
+    (airport.departuresDelay ?? 0) +
+    (airport.arrivalsDelay ?? 0) +
     airport.cancellationRate * 10
   )
 }

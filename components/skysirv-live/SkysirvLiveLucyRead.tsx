@@ -298,12 +298,12 @@ export default function SkysirvLiveLucyRead({
       : buildLucyLiveRead(airports, activeRegion, lastUpdatedAt)
 
   return (
-    <div className="pointer-events-auto absolute right-5 top-[118px] z-20 hidden max-w-sm rounded-[1.35rem] border border-white/70 bg-white/90 p-4 shadow-[0_20px_60px_rgba(15,23,42,0.16)] backdrop-blur-xl lg:block">
-      <p className="text-[14px] font-bold uppercase tracking-[0.2em] text-blue-600">
+    <div className="pointer-events-auto absolute right-4 top-[112px] z-20 hidden max-w-[280px] rounded-[1.15rem] border border-white/70 bg-white/90 p-3 shadow-[0_18px_50px_rgba(15,23,42,0.14)] backdrop-blur-xl lg:block min-[1900px]:right-5 min-[1900px]:top-[118px] min-[1900px]:max-w-sm min-[1900px]:rounded-[1.35rem] min-[1900px]:p-4">
+      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-blue-600 min-[1900px]:text-[14px] min-[1900px]:tracking-[0.2em]">
         Lucy live read
       </p>
 
-      <p className="mt-2 text-sm font-semibold italic leading-6 text-slate-800">
+      <p className="mt-1.5 text-xs font-semibold italic leading-5 text-slate-800 min-[1900px]:mt-2 min-[1900px]:text-sm min-[1900px]:leading-6">
         “{liveRead}”
       </p>
     </div>

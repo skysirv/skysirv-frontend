@@ -42,7 +42,7 @@ const liveModeLogoSrc: Record<SkysirvLiveMode, string> = {
 
 function BetaText() {
   return (
-    <span className="relative top-[4px] inline-flex items-center text-[16px] font-black uppercase tracking-[0.14em] text-orange-500">
+    <span className="relative top-[1px] inline-flex shrink-0 items-center text-[10px] font-black uppercase tracking-[0.14em] text-orange-500">
       Beta
     </span>
   )
@@ -82,12 +82,14 @@ export default function SkysirvLiveHeader({
   const desktopAirportSearchRef = useRef<HTMLDivElement | null>(null)
   const mobileLiveModePickerRef = useRef<HTMLDivElement | null>(null)
   const desktopLiveModePickerRef = useRef<HTMLDivElement | null>(null)
+
   const [airportSearchValue, setAirportSearchValue] = useState("")
   const [isAirportSearchOpen, setIsAirportSearchOpen] = useState(false)
   const [internalLiveMode, setInternalLiveMode] =
     useState<SkysirvLiveMode>("disruptions")
-  const activeLiveMode = controlledLiveMode ?? internalLiveMode
   const [isLiveModePickerOpen, setIsLiveModePickerOpen] = useState(false)
+
+  const activeLiveMode = controlledLiveMode ?? internalLiveMode
 
   const airportSearchResults = useMemo(() => {
     if (mode === "airport" || activeLiveMode === "aircraft") return []
@@ -108,6 +110,11 @@ export default function SkysirvLiveHeader({
   const liveSearchPlaceholder = isLiveAircraftMode
     ? "Search aircraft (e.g. flight number)"
     : "Search airports..."
+
+  const airportTickerText =
+    tickerItems.length > 0
+      ? tickerItems.join(" · ")
+      : `${airportCode} is showing elevated airport pressure right now.`
 
   useEffect(() => {
     function handlePointerDown(event: PointerEvent) {
@@ -142,11 +149,6 @@ export default function SkysirvLiveHeader({
     onLiveModeChange?.(nextLiveMode)
   }
 
-  const airportTickerText =
-    tickerItems.length > 0
-      ? tickerItems.join(" · ")
-      : `${airportCode} is showing elevated airport pressure right now.`
-
   return (
     <>
       <style>{`
@@ -160,6 +162,7 @@ export default function SkysirvLiveHeader({
           }
         }
       `}</style>
+
       {mode !== "airport" && (
         <header className="pointer-events-auto absolute left-4 right-4 top-4 z-50 md:hidden">
           <div className="mx-auto flex w-full max-w-[360px] items-center gap-2">
@@ -239,8 +242,8 @@ export default function SkysirvLiveHeader({
                           setIsAirportSearchOpen(false)
                         }}
                         className={`flex w-full items-center justify-between rounded-2xl px-3 py-2.5 text-left text-sm font-semibold transition ${isActive
-                          ? "bg-slate-100 text-slate-950"
-                          : "text-slate-500 hover:bg-slate-50 hover:text-slate-950"
+                            ? "bg-slate-100 text-slate-950"
+                            : "text-slate-500 hover:bg-slate-50 hover:text-slate-950"
                           }`}
                       >
                         {option.label}
@@ -260,8 +263,8 @@ export default function SkysirvLiveHeader({
 
       <header
         className={`pointer-events-auto absolute z-30 ${mode === "airport"
-          ? "left-4 right-4 top-4 md:left-5 md:right-5 md:top-5"
-          : "left-5 right-5 top-5 hidden md:block"
+            ? "left-4 right-4 top-4 md:left-5 md:right-5 md:top-5"
+            : "left-5 right-5 top-5 hidden md:block"
           }`}
       >
         <div className="rounded-[1.35rem] shadow-[0_18px_50px_rgba(15,23,42,0.28)]">
@@ -269,7 +272,7 @@ export default function SkysirvLiveHeader({
             className={`flex min-h-[62px] flex-col gap-2 bg-blue-700 px-4 py-3 text-white backdrop-blur-xl md:min-h-[76px] md:flex-row md:items-center md:justify-between md:gap-3 md:px-6 md:py-0 ${mode === "airport" ? "rounded-t-[1.35rem]" : "rounded-[1.35rem]"
               }`}
           >
-            <div className="flex items-center gap-4">
+            <div className="flex min-w-0 items-center gap-3 xl:gap-4">
               {mode !== "airport" && onOverviewBackClick ? (
                 <button
                   type="button"
@@ -313,7 +316,7 @@ export default function SkysirvLiveHeader({
                 </Link>
               )}
 
-              <div>
+              <div className="min-w-0">
                 {mode === "airport" ? (
                   <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                     <h1 className="text-[18px] font-black leading-[1.04] tracking-tight sm:text-4xl sm:leading-tight">
@@ -327,8 +330,11 @@ export default function SkysirvLiveHeader({
                     )}
                   </div>
                 ) : (
-                  <div className="flex items-center gap-4">
-                    <div ref={desktopLiveModePickerRef} className="relative hidden md:block">
+                  <div className="flex min-w-0 items-center gap-3 xl:gap-4">
+                    <div
+                      ref={desktopLiveModePickerRef}
+                      className="relative hidden md:block"
+                    >
                       <button
                         type="button"
                         onClick={() =>
@@ -361,8 +367,8 @@ export default function SkysirvLiveHeader({
                                   setIsLiveModePickerOpen(false)
                                 }}
                                 className={`flex w-full items-center justify-between rounded-2xl px-3 py-2.5 text-left text-sm font-bold transition ${isActive
-                                  ? "bg-slate-100 text-slate-950"
-                                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-950"
+                                    ? "bg-slate-100 text-slate-950"
+                                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-950"
                                   }`}
                               >
                                 {option.label}
@@ -377,7 +383,7 @@ export default function SkysirvLiveHeader({
                       )}
                     </div>
 
-                    <div className="flex h-12 w-[340px] items-center gap-2 overflow-visible">
+                    <div className="flex h-12 min-w-0 items-center gap-2 overflow-visible">
                       <Image
                         src={liveModeLogoSrc[activeLiveMode]}
                         alt={
@@ -388,7 +394,7 @@ export default function SkysirvLiveHeader({
                         width={1740}
                         height={184}
                         priority
-                        className="h-[38px] w-auto max-w-none shrink-0 object-contain"
+                        className="h-[30px] w-auto max-w-[260px] shrink object-contain lg:h-[32px] lg:max-w-[285px] xl:h-[34px] xl:max-w-[320px] 2xl:h-[38px] 2xl:max-w-[360px]"
                       />
 
                       <BetaText />
@@ -401,7 +407,7 @@ export default function SkysirvLiveHeader({
             {mode !== "airport" && (
               <div
                 ref={desktopAirportSearchRef}
-                className="relative w-full md:order-3 md:w-[430px] md:flex-none"
+                className="relative w-full md:order-3 md:w-[240px] md:flex-none lg:w-[260px] xl:w-[280px] 2xl:w-[280px] min-[1900px]:w-[430px]"
               >
                 <div className="flex h-11 items-center gap-3 rounded-full border border-white/25 bg-white/95 px-4 text-slate-800 shadow-[0_12px_28px_rgba(15,23,42,0.18)]">
                   <svg
@@ -431,42 +437,44 @@ export default function SkysirvLiveHeader({
                   />
                 </div>
 
-                {!isLiveAircraftMode && isAirportSearchOpen && airportSearchValue.trim() && (
-                  <div className="absolute left-0 right-0 top-[52px] z-50 overflow-hidden rounded-[1.15rem] border border-slate-200 bg-white text-slate-950 shadow-[0_20px_55px_rgba(15,23,42,0.28)]">
-                    {airportSearchResults.length > 0 ? (
-                      airportSearchResults.map((airport) => (
-                        <button
-                          key={airport.code}
-                          type="button"
-                          onClick={() => handleAirportSearchSelect(airport)}
-                          className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-slate-50"
-                        >
-                          <span className="flex h-10 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-700 text-sm font-black tracking-tight text-white">
-                            {airport.code}
-                          </span>
-
-                          <span className="min-w-0">
-                            <span className="block truncate text-sm font-black text-slate-950">
-                              {airport.displayName ?? airport.name}
+                {!isLiveAircraftMode &&
+                  isAirportSearchOpen &&
+                  airportSearchValue.trim() && (
+                    <div className="absolute left-0 right-0 top-[52px] z-50 overflow-hidden rounded-[1.15rem] border border-slate-200 bg-white text-slate-950 shadow-[0_20px_55px_rgba(15,23,42,0.28)]">
+                      {airportSearchResults.length > 0 ? (
+                        airportSearchResults.map((airport) => (
+                          <button
+                            key={airport.code}
+                            type="button"
+                            onClick={() => handleAirportSearchSelect(airport)}
+                            className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-slate-50"
+                          >
+                            <span className="flex h-10 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-700 text-sm font-black tracking-tight text-white">
+                              {airport.code}
                             </span>
 
-                            <span className="block truncate text-xs font-bold text-slate-500">
-                              {airport.city}, {airport.country}
+                            <span className="min-w-0">
+                              <span className="block truncate text-sm font-black text-slate-950">
+                                {airport.displayName ?? airport.name}
+                              </span>
+
+                              <span className="block truncate text-xs font-bold text-slate-500">
+                                {airport.city}, {airport.country}
+                              </span>
                             </span>
-                          </span>
-                        </button>
-                      ))
-                    ) : (
-                      <div className="px-4 py-4 text-sm font-bold text-slate-500">
-                        No airports found.
-                      </div>
-                    )}
-                  </div>
-                )}
+                          </button>
+                        ))
+                      ) : (
+                        <div className="px-4 py-4 text-sm font-bold text-slate-500">
+                          No airports found.
+                        </div>
+                      )}
+                    </div>
+                  )}
               </div>
             )}
 
-            <div className="hidden items-center gap-3 md:order-2 md:ml-auto md:mr-5 md:flex">
+            <div className="hidden min-w-fit items-center gap-2 md:order-2 md:ml-3 md:mr-3 md:flex xl:ml-auto xl:mr-5 xl:gap-3">
               {mode === "airport" ? (
                 <Link
                   href={
@@ -482,7 +490,13 @@ export default function SkysirvLiveHeader({
               ) : (
                 <>
                   <span className="h-4 w-4 rounded-full bg-red-500 shadow-[0_0_18px_rgba(239,68,68,0.9)]" />
-                  <span className="text-xl font-bold text-white">
+
+                  <span
+                    className={`whitespace-nowrap font-bold text-white ${activeLiveMode === "aircraft"
+                        ? "text-base xl:text-lg 2xl:text-xl"
+                        : "text-sm xl:text-base 2xl:text-lg"
+                      }`}
+                  >
                     {activeLiveMode === "aircraft"
                       ? "Live Aircraft Data"
                       : "Live FAA Data"}{" "}
@@ -491,42 +505,43 @@ export default function SkysirvLiveHeader({
                 </>
               )}
             </div>
+          </div>
 
-            {mode === "airport" && (
-              <div
-                className={`flex h-8 items-center overflow-hidden rounded-b-[1.35rem] px-4 text-xs font-bold text-white md:h-9 md:px-5 md:text-sm ${alertBarClassName}`}
-              >
-                <div className="min-w-0 flex-1 overflow-hidden">
-                  <div
-                    className="flex w-max md:hidden"
-                    style={{
-                      animation: "skysirv-mobile-airport-ticker-marquee 58s linear infinite",
-                    }}
+          {mode === "airport" && (
+            <div
+              className={`flex h-8 items-center overflow-hidden rounded-b-[1.35rem] px-4 text-xs font-bold text-white md:h-9 md:px-5 md:text-sm ${alertBarClassName}`}
+            >
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <div
+                  className="flex w-max md:hidden"
+                  style={{
+                    animation:
+                      "skysirv-mobile-airport-ticker-marquee 58s linear infinite",
+                  }}
+                >
+                  <span className="inline-flex items-center whitespace-nowrap pr-10">
+                    <span className="mr-3 h-2 w-2 shrink-0 rounded-full bg-white" />
+                    {airportTickerText}
+                  </span>
+
+                  <span
+                    className="inline-flex items-center whitespace-nowrap pr-10"
+                    aria-hidden="true"
                   >
-                    <span className="inline-flex items-center whitespace-nowrap pr-10">
-                      <span className="mr-3 h-2 w-2 shrink-0 rounded-full bg-white" />
-                      {airportTickerText}
-                    </span>
-
-                    <span
-                      className="inline-flex items-center whitespace-nowrap pr-10"
-                      aria-hidden="true"
-                    >
-                      <span className="mr-3 h-2 w-2 shrink-0 rounded-full bg-white" />
-                      {airportTickerText}
-                    </span>
-                  </div>
-
-                  <span className="hidden items-center whitespace-nowrap md:inline-flex">
                     <span className="mr-3 h-2 w-2 shrink-0 rounded-full bg-white" />
                     {airportTickerText}
                   </span>
                 </div>
+
+                <span className="hidden items-center whitespace-nowrap md:inline-flex">
+                  <span className="mr-3 h-2 w-2 shrink-0 rounded-full bg-white" />
+                  {airportTickerText}
+                </span>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
-      </header >
+      </header>
     </>
   )
 }

@@ -1,115 +1,71 @@
 "use client"
 
 import { FormEvent, useEffect, useRef, useState } from "react"
+
 import AuthModal from "@/components/auth/AuthModal"
 import AuthPanel from "@/components/auth/AuthPanel"
 import { getAuthToken } from "@/utils/auth-storage"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+import {
+  getLucyActionLabel,
+  isAffirmativeRouteConfirmation,
+  isNegativeRouteConfirmation,
+  normalizeLucyAction,
+  type LucyAction,
+  type LucySaveVisibleFlightAction,
+} from "./dashboardFlightAttendant.actions"
 
-type DashboardLucyTier = "free" | "pro" | "business"
+import {
+  API_BASE_URL,
+  LUCY_ACTIVE_CHAT_THREAD_STORAGE_KEY,
+  LUCY_CHAT_THREADS_STORAGE_KEY,
+  tierConfig,
+} from "./dashboardFlightAttendant.config"
 
-type DashboardRouteContext = {
-  id?: string
-  origin: string
-  destination: string
-  departureDate?: string | null
-  routeLabel?: string
-  latestPrice?: number | null
-  averagePrice?: number | null
-  bookingSignal?: string | null
-  recommendedFlights?: Array<{
-    airline?: string | null
-    airlineName?: string | null
-    airlineLogoSymbolUrl?: string | null
-    airlineLogoLockupUrl?: string | null
-    flightNumber?: string | null
-    price?: number | null
-    currency?: string | null
-    stopCount?: number | null
-  }>
-}
+import {
+  formatLucyReplyText,
+  formatReadableFlightDate,
+  formatVisibleFlightPrice,
+  normalizeFlightSearchText,
+  sanitizeLucyText,
+} from "./dashboardFlightAttendant.formatters"
 
-type DashboardFlightAttendantProps = {
-  tier: DashboardLucyTier
-  placement?: "inline" | "floating"
-  defaultOpen?: boolean
-  dashboardRoutes?: DashboardRouteContext[]
-}
+import {
+  appendAssistantPlaceholder,
+  appendUserMessage,
+  updateAssistantMessageText,
+} from "./dashboardFlightAttendant.messages"
 
-type FlightAttendantMessage = {
-  id: string
-  role: "assistant" | "user"
-  label: string
-  text: string
-}
+import { typeAssistantMessage } from "./dashboardFlightAttendant.typing"
 
-type LucyWatchlistAction = {
-  type: "add_watchlist_route"
-  status: "needs_confirmation"
-  origin: string
-  destination: string
-  departureDate: string
-  routeLabel?: string
-  confirmationPrompt?: string
-}
+import {
+  type DashboardFlightAttendantProps,
+  type DashboardLucyTier,
+  type DashboardRouteContext,
+  type FlightAttendantMessage,
+  type LucyChatThread,
+} from "./dashboardFlightAttendant.types"
 
-type LucyPreferredAirportsAction = {
-  type: "save_preferred_airports"
-  status: "needs_confirmation"
-  airportCodes: string[]
-  airportLabels?: string[]
-  confirmationPrompt?: string
-}
+import {
+  cn,
+  createLucyThread,
+  createMessageId,
+} from "./dashboardFlightAttendant.utils"
 
-type LucyPreferredRouteAction = {
-  type: "save_preferred_route"
-  status: "needs_confirmation"
-  origin: string
-  destination: string
-  routeLabel?: string
-  confirmationPrompt?: string
-}
+import { buildLocalVisibleFlightSaveAction } from "./dashboardFlightAttendant.visibleFlights"
 
-type LucySaveFirstNameAction = {
-  type: "save_first_name"
-  status: "needs_confirmation"
-  firstName: string
-  confirmationPrompt?: string
-}
+import {
+  clearRealtimeMicrophoneResumeTimer as clearRealtimeMicrophoneResumeTimerHelper,
+  pauseRealtimeMicrophone as pauseRealtimeMicrophoneHelper,
+  resumeRealtimeMicrophone as resumeRealtimeMicrophoneHelper,
+  scheduleRealtimeMicrophoneResume as scheduleRealtimeMicrophoneResumeHelper,
+  setRealtimeMicrophoneEnabled as setRealtimeMicrophoneEnabledHelper,
+} from "./dashboardFlightAttendant.voice"
 
-type LucySaveVisibleFlightAction = {
-  type: "save_visible_flight"
-  status: "needs_confirmation"
-  origin: string
-  destination: string
-  departureDate?: string | null
-  airline?: string | null
-  airlineName?: string | null
-  flightNumber?: string | null
-  price?: number | null
-  currency?: string | null
-  flightLabel?: string
-  confirmationPrompt?: string
-}
-
-type LucySaveMemoryAction = {
-  type: "save_lucy_memory"
-  status: "needs_confirmation"
-  memoryType: string
-  memoryKey: string
-  memoryText: string
-  memoryValueJson?: unknown | null
-  confirmationPrompt?: string
-}
-
-type LucyAction =
-  | LucyWatchlistAction
-  | LucyPreferredAirportsAction
-  | LucyPreferredRouteAction
-  | LucySaveFirstNameAction
-  | LucySaveVisibleFlightAction
-  | LucySaveMemoryAction
+import {
+  handleRealtimeSaveVisibleFlightToolCall as handleRealtimeSaveVisibleFlightToolCallHelper,
+  handleRealtimeWatchlistToolCall as handleRealtimeWatchlistToolCallHelper,
+} from "./dashboardFlightAttendant.voiceTools"
 
 type FlightAttendantApiResponse = {
   success?: boolean
@@ -143,276 +99,6 @@ type LucyRealtimeSessionResponse = {
     }
   }
   error?: string
-}
-
-const tierConfig: Record<
-  DashboardLucyTier,
-  {
-    badge: string
-    title: string
-    welcome: string
-    placeholder: string
-  }
-> = {
-  free: {
-    badge: "Limited",
-    title: "Free Flight Attendant",
-    welcome:
-      "Hi, I’m Lucy, your Skysirv Flight Attendant. I can help explain Skysirv basics, watchlists, fare signals, and how to get started with smarter flight monitoring.",
-    placeholder: "Ask Lucy...",
-  },
-  pro: {
-    badge: "Standard",
-    title: "Pro Flight Attendant",
-    welcome:
-      "Hi, I’m Lucy, your Skysirv Flight Attendant. I can help explain your routes, fare timing, Skyscore, watchlist signals, and booking confidence.",
-    placeholder: "Ask Lucy...",
-  },
-  business: {
-    badge: "Advanced",
-    title: "Business Flight Attendant",
-    welcome:
-      "Hi, I’m Lucy, your advanced Skysirv Flight Attendant. I can help analyze route behavior, fare intelligence, saved flights, timing signals, and premium booking decisions.",
-    placeholder: "Ask Lucy...",
-  },
-}
-
-function cn(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ")
-}
-
-function createMessageId() {
-  return `${Date.now()}-${Math.random().toString(16).slice(2)}`
-}
-
-function sanitizeLucyText(text: string) {
-  return text
-    .replace(/\*\*(.*?)\*\*/g, "$1")
-    .replace(/__(.*?)__/g, "$1")
-    .replace(/^\s{0,3}#{1,6}\s+/gm, "")
-    .trim()
-}
-
-function normalizeLucyAction(value: unknown): LucyAction | null {
-  if (!value || typeof value !== "object") return null
-
-  const input = value as Partial<LucyAction>
-
-  if (input.status !== "needs_confirmation") return null
-
-  if (input.type === "add_watchlist_route") {
-    const origin = input.origin?.trim().toUpperCase()
-    const destination = input.destination?.trim().toUpperCase()
-    const departureDate = input.departureDate?.trim()
-
-    if (!origin || !destination || !departureDate) return null
-    if (!/^[A-Z0-9]{3,4}$/.test(origin)) return null
-    if (!/^[A-Z0-9]{3,4}$/.test(destination)) return null
-    if (!/^\d{2}-\d{2}-\d{4}$/.test(departureDate)) return null
-    if (origin === destination) return null
-
-    return {
-      type: "add_watchlist_route",
-      status: "needs_confirmation",
-      origin,
-      destination,
-      departureDate,
-      routeLabel: input.routeLabel,
-      confirmationPrompt: input.confirmationPrompt,
-    }
-  }
-
-  if (input.type === "save_preferred_airports") {
-    const rawAirportCodes = Array.isArray(input.airportCodes)
-      ? input.airportCodes
-      : []
-
-    const airportCodes = Array.from(
-      new Set(
-        rawAirportCodes
-          .map((code) =>
-            typeof code === "string" ? code.trim().toUpperCase() : ""
-          )
-          .filter((code) => /^[A-Z0-9]{3,4}$/.test(code))
-      )
-    )
-
-    if (!airportCodes.length) return null
-
-    return {
-      type: "save_preferred_airports",
-      status: "needs_confirmation",
-      airportCodes,
-      airportLabels: Array.isArray(input.airportLabels)
-        ? input.airportLabels.filter(
-          (label): label is string => typeof label === "string"
-        )
-        : undefined,
-      confirmationPrompt: input.confirmationPrompt,
-    }
-  }
-
-  if (input.type === "save_first_name") {
-    const firstName =
-      typeof input.firstName === "string"
-        ? input.firstName.trim().replace(/\s+/g, " ")
-        : ""
-
-    if (!firstName || firstName.length > 80) return null
-
-    return {
-      type: "save_first_name",
-      status: "needs_confirmation",
-      firstName,
-      confirmationPrompt: input.confirmationPrompt,
-    }
-  }
-
-  if (input.type === "save_preferred_route") {
-    const origin = input.origin?.trim().toUpperCase()
-    const destination = input.destination?.trim().toUpperCase()
-
-    if (!origin || !destination) return null
-    if (!/^[A-Z0-9]{3,4}$/.test(origin)) return null
-    if (!/^[A-Z0-9]{3,4}$/.test(destination)) return null
-    if (origin === destination) return null
-
-    return {
-      type: "save_preferred_route",
-      status: "needs_confirmation",
-      origin,
-      destination,
-      routeLabel: input.routeLabel,
-      confirmationPrompt: input.confirmationPrompt,
-    }
-  }
-
-  if (input.type === "save_visible_flight") {
-    const origin = input.origin?.trim().toUpperCase()
-    const destination = input.destination?.trim().toUpperCase()
-
-    if (!origin || !destination) return null
-    if (!/^[A-Z0-9]{3,4}$/.test(origin)) return null
-    if (!/^[A-Z0-9]{3,4}$/.test(destination)) return null
-    if (origin === destination) return null
-
-    const departureDate =
-      typeof input.departureDate === "string" && input.departureDate.trim()
-        ? input.departureDate.trim()
-        : null
-
-    const airline =
-      typeof input.airline === "string" && input.airline.trim()
-        ? input.airline.trim().toUpperCase()
-        : null
-
-    const airlineName =
-      typeof input.airlineName === "string" && input.airlineName.trim()
-        ? input.airlineName.trim()
-        : null
-
-    const flightNumber =
-      typeof input.flightNumber === "string" && input.flightNumber.trim()
-        ? input.flightNumber.trim().toUpperCase()
-        : null
-
-    const price =
-      typeof input.price === "number" && Number.isFinite(input.price)
-        ? input.price
-        : null
-
-    const currency =
-      typeof input.currency === "string" && input.currency.trim()
-        ? input.currency.trim().toUpperCase()
-        : "USD"
-
-    const flightLabel =
-      typeof input.flightLabel === "string" && input.flightLabel.trim()
-        ? input.flightLabel.trim()
-        : `${airlineName || airline || "Flight"}${flightNumber ? ` ${flightNumber}` : ""
-        }`
-
-    return {
-      type: "save_visible_flight",
-      status: "needs_confirmation",
-      origin,
-      destination,
-      departureDate,
-      airline,
-      airlineName,
-      flightNumber,
-      price,
-      currency,
-      flightLabel,
-      confirmationPrompt: input.confirmationPrompt,
-    }
-  }
-
-  if (input.type === "save_lucy_memory") {
-    const memoryType =
-      typeof input.memoryType === "string" && input.memoryType.trim()
-        ? input.memoryType.trim().toLowerCase().replace(/\s+/g, "_").slice(0, 80)
-        : "general_travel_note"
-
-    const memoryKey =
-      typeof input.memoryKey === "string" && input.memoryKey.trim()
-        ? input.memoryKey
-          .trim()
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "_")
-          .replace(/^_+|_+$/g, "")
-          .slice(0, 120)
-        : ""
-
-    const memoryText =
-      typeof input.memoryText === "string" && input.memoryText.trim()
-        ? input.memoryText.trim().replace(/\s+/g, " ").slice(0, 500)
-        : ""
-
-    if (!memoryKey || !memoryText) return null
-
-    return {
-      type: "save_lucy_memory",
-      status: "needs_confirmation",
-      memoryType,
-      memoryKey,
-      memoryText,
-      memoryValueJson: input.memoryValueJson ?? null,
-      confirmationPrompt:
-        typeof input.confirmationPrompt === "string" &&
-          input.confirmationPrompt.trim()
-          ? input.confirmationPrompt.trim()
-          : "Would you like me to remember that for future Skysirv sessions?",
-    }
-  }
-
-  return null
-}
-
-function isAffirmativeRouteConfirmation(message: string) {
-  const normalized = message.trim().toLowerCase()
-
-  return (
-    /^(yes|yep|yeah|correct|confirm|please|sure|ok|okay)\b/.test(normalized) ||
-    normalized.includes("yes please") ||
-    normalized.includes("go ahead") ||
-    normalized.includes("add it") ||
-    normalized.includes("add this") ||
-    normalized.includes("track it") ||
-    normalized.includes("save it")
-  )
-}
-
-function isNegativeRouteConfirmation(message: string) {
-  const normalized = message.trim().toLowerCase()
-
-  return (
-    /^(no|nope|cancel|not now)\b/.test(normalized) ||
-    normalized.includes("do not add") ||
-    normalized.includes("don't add") ||
-    normalized.includes("do not save") ||
-    normalized.includes("don't save")
-  )
 }
 
 function isClearlySkysirvVoiceIntent(message: string) {
@@ -655,95 +341,6 @@ function findRecentlyConfirmedVoiceRoute({
   })
 }
 
-function getLucyActionLabel(action: LucyAction) {
-  if (action.type === "save_first_name") {
-    return action.firstName
-  }
-
-  if (action.type === "save_lucy_memory") {
-    return action.memoryText
-  }
-
-  if (action.type === "add_watchlist_route") {
-    return `${action.origin} → ${action.destination} for ${action.departureDate}`
-  }
-
-  if (action.type === "save_preferred_airports") {
-    return action.airportCodes.join(" and ")
-  }
-
-  return `${action.origin} → ${action.destination}`
-}
-
-function normalizeFlightSearchText(value?: string | null) {
-  return String(value ?? "").toUpperCase().replace(/\s+/g, "")
-}
-
-function isVisibleFlightSaveRequest(message: string) {
-  const normalized = message.trim().toLowerCase()
-
-  if (!normalized) return false
-
-  const savedFlightQuestionSignals = [
-    "what flights do i have saved",
-    "what saved flights",
-    "show me my saved flights",
-    "do i have that flight saved",
-    "is that flight saved",
-    "have i saved that flight",
-    "which flights are saved",
-    "flights do i have saved",
-  ]
-
-  if (
-    savedFlightQuestionSignals.some((signal) =>
-      normalized.includes(signal)
-    )
-  ) {
-    return false
-  }
-
-  const directSaveSignals = [
-    "save that flight",
-    "save this flight",
-    "save the flight",
-    "save flight",
-    "save it to my saved flights",
-    "save this one",
-    "save that one",
-    "add that flight to my saved flights",
-    "add this flight to my saved flights",
-    "add it to my saved flights",
-  ]
-
-  return directSaveSignals.some((signal) => normalized.includes(signal))
-}
-
-function formatReadableFlightDate(value?: string | null) {
-  if (!value) return null
-
-  const date = new Date(value)
-
-  if (Number.isNaN(date.getTime())) return value
-
-  return date.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  })
-}
-
-function formatVisibleFlightPrice(value?: number | null, currency = "USD") {
-  if (typeof value !== "number" || !Number.isFinite(value)) return null
-
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
-    maximumFractionDigits: 0,
-  }).format(value)
-}
-
 function shouldIgnoreDuplicateVoiceToolCall(
   key: string,
   lastCallRef: {
@@ -770,132 +367,6 @@ function shouldIgnoreDuplicateVoiceToolCall(
   }
 
   return false
-}
-
-function buildLocalVisibleFlightSaveAction({
-  message,
-  messages,
-  dashboardRoutes,
-}: {
-  message: string
-  messages: FlightAttendantMessage[]
-  dashboardRoutes: DashboardRouteContext[]
-}): LucySaveVisibleFlightAction | null {
-  if (!isVisibleFlightSaveRequest(message)) return null
-
-  const visibleFlights = dashboardRoutes.flatMap((route) => {
-    const origin = route.origin?.trim().toUpperCase()
-    const destination = route.destination?.trim().toUpperCase()
-
-    if (!origin || !destination) return []
-
-    const flights = Array.isArray(route.recommendedFlights)
-      ? route.recommendedFlights
-      : []
-
-    return flights
-      .filter((flight) => flight.flightNumber || flight.airline || flight.airlineName)
-      .map((flight) => ({
-        route,
-        origin,
-        destination,
-        flight,
-        normalizedFlightNumber: normalizeFlightSearchText(flight.flightNumber),
-      }))
-  })
-
-  if (!visibleFlights.length) return null
-
-  const recentMessages = [...messages].reverse()
-
-  const matchedFlight = recentMessages
-    .flatMap((item) => {
-      const messageText = normalizeFlightSearchText(item.text)
-
-      return visibleFlights.filter((candidate) => {
-        if (!candidate.normalizedFlightNumber) return false
-
-        const numericFlightNumber = candidate.normalizedFlightNumber.replace(
-          /^[A-Z]+/,
-          ""
-        )
-
-        return (
-          messageText.includes(candidate.normalizedFlightNumber) ||
-          Boolean(
-            numericFlightNumber &&
-            numericFlightNumber.length >= 2 &&
-            messageText.includes(numericFlightNumber)
-          )
-        )
-      })
-    })
-    .at(0)
-
-  if (!matchedFlight) return null
-
-  const { route, origin, destination, flight } = matchedFlight
-
-  const airline =
-    typeof flight.airline === "string" && flight.airline.trim()
-      ? flight.airline.trim().toUpperCase()
-      : null
-
-  const airlineName =
-    typeof flight.airlineName === "string" && flight.airlineName.trim()
-      ? flight.airlineName.trim()
-      : null
-
-  const flightNumber =
-    typeof flight.flightNumber === "string" && flight.flightNumber.trim()
-      ? flight.flightNumber.trim().toUpperCase()
-      : null
-
-  const price =
-    typeof flight.price === "number" && Number.isFinite(flight.price)
-      ? flight.price
-      : null
-
-  const currency =
-    typeof flight.currency === "string" && flight.currency.trim()
-      ? flight.currency.trim().toUpperCase()
-      : "USD"
-
-  const departureDate =
-    typeof route.departureDate === "string" && route.departureDate.trim()
-      ? route.departureDate.trim()
-      : null
-
-  const flightLabel = `${airlineName || airline || "Flight"}${flightNumber ? ` ${flightNumber}` : ""
-    }`.trim()
-
-  const readableDate = formatReadableFlightDate(departureDate)
-  const priceLabel = formatVisibleFlightPrice(price, currency)
-
-  const detailParts = [
-    `${origin} → ${destination}`,
-    readableDate ? `on ${readableDate}` : null,
-    priceLabel ? `for ${priceLabel}` : null,
-  ].filter(Boolean)
-
-  const confirmationPrompt = `Save ${flightLabel} ${detailParts.join(
-    " "
-  )} to your Saved Flights?`
-
-  return {
-    type: "save_visible_flight",
-    status: "needs_confirmation",
-    origin,
-    destination,
-    departureDate,
-    airline,
-    airlineName,
-    flightNumber,
-    price,
-    currency,
-    flightLabel,
-    confirmationPrompt,
-  }
 }
 
 export default function DashboardFlightAttendant({
@@ -1011,50 +482,24 @@ export default function DashboardFlightAttendant({
     latestDashboardRoutesRef.current = dashboardRoutes
   }, [dashboardRoutes])
 
-  async function typeAssistantReply(messageId: string, fullText: string) {
-    setAssistantTyping(true)
-
-    const chunks = fullText.split(/(\s+)/)
-
-    await new Promise<void>((resolve) => {
-      let index = 0
-
-      const timer = window.setInterval(() => {
-        index += 1
-
-        setMessages((prev) =>
-          prev.map((message) =>
-            message.id === messageId
-              ? {
-                ...message,
-                text: chunks.slice(0, index).join(""),
-              }
-              : message
-          )
-        )
-
-        if (index >= chunks.length) {
-          window.clearInterval(timer)
-          resolve()
-        }
-      }, 22)
+  async function typeAssistantReply(
+    messageId: string,
+    fullText: string
+  ) {
+    await typeAssistantMessage({
+      messageId,
+      fullText,
+      setMessages,
+      setAssistantTyping,
     })
-
-    setAssistantTyping(false)
   }
 
   async function appendTypedAssistantReply(fullText: string) {
     const assistantMessageId = createMessageId()
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: assistantMessageId,
-        role: "assistant",
-        label: "Lucy",
-        text: "",
-      },
-    ])
+    setMessages((prev) =>
+      appendAssistantPlaceholder(prev, assistantMessageId)
+    )
 
     await typeAssistantReply(assistantMessageId, fullText)
   }
@@ -1335,61 +780,46 @@ export default function DashboardFlightAttendant({
   }
 
   async function setRealtimeMicrophoneEnabled(enabled: boolean) {
-    const micTrack = realtimeMicTrackRef.current
-    const audioSender = realtimeAudioSenderRef.current
-
-    realtimeLocalStreamRef.current?.getAudioTracks().forEach((track) => {
-      track.enabled = enabled
+    await setRealtimeMicrophoneEnabledHelper({
+      enabled,
+      localStreamRef: realtimeLocalStreamRef,
+      micTrackRef: realtimeMicTrackRef,
+      audioSenderRef: realtimeAudioSenderRef,
     })
-
-    if (!audioSender) return
-
-    try {
-      if (!enabled) {
-        await audioSender.replaceTrack(null)
-        return
-      }
-
-      if (micTrack && micTrack.readyState === "live") {
-        await audioSender.replaceTrack(micTrack)
-      }
-    } catch (error) {
-      console.warn("Lucy realtime microphone toggle failed", error)
-    }
   }
 
   function clearRealtimeMicrophoneResumeTimer() {
-    if (realtimeMicResumeTimerRef.current === null) return
-
-    window.clearTimeout(realtimeMicResumeTimerRef.current)
-    realtimeMicResumeTimerRef.current = null
+    clearRealtimeMicrophoneResumeTimerHelper(
+      realtimeMicResumeTimerRef
+    )
   }
 
   function pauseRealtimeMicrophoneForLucy() {
-    clearRealtimeMicrophoneResumeTimer()
-
-    if (realtimeMicPausedForLucyRef.current) return
-
-    realtimeMicPausedForLucyRef.current = true
-    void setRealtimeMicrophoneEnabled(false)
+    pauseRealtimeMicrophoneHelper({
+      clearTimer: clearRealtimeMicrophoneResumeTimer,
+      isPausedRef: realtimeMicPausedForLucyRef,
+      disableMicrophone: () => {
+        void setRealtimeMicrophoneEnabled(false)
+      },
+    })
   }
 
   function resumeRealtimeMicrophoneAfterLucy() {
-    clearRealtimeMicrophoneResumeTimer()
-
-    if (!realtimeMicPausedForLucyRef.current) return
-
-    realtimeMicPausedForLucyRef.current = false
-    void setRealtimeMicrophoneEnabled(true)
+    resumeRealtimeMicrophoneHelper({
+      clearTimer: clearRealtimeMicrophoneResumeTimer,
+      isPausedRef: realtimeMicPausedForLucyRef,
+      enableMicrophone: () => {
+        void setRealtimeMicrophoneEnabled(true)
+      },
+    })
   }
 
   function scheduleRealtimeMicrophoneResume(delayMs = 1400) {
-    clearRealtimeMicrophoneResumeTimer()
-
-    realtimeMicResumeTimerRef.current = window.setTimeout(() => {
-      realtimeMicResumeTimerRef.current = null
-      resumeRealtimeMicrophoneAfterLucy()
-    }, delayMs)
+    scheduleRealtimeMicrophoneResumeHelper({
+      timerRef: realtimeMicResumeTimerRef,
+      delayMs,
+      resumeMicrophone: resumeRealtimeMicrophoneAfterLucy,
+    })
   }
 
   function stopLucyVoiceSession() {
@@ -1558,93 +988,7 @@ export default function DashboardFlightAttendant({
       let activeUserVoiceMessageId: string | null = null
       let activeAssistantVoiceMessageId: string | null = null
 
-      function handleRealtimeWatchlistToolCall(item: any) {
-        if (item?.name !== "prepare_watchlist_route") return
-
-        const rawArguments =
-          typeof item.arguments === "string" ? item.arguments : ""
-
-        if (!rawArguments) return
-
-        try {
-          const parsed = JSON.parse(rawArguments)
-
-          const action = normalizeLucyAction({
-            type: "add_watchlist_route",
-            status: "needs_confirmation",
-            origin: parsed.origin,
-            destination: parsed.destination,
-            departureDate: parsed.departureDate,
-            routeLabel: parsed.routeLabel,
-            confirmationPrompt: parsed.confirmationPrompt,
-          })
-
-          if (!action || action.type !== "add_watchlist_route") return
-
-          const duplicateKey = [
-            action.type,
-            action.origin,
-            action.destination,
-            action.departureDate,
-          ].join(":")
-
-          if (
-            shouldIgnoreDuplicateVoiceToolCall(
-              duplicateKey,
-              lastVoiceToolCallRef
-            )
-          ) {
-            return
-          }
-
-          setPendingLucyAction(action)
-          pendingLucyActionRef.current = action
-          activeAssistantVoiceMessageId = null
-          suppressNextVoiceAssistantReplyRef.current = true
-
-          try {
-            realtimeDataChannelRef.current?.send(
-              JSON.stringify({
-                type: "response.cancel",
-              })
-            )
-          } catch {
-            // Ignore cancel errors.
-          }
-
-          const confirmationText =
-            action.confirmationPrompt ||
-            `Add ${action.origin} → ${action.destination} for ${action.departureDate} to your watchlist?`
-
-          setMessages((prev) => {
-            const lastMessage = prev[prev.length - 1]
-
-            if (
-              lastMessage?.role === "assistant" &&
-              lastMessage.text.trim() === confirmationText.trim()
-            ) {
-              return prev
-            }
-
-            return [
-              ...prev,
-              {
-                id: createMessageId(),
-                role: "assistant",
-                label: "Lucy",
-                text: confirmationText,
-              },
-            ]
-          })
-
-          speakWithRealtimeLucyVoice(confirmationText)
-
-        } catch {
-          // Ignore malformed realtime tool arguments.
-        }
-      }
-
-      function handleRealtimeSaveVisibleFlightToolCall(item: any) {
+      function handleRealtimeSaveVisibleFlightToolCallLegacy(item: any) {
         if (item?.name !== "prepare_save_visible_flight") return
 
         const rawArguments =
@@ -1828,15 +1172,75 @@ export default function DashboardFlightAttendant({
         try {
           const data = JSON.parse(event.data)
 
+          if (
+            data?.type === "response.output_audio_transcript.delta" ||
+            data?.type === "response.output_audio_transcript.done" ||
+            data?.type === "response.done"
+          ) {
+            console.log("Lucy realtime transcript event:", {
+              type: data.type,
+              delta: data.delta,
+              transcript: data.transcript,
+              output: data.output,
+              activeAssistantVoiceMessageId,
+              suppressNextVoiceAssistantReply: suppressNextVoiceAssistantReplyRef.current,
+              suppressNextRealtimeSpeechText: suppressNextRealtimeSpeechTextRef.current,
+            })
+          }
+
           if (data?.type === "response.output_item.done") {
-            handleRealtimeWatchlistToolCall(data.item)
-            handleRealtimeSaveVisibleFlightToolCall(data.item)
+            handleRealtimeWatchlistToolCallHelper(data.item, {
+              lastVoiceToolCallRef,
+              pendingLucyActionRef,
+              dataChannelRef: realtimeDataChannelRef,
+              setPendingLucyAction,
+              setMessages,
+              speakConfirmation: speakWithRealtimeLucyVoice,
+              suppressNextAssistantReplyRef: suppressNextVoiceAssistantReplyRef,
+              clearActiveAssistantMessage: () => {
+                activeAssistantVoiceMessageId = null
+              },
+            })
+            handleRealtimeSaveVisibleFlightToolCallHelper(data.item, {
+              lastVoiceToolCallRef,
+              pendingLucyActionRef,
+              dataChannelRef: realtimeDataChannelRef,
+              setPendingLucyAction,
+              setMessages,
+              speakConfirmation: speakWithRealtimeLucyVoice,
+              suppressNextAssistantReplyRef: suppressNextVoiceAssistantReplyRef,
+              clearActiveAssistantMessage: () => {
+                activeAssistantVoiceMessageId = null
+              },
+            })
             handleRealtimeSaveLucyMemoryToolCall(data.item)
           }
 
           if (data?.type === "conversation.item.done") {
-            handleRealtimeWatchlistToolCall(data.item)
-            handleRealtimeSaveVisibleFlightToolCall(data.item)
+            handleRealtimeWatchlistToolCallHelper(data.item, {
+              lastVoiceToolCallRef,
+              pendingLucyActionRef,
+              dataChannelRef: realtimeDataChannelRef,
+              setPendingLucyAction,
+              setMessages,
+              speakConfirmation: speakWithRealtimeLucyVoice,
+              suppressNextAssistantReplyRef: suppressNextVoiceAssistantReplyRef,
+              clearActiveAssistantMessage: () => {
+                activeAssistantVoiceMessageId = null
+              },
+            })
+            handleRealtimeSaveVisibleFlightToolCallHelper(data.item, {
+              lastVoiceToolCallRef,
+              pendingLucyActionRef,
+              dataChannelRef: realtimeDataChannelRef,
+              setPendingLucyAction,
+              setMessages,
+              speakConfirmation: speakWithRealtimeLucyVoice,
+              suppressNextAssistantReplyRef: suppressNextVoiceAssistantReplyRef,
+              clearActiveAssistantMessage: () => {
+                activeAssistantVoiceMessageId = null
+              },
+            })
             handleRealtimeSaveLucyMemoryToolCall(data.item)
           }
 
@@ -2243,7 +1647,7 @@ export default function DashboardFlightAttendant({
       text: message,
     }
 
-    setMessages((prev) => [...prev, userMessage])
+    setMessages((prev) => appendUserMessage(prev, userMessage))
     setChatInput("")
     setAuthRequired(false)
 
@@ -2399,7 +1803,7 @@ export default function DashboardFlightAttendant({
               expanded
                 ? "flex h-[min(760px,calc(100vh-3rem))] w-full max-w-3xl flex-col shadow-2xl"
                 : placement === "inline"
-                  ? "w-full"
+                  ? "flex h-[360px] w-full flex-col"
                   : "w-[390px]"
             )}
           >
@@ -2623,7 +2027,7 @@ function AssistantBubble({
   text: string
   align: "left" | "right"
 }) {
-  const cleanText = sanitizeLucyText(text)
+  const cleanText = sanitizeLucyText(formatLucyReplyText(text))
 
   if (!cleanText) return null
 

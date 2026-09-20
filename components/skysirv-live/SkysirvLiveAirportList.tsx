@@ -8,6 +8,21 @@ import {
 } from "@/components/skysirv-live/skysirv-live-data"
 import { searchAirports } from "@/lib/airports/major-airports"
 
+function formatAirportDelayDisplay(params: {
+  minutes: number | null | undefined
+  active?: boolean
+}) {
+  if (typeof params.minutes === "number" && Number.isFinite(params.minutes)) {
+    return `${Math.round(params.minutes)}m`
+  }
+
+  if (params.active) {
+    return "Active"
+  }
+
+  return "—"
+}
+
 const regionOptions = [
   { key: "all", label: "All" },
   { key: "north-america", label: "North America" },
@@ -164,10 +179,17 @@ export default function SkysirvLiveAirportList({
 
             {airports.map((airport) => {
               const styles = getSeverityStyles(airport.severity)
-              const pressure = Math.min(
-                100,
-                airport.departuresDelay + airport.arrivalsDelay
-              )
+              const departureDelay =
+                typeof airport.departuresDelay === "number" && Number.isFinite(airport.departuresDelay)
+                  ? airport.departuresDelay
+                  : 0
+
+              const arrivalDelay =
+                typeof airport.arrivalsDelay === "number" && Number.isFinite(airport.arrivalsDelay)
+                  ? airport.arrivalsDelay
+                  : 0
+
+              const pressure = Math.min(100, departureDelay + arrivalDelay)
 
               return (
                 <Link
@@ -200,14 +222,20 @@ export default function SkysirvLiveAirportList({
                     <div>
                       <p className="text-slate-400">Departures</p>
                       <p className="mt-1 text-xl text-slate-950">
-                        {airport.departuresDelay}m
+                        {formatAirportDelayDisplay({
+                          minutes: airport.departuresDelay,
+                          active: airport.departureDelayActive,
+                        })}
                       </p>
                     </div>
 
                     <div>
                       <p className="text-slate-400">Arrivals</p>
                       <p className="mt-1 text-xl text-slate-950">
-                        {airport.arrivalsDelay}m
+                        {formatAirportDelayDisplay({
+                          minutes: airport.arrivalsDelay,
+                          active: airport.arrivalDelayActive,
+                        })}
                       </p>
                     </div>
                   </div>

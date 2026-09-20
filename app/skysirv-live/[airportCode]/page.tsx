@@ -13,6 +13,7 @@ import {
   type SkysirvLiveAirport,
 } from "@/components/skysirv-live/skysirv-live-data"
 
+
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
 
 const MAP_STYLES = {
@@ -69,6 +70,67 @@ type SkysirvLiveWeatherResponse = {
   ok: boolean
   weather?: SkysirvLiveWeatherSnapshot
   error?: string
+}
+
+function hasDelayMinutes(value: number | null | undefined): value is number {
+  return typeof value === "number" && Number.isFinite(value)
+}
+
+function formatAirportDelayDisplay(params: {
+  minutes: number | null | undefined
+  active?: boolean
+}) {
+  if (hasDelayMinutes(params.minutes)) {
+    return `${Math.round(params.minutes)}m`
+  }
+
+  if (params.active) {
+    return "Active"
+  }
+
+  return "—"
+}
+
+function getAirportDelayValue(value: number | null | undefined) {
+  return hasDelayMinutes(value) ? value : 0
+}
+
+function getAirportDelayPercent(params: {
+  minutes: number | null | undefined
+  active?: boolean
+  activeFallbackPercent?: number
+}) {
+  if (hasDelayMinutes(params.minutes)) {
+    return Math.min(88, Math.max(0, params.minutes))
+  }
+
+  if (params.active) {
+    return params.activeFallbackPercent ?? 7
+  }
+
+  return 0
+}
+
+function getAirportDelayTickerText(params: {
+  type: "departure" | "arrival"
+  minutes: number | null | undefined
+  active?: boolean
+}) {
+  if (hasDelayMinutes(params.minutes)) {
+    return params.type === "departure"
+      ? `Departures are taking off ${Math.round(params.minutes)}m late on average`
+      : `Arrivals are landing ${Math.round(params.minutes)}m late on average`
+  }
+
+  if (params.active) {
+    return params.type === "departure"
+      ? "Departure delay activity is active"
+      : "Arrival delay activity is active"
+  }
+
+  return params.type === "departure"
+    ? "Departure timing is unavailable"
+    : "Arrival timing is unavailable"
 }
 
 export default function SkysirvLiveAirportPage({
@@ -344,8 +406,16 @@ export default function SkysirvLiveAirportPage({
           ...(displayAirport.disruptionReason
             ? [`Reason: ${displayAirport.disruptionReason}`]
             : []),
-          `Departures are taking off ${displayAirport.departuresDelay}m late on average`,
-          `Arrivals are landing ${displayAirport.arrivalsDelay}m late on average`,
+          getAirportDelayTickerText({
+            type: "departure",
+            minutes: displayAirport.departuresDelay,
+            active: displayAirport.departureDelayActive,
+          }),
+          getAirportDelayTickerText({
+            type: "arrival",
+            minutes: displayAirport.arrivalsDelay,
+            active: displayAirport.arrivalDelayActive,
+          }),
           `Cancellations remain at ${displayAirport.cancellationRate}%`,
         ]}
       />
@@ -522,21 +592,35 @@ function renderAirportPanel(
       <div className="space-y-4">
         <DelayChartCard
           title="Live takeoff delay"
-          value={`${airport.departuresDelay}m`}
+          value={formatAirportDelayDisplay({
+            minutes: airport.departuresDelay,
+            active: airport.departureDelayActive,
+          })}
           toneClassName={styles.bar}
         />
 
         <DelayChartCard
           title="Live landing delay"
-          value={`${airport.arrivalsDelay}m`}
-          toneClassName={airport.arrivalsDelay > 20 ? styles.bar : "bg-emerald-500"}
+          value={formatAirportDelayDisplay({
+            minutes: airport.arrivalsDelay,
+            active: airport.arrivalDelayActive,
+          })}
+          toneClassName={
+            getAirportDelayValue(airport.arrivalsDelay) > 20
+              ? styles.bar
+              : "bg-emerald-500"
+          }
         />
       </div>
     )
   }
 
   if (activeView === "departures") {
-    const delayedPercent = Math.min(88, Math.max(6, airport.departuresDelay))
+    const delayedPercent = getAirportDelayPercent({
+      minutes: airport.departuresDelay,
+      active: airport.departureDelayActive,
+      activeFallbackPercent: 6,
+    })
     const onTimePercent = 100 - delayedPercent
 
     return (
@@ -552,7 +636,11 @@ function renderAirportPanel(
   }
 
   if (activeView === "arrivals") {
-    const delayedPercent = Math.min(88, Math.max(7, airport.arrivalsDelay))
+    const delayedPercent = getAirportDelayPercent({
+      minutes: airport.arrivalsDelay,
+      active: airport.arrivalDelayActive,
+      activeFallbackPercent: 7,
+    })
     const onTimePercent = 100 - delayedPercent
 
     return (
@@ -730,13 +818,21 @@ function renderAirportPanel(
         <div className="rounded-2xl bg-slate-50 p-4">
           <p className="text-sm font-bold text-slate-400">Departures</p>
           <p className="mt-2 text-4xl font-black">
-            {airport.departuresDelay}m
+            {formatAirportDelayDisplay({
+              minutes: airport.departuresDelay,
+              active: airport.departureDelayActive,
+            })}
           </p>
         </div>
 
         <div className="rounded-2xl bg-slate-50 p-4">
           <p className="text-sm font-bold text-slate-400">Arrivals</p>
-          <p className="mt-2 text-4xl font-black">{airport.arrivalsDelay}m</p>
+          <p className="mt-2 text-4xl font-black">
+            {formatAirportDelayDisplay({
+              minutes: airport.arrivalsDelay,
+              active: airport.arrivalDelayActive,
+            })}
+          </p>
         </div>
       </div>
     </div>
