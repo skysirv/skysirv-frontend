@@ -82,6 +82,18 @@ export function getRealtimeLucyTranscriptDelta(data: any) {
   return data.delta
 }
 
+export function getCompletedRealtimeLucyTranscript(data: any) {
+  if (
+    data?.type !== "response.output_audio_transcript.done" ||
+    typeof data.transcript !== "string" ||
+    !data.transcript.trim()
+  ) {
+    return null
+  }
+
+  return data.transcript.trim()
+}
+
 export function isRealtimeVoiceSpeechStarted(data: any) {
   return data?.type === "input_audio_buffer.speech_started"
 }

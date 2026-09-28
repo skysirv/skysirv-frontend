@@ -6,6 +6,7 @@ import {
 export type LucyToolCallInput = {
   name?: string
   arguments?: string
+  call_id?: string
 }
 
 export type PreparedLucyToolAction = {

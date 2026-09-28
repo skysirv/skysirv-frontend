@@ -79,6 +79,7 @@ import {
   applyRealtimeVoiceTranscriptDelta,
   createVoiceUserMessage,
   getCompletedRealtimeVoiceTranscript,
+  getCompletedRealtimeLucyTranscript,
   getCompletedVoiceTranscriptDecision,
   getPendingVoiceActionResponse,
   getRealtimeLucyAudioCompletionState,
@@ -149,6 +150,7 @@ export default function DashboardFlightAttendant({
   const suppressNextRealtimeSpeechTextRef = useRef(false)
   const localRealtimeSpeechMessageIdRef = useRef<string | null>(null)
   const pendingLucyActionRef = useRef<LucyAction | null>(null)
+  const pendingRealtimeToolCallIdRef = useRef<string | null>(null)
   const lastVoiceToolCallRef = useRef<{
     key: string
     timestamp: number
@@ -254,11 +256,39 @@ export default function DashboardFlightAttendant({
     await typeAssistantReply(assistantMessageId, fullText)
   }
 
+  function sendRealtimeToolCallOutput(
+    callId: string,
+    output: Record<string, unknown>
+  ) {
+    const dataChannel = realtimeDataChannelRef.current
+
+    if (!callId) return
+    if (!dataChannel || dataChannel.readyState !== "open") return
+
+    try {
+      dataChannel.send(
+        JSON.stringify({
+          type: "conversation.item.create",
+          item: {
+            type: "function_call_output",
+            call_id: callId,
+            output: JSON.stringify(output),
+          },
+        })
+      )
+    } catch {
+      // Realtime state sync should never block the underlying Skysirv action.
+    }
+  }
+
   async function handleConfirmPendingLucyAction(
     action: LucyAction,
     token: string
   ) {
     if (!API_BASE_URL) return
+
+    const realtimeToolCallId =
+      pendingRealtimeToolCallIdRef.current
 
     setChatLoading(true)
 
@@ -279,6 +309,18 @@ export default function DashboardFlightAttendant({
         ].slice(0, 10)
       }
 
+      if (realtimeToolCallId) {
+        sendRealtimeToolCallOutput(
+          realtimeToolCallId,
+          {
+            status: "completed",
+            actionType: action.type,
+            message: result.reply,
+          }
+        )
+      }
+
+      pendingRealtimeToolCallIdRef.current = null
       setPendingLucyAction(null)
       pendingLucyActionRef.current = null
 
@@ -288,10 +330,30 @@ export default function DashboardFlightAttendant({
         speakWithRealtimeLucyVoice(result.reply)
       }
     } catch (error: any) {
-      await appendTypedAssistantReply(
+      const errorMessage =
         error?.message ||
         "I couldn’t save that action yet. Please try again in a moment."
-      )
+
+      if (realtimeToolCallId) {
+        sendRealtimeToolCallOutput(
+          realtimeToolCallId,
+          {
+            status: "failed",
+            actionType: action.type,
+            message: errorMessage,
+          }
+        )
+      }
+
+      pendingRealtimeToolCallIdRef.current = null
+      pendingLucyActionRef.current = null
+      setPendingLucyAction(null)
+
+      await appendTypedAssistantReply(errorMessage)
+
+      if (voiceStatus !== "idle") {
+        speakWithRealtimeLucyVoice(errorMessage)
+      }
     } finally {
       setChatLoading(false)
     }
@@ -348,6 +410,7 @@ export default function DashboardFlightAttendant({
     suppressNextRealtimeSpeechTextRef.current = false
     localRealtimeSpeechMessageIdRef.current = null
     lastVoiceToolCallRef.current = null
+    pendingRealtimeToolCallIdRef.current = null
 
     void setRealtimeMicrophoneEnabled(true)
 
@@ -530,18 +593,25 @@ export default function DashboardFlightAttendant({
             data?.type === "response.output_item.done" ||
             data?.type === "conversation.item.done"
           ) {
-            handleRealtimeVoiceToolItem(data.item, {
-              lastVoiceToolCallRef,
-              pendingLucyActionRef,
-              dataChannelRef: realtimeDataChannelRef,
-              setPendingLucyAction,
-              setMessages,
-              speakConfirmation: speakWithRealtimeLucyVoice,
-              suppressNextAssistantReplyRef: suppressNextVoiceAssistantReplyRef,
-              clearActiveAssistantMessage: () => {
-                activeAssistantVoiceMessageId = null
-              },
-            })
+            const realtimeToolCallId = handleRealtimeVoiceToolItem(
+              data.item,
+              {
+                lastVoiceToolCallRef,
+                pendingLucyActionRef,
+                dataChannelRef: realtimeDataChannelRef,
+                setPendingLucyAction,
+                setMessages,
+                speakConfirmation: speakWithRealtimeLucyVoice,
+                suppressNextAssistantReplyRef: suppressNextVoiceAssistantReplyRef,
+                clearActiveAssistantMessage: () => {
+                  activeAssistantVoiceMessageId = null
+                },
+              }
+            )
+
+            if (realtimeToolCallId) {
+              pendingRealtimeToolCallIdRef.current = realtimeToolCallId
+            }
           }
 
           const realtimeVoiceTranscriptDelta =
@@ -659,6 +729,21 @@ export default function DashboardFlightAttendant({
             }
 
             if (pendingActionResponse.decision === "negative") {
+              const realtimeToolCallId =
+                pendingRealtimeToolCallIdRef.current
+
+              if (realtimeToolCallId) {
+                sendRealtimeToolCallOutput(
+                  realtimeToolCallId,
+                  {
+                    status: "declined",
+                    actionType: actionToConfirm?.type ?? null,
+                    message: pendingActionResponse.reply,
+                  }
+                )
+              }
+
+              pendingRealtimeToolCallIdRef.current = null
               pendingLucyActionRef.current = null
               setPendingLucyAction(null)
               suppressNextVoiceAssistantReplyRef.current = true
@@ -745,6 +830,27 @@ export default function DashboardFlightAttendant({
             }
 
             activeUserVoiceMessageId = null
+          }
+
+          const completedRealtimeLucyTranscript =
+            getCompletedRealtimeLucyTranscript(data)
+
+          if (
+            completedRealtimeLucyTranscript &&
+            activeAssistantVoiceMessageId &&
+            !suppressNextRealtimeSpeechTextRef.current &&
+            !suppressNextVoiceAssistantReplyRef.current
+          ) {
+            const completedAssistantMessageId =
+              activeAssistantVoiceMessageId
+
+            setMessages((prev) =>
+              updateAssistantMessageText(
+                prev,
+                completedAssistantMessageId,
+                completedRealtimeLucyTranscript
+              )
+            )
           }
 
           const {

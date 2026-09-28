@@ -80,7 +80,7 @@ function prepareRealtimeConfirmation({
       lastVoiceToolCallRef
     )
   ) {
-    return
+    return false
   }
 
   setPendingLucyAction(action)
@@ -120,6 +120,7 @@ function prepareRealtimeConfirmation({
   })
 
   speakConfirmation(confirmationText)
+  return true
 }
 
 export function handleRealtimeVoiceToolItem(
@@ -128,12 +129,18 @@ export function handleRealtimeVoiceToolItem(
 ) {
   const preparedAction = buildLucyActionFromToolCall(item)
 
-  if (!preparedAction) return
+  if (!preparedAction) return null
 
-  prepareRealtimeConfirmation({
+  const didPrepare = prepareRealtimeConfirmation({
     action: preparedAction.action,
     confirmationText: preparedAction.confirmationText,
     duplicateKey: preparedAction.duplicateKey,
     dependencies,
   })
+
+  if (!didPrepare) return null
+
+  return typeof item.call_id === "string" && item.call_id.trim()
+    ? item.call_id.trim()
+    : null
 }
