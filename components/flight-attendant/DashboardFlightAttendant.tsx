@@ -7,13 +7,18 @@ import AuthPanel from "@/components/auth/AuthPanel"
 import { getAuthToken } from "@/utils/auth-storage"
 
 import {
-  getLucyActionLabel,
-  isAffirmativeRouteConfirmation,
-  isNegativeRouteConfirmation,
-  normalizeLucyAction,
+  isAffirmativeLucyActionConfirmation,
+  isNegativeLucyActionConfirmation,
   type LucyAction,
-  type LucySaveVisibleFlightAction,
 } from "./dashboardFlightAttendant.actions"
+
+import {
+  executeLucyAction,
+} from "./dashboardFlightAttendant.actionExecution"
+
+import {
+  sendLucyChatMessage,
+} from "./dashboardFlightAttendant.chat"
 
 import {
   API_BASE_URL,
@@ -63,17 +68,30 @@ import {
 } from "./dashboardFlightAttendant.voice"
 
 import {
-  handleRealtimeSaveVisibleFlightToolCall as handleRealtimeSaveVisibleFlightToolCallHelper,
-  handleRealtimeWatchlistToolCall as handleRealtimeWatchlistToolCallHelper,
+  handleRealtimeVoiceToolItem,
 } from "./dashboardFlightAttendant.voiceTools"
 
-type FlightAttendantApiResponse = {
-  success?: boolean
-  model?: string
-  reply?: string
-  action?: LucyAction | null
-  error?: string
-}
+import {
+  appendVoiceAssistantMessage,
+  appendVoiceTranscriptDelta,
+  applyCompletedVoiceTranscript,
+  applyRealtimeLucyTranscriptDelta,
+  applyRealtimeVoiceTranscriptDelta,
+  createVoiceUserMessage,
+  getCompletedRealtimeVoiceTranscript,
+  getCompletedVoiceTranscriptDecision,
+  getPendingVoiceActionResponse,
+  getRealtimeLucyAudioCompletionState,
+  getRealtimeLucyAudioEventState,
+  getRealtimeLucyTranscriptDelta,
+  getRealtimeVoiceTranscriptDelta,
+  isRealtimeVoiceSpeechStarted,
+  removeVoiceTranscriptMessage,
+} from "./dashboardFlightAttendant.voiceTranscript"
+
+import {
+  getRecentlyConfirmedWatchlistResponse,
+} from "./dashboardFlightAttendant.watchlistVoice"
 
 type LucyVoiceStatus =
   | "idle"
@@ -99,274 +117,6 @@ type LucyRealtimeSessionResponse = {
     }
   }
   error?: string
-}
-
-function isClearlySkysirvVoiceIntent(message: string) {
-  const normalized = message.trim().toLowerCase()
-
-  if (!normalized) return false
-
-  const skysirvSignals = [
-    "lucy",
-    "skysirv",
-
-    "flight",
-    "flights",
-    "fare",
-    "fares",
-    "route",
-    "routes",
-    "watchlist",
-    "watch list",
-    "saved flight",
-    "saved flights",
-    "save flight",
-    "save that flight",
-    "track",
-    "tracking",
-
-    "airport",
-    "airports",
-    "airline",
-    "airlines",
-    "alliance",
-    "alliances",
-    "star alliance",
-    "oneworld",
-    "one world",
-    "skyteam",
-    "sky team",
-    "partner airline",
-    "partner airlines",
-    "airline partner",
-    "airline partners",
-    "codeshare",
-
-    "miles",
-    "points",
-    "loyalty",
-    "rewards",
-    "program",
-    "membership",
-    "member",
-    "frequent flyer",
-    "frequent flier",
-    "mileageplus",
-    "aadvantage",
-    "skymiles",
-    "airline miles",
-    "travel rewards",
-    "earn miles",
-    "redeem miles",
-    "award travel",
-    "award flight",
-    "status",
-    "elite status",
-    "upgrade",
-    "upgrades",
-
-    "price",
-    "prices",
-    "booking",
-    "book",
-    "ticket",
-    "tickets",
-
-    "trip",
-    "trips",
-    "travel",
-    "traveler",
-    "traveling",
-    "travelling",
-    "vacation",
-    "holiday",
-    "destination",
-    "destinations",
-    "itinerary",
-    "itineraries",
-
-    "origin",
-    "departure",
-    "depart",
-    "arrive",
-    "arrival",
-    "round trip",
-    "round-trip",
-    "one way",
-    "one-way",
-    "multi city",
-    "multi-city",
-    "open jaw",
-    "stopover",
-    "layover",
-    "layovers",
-    "connection",
-    "connections",
-    "nonstop",
-    "non-stop",
-    "direct flight",
-    "direct flights",
-    "connecting flight",
-    "connecting flights",
-
-    "terminal",
-    "terminals",
-    "gate",
-    "gates",
-    "lounge",
-    "lounges",
-    "baggage",
-    "bags",
-    "checked bag",
-    "checked bags",
-    "luggage",
-    "carry-on",
-    "carry on",
-    "carryon",
-    "carry-on bag",
-    "packing",
-    "passport",
-    "visa",
-    "customs",
-    "immigration",
-    "security",
-    "tsa",
-    "boarding",
-    "boarding pass",
-
-    "seat",
-    "seats",
-    "cabin",
-    "economy",
-    "premium economy",
-    "business class",
-    "first class",
-    "extra legroom",
-    "legroom",
-    "red eye",
-    "red-eye",
-    "overnight flight",
-
-    "hotel",
-    "hotels",
-    "rental car",
-    "car rental",
-    "family trip",
-    "business trip",
-
-    "remember",
-    "memory",
-    "preference",
-    "preferences",
-    "prefer",
-    "preferred",
-    "favorite airline",
-    "favorite airlines",
-    "home airport",
-    "usual airport",
-    "travel style",
-
-    "alert",
-    "alerts",
-
-    "united",
-    "lufthansa",
-    "air canada",
-    "swiss",
-    "ana",
-    "all nippon",
-    "singapore airlines",
-    "turkish airlines",
-    "copa",
-
-    "jfk",
-    "mia",
-    "bos",
-    "iah",
-    "ord",
-    "lax",
-
-    "houston",
-    "miami",
-    "boston",
-    "chicago",
-    "los angeles",
-    "new york",
-    "london",
-    "paris",
-    "tokyo",
-    "rome",
-    "madrid",
-    "barcelona",
-    "bolivia",
-    "santa cruz de la sierra",
-    "viru viru",
-    "panama city",
-    "panama",
-    "cancun",
-    "orlando",
-  ]
-
-  return skysirvSignals.some((signal) => normalized.includes(signal))
-}
-
-function findRecentlyConfirmedVoiceRoute({
-  message,
-  confirmedRoutes,
-}: {
-  message: string
-  confirmedRoutes: Array<{
-    origin: string
-    destination: string
-    departureDate: string
-    routeLabel?: string
-    confirmedAt: number
-  }>
-}) {
-  const normalized = message.toLowerCase()
-
-  return confirmedRoutes.find((route) => {
-    const origin = route.origin.toLowerCase()
-    const destination = route.destination.toLowerCase()
-    const routeLabel = route.routeLabel?.toLowerCase() ?? ""
-
-    const routeMentioned =
-      normalized.includes(origin) ||
-      normalized.includes(destination) ||
-      (routeLabel && normalized.includes(routeLabel))
-
-    const recentlyConfirmed = Date.now() - route.confirmedAt < 10 * 60 * 1000
-
-    return routeMentioned && recentlyConfirmed
-  })
-}
-
-function shouldIgnoreDuplicateVoiceToolCall(
-  key: string,
-  lastCallRef: {
-    current: {
-      key: string
-      timestamp: number
-    } | null
-  }
-) {
-  const now = Date.now()
-  const lastCall = lastCallRef.current
-
-  if (
-    lastCall &&
-    lastCall.key === key &&
-    now - lastCall.timestamp < 5000
-  ) {
-    return true
-  }
-
-  lastCallRef.current = {
-    key,
-    timestamp: now,
-  }
-
-  return false
 }
 
 export default function DashboardFlightAttendant({
@@ -504,270 +254,38 @@ export default function DashboardFlightAttendant({
     await typeAssistantReply(assistantMessageId, fullText)
   }
 
-  async function handleConfirmPendingLucyAction(action: LucyAction, token: string) {
+  async function handleConfirmPendingLucyAction(
+    action: LucyAction,
+    token: string
+  ) {
     if (!API_BASE_URL) return
 
     setChatLoading(true)
 
     try {
-      let successReply = ""
+      const result = await executeLucyAction({
+        action,
+        token,
+        apiBaseUrl: API_BASE_URL,
+      })
 
-      if (action.type === "save_first_name") {
-        const response = await fetch(
-          `${API_BASE_URL}/api/user-preferences/profile-name`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              firstName: action.firstName,
-            }),
-          }
-        )
-
-        const data = await response.json().catch(() => null)
-
-        if (!response.ok) {
-          throw new Error(
-            data?.error ||
-            "I couldn’t save your name yet. Please try again in a moment."
-          )
-        }
-
-        window.dispatchEvent(
-          new CustomEvent("skysirv:profile-name-updated", {
-            detail: data,
-          })
-        )
-
-        successReply = `Done — I’ll remember your name as ${action.firstName} for future Skysirv sessions.`
-      }
-
-      if (action.type === "save_lucy_memory") {
-        const response = await fetch(
-          `${API_BASE_URL}/api/flight-attendant/memories`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              memoryType: action.memoryType,
-              memoryKey: action.memoryKey,
-              memoryText: action.memoryText,
-              memoryValueJson: action.memoryValueJson ?? null,
-            }),
-          }
-        )
-
-        const data = await response.json().catch(() => null)
-
-        if (!response.ok) {
-          throw new Error(
-            data?.error ||
-            "I couldn’t save that memory yet. Please try again in a moment."
-          )
-        }
-
-        window.dispatchEvent(
-          new CustomEvent("skysirv:lucy-memory-updated", {
-            detail: data,
-          })
-        )
-
-        successReply =
-          "Done — I’ll remember that for future Skysirv sessions."
-      }
-
-      if (action.type === "add_watchlist_route") {
-        console.log("Lucy watchlist voice action:", action)
-
-        const response = await fetch(`${API_BASE_URL}/watchlist`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            origin: action.origin,
-            destination: action.destination,
-            departureDate: action.departureDate,
-            departure_date: action.departureDate,
-          }),
-        })
-
-        const data = await response.json().catch(() => null)
-        console.log("Lucy watchlist response:", response.status, data)
-
-        if (!response.ok) {
-          const message =
-            response.status === 403
-              ? "Your current plan has reached its watchlist limit. You’ll need to remove a route or upgrade before Lucy can add another one."
-              : data?.error ||
-              "I couldn’t add that route to your watchlist yet. Please try again in a moment."
-
-          throw new Error(message)
-        }
-
-        window.dispatchEvent(
-          new CustomEvent("skysirv:watchlist-updated", {
-            detail: {
-              origin: action.origin,
-              destination: action.destination,
-              departureDate: action.departureDate,
-              result: data,
-            },
-          })
-        )
-
+      if (result.confirmedWatchlistRoute) {
         confirmedVoiceWatchlistRoutesRef.current = [
           {
-            origin: action.origin,
-            destination: action.destination,
-            departureDate: action.departureDate,
-            routeLabel: action.routeLabel,
+            ...result.confirmedWatchlistRoute,
             confirmedAt: Date.now(),
           },
           ...confirmedVoiceWatchlistRoutesRef.current,
         ].slice(0, 10)
-
-        successReply = "Done — it’s on your watchlist."
-      }
-
-      if (action.type === "save_visible_flight") {
-        const response = await fetch(`${API_BASE_URL}/saved-flights`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            origin: action.origin,
-            destination: action.destination,
-            departureDate: action.departureDate ?? null,
-            airline: action.airline ?? null,
-            flightNumber: action.flightNumber ?? null,
-            price: action.price ?? null,
-            currency: action.currency ?? "USD",
-          }),
-        })
-
-        const data = await response.json().catch(() => null)
-
-        if (!response.ok) {
-          if (response.status === 409) {
-            successReply = "That flight is already in your Saved Flights."
-          } else {
-            throw new Error(
-              data?.error ||
-              "I couldn’t save that flight yet. Please try again in a moment."
-            )
-          }
-        } else {
-          window.dispatchEvent(
-            new CustomEvent("skysirv:saved-flights-updated", {
-              detail: {
-                origin: action.origin,
-                destination: action.destination,
-                departureDate: action.departureDate,
-                airline: action.airline,
-                airlineName: action.airlineName,
-                flightNumber: action.flightNumber,
-                price: action.price,
-                currency: action.currency,
-                result: data,
-              },
-            })
-          )
-
-          successReply = `Done — I saved ${action.flightLabel || action.flightNumber || "that flight"
-            } to your Saved Flights.`
-        }
-      }
-
-      if (action.type === "save_preferred_airports") {
-        const response = await fetch(
-          `${API_BASE_URL}/api/user-preferences/preferred-airports`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              airportCodes: action.airportCodes,
-            }),
-          }
-        )
-
-        const data = await response.json().catch(() => null)
-
-        if (!response.ok) {
-          throw new Error(
-            data?.error ||
-            "I couldn’t save those preferred airports yet. Please try again in a moment."
-          )
-        }
-
-        window.dispatchEvent(
-          new CustomEvent("skysirv:preferred-airports-updated", {
-            detail: data,
-          })
-        )
-
-        successReply = `Done — I saved ${getLucyActionLabel(
-          action
-        )} as preferred airports.`
-      }
-
-      if (action.type === "save_preferred_route") {
-        const response = await fetch(
-          `${API_BASE_URL}/api/user-preferences/preferred-routes`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              origin: action.origin,
-              destination: action.destination,
-            }),
-          }
-        )
-
-        const data = await response.json().catch(() => null)
-
-        if (!response.ok) {
-          throw new Error(
-            data?.error ||
-            "I couldn’t save that preferred route yet. Please try again in a moment."
-          )
-        }
-
-        window.dispatchEvent(
-          new CustomEvent("skysirv:preferred-routes-updated", {
-            detail: data,
-          })
-        )
-
-        successReply = `Done — I saved ${getLucyActionLabel(
-          action
-        )} as a preferred route.`
       }
 
       setPendingLucyAction(null)
       pendingLucyActionRef.current = null
 
-      const finalSuccessReply = successReply || "Done — I saved that preference."
-
-      await appendTypedAssistantReply(finalSuccessReply)
+      await appendTypedAssistantReply(result.reply)
 
       if (voiceStatus !== "idle") {
-        speakWithRealtimeLucyVoice(finalSuccessReply)
+        speakWithRealtimeLucyVoice(result.reply)
       }
     } catch (error: any) {
       await appendTypedAssistantReply(
@@ -988,186 +506,6 @@ export default function DashboardFlightAttendant({
       let activeUserVoiceMessageId: string | null = null
       let activeAssistantVoiceMessageId: string | null = null
 
-      function handleRealtimeSaveVisibleFlightToolCallLegacy(item: any) {
-        if (item?.name !== "prepare_save_visible_flight") return
-
-        const rawArguments =
-          typeof item.arguments === "string" ? item.arguments : ""
-
-        if (!rawArguments) return
-
-        try {
-          const parsed = JSON.parse(rawArguments)
-
-          const parsedPrice =
-            typeof parsed.price === "number" ? parsed.price : Number(parsed.price)
-
-          const action = normalizeLucyAction({
-            type: "save_visible_flight",
-            status: "needs_confirmation",
-            origin: parsed.origin,
-            destination: parsed.destination,
-            departureDate: parsed.departureDate,
-            airline: parsed.airline,
-            airlineName: parsed.airlineName,
-            flightNumber: parsed.flightNumber,
-            price: Number.isFinite(parsedPrice) ? parsedPrice : null,
-            currency: parsed.currency,
-            flightLabel: parsed.flightLabel,
-            confirmationPrompt: parsed.confirmationPrompt,
-          })
-
-          if (!action || action.type !== "save_visible_flight") return
-
-          const duplicateKey = [
-            action.type,
-            action.origin,
-            action.destination,
-            action.departureDate ?? "",
-            action.flightNumber ?? "",
-          ].join(":")
-
-          if (
-            shouldIgnoreDuplicateVoiceToolCall(
-              duplicateKey,
-              lastVoiceToolCallRef
-            )
-          ) {
-            return
-          }
-
-          setPendingLucyAction(action)
-          pendingLucyActionRef.current = action
-          activeAssistantVoiceMessageId = null
-          suppressNextVoiceAssistantReplyRef.current = true
-
-          try {
-            realtimeDataChannelRef.current?.send(
-              JSON.stringify({
-                type: "response.cancel",
-              })
-            )
-          } catch {
-            // Ignore cancel errors.
-          }
-
-          const confirmationText =
-            action.confirmationPrompt ||
-            `Save ${action.flightLabel || action.flightNumber || "that flight"
-            } to your Saved Flights?`
-
-          setMessages((prev) => {
-            const lastMessage = prev[prev.length - 1]
-
-            if (
-              lastMessage?.role === "assistant" &&
-              lastMessage.text.trim() === confirmationText.trim()
-            ) {
-              return prev
-            }
-
-            return [
-              ...prev,
-              {
-                id: createMessageId(),
-                role: "assistant",
-                label: "Lucy",
-                text: confirmationText,
-              },
-            ]
-          })
-
-          speakWithRealtimeLucyVoice(confirmationText)
-
-        } catch {
-          // Ignore malformed realtime save-flight tool arguments.
-        }
-      }
-
-      function handleRealtimeSaveLucyMemoryToolCall(item: any) {
-        if (item?.name !== "prepare_save_lucy_memory") return
-
-        const rawArguments =
-          typeof item.arguments === "string" ? item.arguments : ""
-
-        if (!rawArguments) return
-
-        try {
-          const parsed = JSON.parse(rawArguments)
-
-          const action = normalizeLucyAction({
-            type: "save_lucy_memory",
-            status: "needs_confirmation",
-            memoryType: parsed.memoryType,
-            memoryKey: parsed.memoryKey,
-            memoryText: parsed.memoryText,
-            memoryValueJson: parsed.memoryValueJson ?? null,
-            confirmationPrompt: parsed.confirmationPrompt,
-          })
-
-          if (!action || action.type !== "save_lucy_memory") return
-
-          const duplicateKey = [
-            action.type,
-            action.memoryType,
-            action.memoryKey,
-          ].join(":")
-
-          if (
-            shouldIgnoreDuplicateVoiceToolCall(
-              duplicateKey,
-              lastVoiceToolCallRef
-            )
-          ) {
-            return
-          }
-
-          setPendingLucyAction(action)
-          pendingLucyActionRef.current = action
-          activeAssistantVoiceMessageId = null
-          suppressNextVoiceAssistantReplyRef.current = true
-
-          try {
-            realtimeDataChannelRef.current?.send(
-              JSON.stringify({
-                type: "response.cancel",
-              })
-            )
-          } catch {
-            // Ignore cancel errors.
-          }
-
-          const confirmationText =
-            action.confirmationPrompt ||
-            "Would you like me to remember that for future Skysirv sessions?"
-
-          setMessages((prev) => {
-            const lastMessage = prev[prev.length - 1]
-
-            if (
-              lastMessage?.role === "assistant" &&
-              lastMessage.text.trim() === confirmationText.trim()
-            ) {
-              return prev
-            }
-
-            return [
-              ...prev,
-              {
-                id: createMessageId(),
-                role: "assistant",
-                label: "Lucy",
-                text: confirmationText,
-              },
-            ]
-          })
-
-          speakWithRealtimeLucyVoice(confirmationText)
-        } catch {
-          // Ignore malformed realtime memory arguments.
-        }
-      }
-
       dataChannel.addEventListener("message", (event) => {
         try {
           const data = JSON.parse(event.data)
@@ -1188,109 +526,69 @@ export default function DashboardFlightAttendant({
             })
           }
 
-          if (data?.type === "response.output_item.done") {
-            handleRealtimeWatchlistToolCallHelper(data.item, {
-              lastVoiceToolCallRef,
-              pendingLucyActionRef,
-              dataChannelRef: realtimeDataChannelRef,
-              setPendingLucyAction,
-              setMessages,
-              speakConfirmation: speakWithRealtimeLucyVoice,
-              suppressNextAssistantReplyRef: suppressNextVoiceAssistantReplyRef,
-              clearActiveAssistantMessage: () => {
-                activeAssistantVoiceMessageId = null
-              },
-            })
-            handleRealtimeSaveVisibleFlightToolCallHelper(data.item, {
-              lastVoiceToolCallRef,
-              pendingLucyActionRef,
-              dataChannelRef: realtimeDataChannelRef,
-              setPendingLucyAction,
-              setMessages,
-              speakConfirmation: speakWithRealtimeLucyVoice,
-              suppressNextAssistantReplyRef: suppressNextVoiceAssistantReplyRef,
-              clearActiveAssistantMessage: () => {
-                activeAssistantVoiceMessageId = null
-              },
-            })
-            handleRealtimeSaveLucyMemoryToolCall(data.item)
-          }
-
-          if (data?.type === "conversation.item.done") {
-            handleRealtimeWatchlistToolCallHelper(data.item, {
-              lastVoiceToolCallRef,
-              pendingLucyActionRef,
-              dataChannelRef: realtimeDataChannelRef,
-              setPendingLucyAction,
-              setMessages,
-              speakConfirmation: speakWithRealtimeLucyVoice,
-              suppressNextAssistantReplyRef: suppressNextVoiceAssistantReplyRef,
-              clearActiveAssistantMessage: () => {
-                activeAssistantVoiceMessageId = null
-              },
-            })
-            handleRealtimeSaveVisibleFlightToolCallHelper(data.item, {
-              lastVoiceToolCallRef,
-              pendingLucyActionRef,
-              dataChannelRef: realtimeDataChannelRef,
-              setPendingLucyAction,
-              setMessages,
-              speakConfirmation: speakWithRealtimeLucyVoice,
-              suppressNextAssistantReplyRef: suppressNextVoiceAssistantReplyRef,
-              clearActiveAssistantMessage: () => {
-                activeAssistantVoiceMessageId = null
-              },
-            })
-            handleRealtimeSaveLucyMemoryToolCall(data.item)
-          }
-
           if (
-            data?.type === "conversation.item.input_audio_transcription.delta" &&
-            typeof data.delta === "string"
+            data?.type === "response.output_item.done" ||
+            data?.type === "conversation.item.done"
           ) {
-            if (!activeUserVoiceMessageId) {
-              activeUserVoiceMessageId = createMessageId()
-
-              setMessages((prev) => [
-                ...prev,
-                {
-                  id: activeUserVoiceMessageId!,
-                  role: "user",
-                  label: "You",
-                  text: "",
-                },
-              ])
-            }
-
-            setMessages((prev) =>
-              prev.map((message) =>
-                message.id === activeUserVoiceMessageId
-                  ? {
-                    ...message,
-                    text: `${message.text}${data.delta}`,
-                  }
-                  : message
-              )
-            )
+            handleRealtimeVoiceToolItem(data.item, {
+              lastVoiceToolCallRef,
+              pendingLucyActionRef,
+              dataChannelRef: realtimeDataChannelRef,
+              setPendingLucyAction,
+              setMessages,
+              speakConfirmation: speakWithRealtimeLucyVoice,
+              suppressNextAssistantReplyRef: suppressNextVoiceAssistantReplyRef,
+              clearActiveAssistantMessage: () => {
+                activeAssistantVoiceMessageId = null
+              },
+            })
           }
 
-          if (
-            data?.type === "conversation.item.input_audio_transcription.completed" &&
-            typeof data.transcript === "string" &&
-            data.transcript.trim()
-          ) {
-            const completedTranscript = data.transcript.trim()
+          const realtimeVoiceTranscriptDelta =
+            getRealtimeVoiceTranscriptDelta(data)
+
+          if (realtimeVoiceTranscriptDelta !== null) {
+            const currentActiveUserVoiceMessageId =
+              activeUserVoiceMessageId
+
+            setMessages((prev) => {
+              const result = applyRealtimeVoiceTranscriptDelta({
+                messages: prev,
+                activeMessageId: currentActiveUserVoiceMessageId,
+                delta: realtimeVoiceTranscriptDelta,
+                createMessageId,
+              })
+
+              activeUserVoiceMessageId = result.messageId
+
+              return result.messages
+            })
+          }
+
+          const completedTranscript =
+            getCompletedRealtimeVoiceTranscript(data)
+
+          if (completedTranscript) {
             suppressNextVoiceAssistantReplyRef.current = false
 
-            const hasPendingAction = Boolean(pendingLucyActionRef.current)
+            const transcriptDecision = getCompletedVoiceTranscriptDecision({
+              transcript: completedTranscript,
+              pendingAction: pendingLucyActionRef.current,
+              lucySessionActive: true,
+            })
 
-            if (!hasPendingAction && !isClearlySkysirvVoiceIntent(completedTranscript)) {
+            if (transcriptDecision === "ignore") {
               suppressNextVoiceAssistantReplyRef.current = true
               suppressNextRealtimeSpeechTextRef.current = false
 
               if (activeUserVoiceMessageId) {
+                const ignoredUserMessageId = activeUserVoiceMessageId
+
                 setMessages((prev) =>
-                  prev.filter((message) => message.id !== activeUserVoiceMessageId)
+                  removeVoiceTranscriptMessage({
+                    messages: prev,
+                    messageId: ignoredUserMessageId,
+                  })
                 )
               }
 
@@ -1299,12 +597,15 @@ export default function DashboardFlightAttendant({
               return
             }
 
-            if (completedTranscript.length < 3) {
+            if (transcriptDecision === "too_short") {
               const emptyUserMessageId = activeUserVoiceMessageId
 
               if (emptyUserMessageId) {
                 setMessages((prev) =>
-                  prev.filter((message) => message.id !== emptyUserMessageId)
+                  removeVoiceTranscriptMessage({
+                    messages: prev,
+                    messageId: emptyUserMessageId,
+                  })
                 )
               }
 
@@ -1313,15 +614,14 @@ export default function DashboardFlightAttendant({
             }
 
             if (activeUserVoiceMessageId) {
+              const completedUserMessageId = activeUserVoiceMessageId
+
               setMessages((prev) =>
-                prev.map((message) =>
-                  message.id === activeUserVoiceMessageId
-                    ? {
-                      ...message,
-                      text: completedTranscript,
-                    }
-                    : message
-                )
+                applyCompletedVoiceTranscript({
+                  messages: prev,
+                  messageId: completedUserMessageId,
+                  transcript: completedTranscript,
+                })
               )
             }
 
@@ -1329,50 +629,50 @@ export default function DashboardFlightAttendant({
 
             const actionToConfirm = pendingLucyActionRef.current
 
-            const recentlyConfirmedRoute = findRecentlyConfirmedVoiceRoute({
-              message: completedTranscript,
-              confirmedRoutes: confirmedVoiceWatchlistRoutesRef.current,
+            const pendingActionResponse = getPendingVoiceActionResponse({
+              transcript: completedTranscript,
+              pendingAction: actionToConfirm,
             })
 
-            if (
-              recentlyConfirmedRoute &&
-              completedTranscript.toLowerCase().includes("watch")
-            ) {
+            const recentlyConfirmedWatchlistResponse =
+              getRecentlyConfirmedWatchlistResponse({
+                transcript: completedTranscript,
+                confirmedRoutes: confirmedVoiceWatchlistRoutesRef.current,
+              })
+
+            if (recentlyConfirmedWatchlistResponse) {
               suppressNextVoiceAssistantReplyRef.current = true
               activeAssistantVoiceMessageId = null
 
-              setMessages((prev) => [
-                ...prev,
-                {
-                  id: createMessageId(),
-                  role: "assistant",
-                  label: "Lucy",
-                  text: `${recentlyConfirmedRoute.origin} → ${recentlyConfirmedRoute.destination} is on your watchlist.`,
-                },
-              ])
+              const watchlistReplyMessageId = createMessageId()
+
+              setMessages((prev) =>
+                appendVoiceAssistantMessage({
+                  messages: prev,
+                  messageId: watchlistReplyMessageId,
+                  text: recentlyConfirmedWatchlistResponse.reply,
+                })
+              )
 
               activeUserVoiceMessageId = null
               return
             }
 
-            if (
-              actionToConfirm &&
-              isNegativeRouteConfirmation(completedTranscript)
-            ) {
+            if (pendingActionResponse.decision === "negative") {
               pendingLucyActionRef.current = null
               setPendingLucyAction(null)
               suppressNextVoiceAssistantReplyRef.current = true
               activeAssistantVoiceMessageId = null
 
-              setMessages((prev) => [
-                ...prev,
-                {
-                  id: createMessageId(),
-                  role: "assistant",
-                  label: "Lucy",
-                  text: "No problem — I won’t save that action.",
-                },
-              ])
+              const negativeReplyMessageId = createMessageId()
+
+              setMessages((prev) =>
+                appendVoiceAssistantMessage({
+                  messages: prev,
+                  messageId: negativeReplyMessageId,
+                  text: pendingActionResponse.reply!,
+                })
+              )
 
               activeUserVoiceMessageId = null
               return
@@ -1381,7 +681,7 @@ export default function DashboardFlightAttendant({
             if (
               token &&
               actionToConfirm &&
-              isAffirmativeRouteConfirmation(completedTranscript)
+              pendingActionResponse.decision === "affirmative"
             ) {
               pendingLucyActionRef.current = null
               setPendingLucyAction(null)
@@ -1428,17 +728,17 @@ export default function DashboardFlightAttendant({
                 // Ignore cancel errors.
               }
 
-              setMessages((prev) => [
-                ...prev,
-                {
-                  id: createMessageId(),
-                  role: "assistant",
-                  label: "Lucy",
+              const saveFlightConfirmationMessageId = createMessageId()
+
+              setMessages((prev) =>
+                appendVoiceAssistantMessage({
+                  messages: prev,
+                  messageId: saveFlightConfirmationMessageId,
                   text:
                     localVoiceSaveFlightAction.confirmationPrompt ||
                     "Would you like me to save this flight to your Saved Flights?",
-                },
-              ])
+                })
+              )
 
               activeUserVoiceMessageId = null
               return
@@ -1447,17 +747,11 @@ export default function DashboardFlightAttendant({
             activeUserVoiceMessageId = null
           }
 
-          const isLucyAudioDelta =
-            data?.type === "response.audio.delta" ||
-            data?.type === "response.output_audio.delta"
-
-          const isLucyTranscriptDelta =
-            data?.type === "response.output_audio_transcript.delta" &&
-            typeof data.delta === "string"
-
-          const isLucyAudioDone =
-            data?.type === "response.output_audio_transcript.done" ||
-            data?.type === "response.done"
+          const {
+            isAudioDelta: isLucyAudioDelta,
+            isTranscriptDelta: isLucyTranscriptDelta,
+            isAudioDone: isLucyAudioDone,
+          } = getRealtimeLucyAudioEventState(data)
 
           if (isLucyAudioDelta || isLucyTranscriptDelta) {
             pauseRealtimeMicrophoneForLucy()
@@ -1471,11 +765,24 @@ export default function DashboardFlightAttendant({
             activeUserVoiceMessageId = null
             localRealtimeSpeechMessageIdRef.current = null
 
-            if (suppressNextRealtimeSpeechTextRef.current) {
+            const audioCompletionState =
+              getRealtimeLucyAudioCompletionState({
+                hasPendingAction: Boolean(
+                  pendingLucyActionRef.current
+                ),
+                suppressRealtimeSpeechText:
+                  suppressNextRealtimeSpeechTextRef.current,
+              })
+
+            if (
+              audioCompletionState.shouldClearRealtimeSpeechTextSuppression
+            ) {
               suppressNextRealtimeSpeechTextRef.current = false
             }
 
-            if (!pendingLucyActionRef.current) {
+            if (
+              audioCompletionState.shouldClearVoiceAssistantReplySuppression
+            ) {
               suppressNextVoiceAssistantReplyRef.current = false
             }
 
@@ -1492,10 +799,10 @@ export default function DashboardFlightAttendant({
             return
           }
 
-          if (
-            data?.type === "response.output_audio_transcript.delta" &&
-            typeof data.delta === "string"
-          ) {
+          const realtimeLucyTranscriptDelta =
+            getRealtimeLucyTranscriptDelta(data)
+
+          if (realtimeLucyTranscriptDelta !== null) {
             if (suppressNextRealtimeSpeechTextRef.current) {
               return
             }
@@ -1504,62 +811,37 @@ export default function DashboardFlightAttendant({
               const localMessageId = localRealtimeSpeechMessageIdRef.current
 
               setMessages((prev) =>
-                prev.map((message) =>
-                  message.id === localMessageId
-                    ? {
-                      ...message,
-                      text: `${message.text}${data.delta}`,
-                    }
-                    : message
-                )
+                appendVoiceTranscriptDelta({
+                  messages: prev,
+                  messageId: localMessageId,
+                  delta: realtimeLucyTranscriptDelta,
+                })
               )
 
               setVoiceStatus("speaking")
               return
             }
 
-            if (!activeAssistantVoiceMessageId) {
-              const existingEmptyAssistantMessage = messages
-                .slice()
-                .reverse()
-                .find(
-                  (message) =>
-                    message.role === "assistant" &&
-                    message.label === "Lucy" &&
-                    !message.text.trim()
-                )
+            const currentActiveAssistantVoiceMessageId =
+              activeAssistantVoiceMessageId
 
-              activeAssistantVoiceMessageId =
-                existingEmptyAssistantMessage?.id || createMessageId()
+            setMessages((prev) => {
+              const result = applyRealtimeLucyTranscriptDelta({
+                messages: prev,
+                activeMessageId: currentActiveAssistantVoiceMessageId,
+                delta: realtimeLucyTranscriptDelta,
+                createMessageId,
+              })
 
-              if (!existingEmptyAssistantMessage) {
-                setMessages((prev) => [
-                  ...prev,
-                  {
-                    id: activeAssistantVoiceMessageId!,
-                    role: "assistant",
-                    label: "Lucy",
-                    text: "",
-                  },
-                ])
-              }
-            }
+              activeAssistantVoiceMessageId = result.messageId
 
-            setMessages((prev) =>
-              prev.map((message) =>
-                message.id === activeAssistantVoiceMessageId
-                  ? {
-                    ...message,
-                    text: `${message.text}${data.delta}`,
-                  }
-                  : message
-              )
-            )
+              return result.messages
+            })
 
             setVoiceStatus("speaking")
           }
 
-          if (data?.type === "input_audio_buffer.speech_started") {
+          if (isRealtimeVoiceSpeechStarted(data)) {
             suppressNextRealtimeSpeechTextRef.current = false
 
             suppressNextVoiceAssistantReplyRef.current = Boolean(
@@ -1568,17 +850,16 @@ export default function DashboardFlightAttendant({
 
             activeAssistantVoiceMessageId = null
 
-            activeUserVoiceMessageId = createMessageId()
+            setMessages((prev) => {
+              const result = createVoiceUserMessage({
+                messages: prev,
+                createMessageId,
+              })
 
-            setMessages((prev) => [
-              ...prev,
-              {
-                id: activeUserVoiceMessageId!,
-                role: "user",
-                label: "You",
-                text: "",
-              },
-            ])
+              activeUserVoiceMessageId = result.messageId
+
+              return result.messages
+            })
 
             setVoiceStatus("listening")
           }
@@ -1661,7 +942,7 @@ export default function DashboardFlightAttendant({
           role: "assistant",
           label: "Lucy",
           text:
-            "Please sign in again to use the live Flight Attendant. This keeps Skysirv intelligence secure and connected to your account.",
+            "Please sign in again to continue with Lucy. This keeps your Skysirv travel intelligence, preferences, and memories securely connected to your account.",
         },
       ])
 
@@ -1676,14 +957,14 @@ export default function DashboardFlightAttendant({
           role: "assistant",
           label: "Lucy",
           text:
-            "The Flight Attendant is not configured yet. Please try again once the API connection is available.",
+            "Lucy is not configured yet. Please try again once the Skysirv connection is available.",
         },
       ])
 
       return
     }
 
-    if (pendingLucyAction && isNegativeRouteConfirmation(message)) {
+    if (pendingLucyAction && isNegativeLucyActionConfirmation(message)) {
       setPendingLucyAction(null)
 
       await appendTypedAssistantReply(
@@ -1693,7 +974,7 @@ export default function DashboardFlightAttendant({
       return
     }
 
-    if (pendingLucyAction && isAffirmativeRouteConfirmation(message)) {
+    if (pendingLucyAction && isAffirmativeLucyActionConfirmation(message)) {
       await handleConfirmPendingLucyAction(pendingLucyAction, token)
       return
     }
@@ -1718,39 +999,20 @@ export default function DashboardFlightAttendant({
     setChatLoading(true)
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/flight-attendant/chat`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          message,
-          tier,
-          dashboardRoutes,
-          messages: [...messages, userMessage].slice(-10).map((item) => ({
-            role: item.role,
-            content: item.text,
-          })),
-        }),
+      const result = await sendLucyChatMessage({
+        apiBaseUrl: API_BASE_URL,
+        token,
+        message,
+        tier,
+        dashboardRoutes,
+        messages: [...messages, userMessage],
       })
 
-      const data = (await response.json().catch(() => null)) as
-        | FlightAttendantApiResponse
-        | null
-
-      if (!response.ok) {
-        throw new Error(data?.error || "Unable to reach Skysirv Flight Attendant")
-      }
-
       const assistantMessageId = createMessageId()
-      const assistantReply =
-        data?.reply || "I’m here, but I could not generate a response."
 
-      const suggestedAction = normalizeLucyAction(data?.action)
-
-      if (suggestedAction) {
-        setPendingLucyAction(suggestedAction)
+      if (result.action) {
+        setPendingLucyAction(result.action)
+        pendingLucyActionRef.current = result.action
       }
 
       setChatLoading(false)
@@ -1765,7 +1027,7 @@ export default function DashboardFlightAttendant({
         },
       ])
 
-      await typeAssistantReply(assistantMessageId, assistantReply)
+      await typeAssistantReply(assistantMessageId, result.reply)
     } catch (error: any) {
       setMessages((prev) => [
         ...prev,
@@ -1775,7 +1037,7 @@ export default function DashboardFlightAttendant({
           label: "Lucy",
           text:
             error?.message ||
-            "Something went wrong while contacting the Flight Attendant. Please try again.",
+            "Something went wrong while contacting Lucy. Please try again.",
         },
       ])
     } finally {
@@ -1814,7 +1076,7 @@ export default function DashboardFlightAttendant({
                     Lucy
                   </p>
                   <p className="mt-1 text-sm text-slate-400">
-                    Skysirv Flight Attendant™
+                    Your AI Travel Companion
                   </p>
                 </div>
 
