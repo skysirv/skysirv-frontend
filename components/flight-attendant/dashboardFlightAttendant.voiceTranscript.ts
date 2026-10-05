@@ -342,6 +342,22 @@ export function applyCompletedVoiceTranscript({
   messageId: string
   transcript: string
 }) {
+  const existingMessage = messages.some(
+    (message) => message.id === messageId
+  )
+
+  if (!existingMessage) {
+    return [
+      ...messages,
+      {
+        id: messageId,
+        role: "user" as const,
+        label: "You",
+        text: transcript,
+      },
+    ]
+  }
+
   return messages.map((message) =>
     message.id === messageId
       ? {
@@ -431,17 +447,20 @@ export function applyRealtimeVoiceTranscriptDelta({
 export function createVoiceUserMessage({
   messages,
   createMessageId,
+  messageId,
 }: {
   messages: FlightAttendantMessage[]
   createMessageId: () => string
+  messageId?: string
 }) {
-  const messageId = createMessageId()
+  const resolvedMessageId =
+    messageId || createMessageId()
 
   return {
-    messageId,
+    messageId: resolvedMessageId,
     messages: appendEmptyVoiceUserMessage({
       messages,
-      messageId,
+      messageId: resolvedMessageId,
     }),
   }
 }

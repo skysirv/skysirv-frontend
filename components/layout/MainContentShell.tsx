@@ -13,7 +13,9 @@ export default function MainContentShell({ children }: PropsWithChildren) {
     pathname.startsWith('/plan-with-lucy') ||
     pathname.startsWith('/booking') ||
     pathname.startsWith('/plan-smarter') ||
-    pathname.startsWith('/lucy-trip')
+    pathname.startsWith('/lucy-trip') ||
+    pathname === '/lucy' ||
+    pathname.startsWith('/lucy/')
 
   return (
     <main

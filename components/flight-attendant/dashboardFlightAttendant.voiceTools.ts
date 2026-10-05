@@ -27,6 +27,10 @@ export type RealtimeVoiceToolHandlerDependencies = {
   speakConfirmation: (text: string) => void
   suppressNextAssistantReplyRef: React.MutableRefObject<boolean>
   clearActiveAssistantMessage: () => void
+  executeImmediateAction: (
+    action: LucyAction,
+    realtimeToolCallId: string | null
+  ) => void
 }
 
 export function shouldIgnoreDuplicateVoiceToolCall(
@@ -120,6 +124,7 @@ function prepareRealtimeConfirmation({
   })
 
   speakConfirmation(confirmationText)
+
   return true
 }
 
@@ -127,20 +132,62 @@ export function handleRealtimeVoiceToolItem(
   item: LucyToolCallInput,
   dependencies: RealtimeVoiceToolHandlerDependencies
 ) {
+  const realtimeToolCallId =
+    typeof item.call_id === "string" &&
+      item.call_id.trim()
+      ? item.call_id.trim()
+      : null
+
   const preparedAction = buildLucyActionFromToolCall(item)
 
   if (!preparedAction) return null
 
+  if (
+    preparedAction.action.type ===
+    "save_lucy_memory"
+  ) {
+    if (
+      shouldIgnoreDuplicateVoiceToolCall(
+        preparedAction.duplicateKey,
+        dependencies.lastVoiceToolCallRef
+      )
+    ) {
+      return null
+    }
+
+    dependencies.clearActiveAssistantMessage()
+
+    dependencies.suppressNextAssistantReplyRef.current =
+      true
+
+    try {
+      dependencies.dataChannelRef.current?.send(
+        JSON.stringify({
+          type: "response.cancel",
+        })
+      )
+    } catch {
+      // Ignore cancel errors.
+    }
+
+    dependencies.executeImmediateAction(
+      preparedAction.action,
+      realtimeToolCallId
+    )
+
+    return null
+  }
+
   const didPrepare = prepareRealtimeConfirmation({
     action: preparedAction.action,
-    confirmationText: preparedAction.confirmationText,
-    duplicateKey: preparedAction.duplicateKey,
+    confirmationText:
+      preparedAction.confirmationText,
+    duplicateKey:
+      preparedAction.duplicateKey,
     dependencies,
   })
 
   if (!didPrepare) return null
 
-  return typeof item.call_id === "string" && item.call_id.trim()
-    ? item.call_id.trim()
-    : null
+  return realtimeToolCallId
 }

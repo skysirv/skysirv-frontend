@@ -115,7 +115,9 @@ export default function BookingSearchPanel({
       planHandoff.confirmedAnswers?.["itinerary-flight-cabin"]?.label
 
     const cabinLabel =
-      planHandoff.mode === "flights" ? directCabinLabel : itineraryCabinLabel
+      planHandoff.mode === "flights"
+        ? directCabinLabel
+        : itineraryCabinLabel
 
     if (cabinLabel) {
       setFlightCabinClass(cabinLabel)

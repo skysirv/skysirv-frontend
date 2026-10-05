@@ -55,6 +55,7 @@ export type PlanToBookingHandoff = {
   mode?: string
   modeLabel?: string
   prompt?: string
+
   confirmedAnswers?: Record<
     string,
     {
@@ -63,6 +64,7 @@ export type PlanToBookingHandoff = {
       values?: string[]
     }
   >
+
   confirmedStepIds?: string[]
   createdAt?: string
 }

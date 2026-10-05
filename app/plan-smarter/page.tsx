@@ -1,5 +1,5 @@
-import PlanSmarterLabShell from "@/components/plan-smarter/PlanSmarterLabShell"
+import { redirect } from "next/navigation"
 
-export default function PlanSmarterLabPage() {
-  return <PlanSmarterLabShell />
+export default function PlanSmarterPage() {
+  redirect("/lucy")
 }

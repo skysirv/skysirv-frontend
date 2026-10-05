@@ -1285,9 +1285,7 @@ export default function ProDashboardPage() {
                   </h1>
 
                   <p className="mt-6 max-w-2xl text-base leading-7 text-slate-700">
-                    Access to your Skysirv Network for flights, hotels, car rentals, cruises,
-                    monitored routes, saved flights, airport intelligence, Lucy context, and
-                    smarter timing and booking signals up to 25 tracked routes.
+                    Access to your Skysirv Network for flights, hotels, car rentals, cruises, monitored routes, saved flights, airport intelligence, Lucy context, and smarter timing and booking signals up to 25 tracked routes.
                   </p>
                 </div>
 

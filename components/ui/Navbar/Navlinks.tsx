@@ -584,82 +584,6 @@ export default function Navlinks({
                 )}
               </div>
 
-              <div className="relative">
-                {PLAN_WITH_LUCY_DIRECT_LINK_ONLY ? (
-                  <Link
-                    href="/plan-with-lucy/itinerary"
-                    onClick={() => {
-                      setBookMenuOpen(false);
-                      setPlanMenuOpen(false);
-                    }}
-                    className={navItemClass(isPlanActive)}
-                  >
-                    Plan with Lucy
-                  </Link>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={togglePlanMenu}
-                    className={`inline-flex items-center gap-1.5 ${navItemClass(isPlanActive)}`}
-                    aria-expanded={planMenuOpen}
-                  >
-                    Plan with Lucy
-                    <svg
-                      viewBox="0 0 20 20"
-                      aria-hidden="true"
-                      className={`h-4 w-4 transition-transform ${planMenuOpen ? 'rotate-180' : ''}`}
-                      fill="none"
-                    >
-                      <path
-                        d="M5 7.5 10 12.5 15 7.5"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-                )}
-
-                {!PLAN_WITH_LUCY_DIRECT_LINK_ONLY && planMenuOpen && (
-                  <div
-                    onMouseEnter={clearPlanMenuCloseTimer}
-                    onMouseLeave={scheduleClosePlanMenu}
-                    className="absolute left-1/2 top-16 z-50 w-[680px] -translate-x-1/2 rounded-[1.5rem] border border-slate-200 bg-white p-4 text-left shadow-[0_24px_70px_rgba(15,23,42,0.16)]"
-                  >
-                    <div className="grid grid-cols-2 gap-2">
-                      {planMenuItems.map((item) => (
-                        <Link
-                          key={item.label}
-                          href={item.href}
-                          onClick={() => setPlanMenuOpen(false)}
-                          className="group flex items-start gap-4 rounded-[1.1rem] border border-transparent p-4 transition hover:border-slate-200 hover:bg-slate-50"
-                        >
-                          <span className="flex h-12 w-12 shrink-0 items-center justify-center">
-                            <img
-                              src={item.iconSrc}
-                              alt=""
-                              aria-hidden="true"
-                              className="h-9 w-9 object-contain"
-                            />
-                          </span>
-
-                          <span className="min-w-0">
-                            <span className="block text-sm font-bold text-slate-800">
-                              {item.label}
-                            </span>
-
-                            <span className="mt-1 block text-xs font-medium leading-5 text-slate-500">
-                              {item.description}
-                            </span>
-                          </span>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
               <Link
                 href="/skysirv-live"
                 className={navItemClass(isLiveActive)}
@@ -697,7 +621,7 @@ export default function Navlinks({
                   href="/plan-smarter"
                   className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-lg border border-orange-500 bg-orange-500 px-4 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:border-orange-600 hover:bg-orange-600"
                 >
-                  Plan smarter
+                  Chat with Lucy
                   <LargeChevron direction="right" />
                 </Link>
 
@@ -717,15 +641,6 @@ export default function Navlinks({
                             }`}
                         >
                           Book
-                        </Link>
-
-                        <Link
-                          href="/plan-with-lucy/itinerary"
-                          onClick={() => setAccountMenuOpen(false)}
-                          className={`block px-4 py-2.5 text-center font-medium transition ${isDark ? 'hover:bg-white/10' : 'hover:bg-slate-50'
-                            }`}
-                        >
-                          Plan with Lucy
                         </Link>
 
                         <Link
@@ -855,14 +770,6 @@ export default function Navlinks({
                   </Link>
 
                   <Link
-                    href="/plan-with-lucy/itinerary"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="rounded-2xl px-4 py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50"
-                  >
-                    Plan with Lucy
-                  </Link>
-
-                  <Link
                     href="/skysirv-live"
                     onClick={() => setMobileMenuOpen(false)}
                     className="rounded-2xl px-4 py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50"
@@ -906,7 +813,7 @@ export default function Navlinks({
                     onClick={() => setMobileMenuOpen(false)}
                     className="mt-2 flex min-h-[44px] w-full items-center justify-center rounded-2xl bg-orange-500 px-4 text-sm font-bold text-white transition hover:bg-orange-600"
                   >
-                    Plan smarter
+                    Chat with Lucy
                   </Link>
                 </div>
               </div>

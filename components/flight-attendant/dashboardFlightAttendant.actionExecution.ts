@@ -94,25 +94,39 @@ export async function executeLucyAction({
       })
     )
 
+    const confirmationPrompt =
+      typeof action.confirmationPrompt === "string"
+        ? action.confirmationPrompt.trim()
+        : ""
+
+    const acknowledgement =
+      confirmationPrompt &&
+        !confirmationPrompt.endsWith("?")
+        ? confirmationPrompt
+        : "Got it. I’ll keep that in mind for future travel planning."
+
     return {
-      reply: "Done — I’ll remember that for future Skysirv sessions.",
+      reply: acknowledgement,
     }
   }
 
   if (action.type === "add_watchlist_route") {
-    const response = await fetch(`${apiBaseUrl}/watchlist`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        origin: action.origin,
-        destination: action.destination,
-        departureDate: action.departureDate,
-        departure_date: action.departureDate,
-      }),
-    })
+    const response = await fetch(
+      `${apiBaseUrl}/watchlist`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          origin: action.origin,
+          destination: action.destination,
+          departureDate: action.departureDate,
+          departure_date: action.departureDate,
+        }),
+      }
+    )
 
     const data = await response.json().catch(() => null)
 
@@ -149,22 +163,25 @@ export async function executeLucyAction({
   }
 
   if (action.type === "save_visible_flight") {
-    const response = await fetch(`${apiBaseUrl}/saved-flights`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        origin: action.origin,
-        destination: action.destination,
-        departureDate: action.departureDate ?? null,
-        airline: action.airline ?? null,
-        flightNumber: action.flightNumber ?? null,
-        price: action.price ?? null,
-        currency: action.currency ?? "USD",
-      }),
-    })
+    const response = await fetch(
+      `${apiBaseUrl}/saved-flights`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          origin: action.origin,
+          destination: action.destination,
+          departureDate: action.departureDate ?? null,
+          airline: action.airline ?? null,
+          flightNumber: action.flightNumber ?? null,
+          price: action.price ?? null,
+          currency: action.currency ?? "USD",
+        }),
+      }
+    )
 
     const data = await response.json().catch(() => null)
 
@@ -198,7 +215,9 @@ export async function executeLucyAction({
     )
 
     return {
-      reply: `Done — I saved ${action.flightLabel || action.flightNumber || "that flight"
+      reply: `Done — I saved ${action.flightLabel ||
+        action.flightNumber ||
+        "that flight"
         } to your Saved Flights.`,
     }
   }
@@ -278,5 +297,7 @@ export async function executeLucyAction({
     }
   }
 
-  throw new Error("Lucy does not support that action yet.")
+  throw new Error(
+    "Lucy does not support that action yet."
+  )
 }

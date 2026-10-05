@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import s from './Navbar.module.css';
 import Navlinks from './Navlinks';
 
 export default function Navbar() {
+  const pathname = usePathname();
   const [hasScrolled, setHasScrolled] = useState(false);
 
   /**
@@ -29,6 +31,10 @@ export default function Navbar() {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+
+  if (pathname === "/lucy" || pathname.startsWith("/lucy/")) {
+    return null;
+  }
 
   return (
     <nav
