@@ -133,7 +133,7 @@ export default function HomepageLabHero() {
   }
 
   return (
-    <section className="relative isolate min-h-[calc(100svh+220px)] overflow-hidden bg-white sm:min-h-[calc(100dvh+140px)]">
+    <section className="relative isolate min-h-[calc(100svh+160px)] overflow-hidden bg-white sm:min-h-[calc(100dvh+160px)]">
       <div className="absolute inset-0 z-0 overflow-hidden bg-white">
         {heroVideos.map((src, index) => (
           <video
@@ -184,25 +184,17 @@ export default function HomepageLabHero() {
         ))}
       </div>
 
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 z-[1]"
-        style={{
-          background:
-            "linear-gradient(to bottom, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.02) 46%, rgba(255,255,255,0.12) 58%, rgba(255,255,255,0.46) 71%, rgba(255,255,255,0.82) 84%, rgba(255,255,255,1) 95%)",
-        }}
-      />
-      <div className="absolute inset-0 z-10 flex items-end justify-center px-6 pb-[12vh] text-center sm:px-8 sm:pb-[10vh] lg:px-12">
+      <div className="absolute inset-0 z-10 flex translate-y-[96px] items-center justify-center px-6 text-center sm:px-8 lg:px-12">
         <div
           className="flex w-full max-w-7xl flex-col items-center"
         >
           <div className="mx-auto max-w-5xl">
-            <h1 className="text-4xl font-bold tracking-tight text-slate-800 sm:text-5xl md:text-6xl lg:text-6xl">
+            <h1 className="text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl md:text-6xl lg:text-6xl">
               AI-powered travel intelligence,
               guided by Lucy.
             </h1>
 
-            <p className="mx-auto mt-6 max-w-3xl text-base font-semibold leading-6 text-slate-700 sm:text-xl">
+            <p className="mx-auto mt-6 max-w-3xl text-base font-semibold leading-6 text-slate-800 sm:text-xl">
               Meet Lucy — your personal travel companion. She learns how you like to travel, keeps track of what matters, and stays one step ahead so every trip feels more like yours.
             </p>
           </div>
