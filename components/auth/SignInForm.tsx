@@ -156,57 +156,16 @@ export default function SignInForm({
     window.history.replaceState({}, "", cleanedUrl)
   }
 
-  async function routeUserAfterAuth(token: string, isAdmin: boolean) {
+  async function routeUserAfterAuth(
+    _token: string,
+    isAdmin: boolean
+  ) {
     if (isAdmin) {
       window.location.href = "/admin"
       return
     }
 
-    const sessionRes = await fetch(`${API_BASE_URL}/auth/session`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-
-    const sessionData = await sessionRes.json().catch(() => null)
-
-    if (!sessionRes.ok || !sessionData?.user) {
-      throw new Error("Unable to load session")
-    }
-
-    const subscription = sessionData.subscription
-    const planId = subscription?.plan_id || null
-
-    if (!planId) {
-      window.location.href = "/choose-plan"
-      return
-    }
-
-    if (planId === "free") {
-      window.location.href = "/dashboard/free"
-      return
-    }
-
-    if (
-      planId === "pro" ||
-      planId === "pro_monthly" ||
-      planId === "pro_yearly" ||
-      planId === "pro_lifetime"
-    ) {
-      window.location.href = "/dashboard/pro"
-      return
-    }
-
-    if (
-      planId === "business" ||
-      planId === "business_monthly" ||
-      planId === "business_yearly"
-    ) {
-      window.location.href = "/dashboard/business"
-      return
-    }
-
-    window.location.href = "/dashboard"
+    window.location.href = "/"
   }
 
   async function finishAuth(data: any) {

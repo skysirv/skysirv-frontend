@@ -471,7 +471,10 @@ export default function Navlinks({
     setAccountMenuOpen(false);
 
     if (isLoggedIn && !isPasswordResetFlow) {
-      window.location.href = isAdmin ? '/admin' : dashboardHref;
+      if (isAdmin) {
+        window.location.href = '/admin';
+      }
+
       return;
     }
 
@@ -859,7 +862,9 @@ export default function Navlinks({
                 return;
               }
 
-              window.location.href = getDashboardHrefFromPlan(data.subscription?.plan_id);
+              setIsLoggedIn(true);
+              setIsAdmin(false);
+              setAuthAdmin(false);
             } catch {
               window.location.href = '/choose-plan';
             }

@@ -957,14 +957,11 @@ export default function LucyWorkspace() {
                         setActiveConversationId(null)
                         setAccountMenuOpen(false)
 
-                        setLucyEngineKey((current) => current + 1)
-
-                        setAuthModalIntent("workspace")
-                        setAuthModalOpen(true)
-
                         window.dispatchEvent(
                           new Event("skysirv-auth-changed")
                         )
+
+                        router.push("/")
                       }}
                       className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-red-600 transition hover:bg-red-50"
                     >
