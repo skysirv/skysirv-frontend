@@ -9,6 +9,8 @@ type Billing = "monthly" | "annual"
 
 type PlanId = "free" | "pro" | "business"
 
+const PAID_SIGNUPS_ENABLED = false
+
 type SessionUser = {
   id: string
   email: string
@@ -161,6 +163,16 @@ function ChoosePlanPageContent() {
 
     if (!token) {
       router.push("/signin")
+      return
+    }
+
+    if (
+      !PAID_SIGNUPS_ENABLED &&
+      (plan === "pro" || plan === "business")
+    ) {
+      setError(
+        "Pro and Business plans are coming soon. Please start with the Free plan for now."
+      )
       return
     }
 
@@ -467,6 +479,17 @@ function getPlanCardState(args: {
   sessionLoading: boolean
 }) {
   const { plan, currentPlanTier, currentPlanId, isUpgradeMode, target, sessionLoading } = args
+
+  if (
+    !PAID_SIGNUPS_ENABLED &&
+    (plan === "pro" || plan === "business")
+  ) {
+    return {
+      disabled: true,
+      ctaLabel: "Coming soon",
+      badge: plan === "pro" ? "Coming soon" : "Coming soon",
+    }
+  }
 
   if (sessionLoading && isUpgradeMode) {
     return {

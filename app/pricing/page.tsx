@@ -6,6 +6,8 @@ import { motion } from "framer-motion"
 
 type Billing = "monthly" | "annual"
 
+const PAID_SIGNUPS_ENABLED = false
+
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ")
 }
@@ -21,6 +23,7 @@ const planCards = [
     badge: "Start here",
     cta: "Create free account",
     href: "/create-account",
+    disabled: false,
     featured: false,
     features: [
       "Basic Skysirv account",
@@ -39,8 +42,9 @@ const planCards = [
     monthlyPrice: 19,
     annualPrice: 15,
     badge: "Most popular",
-    cta: "Start Pro",
+    cta: "Coming soon",
     href: "/create-account",
+    disabled: !PAID_SIGNUPS_ENABLED,
     featured: true,
     features: [
       "Expanded route tracking",
@@ -59,8 +63,9 @@ const planCards = [
     monthlyPrice: 49,
     annualPrice: 39,
     badge: "Full access",
-    cta: "Start Business",
+    cta: "Coming soon",
     href: "/create-account",
+    disabled: !PAID_SIGNUPS_ENABLED,
     featured: false,
     features: [
       "Unlimited route monitoring",
@@ -296,17 +301,32 @@ export default function PricingLabPage() {
                       </span>
                     </div>
 
-                    <Link
-                      href={plan.href}
-                      className={cn(
-                        "mt-7 inline-flex min-h-[48px] w-full items-center justify-center rounded-full px-5 text-sm font-bold transition hover:-translate-y-0.5",
-                        plan.featured
-                          ? "bg-blue-600 text-white hover:bg-blue-700"
-                          : "border border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50",
-                      )}
-                    >
-                      {plan.cta}
-                    </Link>
+                    {plan.disabled ? (
+                      <button
+                        type="button"
+                        disabled
+                        className={cn(
+                          "mt-7 inline-flex min-h-[48px] w-full cursor-not-allowed items-center justify-center rounded-full px-5 text-sm font-bold opacity-60",
+                          plan.featured
+                            ? "bg-blue-600 text-white"
+                            : "border border-slate-200 bg-white text-slate-800",
+                        )}
+                      >
+                        {plan.cta}
+                      </button>
+                    ) : (
+                      <Link
+                        href={plan.href}
+                        className={cn(
+                          "mt-7 inline-flex min-h-[48px] w-full items-center justify-center rounded-full px-5 text-sm font-bold transition hover:-translate-y-0.5",
+                          plan.featured
+                            ? "bg-blue-600 text-white hover:bg-blue-700"
+                            : "border border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50",
+                        )}
+                      >
+                        {plan.cta}
+                      </Link>
+                    )}
 
                     <div className="mt-7 space-y-3">
                       {plan.features.map((feature) => (
