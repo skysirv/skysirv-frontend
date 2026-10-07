@@ -1,5 +1,5 @@
-import LucyTripLabShell from "@/components/lucy-trip/LucyTripLabShell"
+import { redirect } from "next/navigation"
 
 export default function LucyTripLabPage() {
-  return <LucyTripLabShell />
+  redirect("/lucy")
 }

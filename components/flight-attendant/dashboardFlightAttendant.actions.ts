@@ -47,9 +47,18 @@ export type LucySaveVisibleFlightAction = {
   confirmationPrompt?: string
 }
 
+export type LucyMemorySubject = {
+  subjectType: "self" | "person" | "group"
+  subjectKey: string
+  displayName: string
+  relationshipLabel?: string | null
+  aliases?: string[]
+}
+
 export type LucySaveMemoryAction = {
   type: "save_lucy_memory"
   status: "needs_confirmation"
+  subject?: LucyMemorySubject
   memoryType: string
   memoryKey: string
   memoryText: string
@@ -64,6 +73,124 @@ export type LucyAction =
   | LucySaveFirstNameAction
   | LucySaveVisibleFlightAction
   | LucySaveMemoryAction
+
+function normalizeLucyMemorySubject(
+  value: unknown
+): LucyMemorySubject | null {
+  if (!value || typeof value !== "object") {
+    return null
+  }
+
+  const input = value as {
+    subjectType?: unknown
+    subjectKey?: unknown
+    displayName?: unknown
+    relationshipLabel?: unknown
+    aliases?: unknown
+  }
+
+  const subjectType =
+    typeof input.subjectType === "string"
+      ? input.subjectType.trim().toLowerCase()
+      : ""
+
+  if (
+    subjectType !== "self" &&
+    subjectType !== "person" &&
+    subjectType !== "group"
+  ) {
+    return null
+  }
+
+  if (subjectType === "self") {
+    return {
+      subjectType: "self",
+      subjectKey: "self",
+      displayName:
+        typeof input.displayName === "string" &&
+          input.displayName.trim()
+          ? input.displayName
+            .trim()
+            .replace(/\s+/g, " ")
+            .slice(0, 120)
+          : "Traveler",
+      relationshipLabel: "self",
+      aliases: ["self", "me"],
+    }
+  }
+
+  const displayName =
+    typeof input.displayName === "string"
+      ? input.displayName
+        .trim()
+        .replace(/\s+/g, " ")
+        .slice(0, 120)
+      : ""
+
+  if (!displayName) return null
+
+  const rawSubjectKey =
+    typeof input.subjectKey === "string" &&
+      input.subjectKey.trim()
+      ? input.subjectKey
+      : displayName
+
+  const subjectKey = rawSubjectKey
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 120)
+
+  if (!subjectKey) return null
+
+  const relationshipLabel =
+    typeof input.relationshipLabel === "string" &&
+      input.relationshipLabel.trim()
+      ? input.relationshipLabel
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "_")
+        .slice(0, 80)
+      : null
+
+  const aliases = Array.isArray(input.aliases)
+    ? Array.from(
+      new Set(
+        input.aliases
+          .filter(
+            (alias): alias is string =>
+              typeof alias === "string"
+          )
+          .map((alias) =>
+            alias
+              .trim()
+              .replace(/\s+/g, " ")
+              .slice(0, 120)
+          )
+          .filter(Boolean)
+      )
+    )
+    : []
+
+  if (
+    !aliases.some(
+      (alias) =>
+        alias.toLowerCase() ===
+        displayName.toLowerCase()
+    )
+  ) {
+    aliases.unshift(displayName)
+  }
+
+  return {
+    subjectType,
+    subjectKey,
+    displayName,
+    relationshipLabel,
+    aliases,
+  }
+}
 
 export function normalizeLucyAction(value: unknown): LucyAction | null {
   if (!value || typeof value !== "object") return null
@@ -221,6 +348,18 @@ export function normalizeLucyAction(value: unknown): LucyAction | null {
   }
 
   if (input.type === "save_lucy_memory") {
+    const subjectWasProvided =
+      input.subject !== undefined &&
+      input.subject !== null
+
+    const subject = subjectWasProvided
+      ? normalizeLucyMemorySubject(input.subject)
+      : undefined
+
+    if (subjectWasProvided && !subject) {
+      return null
+    }
+
     const memoryType =
       typeof input.memoryType === "string" && input.memoryType.trim()
         ? input.memoryType.trim().toLowerCase().replace(/\s+/g, "_").slice(0, 80)
@@ -246,6 +385,7 @@ export function normalizeLucyAction(value: unknown): LucyAction | null {
     return {
       type: "save_lucy_memory",
       status: "needs_confirmation",
+      ...(subject ? { subject } : {}),
       memoryType,
       memoryKey,
       memoryText,

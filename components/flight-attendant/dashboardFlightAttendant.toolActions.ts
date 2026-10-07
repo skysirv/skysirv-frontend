@@ -130,6 +130,7 @@ function buildSaveLucyMemoryToolAction(
   const action = normalizeLucyAction({
     type: "save_lucy_memory",
     status: "needs_confirmation",
+    subject: parsed.subject,
     memoryType: parsed.memoryType,
     memoryKey: parsed.memoryKey,
     memoryText: parsed.memoryText,
@@ -145,6 +146,8 @@ function buildSaveLucyMemoryToolAction(
     action,
     duplicateKey: [
       action.type,
+      action.subject?.subjectType ?? "self",
+      action.subject?.subjectKey ?? "self",
       action.memoryType,
       action.memoryKey,
     ].join(":"),

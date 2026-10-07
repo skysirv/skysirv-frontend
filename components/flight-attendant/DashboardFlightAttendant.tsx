@@ -76,6 +76,7 @@ import {
 
 import {
   handleRealtimeVoiceToolItem,
+  shouldIgnoreDuplicateVoiceToolCall,
 } from "./dashboardFlightAttendant.voiceTools"
 
 import {
@@ -489,6 +490,131 @@ export default function DashboardFlightAttendant({
     }
   }
 
+  async function handleRealtimeMemoryRetrievalToolCall(
+    item: {
+      name?: string
+      arguments?: string
+      call_id?: string
+    },
+    token: string
+  ) {
+    if (item.name !== "retrieve_lucy_memories") {
+      return false
+    }
+
+    const callId =
+      typeof item.call_id === "string"
+        ? item.call_id.trim()
+        : ""
+
+    if (!callId) {
+      return true
+    }
+
+    if (
+      shouldIgnoreDuplicateVoiceToolCall(
+        `retrieve_lucy_memories:${callId}`,
+        lastVoiceToolCallRef
+      )
+    ) {
+      return true
+    }
+
+    let parsedArguments: {
+      query?: unknown
+      recentContext?: unknown
+    } = {}
+
+    try {
+      parsedArguments =
+        typeof item.arguments === "string" &&
+          item.arguments.trim()
+          ? JSON.parse(item.arguments)
+          : {}
+    } catch {
+      parsedArguments = {}
+    }
+
+    const query =
+      typeof parsedArguments.query === "string"
+        ? parsedArguments.query.trim()
+        : ""
+
+    const recentContext = Array.isArray(
+      parsedArguments.recentContext
+    )
+      ? parsedArguments.recentContext
+        .filter(
+          (value): value is string =>
+            typeof value === "string" &&
+            Boolean(value.trim())
+        )
+        .slice(-5)
+      : []
+
+    if (!query || !API_BASE_URL) {
+      sendRealtimeToolCallOutput(callId, {
+        success: false,
+        memories: [],
+      })
+
+      realtimeDataChannelRef.current?.send(
+        JSON.stringify({
+          type: "response.create",
+        })
+      )
+
+      return true
+    }
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/flight-attendant/memories/retrieve`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            query,
+            recentContext,
+          }),
+        }
+      )
+
+      const data = await response
+        .json()
+        .catch(() => null)
+
+      sendRealtimeToolCallOutput(callId, {
+        success: response.ok,
+        memories:
+          response.ok &&
+            Array.isArray(data?.memories)
+            ? data.memories
+            : [],
+      })
+    } catch {
+      sendRealtimeToolCallOutput(callId, {
+        success: false,
+        memories: [],
+      })
+    }
+
+    try {
+      realtimeDataChannelRef.current?.send(
+        JSON.stringify({
+          type: "response.create",
+        })
+      )
+    } catch {
+      // Memory retrieval should never terminate the voice session.
+    }
+
+    return true
+  }
+
   async function handleConfirmPendingLucyAction(
     action: LucyAction,
     token: string
@@ -505,6 +631,8 @@ export default function DashboardFlightAttendant({
         action,
         token,
         apiBaseUrl: API_BASE_URL,
+        sourceConversationId:
+          activeLucyConversationIdRef.current,
       })
 
       if (result.confirmedWatchlistRoute) {
@@ -811,41 +939,56 @@ export default function DashboardFlightAttendant({
             data?.type === "response.output_item.done" ||
             data?.type === "conversation.item.done"
           ) {
-            const realtimeToolCallId = handleRealtimeVoiceToolItem(
-              data.item,
-              {
-                lastVoiceToolCallRef,
-                pendingLucyActionRef,
-                dataChannelRef: realtimeDataChannelRef,
-                setPendingLucyAction,
-                setMessages,
-                speakConfirmation: speakWithRealtimeLucyVoice,
-                suppressNextAssistantReplyRef: suppressNextVoiceAssistantReplyRef,
-                clearActiveAssistantMessage: () => {
-                  activeAssistantVoiceMessageId = null
-                },
-                executeImmediateAction: (
-                  action,
-                  realtimeToolCallId
-                ) => {
-                  pendingRealtimeToolCallIdRef.current =
-                    realtimeToolCallId
-
-                  pendingLucyActionRef.current = null
-                  setPendingLucyAction(null)
-
-                  window.setTimeout(() => {
-                    void handleConfirmPendingLucyAction(
+            if (
+              data.item?.name ===
+              "retrieve_lucy_memories"
+            ) {
+              void handleRealtimeMemoryRetrievalToolCall(
+                data.item,
+                token
+              )
+            } else {
+              const realtimeToolCallId =
+                handleRealtimeVoiceToolItem(
+                  data.item,
+                  {
+                    lastVoiceToolCallRef,
+                    pendingLucyActionRef,
+                    dataChannelRef:
+                      realtimeDataChannelRef,
+                    setPendingLucyAction,
+                    setMessages,
+                    speakConfirmation:
+                      speakWithRealtimeLucyVoice,
+                    suppressNextAssistantReplyRef:
+                      suppressNextVoiceAssistantReplyRef,
+                    clearActiveAssistantMessage: () => {
+                      activeAssistantVoiceMessageId = null
+                    },
+                    executeImmediateAction: (
                       action,
-                      token
-                    )
-                  }, 0)
-                },
-              }
-            )
+                      realtimeToolCallId
+                    ) => {
+                      pendingRealtimeToolCallIdRef.current =
+                        realtimeToolCallId
 
-            if (realtimeToolCallId) {
-              pendingRealtimeToolCallIdRef.current = realtimeToolCallId
+                      pendingLucyActionRef.current = null
+                      setPendingLucyAction(null)
+
+                      window.setTimeout(() => {
+                        void handleConfirmPendingLucyAction(
+                          action,
+                          token
+                        )
+                      }, 0)
+                    },
+                  }
+                )
+
+              if (realtimeToolCallId) {
+                pendingRealtimeToolCallIdRef.current =
+                  realtimeToolCallId
+              }
             }
           }
 

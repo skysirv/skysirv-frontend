@@ -14,6 +14,7 @@ type ExecuteLucyActionParams = {
   action: LucyAction
   token: string
   apiBaseUrl: string
+  sourceConversationId?: string | null
 }
 
 export type LucyActionExecutionResult = {
@@ -25,6 +26,7 @@ export async function executeLucyAction({
   action,
   token,
   apiBaseUrl,
+  sourceConversationId = null,
 }: ExecuteLucyActionParams): Promise<LucyActionExecutionResult> {
   if (action.type === "save_first_name") {
     const response = await fetch(
@@ -71,10 +73,12 @@ export async function executeLucyAction({
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
+          subject: action.subject,
           memoryType: action.memoryType,
           memoryKey: action.memoryKey,
           memoryText: action.memoryText,
           memoryValueJson: action.memoryValueJson ?? null,
+          sourceConversationId,
         }),
       }
     )
