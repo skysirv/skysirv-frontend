@@ -752,8 +752,6 @@ export default function DashboardFlightAttendant({
     lastVoiceToolCallRef.current = null
     pendingRealtimeToolCallIdRef.current = null
 
-    void setRealtimeMicrophoneEnabled(true)
-
     realtimeDataChannelRef.current?.close()
     realtimeDataChannelRef.current = null
     realtimePeerConnectionRef.current?.close()
@@ -806,7 +804,9 @@ export default function DashboardFlightAttendant({
     }
   }
 
-  async function startLucyVoiceSession() {
+  async function startLucyVoiceSession(
+    forceStart = false
+  ) {
     if (tier === "free") {
       await appendTypedAssistantReply(
         "Lucy voice is available on Pro and Business plans."
@@ -829,7 +829,7 @@ export default function DashboardFlightAttendant({
       return
     }
 
-    if (voiceStatus !== "idle") {
+    if (!forceStart && voiceStatus !== "idle") {
       stopLucyVoiceSession()
       return
     }
@@ -1618,7 +1618,12 @@ export default function DashboardFlightAttendant({
 
     if (!apiBaseUrl || conversationSwitching) return
 
-    if (voiceStatus !== "idle") {
+    const shouldRestartVoice =
+      voiceStatus === "connecting" ||
+      voiceStatus === "listening" ||
+      voiceStatus === "speaking"
+
+    if (shouldRestartVoice) {
       stopLucyVoiceSession()
     }
 
@@ -1665,6 +1670,11 @@ export default function DashboardFlightAttendant({
       ])
 
       onConversationCreated?.(conversation)
+
+      if (shouldRestartVoice) {
+        await startLucyVoiceSession(true)
+      }
+
     } catch (error) {
       console.error(
         "Unable to create Lucy conversation",
@@ -1750,7 +1760,12 @@ export default function DashboardFlightAttendant({
       return
     }
 
-    if (voiceStatus !== "idle") {
+    const shouldRestartVoice =
+      voiceStatus === "connecting" ||
+      voiceStatus === "listening" ||
+      voiceStatus === "speaking"
+
+    if (shouldRestartVoice) {
       stopLucyVoiceSession()
     }
 
@@ -1791,6 +1806,11 @@ export default function DashboardFlightAttendant({
               },
             ]
       )
+
+      if (shouldRestartVoice) {
+        await startLucyVoiceSession(true)
+      }
+
     } catch (error) {
       console.error(
         "Unable to open Lucy conversation",
@@ -1804,7 +1824,6 @@ export default function DashboardFlightAttendant({
 
   return (
     <>
-
       <div
         onClick={expanded ? () => setExpanded(false) : undefined}
         className={
@@ -2340,7 +2359,9 @@ export default function DashboardFlightAttendant({
                     {isWorkspace && (
                       <button
                         type="button"
-                        onClick={startLucyVoiceSession}
+                        onClick={() => {
+                          void startLucyVoiceSession()
+                        }}
                         disabled={chatLoading || assistantTyping}
                         aria-label={
                           voiceStatus === "idle"
@@ -2407,7 +2428,9 @@ export default function DashboardFlightAttendant({
                   {!isWorkspace && tier !== "free" && (
                     <button
                       type="button"
-                      onClick={startLucyVoiceSession}
+                      onClick={() => {
+                        void startLucyVoiceSession()
+                      }}
                       disabled={chatLoading || assistantTyping}
                       className={cn(
                         "inline-flex min-h-[46px] shrink-0 items-center justify-center rounded-full border px-5 text-sm font-semibold transition disabled:cursor-not-allowed",
