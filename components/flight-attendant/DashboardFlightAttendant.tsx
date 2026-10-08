@@ -718,6 +718,136 @@ export default function DashboardFlightAttendant({
     return true
   }
 
+  async function handleRealtimeFlightSearchToolCall(
+    item: {
+      name?: string
+      arguments?: string
+      call_id?: string
+    },
+    token: string
+  ) {
+    if (item.name !== "search_flights") {
+      return false
+    }
+
+    const callId =
+      typeof item.call_id === "string"
+        ? item.call_id.trim()
+        : ""
+
+    if (!callId) {
+      return true
+    }
+
+    if (
+      shouldIgnoreDuplicateVoiceToolCall(
+        `search_flights:${callId}`,
+        lastVoiceToolCallRef
+      )
+    ) {
+      return true
+    }
+
+    let parsedArguments: Record<string, unknown> = {}
+
+    try {
+      parsedArguments =
+        typeof item.arguments === "string" &&
+          item.arguments.trim()
+          ? JSON.parse(item.arguments)
+          : {}
+    } catch {
+      parsedArguments = {}
+    }
+
+    if (!API_BASE_URL) {
+      sendRealtimeToolCallOutput(callId, {
+        success: false,
+        error:
+          "Live flight search is not available right now.",
+        offers: [],
+      })
+
+      try {
+        realtimeDataChannelRef.current?.send(
+          JSON.stringify({
+            type: "response.create",
+          })
+        )
+      } catch {
+        // Flight-search failure should not terminate voice.
+      }
+
+      return true
+    }
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/flight-attendant/flights/search`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(parsedArguments),
+        }
+      )
+
+      const data = await response
+        .json()
+        .catch(() => null)
+
+      sendRealtimeToolCallOutput(callId, {
+        success: response.ok,
+        provider:
+          response.ok
+            ? data?.provider ?? null
+            : null,
+        offerRequestId:
+          response.ok
+            ? data?.offerRequestId ?? null
+            : null,
+        liveMode:
+          response.ok
+            ? data?.liveMode ?? null
+            : null,
+        offers:
+          response.ok &&
+            Array.isArray(data?.offers)
+            ? data.offers
+            : [],
+        error:
+          response.ok
+            ? null
+            : data?.error ||
+            "Lucy could not complete the live flight search.",
+      })
+    } catch {
+      sendRealtimeToolCallOutput(callId, {
+        success: false,
+        provider: null,
+        offerRequestId: null,
+        liveMode: null,
+        offers: [],
+        error:
+          "Lucy could not complete the live flight search.",
+      })
+    }
+
+    try {
+      realtimeDataChannelRef.current?.send(
+        JSON.stringify({
+          type: "response.create",
+        })
+      )
+    } catch {
+      // Flight search should never terminate voice.
+    }
+
+    return true
+  }
+
   async function handleConfirmPendingLucyAction(
     action: LucyAction,
     token: string
@@ -966,6 +1096,9 @@ export default function DashboardFlightAttendant({
           body: JSON.stringify({
             dashboardRoutes: latestDashboardRoutesRef.current,
             conversationId: activeLucyConversationIdRef.current,
+            clientLocalDateTime: new Date().toISOString(),
+            clientTimeZone:
+              Intl.DateTimeFormat().resolvedOptions().timeZone || null,
           }),
         }
       )
@@ -1241,6 +1374,14 @@ export default function DashboardFlightAttendant({
               "retrieve_recent_conversation_context"
             ) {
               void handleRealtimeConversationContextToolCall(
+                data.item,
+                token
+              )
+            } else if (
+              data.item?.name ===
+              "search_flights"
+            ) {
+              void handleRealtimeFlightSearchToolCall(
                 data.item,
                 token
               )
