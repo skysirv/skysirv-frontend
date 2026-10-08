@@ -1078,14 +1078,14 @@ export default function DashboardFlightAttendant({
         const cleanWord = word.trim()
 
         if (/[.!?]["')\]]?$/.test(cleanWord)) {
-          return 520
+          return 430
         }
 
         if (/[,;:]["')\]]?$/.test(cleanWord)) {
-          return 400
+          return 330
         }
 
-        return 310
+        return 260
       }
 
       function scheduleNextLucyCaptionWord() {
