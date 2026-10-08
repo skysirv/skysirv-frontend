@@ -798,6 +798,50 @@ export default function DashboardFlightAttendant({
         .json()
         .catch(() => null)
 
+      console.log(
+        "Lucy realtime flight search result:",
+        {
+          success: response.ok,
+          status: response.status,
+          airlineIataCode:
+            typeof parsedArguments.airlineIataCode === "string"
+              ? parsedArguments.airlineIataCode
+              : null,
+          origin:
+            typeof parsedArguments.origin === "string"
+              ? parsedArguments.origin
+              : null,
+          destination:
+            typeof parsedArguments.destination === "string"
+              ? parsedArguments.destination
+              : null,
+          departureDate:
+            typeof parsedArguments.departureDate === "string"
+              ? parsedArguments.departureDate
+              : null,
+          offerCount:
+            Array.isArray(data?.offers)
+              ? data.offers.length
+              : 0,
+          airlines:
+            Array.isArray(data?.offers)
+              ? Array.from(
+                new Set(
+                  data.offers
+                    .map((offer: any) =>
+                      offer?.airlineIataCode
+                    )
+                    .filter(Boolean)
+                )
+              )
+              : [],
+          liveMode:
+            data?.liveMode ?? null,
+          error:
+            data?.error ?? null,
+        }
+      )
+
       sendRealtimeToolCallOutput(callId, {
         success: response.ok,
         provider:
