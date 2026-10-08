@@ -1207,6 +1207,33 @@ export default function DashboardFlightAttendant({
             })
           }
 
+          const realtimeLucyTranscriptDelta =
+            getRealtimeLucyTranscriptDelta(data)
+
+          if (
+            realtimeLucyTranscriptDelta !== null &&
+            !suppressNextRealtimeSpeechTextRef.current &&
+            !suppressNextVoiceAssistantReplyRef.current
+          ) {
+            const currentActiveAssistantVoiceMessageId =
+              activeAssistantVoiceMessageId
+
+            setMessages((prev) => {
+              const result = applyRealtimeLucyTranscriptDelta({
+                messages: prev,
+                activeMessageId:
+                  currentActiveAssistantVoiceMessageId,
+                delta: realtimeLucyTranscriptDelta,
+                createMessageId,
+              })
+
+              activeAssistantVoiceMessageId =
+                result.messageId
+
+              return result.messages
+            })
+          }
+
           const completedTranscript =
             getCompletedRealtimeVoiceTranscript(data)
 
