@@ -19,7 +19,6 @@ import {
 import {
   createLucyConversation,
   getRecentLucyConversations,
-  loadLatestLucyConversation,
   loadLucyConversation,
   persistLucyConversationMessage,
   sendLucyChatMessage,
@@ -29,17 +28,12 @@ import {
 
 import {
   API_BASE_URL,
-  LUCY_ACTIVE_CHAT_THREAD_STORAGE_KEY,
-  LUCY_CHAT_THREADS_STORAGE_KEY,
-  tierConfig,
+  tierConfig
 } from "./dashboardFlightAttendant.config"
 
 import {
   formatLucyReplyText,
-  formatReadableFlightDate,
-  formatVisibleFlightPrice,
-  normalizeFlightSearchText,
-  sanitizeLucyText,
+  sanitizeLucyText
 } from "./dashboardFlightAttendant.formatters"
 
 import {
@@ -52,16 +46,13 @@ import { typeAssistantMessage } from "./dashboardFlightAttendant.typing"
 
 import {
   type DashboardFlightAttendantProps,
-  type DashboardLucyTier,
   type DashboardRouteContext,
-  type FlightAttendantMessage,
-  type LucyChatThread,
+  type FlightAttendantMessage
 } from "./dashboardFlightAttendant.types"
 
 import {
   cn,
-  createLucyThread,
-  createMessageId,
+  createMessageId
 } from "./dashboardFlightAttendant.utils"
 
 import { buildLocalVisibleFlightSaveAction } from "./dashboardFlightAttendant.visibleFlights"
@@ -81,12 +72,11 @@ import {
 
 import {
   appendVoiceAssistantMessage,
-  appendVoiceTranscriptDelta,
   applyCompletedVoiceTranscript,
   applyRealtimeVoiceTranscriptDelta,
   createVoiceUserMessage,
-  getCompletedRealtimeVoiceTranscript,
   getCompletedRealtimeLucyTranscript,
+  getCompletedRealtimeVoiceTranscript,
   getCompletedVoiceTranscriptDecision,
   getPendingVoiceActionResponse,
   getRealtimeLucyAudioCompletionState,
@@ -94,7 +84,7 @@ import {
   getRealtimeLucyTranscriptDelta,
   getRealtimeVoiceTranscriptDelta,
   isRealtimeVoiceSpeechStarted,
-  removeVoiceTranscriptMessage,
+  removeVoiceTranscriptMessage
 } from "./dashboardFlightAttendant.voiceTranscript"
 
 import {
@@ -266,55 +256,9 @@ export default function DashboardFlightAttendant({
       return
     }
 
-    const token = getAuthToken() || ""
-    const apiBaseUrl = API_BASE_URL || ""
+    activeLucyConversationIdRef.current = null
 
-    if (!token || !apiBaseUrl) {
-      setConversationRestoring(false)
-      return
-    }
-
-    let active = true
-
-    async function resumeLatestLucyConversation() {
-      setConversationRestoring(true)
-
-      try {
-        const latestConversation =
-          await loadLatestLucyConversation({
-            apiBaseUrl,
-            token,
-          })
-
-        if (!active) return
-
-        if (
-          latestConversation &&
-          latestConversation.messages.length > 0
-        ) {
-          activeLucyConversationIdRef.current =
-            latestConversation.conversationId
-
-          onActiveConversationChange?.(
-            latestConversation.conversationId
-          )
-
-          setMessages(latestConversation.messages)
-        }
-      } catch {
-        // Conversation continuity should never block Lucy from opening normally.
-      } finally {
-        if (active) {
-          setConversationRestoring(false)
-        }
-      }
-    }
-
-    void resumeLatestLucyConversation()
-
-    return () => {
-      active = false
-    }
+    setConversationRestoring(false)
   }, [initialPrompt])
 
   useEffect(() => {
@@ -1134,14 +1078,14 @@ export default function DashboardFlightAttendant({
         const cleanWord = word.trim()
 
         if (/[.!?]["')\]]?$/.test(cleanWord)) {
-          return 430
+          return 520
         }
 
         if (/[,;:]["')\]]?$/.test(cleanWord)) {
-          return 330
+          return 400
         }
 
-        return 260
+        return 310
       }
 
       function scheduleNextLucyCaptionWord() {
