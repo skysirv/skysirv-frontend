@@ -112,6 +112,16 @@ type LucyVoiceStatus =
 type LucyRealtimeSessionResponse = {
   success?: boolean
   conversationId?: string
+  conversationCreated?: boolean
+  conversation?: {
+    id: string
+    title: string
+    pinned: boolean
+    planned_trip: boolean
+    status: string
+    created_at: string
+    updated_at: string
+  }
   model?: string
   voice?: string
   plan?: string
@@ -193,6 +203,8 @@ export default function DashboardFlightAttendant({
   const pendingLucyActionRef = useRef<LucyAction | null>(null)
   const pendingRealtimeToolCallIdRef = useRef<string | null>(null)
   const activeLucyConversationIdRef = useRef<string | null>(null)
+  const pendingVoiceConversationAutoTitleRef =
+    useRef<string | null>(null)
   const lastNewConversationRequestKeyRef =
     useRef(newConversationRequestKey)
   const lastInitialPromptRef =
@@ -615,6 +627,140 @@ export default function DashboardFlightAttendant({
     return true
   }
 
+  async function handleRealtimeConversationContextToolCall(
+    item: {
+      name?: string
+      arguments?: string
+      call_id?: string
+    },
+    token: string
+  ) {
+    if (
+      item.name !==
+      "retrieve_recent_conversation_context"
+    ) {
+      return false
+    }
+
+    const callId =
+      typeof item.call_id === "string"
+        ? item.call_id.trim()
+        : ""
+
+    if (!callId) {
+      return true
+    }
+
+    if (
+      shouldIgnoreDuplicateVoiceToolCall(
+        `retrieve_recent_conversation_context:${callId}`,
+        lastVoiceToolCallRef
+      )
+    ) {
+      return true
+    }
+
+    let parsedArguments: {
+      query?: unknown
+      recentContext?: unknown
+    } = {}
+
+    try {
+      parsedArguments =
+        typeof item.arguments === "string" &&
+          item.arguments.trim()
+          ? JSON.parse(item.arguments)
+          : {}
+    } catch {
+      parsedArguments = {}
+    }
+
+    const query =
+      typeof parsedArguments.query === "string"
+        ? parsedArguments.query.trim()
+        : ""
+
+    const recentContext = Array.isArray(
+      parsedArguments.recentContext
+    )
+      ? parsedArguments.recentContext
+        .filter(
+          (value): value is string =>
+            typeof value === "string" &&
+            Boolean(value.trim())
+        )
+        .slice(-5)
+      : []
+
+    if (!query || !API_BASE_URL) {
+      sendRealtimeToolCallOutput(callId, {
+        success: false,
+        conversations: [],
+      })
+
+      try {
+        realtimeDataChannelRef.current?.send(
+          JSON.stringify({
+            type: "response.create",
+          })
+        )
+      } catch {
+        // Conversation continuity failure should not terminate voice.
+      }
+
+      return true
+    }
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/flight-attendant/conversations/retrieve-context`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            query,
+            recentContext,
+            currentConversationId:
+              activeLucyConversationIdRef.current,
+          }),
+        }
+      )
+
+      const data = await response
+        .json()
+        .catch(() => null)
+
+      sendRealtimeToolCallOutput(callId, {
+        success: response.ok,
+        conversations:
+          response.ok &&
+            Array.isArray(data?.conversations)
+            ? data.conversations
+            : [],
+      })
+    } catch {
+      sendRealtimeToolCallOutput(callId, {
+        success: false,
+        conversations: [],
+      })
+    }
+
+    try {
+      realtimeDataChannelRef.current?.send(
+        JSON.stringify({
+          type: "response.create",
+        })
+      )
+    } catch {
+      // Conversation continuity should never terminate voice.
+    }
+
+    return true
+  }
+
   async function handleConfirmPendingLucyAction(
     action: LucyAction,
     token: string
@@ -751,6 +897,7 @@ export default function DashboardFlightAttendant({
     localRealtimeSpeechMessageIdRef.current = null
     lastVoiceToolCallRef.current = null
     pendingRealtimeToolCallIdRef.current = null
+    pendingVoiceConversationAutoTitleRef.current = null
 
     realtimeDataChannelRef.current?.close()
     realtimeDataChannelRef.current = null
@@ -804,9 +951,7 @@ export default function DashboardFlightAttendant({
     }
   }
 
-  async function startLucyVoiceSession(
-    forceStart = false
-  ) {
+  async function startLucyVoiceSession() {
     if (tier === "free") {
       await appendTypedAssistantReply(
         "Lucy voice is available on Pro and Business plans."
@@ -829,7 +974,7 @@ export default function DashboardFlightAttendant({
       return
     }
 
-    if (!forceStart && voiceStatus !== "idle") {
+    if (voiceStatus !== "idle") {
       stopLucyVoiceSession()
       return
     }
@@ -866,6 +1011,47 @@ export default function DashboardFlightAttendant({
       if (sessionData?.conversationId) {
         activeLucyConversationIdRef.current =
           sessionData.conversationId
+
+        onActiveConversationChange?.(
+          sessionData.conversationId
+        )
+      }
+
+      if (
+        sessionData?.conversationCreated &&
+        sessionData.conversation
+      ) {
+        const createdConversation: LucyConversationSummary = {
+          id: sessionData.conversation.id,
+          title: sessionData.conversation.title,
+          pinned: sessionData.conversation.pinned,
+          plannedTrip: sessionData.conversation.planned_trip,
+          status: sessionData.conversation.status,
+          createdAt: sessionData.conversation.created_at,
+          updatedAt: sessionData.conversation.updated_at,
+        }
+
+        if (
+          sessionData?.conversation?.id &&
+          sessionData.conversation.title === "New conversation"
+        ) {
+          pendingVoiceConversationAutoTitleRef.current =
+            sessionData.conversation.id
+        } else {
+          pendingVoiceConversationAutoTitleRef.current = null
+        }
+
+        setRecentLucyConversations((prev) => [
+          createdConversation,
+          ...prev.filter(
+            (conversation) =>
+              conversation.id !== createdConversation.id
+          ),
+        ])
+
+        onConversationCreated?.(
+          createdConversation
+        )
       }
 
       const clientSecret =
@@ -944,6 +1130,14 @@ export default function DashboardFlightAttendant({
               "retrieve_lucy_memories"
             ) {
               void handleRealtimeMemoryRetrievalToolCall(
+                data.item,
+                token
+              )
+            } else if (
+              data.item?.name ===
+              "retrieve_recent_conversation_context"
+            ) {
+              void handleRealtimeConversationContextToolCall(
                 data.item,
                 token
               )
@@ -1081,6 +1275,62 @@ export default function DashboardFlightAttendant({
 
             const voiceToken = getAuthToken()
             const voiceApiBaseUrl = API_BASE_URL || ""
+
+            if (
+              voiceConversationId &&
+              voiceToken &&
+              voiceApiBaseUrl &&
+              pendingVoiceConversationAutoTitleRef.current ===
+              voiceConversationId
+            ) {
+              const voiceConversationTitle =
+                completedTranscript.trim().slice(0, 80)
+
+              if (voiceConversationTitle) {
+                pendingVoiceConversationAutoTitleRef.current = null
+
+                void updateLucyConversation({
+                  apiBaseUrl: voiceApiBaseUrl,
+                  token: voiceToken,
+                  conversationId: voiceConversationId,
+                  title: voiceConversationTitle,
+                })
+                  .then((updatedConversation) => {
+                    setRecentLucyConversations((current) => {
+                      const exists = current.some(
+                        (conversation) =>
+                          conversation.id === updatedConversation.id
+                      )
+
+                      if (!exists) {
+                        return [
+                          updatedConversation,
+                          ...current,
+                        ]
+                      }
+
+                      return current.map((conversation) =>
+                        conversation.id === updatedConversation.id
+                          ? updatedConversation
+                          : conversation
+                      )
+                    })
+
+                    onConversationUpdated?.(
+                      updatedConversation
+                    )
+                  })
+                  .catch((error) => {
+                    pendingVoiceConversationAutoTitleRef.current =
+                      voiceConversationId
+
+                    console.error(
+                      "Unable to auto-title Lucy voice conversation",
+                      error
+                    )
+                  })
+              }
+            }
 
             if (
               voiceConversationId &&
@@ -1618,12 +1868,7 @@ export default function DashboardFlightAttendant({
 
     if (!apiBaseUrl || conversationSwitching) return
 
-    const shouldRestartVoice =
-      voiceStatus === "connecting" ||
-      voiceStatus === "listening" ||
-      voiceStatus === "speaking"
-
-    if (shouldRestartVoice) {
+    if (voiceStatus !== "idle") {
       stopLucyVoiceSession()
     }
 
@@ -1670,11 +1915,6 @@ export default function DashboardFlightAttendant({
       ])
 
       onConversationCreated?.(conversation)
-
-      if (shouldRestartVoice) {
-        await startLucyVoiceSession(true)
-      }
-
     } catch (error) {
       console.error(
         "Unable to create Lucy conversation",
@@ -1760,12 +2000,7 @@ export default function DashboardFlightAttendant({
       return
     }
 
-    const shouldRestartVoice =
-      voiceStatus === "connecting" ||
-      voiceStatus === "listening" ||
-      voiceStatus === "speaking"
-
-    if (shouldRestartVoice) {
+    if (voiceStatus !== "idle") {
       stopLucyVoiceSession()
     }
 
@@ -1806,10 +2041,6 @@ export default function DashboardFlightAttendant({
               },
             ]
       )
-
-      if (shouldRestartVoice) {
-        await startLucyVoiceSession(true)
-      }
 
     } catch (error) {
       console.error(
