@@ -1031,16 +1031,6 @@ export default function DashboardFlightAttendant({
           updatedAt: sessionData.conversation.updated_at,
         }
 
-        if (
-          sessionData?.conversation?.id &&
-          sessionData.conversation.title === "New conversation"
-        ) {
-          pendingVoiceConversationAutoTitleRef.current =
-            sessionData.conversation.id
-        } else {
-          pendingVoiceConversationAutoTitleRef.current = null
-        }
-
         setRecentLucyConversations((prev) => [
           createdConversation,
           ...prev.filter(
@@ -1052,6 +1042,16 @@ export default function DashboardFlightAttendant({
         onConversationCreated?.(
           createdConversation
         )
+      }
+
+      if (
+        sessionData?.conversation?.id &&
+        sessionData.conversation.title === "New conversation"
+      ) {
+        pendingVoiceConversationAutoTitleRef.current =
+          sessionData.conversation.id
+      } else {
+        pendingVoiceConversationAutoTitleRef.current = null
       }
 
       const clientSecret =
