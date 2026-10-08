@@ -83,7 +83,6 @@ import {
   appendVoiceAssistantMessage,
   appendVoiceTranscriptDelta,
   applyCompletedVoiceTranscript,
-  applyRealtimeLucyTranscriptDelta,
   applyRealtimeVoiceTranscriptDelta,
   createVoiceUserMessage,
   getCompletedRealtimeVoiceTranscript,
@@ -228,6 +227,20 @@ export default function DashboardFlightAttendant({
   const realtimeDataChannelRef = useRef<RTCDataChannel | null>(null)
   const realtimeMicPausedForLucyRef = useRef(false)
   const realtimeMicResumeTimerRef = useRef<number | null>(null)
+  const realtimeLucyCaptionTimerRef =
+    useRef<number | null>(null)
+
+  const realtimeLucyCaptionTargetRef =
+    useRef("")
+
+  const realtimeLucyCaptionRenderedWordsRef =
+    useRef(0)
+
+  const realtimeLucyCaptionCompletedRef =
+    useRef(false)
+
+  const realtimeLucyCaptionMessageIdRef =
+    useRef<string | null>(null)
   const latestDashboardRoutesRef = useRef<DashboardRouteContext[]>(dashboardRoutes)
   const confirmedVoiceWatchlistRoutesRef = useRef<
     Array<{
@@ -888,8 +901,24 @@ export default function DashboardFlightAttendant({
     })
   }
 
+  function clearRealtimeLucyCaptionPacing() {
+    if (realtimeLucyCaptionTimerRef.current !== null) {
+      window.clearTimeout(
+        realtimeLucyCaptionTimerRef.current
+      )
+
+      realtimeLucyCaptionTimerRef.current = null
+    }
+
+    realtimeLucyCaptionTargetRef.current = ""
+    realtimeLucyCaptionRenderedWordsRef.current = 0
+    realtimeLucyCaptionCompletedRef.current = false
+    realtimeLucyCaptionMessageIdRef.current = null
+  }
+
   function stopLucyVoiceSession() {
     clearRealtimeMicrophoneResumeTimer()
+    clearRealtimeLucyCaptionPacing()
 
     realtimeMicPausedForLucyRef.current = false
     suppressNextVoiceAssistantReplyRef.current = false
@@ -1101,6 +1130,136 @@ export default function DashboardFlightAttendant({
       let activeUserVoiceMessageId: string | null = null
       let activeAssistantVoiceMessageId: string | null = null
 
+      function getLucyCaptionWordDelay(word: string) {
+        const cleanWord = word.trim()
+
+        if (/[.!?]["')\]]?$/.test(cleanWord)) {
+          return 430
+        }
+
+        if (/[,;:]["')\]]?$/.test(cleanWord)) {
+          return 330
+        }
+
+        return 260
+      }
+
+      function scheduleNextLucyCaptionWord() {
+        if (
+          realtimeLucyCaptionTimerRef.current !== null
+        ) {
+          return
+        }
+
+        function revealNextWord() {
+          realtimeLucyCaptionTimerRef.current = null
+
+          const targetText =
+            realtimeLucyCaptionTargetRef.current
+
+          const words =
+            targetText.match(/\S+\s*/g) ?? []
+
+          const nextWordIndex =
+            realtimeLucyCaptionRenderedWordsRef.current
+
+          if (nextWordIndex >= words.length) {
+            return
+          }
+
+          const nextRenderedWordCount =
+            nextWordIndex + 1
+
+          realtimeLucyCaptionRenderedWordsRef.current =
+            nextRenderedWordCount
+
+          const visibleText = words
+            .slice(0, nextRenderedWordCount)
+            .join("")
+            .trimEnd()
+
+          let assistantMessageId =
+            realtimeLucyCaptionMessageIdRef.current
+
+          if (!assistantMessageId) {
+            assistantMessageId = createMessageId()
+
+            realtimeLucyCaptionMessageIdRef.current =
+              assistantMessageId
+          }
+
+          activeAssistantVoiceMessageId =
+            assistantMessageId
+
+          setMessages((prev) => {
+            const existingAssistantMessage =
+              prev.some(
+                (message) =>
+                  message.id === assistantMessageId
+              )
+
+            if (existingAssistantMessage) {
+              return updateAssistantMessageText(
+                prev,
+                assistantMessageId,
+                visibleText
+              )
+            }
+
+            return appendVoiceAssistantMessage({
+              messages: prev,
+              messageId: assistantMessageId,
+              text: visibleText,
+            })
+          })
+
+          const hasMoreWords =
+            nextRenderedWordCount < words.length
+
+          if (
+            !hasMoreWords &&
+            realtimeLucyCaptionCompletedRef.current
+          ) {
+            const finalText =
+              realtimeLucyCaptionTargetRef.current.trim()
+
+            if (finalText) {
+              setMessages((prev) =>
+                updateAssistantMessageText(
+                  prev,
+                  assistantMessageId,
+                  finalText
+                )
+              )
+            }
+
+            realtimeLucyCaptionTargetRef.current = ""
+            realtimeLucyCaptionRenderedWordsRef.current = 0
+            realtimeLucyCaptionCompletedRef.current = false
+            realtimeLucyCaptionMessageIdRef.current = null
+
+            return
+          }
+
+          if (hasMoreWords) {
+            const renderedWord =
+              words[nextWordIndex]
+
+            realtimeLucyCaptionTimerRef.current =
+              window.setTimeout(
+                revealNextWord,
+                getLucyCaptionWordDelay(renderedWord)
+              )
+          }
+        }
+
+        realtimeLucyCaptionTimerRef.current =
+          window.setTimeout(
+            revealNextWord,
+            80
+          )
+      }
+
       dataChannel.addEventListener("message", (event) => {
         try {
           const data = JSON.parse(event.data)
@@ -1215,23 +1374,10 @@ export default function DashboardFlightAttendant({
             !suppressNextRealtimeSpeechTextRef.current &&
             !suppressNextVoiceAssistantReplyRef.current
           ) {
-            const currentActiveAssistantVoiceMessageId =
-              activeAssistantVoiceMessageId
+            realtimeLucyCaptionTargetRef.current +=
+              realtimeLucyTranscriptDelta
 
-            setMessages((prev) => {
-              const result = applyRealtimeLucyTranscriptDelta({
-                messages: prev,
-                activeMessageId:
-                  currentActiveAssistantVoiceMessageId,
-                delta: realtimeLucyTranscriptDelta,
-                createMessageId,
-              })
-
-              activeAssistantVoiceMessageId =
-                result.messageId
-
-              return result.messages
-            })
+            scheduleNextLucyCaptionWord()
           }
 
           const completedTranscript =
@@ -1522,33 +1668,23 @@ export default function DashboardFlightAttendant({
             !suppressNextRealtimeSpeechTextRef.current &&
             !suppressNextVoiceAssistantReplyRef.current
           ) {
-            const completedAssistantMessageId =
-              activeAssistantVoiceMessageId || createMessageId()
+            if (
+              !realtimeLucyCaptionMessageIdRef.current
+            ) {
+              realtimeLucyCaptionMessageIdRef.current =
+                activeAssistantVoiceMessageId ||
+                createMessageId()
+            }
 
             activeAssistantVoiceMessageId =
-              completedAssistantMessageId
+              realtimeLucyCaptionMessageIdRef.current
 
-            setMessages((prev) => {
-              const existingAssistantMessage =
-                prev.some(
-                  (message) =>
-                    message.id === completedAssistantMessageId
-                )
+            realtimeLucyCaptionTargetRef.current =
+              completedRealtimeLucyTranscript
 
-              if (existingAssistantMessage) {
-                return updateAssistantMessageText(
-                  prev,
-                  completedAssistantMessageId,
-                  completedRealtimeLucyTranscript
-                )
-              }
+            realtimeLucyCaptionCompletedRef.current = true
 
-              return appendVoiceAssistantMessage({
-                messages: prev,
-                messageId: completedAssistantMessageId,
-                text: completedRealtimeLucyTranscript,
-              })
-            })
+            scheduleNextLucyCaptionWord()
           }
 
           const voiceConversationId =
@@ -1558,6 +1694,7 @@ export default function DashboardFlightAttendant({
           const voiceApiBaseUrl = API_BASE_URL || ""
 
           if (
+            completedRealtimeLucyTranscript &&
             voiceConversationId &&
             voiceToken &&
             voiceApiBaseUrl
@@ -1628,6 +1765,7 @@ export default function DashboardFlightAttendant({
           }
 
           if (isRealtimeVoiceSpeechStarted(data)) {
+            clearRealtimeLucyCaptionPacing()
             suppressNextRealtimeSpeechTextRef.current = false
 
             suppressNextVoiceAssistantReplyRef.current = Boolean(
