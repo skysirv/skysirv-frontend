@@ -209,6 +209,12 @@ export default function DashboardFlightAttendant({
   const attachmentInputRef = useRef<HTMLInputElement | null>(null)
   const composerFormRef = useRef<HTMLFormElement | null>(null)
 
+  const realtimeSessionGenerationRef = useRef(0)
+  const textRequestGenerationRef = useRef(0)
+  const textRequestAbortRef = useRef<AbortController | null>(null)
+  const conversationLoadGenerationRef = useRef(0)
+  const conversationLoadAbortRef = useRef<AbortController | null>(null)
+  const typingAbortRef = useRef<AbortController | null>(null)
   const realtimePeerConnectionRef = useRef<RTCPeerConnection | null>(null)
   const realtimeLocalStreamRef = useRef<MediaStream | null>(null)
   const realtimeMicTrackRef = useRef<MediaStreamTrack | null>(null)
@@ -385,6 +391,15 @@ export default function DashboardFlightAttendant({
 
   useEffect(() => {
     return () => {
+      realtimeSessionGenerationRef.current += 1
+      textRequestGenerationRef.current += 1
+      conversationLoadGenerationRef.current += 1
+      textRequestAbortRef.current?.abort()
+      conversationLoadAbortRef.current?.abort()
+      typingAbortRef.current?.abort()
+      realtimeDataChannelRef.current?.close()
+      realtimeDataChannelRef.current = null
+
       if (realtimeMicResumeTimerRef.current !== null) {
         window.clearTimeout(realtimeMicResumeTimerRef.current)
         realtimeMicResumeTimerRef.current = null
@@ -416,12 +431,22 @@ export default function DashboardFlightAttendant({
     messageId: string,
     fullText: string
   ) {
-    await typeAssistantMessage({
-      messageId,
-      fullText,
-      setMessages,
-      setAssistantTyping,
-    })
+    typingAbortRef.current?.abort()
+    const controller = new AbortController()
+    typingAbortRef.current = controller
+    try {
+      await typeAssistantMessage({
+        messageId,
+        fullText,
+        setMessages,
+        setAssistantTyping,
+        signal: controller.signal,
+      })
+    } finally {
+      if (typingAbortRef.current === controller) {
+        typingAbortRef.current = null
+      }
+    }
   }
 
   async function appendTypedAssistantReply(fullText: string) {
@@ -465,7 +490,8 @@ export default function DashboardFlightAttendant({
       arguments?: string
       call_id?: string
     },
-    token: string
+    token: string,
+    sessionGeneration: number
   ) {
     if (item.name !== "retrieve_lucy_memories") {
       return false
@@ -522,6 +548,7 @@ export default function DashboardFlightAttendant({
       : []
 
     if (!query || !API_BASE_URL) {
+      if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
       sendRealtimeToolCallOutput(callId, {
         success: false,
         memories: [],
@@ -556,6 +583,7 @@ export default function DashboardFlightAttendant({
         .json()
         .catch(() => null)
 
+      if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
       sendRealtimeToolCallOutput(callId, {
         success: response.ok,
         memories:
@@ -565,12 +593,14 @@ export default function DashboardFlightAttendant({
             : [],
       })
     } catch {
+      if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
       sendRealtimeToolCallOutput(callId, {
         success: false,
         memories: [],
       })
     }
 
+    if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
     try {
       realtimeDataChannelRef.current?.send(
         JSON.stringify({
@@ -590,7 +620,8 @@ export default function DashboardFlightAttendant({
       arguments?: string
       call_id?: string
     },
-    token: string
+    token: string,
+    sessionGeneration: number
   ) {
     if (
       item.name !==
@@ -650,6 +681,7 @@ export default function DashboardFlightAttendant({
       : []
 
     if (!query || !API_BASE_URL) {
+      if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
       sendRealtimeToolCallOutput(callId, {
         success: false,
         conversations: [],
@@ -690,6 +722,7 @@ export default function DashboardFlightAttendant({
         .json()
         .catch(() => null)
 
+      if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
       sendRealtimeToolCallOutput(callId, {
         success: response.ok,
         conversations:
@@ -699,12 +732,14 @@ export default function DashboardFlightAttendant({
             : [],
       })
     } catch {
+      if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
       sendRealtimeToolCallOutput(callId, {
         success: false,
         conversations: [],
       })
     }
 
+    if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
     try {
       realtimeDataChannelRef.current?.send(
         JSON.stringify({
@@ -724,7 +759,8 @@ export default function DashboardFlightAttendant({
       arguments?: string
       call_id?: string
     },
-    token: string
+    token: string,
+    sessionGeneration: number
   ) {
     if (item.name !== "search_flights") {
       return false
@@ -761,6 +797,7 @@ export default function DashboardFlightAttendant({
     }
 
     if (!API_BASE_URL) {
+      if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
       sendRealtimeToolCallOutput(callId, {
         success: false,
         error:
@@ -798,6 +835,7 @@ export default function DashboardFlightAttendant({
         .json()
         .catch(() => null)
 
+      if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
       sendRealtimeToolCallOutput(callId, {
         success: response.ok,
         provider:
@@ -824,6 +862,7 @@ export default function DashboardFlightAttendant({
             "Lucy could not complete the live flight search.",
       })
     } catch {
+      if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
       sendRealtimeToolCallOutput(callId, {
         success: false,
         provider: null,
@@ -835,6 +874,7 @@ export default function DashboardFlightAttendant({
       })
     }
 
+    if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
     try {
       realtimeDataChannelRef.current?.send(
         JSON.stringify({
@@ -854,6 +894,10 @@ export default function DashboardFlightAttendant({
   ) {
     if (!API_BASE_URL) return
 
+    const actionSessionGeneration =
+      realtimeSessionGenerationRef.current
+    const actionConversationId =
+      activeLucyConversationIdRef.current
     const realtimeToolCallId =
       pendingRealtimeToolCallIdRef.current
 
@@ -867,6 +911,15 @@ export default function DashboardFlightAttendant({
         sourceConversationId:
           activeLucyConversationIdRef.current,
       })
+
+      if (
+        actionSessionGeneration !==
+        realtimeSessionGenerationRef.current ||
+        actionConversationId !==
+        activeLucyConversationIdRef.current
+      ) {
+        return
+      }
 
       if (result.confirmedWatchlistRoute) {
         confirmedVoiceWatchlistRoutesRef.current = [
@@ -894,6 +947,10 @@ export default function DashboardFlightAttendant({
       pendingLucyActionRef.current = null
 
       await appendTypedAssistantReply(result.reply)
+      if (
+        actionSessionGeneration !== realtimeSessionGenerationRef.current ||
+        actionConversationId !== activeLucyConversationIdRef.current
+      ) return
 
       if (
         realtimeDataChannelRef.current?.readyState === "open"
@@ -901,6 +958,16 @@ export default function DashboardFlightAttendant({
         speakWithRealtimeLucyVoice(result.reply)
       }
     } catch (error: any) {
+
+      if (
+        actionSessionGeneration !==
+        realtimeSessionGenerationRef.current ||
+        actionConversationId !==
+        activeLucyConversationIdRef.current
+      ) {
+        return
+      }
+
       const errorMessage =
         error?.message ||
         "I couldn’t save that action yet. Please try again in a moment."
@@ -921,6 +988,10 @@ export default function DashboardFlightAttendant({
       setPendingLucyAction(null)
 
       await appendTypedAssistantReply(errorMessage)
+      if (
+        actionSessionGeneration !== realtimeSessionGenerationRef.current ||
+        actionConversationId !== activeLucyConversationIdRef.current
+      ) return
 
       if (
         realtimeDataChannelRef.current?.readyState === "open"
@@ -928,7 +999,14 @@ export default function DashboardFlightAttendant({
         speakWithRealtimeLucyVoice(errorMessage)
       }
     } finally {
-      setChatLoading(false)
+      if (
+        actionSessionGeneration ===
+        realtimeSessionGenerationRef.current &&
+        actionConversationId ===
+        activeLucyConversationIdRef.current
+      ) {
+        setChatLoading(false)
+      }
     }
   }
 
@@ -958,6 +1036,12 @@ export default function DashboardFlightAttendant({
   }
 
   function resumeRealtimeMicrophoneAfterLucy() {
+    if (
+      !realtimePeerConnectionRef.current ||
+      realtimePeerConnectionRef.current.connectionState === "closed"
+    ) {
+      return
+    }
     resumeRealtimeMicrophoneHelper({
       clearTimer: clearRealtimeMicrophoneResumeTimer,
       isPausedRef: realtimeMicPausedForLucyRef,
@@ -991,6 +1075,7 @@ export default function DashboardFlightAttendant({
   }
 
   function stopLucyVoiceSession() {
+    realtimeSessionGenerationRef.current += 1
     clearRealtimeMicrophoneResumeTimer()
     clearRealtimeLucyCaptionPacing()
 
@@ -1084,6 +1169,9 @@ export default function DashboardFlightAttendant({
 
     setVoiceStatus("connecting")
 
+    const sessionGeneration =
+      ++realtimeSessionGenerationRef.current
+
     try {
       const sessionResponse = await fetch(
         `${API_BASE_URL}/api/flight-attendant/realtime-session`,
@@ -1103,10 +1191,24 @@ export default function DashboardFlightAttendant({
         }
       )
 
+      if (
+        sessionGeneration !==
+        realtimeSessionGenerationRef.current
+      ) {
+        return
+      }
+
       const sessionData =
         (await sessionResponse.json().catch(() => null)) as
         | LucyRealtimeSessionResponse
         | null
+
+      if (
+        sessionGeneration !==
+        realtimeSessionGenerationRef.current
+      ) {
+        return
+      }
 
       if (!sessionResponse.ok) {
         throw new Error(
@@ -1177,6 +1279,13 @@ export default function DashboardFlightAttendant({
       realtimeAudioElementRef.current = audioElement
 
       peerConnection.ontrack = (event) => {
+        if (
+          sessionGeneration !==
+          realtimeSessionGenerationRef.current
+        ) {
+          return
+        }
+
         audioElement.srcObject = event.streams[0]
         setVoiceStatus("speaking")
       }
@@ -1184,6 +1293,16 @@ export default function DashboardFlightAttendant({
       const localStream = await navigator.mediaDevices.getUserMedia({
         audio: true,
       })
+
+      if (
+        sessionGeneration !==
+        realtimeSessionGenerationRef.current
+      ) {
+        localStream.getTracks().forEach((track) => {
+          track.stop()
+        })
+        return
+      }
 
       realtimeLocalStreamRef.current = localStream
 
@@ -1201,6 +1320,13 @@ export default function DashboardFlightAttendant({
       realtimeDataChannelRef.current = dataChannel
 
       dataChannel.addEventListener("open", () => {
+        if (
+          sessionGeneration !==
+          realtimeSessionGenerationRef.current
+        ) {
+          return
+        }
+
         setVoiceStatus("listening")
       })
 
@@ -1338,6 +1464,13 @@ export default function DashboardFlightAttendant({
       }
 
       dataChannel.addEventListener("message", (event) => {
+        if (
+          sessionGeneration !==
+          realtimeSessionGenerationRef.current
+        ) {
+          return
+        }
+
         try {
           const data = JSON.parse(event.data)
 
@@ -1367,7 +1500,8 @@ export default function DashboardFlightAttendant({
             ) {
               void handleRealtimeMemoryRetrievalToolCall(
                 data.item,
-                token
+                token,
+                sessionGeneration
               )
             } else if (
               data.item?.name ===
@@ -1375,7 +1509,8 @@ export default function DashboardFlightAttendant({
             ) {
               void handleRealtimeConversationContextToolCall(
                 data.item,
-                token
+                token,
+                sessionGeneration
               )
             } else if (
               data.item?.name ===
@@ -1383,7 +1518,8 @@ export default function DashboardFlightAttendant({
             ) {
               void handleRealtimeFlightSearchToolCall(
                 data.item,
-                token
+                token,
+                sessionGeneration
               )
             } else {
               const realtimeToolCallId =
@@ -1414,6 +1550,13 @@ export default function DashboardFlightAttendant({
                       setPendingLucyAction(null)
 
                       window.setTimeout(() => {
+                        if (
+                          sessionGeneration !==
+                          realtimeSessionGenerationRef.current
+                        ) {
+                          return
+                        }
+
                         void handleConfirmPendingLucyAction(
                           action,
                           token
@@ -1554,6 +1697,7 @@ export default function DashboardFlightAttendant({
                   title: voiceConversationTitle,
                 })
                   .then((updatedConversation) => {
+                    if (sessionGeneration !== realtimeSessionGenerationRef.current) return
                     setRecentLucyConversations((current) => {
                       const exists = current.some(
                         (conversation) =>
@@ -1579,6 +1723,7 @@ export default function DashboardFlightAttendant({
                     )
                   })
                   .catch((error) => {
+                    if (sessionGeneration !== realtimeSessionGenerationRef.current) return
                     pendingVoiceConversationAutoTitleRef.current =
                       voiceConversationId
 
@@ -1697,7 +1842,8 @@ export default function DashboardFlightAttendant({
               }
 
               window.setTimeout(() => {
-                handleConfirmPendingLucyAction(actionToConfirm, token)
+                if (sessionGeneration !== realtimeSessionGenerationRef.current) return
+                void handleConfirmPendingLucyAction(actionToConfirm, token)
               }, 0)
 
               activeUserVoiceMessageId = null
@@ -1838,7 +1984,11 @@ export default function DashboardFlightAttendant({
 
             if (realtimePeerConnectionRef.current) {
               window.setTimeout(() => {
-                if (realtimePeerConnectionRef.current) {
+                if (
+                  sessionGeneration ===
+                  realtimeSessionGenerationRef.current &&
+                  realtimePeerConnectionRef.current === peerConnection
+                ) {
                   setVoiceStatus("listening")
                 }
               }, 1800)
@@ -1885,6 +2035,14 @@ export default function DashboardFlightAttendant({
       const offer = await peerConnection.createOffer()
       await peerConnection.setLocalDescription(offer)
 
+      if (
+        sessionGeneration !==
+        realtimeSessionGenerationRef.current
+      ) {
+        peerConnection.close()
+        return
+      }
+
       const sdpResponse = await fetch(
         "https://api.openai.com/v1/realtime/calls",
         {
@@ -1897,19 +2055,50 @@ export default function DashboardFlightAttendant({
         }
       )
 
+      if (
+        sessionGeneration !==
+        realtimeSessionGenerationRef.current
+      ) {
+        peerConnection.close()
+        return
+      }
+
       if (!sdpResponse.ok) {
         throw new Error("Lucy voice connection could not be completed.")
       }
 
       const answerSdp = await sdpResponse.text()
 
+      if (
+        sessionGeneration !==
+        realtimeSessionGenerationRef.current
+      ) {
+        peerConnection.close()
+        return
+      }
+
       await peerConnection.setRemoteDescription({
         type: "answer",
         sdp: answerSdp,
       })
 
+      if (
+        sessionGeneration !==
+        realtimeSessionGenerationRef.current
+      ) {
+        peerConnection.close()
+        return
+      }
+
       setVoiceStatus("listening")
     } catch (error: any) {
+      if (
+        sessionGeneration !==
+        realtimeSessionGenerationRef.current
+      ) {
+        return
+      }
+
       stopLucyVoiceSession()
       setVoiceStatus("error")
 
@@ -1919,7 +2108,12 @@ export default function DashboardFlightAttendant({
       )
 
       window.setTimeout(() => {
-        setVoiceStatus("idle")
+        if (
+          realtimeSessionGenerationRef.current ===
+          sessionGeneration + 1
+        ) {
+          setVoiceStatus("idle")
+        }
       }, 1800)
     }
   }
@@ -2018,6 +2212,19 @@ export default function DashboardFlightAttendant({
       return
     }
 
+    const requestConversationId =
+      activeLucyConversationIdRef.current
+    const requestGeneration =
+      ++textRequestGenerationRef.current
+    textRequestAbortRef.current?.abort()
+    const requestController = new AbortController()
+    textRequestAbortRef.current = requestController
+    let expectedConversationId = requestConversationId
+    const isCurrentRequest = () =>
+      !requestController.signal.aborted &&
+      requestGeneration === textRequestGenerationRef.current &&
+      expectedConversationId === activeLucyConversationIdRef.current
+
     setChatLoading(true)
 
     try {
@@ -2028,12 +2235,15 @@ export default function DashboardFlightAttendant({
         tier,
         dashboardRoutes,
         messages: [...messages, userMessage],
-        conversationId: activeLucyConversationIdRef.current,
+        conversationId: requestConversationId,
+        signal: requestController.signal,
       })
 
+      if (!isCurrentRequest()) return
+
       if (result.conversationId) {
-        activeLucyConversationIdRef.current =
-          result.conversationId
+        activeLucyConversationIdRef.current = result.conversationId
+        expectedConversationId = result.conversationId
       }
 
       if (
@@ -2050,6 +2260,7 @@ export default function DashboardFlightAttendant({
               title: message.slice(0, 80),
             })
 
+          if (!isCurrentRequest()) return
           setRecentLucyConversations((current) =>
             current.map((conversation) =>
               conversation.id === updatedConversation.id
@@ -2068,6 +2279,8 @@ export default function DashboardFlightAttendant({
           )
         }
       }
+
+      if (!isCurrentRequest()) return
 
       const assistantMessageId = createMessageId()
 
@@ -2090,6 +2303,7 @@ export default function DashboardFlightAttendant({
 
       await typeAssistantReply(assistantMessageId, result.reply)
     } catch (error: any) {
+      if (!isCurrentRequest()) return
       setMessages((prev) => [
         ...prev,
         {
@@ -2101,9 +2315,26 @@ export default function DashboardFlightAttendant({
             "Something went wrong while contacting Lucy. Please try again.",
         },
       ])
+
     } finally {
-      setChatLoading(false)
+      if (textRequestAbortRef.current === requestController) {
+        textRequestAbortRef.current = null
+      }
+      if (isCurrentRequest()) setChatLoading(false)
     }
+  }
+
+  function invalidatePendingConversationWork() {
+    textRequestGenerationRef.current += 1
+    textRequestAbortRef.current?.abort()
+    textRequestAbortRef.current = null
+    conversationLoadGenerationRef.current += 1
+    conversationLoadAbortRef.current?.abort()
+    conversationLoadAbortRef.current = null
+    typingAbortRef.current?.abort()
+    typingAbortRef.current = null
+    setChatLoading(false)
+    setAssistantTyping(false)
   }
 
   async function handleNewLucyConversation() {
@@ -2122,8 +2353,12 @@ export default function DashboardFlightAttendant({
       stopLucyVoiceSession()
     }
 
+    invalidatePendingConversationWork()
+
     setConversationSwitching(true)
     setRecentConversationsOpen(false)
+    setChatLoading(false)
+    setAssistantTyping(false)
 
     try {
       const conversation =
@@ -2254,9 +2489,16 @@ export default function DashboardFlightAttendant({
       stopLucyVoiceSession()
     }
 
+    invalidatePendingConversationWork()
+
+    const loadGeneration = ++conversationLoadGenerationRef.current
+    const loadController = new AbortController()
+    conversationLoadAbortRef.current = loadController
     setConversationSwitching(true)
     setConversationRestoring(true)
     setRecentConversationsOpen(false)
+    setChatLoading(false)
+    setAssistantTyping(false)
 
     try {
       const conversation =
@@ -2264,7 +2506,9 @@ export default function DashboardFlightAttendant({
           apiBaseUrl,
           token,
           conversationId,
+          signal: loadController.signal,
         })
+      if (loadGeneration !== conversationLoadGenerationRef.current) return
 
       activeLucyConversationIdRef.current =
         conversation.conversationId
@@ -2293,13 +2537,15 @@ export default function DashboardFlightAttendant({
       )
 
     } catch (error) {
-      console.error(
-        "Unable to open Lucy conversation",
-        error
-      )
+      if (!loadController.signal.aborted) {
+        console.error("Unable to open Lucy conversation", error)
+      }
     } finally {
-      setConversationRestoring(false)
-      setConversationSwitching(false)
+      if (loadGeneration === conversationLoadGenerationRef.current) {
+        conversationLoadAbortRef.current = null
+        setConversationRestoring(false)
+        setConversationSwitching(false)
+      }
     }
   }
 

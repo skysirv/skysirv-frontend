@@ -58,6 +58,7 @@ type SendLucyChatMessageParams = {
   dashboardRoutes: DashboardRouteContext[]
   messages: FlightAttendantMessage[]
   conversationId?: string | null
+  signal?: AbortSignal
 }
 
 export type LoadedLucyConversation = {
@@ -90,11 +91,13 @@ export async function sendLucyChatMessage({
   dashboardRoutes,
   messages,
   conversationId,
+  signal,
 }: SendLucyChatMessageParams): Promise<LucyChatResult> {
   const response = await fetch(
     `${apiBaseUrl}/api/flight-attendant/chat`,
     {
       method: "POST",
+      signal,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
@@ -311,14 +314,17 @@ export async function loadLucyConversation({
   apiBaseUrl,
   token,
   conversationId,
+  signal,
 }: {
   apiBaseUrl: string
   token: string
   conversationId: string
+  signal?: AbortSignal
 }): Promise<LoadedLucyConversation> {
   const response = await fetch(
     `${apiBaseUrl}/api/lucy/conversations/${conversationId}`,
     {
+      signal,
       headers: {
         Authorization: `Bearer ${token}`,
       },
