@@ -124,8 +124,8 @@ function LucyRailItem({
         className={[
           "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 pr-10 text-left text-sm text-slate-100 transition",
           active
-            ? "bg-[#303239]"
-            : "hover:bg-[#303239]",
+            ? "bg-[#A855F7]/25"
+            : "hover:bg-[#A855F7]/20",
         ].join(" ")}
       >
         {icon && (
@@ -1092,186 +1092,186 @@ export default function LucyWorkspace() {
               )}
             </button>
 
-                {/* Pinned conversations */}
-                <SectionHeading expanded={pinnedOpen} onToggle={() => setPinnedOpen((open) => !open)}>
-                  Pinned conversations
-                </SectionHeading>
+            {/* Pinned conversations */}
+            <SectionHeading expanded={pinnedOpen} onToggle={() => setPinnedOpen((open) => !open)}>
+              Pinned conversations
+            </SectionHeading>
 
-                {pinnedOpen && (
-                <div className="space-y-0.5">
-                  {lucyConversations
-                    .filter((conversation) => conversation.pinned)
-                    .map((conversation) => (
-                      <LucyRailItem
-                        key={conversation.id}
-                        label={conversation.title}
-                        active={
-                          activeConversationId === conversation.id
-                        }
-                        icon="/images/stock/lucy-chat/lucy-rail/pin.svg"
-                        menuOpen={
-                          openRailMenu === `pinned-${conversation.id}`
-                        }
-                        onMenuToggle={() =>
-                          setOpenRailMenu((current) =>
-                            current === `pinned-${conversation.id}`
-                              ? null
-                              : `pinned-${conversation.id}`
-                          )
-                        }
-                        onClick={() => {
-                          setOpenRailMenu(null)
-                          setRequestedConversationId(
-                            conversation.id
-                          )
-                        }}
-                        onPinAction={() =>
-                          void handleUnpinLucyConversation(
-                            conversation.id
-                          )
-                        }
-                        onRenameAction={() =>
-                          handleRequestRenameLucyConversation(
-                            conversation.id
-                          )
-                        }
-                        onDeleteAction={() =>
-                          handleRequestDeleteLucyConversation(
-                            conversation.id
-                          )
-                        }
-                      />
-                    ))}
-                </div>
-                )}
+            {pinnedOpen && (
+              <div className="space-y-0.5">
+                {lucyConversations
+                  .filter((conversation) => conversation.pinned)
+                  .map((conversation) => (
+                    <LucyRailItem
+                      key={conversation.id}
+                      label={conversation.title}
+                      active={
+                        activeConversationId === conversation.id
+                      }
+                      icon="/images/stock/lucy-chat/lucy-rail/pin.svg"
+                      menuOpen={
+                        openRailMenu === `pinned-${conversation.id}`
+                      }
+                      onMenuToggle={() =>
+                        setOpenRailMenu((current) =>
+                          current === `pinned-${conversation.id}`
+                            ? null
+                            : `pinned-${conversation.id}`
+                        )
+                      }
+                      onClick={() => {
+                        setOpenRailMenu(null)
+                        setRequestedConversationId(
+                          conversation.id
+                        )
+                      }}
+                      onPinAction={() =>
+                        void handleUnpinLucyConversation(
+                          conversation.id
+                        )
+                      }
+                      onRenameAction={() =>
+                        handleRequestRenameLucyConversation(
+                          conversation.id
+                        )
+                      }
+                      onDeleteAction={() =>
+                        handleRequestDeleteLucyConversation(
+                          conversation.id
+                        )
+                      }
+                    />
+                  ))}
+              </div>
+            )}
 
-                {/* Planned trips */}
-                <SectionHeading expanded={plannedOpen} onToggle={() => setPlannedOpen((open) => !open)}>
-                  Planned trips
-                </SectionHeading>
+            {/* Planned trips */}
+            <SectionHeading expanded={plannedOpen} onToggle={() => setPlannedOpen((open) => !open)}>
+              Planned trips
+            </SectionHeading>
 
-                {plannedOpen && (
-                <div className="space-y-0.5">
-                  {lucyConversations
-                    .filter(
-                      (conversation) =>
-                        conversation.plannedTrip
-                    )
-                    .map((conversation) => (
-                      <LucyRailItem
-                        key={conversation.id}
-                        label={conversation.title}
-                        active={
-                          activeConversationId === conversation.id
-                        }
-                        icon="/images/stock/lucy-chat/lucy-rail/planned-trip.svg"
-                        menuOpen={
-                          openRailMenu === `planned-${conversation.id}`
-                        }
-                        onMenuToggle={() =>
-                          setOpenRailMenu((current) =>
-                            current === `planned-${conversation.id}`
-                              ? null
-                              : `planned-${conversation.id}`
-                          )
-                        }
-                        onClick={() => {
-                          setOpenRailMenu(null)
-                          setRequestedConversationId(
+            {plannedOpen && (
+              <div className="space-y-0.5">
+                {lucyConversations
+                  .filter(
+                    (conversation) =>
+                      conversation.plannedTrip
+                  )
+                  .map((conversation) => (
+                    <LucyRailItem
+                      key={conversation.id}
+                      label={conversation.title}
+                      active={
+                        activeConversationId === conversation.id
+                      }
+                      icon="/images/stock/lucy-chat/lucy-rail/planned-trip.svg"
+                      menuOpen={
+                        openRailMenu === `planned-${conversation.id}`
+                      }
+                      onMenuToggle={() =>
+                        setOpenRailMenu((current) =>
+                          current === `planned-${conversation.id}`
+                            ? null
+                            : `planned-${conversation.id}`
+                        )
+                      }
+                      onClick={() => {
+                        setOpenRailMenu(null)
+                        setRequestedConversationId(
+                          conversation.id
+                        )
+                      }}
+                      onPinAction={() =>
+                        conversation.pinned
+                          ? void handleUnpinLucyConversation(
                             conversation.id
                           )
-                        }}
-                        onPinAction={() =>
-                          conversation.pinned
-                            ? void handleUnpinLucyConversation(
-                              conversation.id
-                            )
-                            : void handlePinLucyConversation(
-                              conversation.id
-                            )
-                        }
-                        pinActionLabel={
-                          conversation.pinned
-                            ? "Unpin"
-                            : "Pin"
-                        }
-                        onRenameAction={() =>
-                          handleRequestRenameLucyConversation(
+                          : void handlePinLucyConversation(
                             conversation.id
                           )
-                        }
-                        onDeleteAction={() =>
-                          handleRequestDeleteLucyConversation(
-                            conversation.id
-                          )
-                        }
-                      />
-                    ))}
-                </div>
-                )}
+                      }
+                      pinActionLabel={
+                        conversation.pinned
+                          ? "Unpin"
+                          : "Pin"
+                      }
+                      onRenameAction={() =>
+                        handleRequestRenameLucyConversation(
+                          conversation.id
+                        )
+                      }
+                      onDeleteAction={() =>
+                        handleRequestDeleteLucyConversation(
+                          conversation.id
+                        )
+                      }
+                    />
+                  ))}
+              </div>
+            )}
 
-                {/* Recent conversations */}
-                <SectionHeading expanded={recentOpen} onToggle={() => setRecentOpen((open) => !open)}>
-                  Recent conversations
-                </SectionHeading>
+            {/* Recent conversations */}
+            <SectionHeading expanded={recentOpen} onToggle={() => setRecentOpen((open) => !open)}>
+              Recent conversations
+            </SectionHeading>
 
-                {recentOpen && (
-                <div className="space-y-0.5">
-                  {lucyConversations
-                    .filter(
-                      (conversation) =>
-                        !conversation.pinned &&
-                        !conversation.plannedTrip
-                    )
-                    .map((conversation) => (
-                      <LucyRailItem
-                        key={conversation.id}
-                        label={conversation.title}
-                        active={
-                          activeConversationId === conversation.id
-                        }
-                        menuOpen={
-                          openRailMenu === `recent-${conversation.id}`
-                        }
-                        onMenuToggle={() =>
-                          setOpenRailMenu((current) =>
-                            current === `recent-${conversation.id}`
-                              ? null
-                              : `recent-${conversation.id}`
-                          )
-                        }
-                        onClick={() => {
-                          setOpenRailMenu(null)
-                          setRequestedConversationId(
-                            conversation.id
-                          )
-                        }}
-                        onPinAction={() =>
-                          void handlePinLucyConversation(
-                            conversation.id
-                          )
-                        }
-                        onMoveToPlannedTrip={() =>
-                          void handleMoveLucyConversationToPlannedTrip(
-                            conversation.id
-                          )
-                        }
-                        showMoveToPlannedTrip
-                        onRenameAction={() =>
-                          handleRequestRenameLucyConversation(
-                            conversation.id
-                          )
-                        }
-                        onDeleteAction={() =>
-                          handleRequestDeleteLucyConversation(
-                            conversation.id
-                          )
-                        }
-                        pinActionLabel="Pin"
-                      />
-                    ))}
-                </div>
-                )}
+            {recentOpen && (
+              <div className="space-y-0.5">
+                {lucyConversations
+                  .filter(
+                    (conversation) =>
+                      !conversation.pinned &&
+                      !conversation.plannedTrip
+                  )
+                  .map((conversation) => (
+                    <LucyRailItem
+                      key={conversation.id}
+                      label={conversation.title}
+                      active={
+                        activeConversationId === conversation.id
+                      }
+                      menuOpen={
+                        openRailMenu === `recent-${conversation.id}`
+                      }
+                      onMenuToggle={() =>
+                        setOpenRailMenu((current) =>
+                          current === `recent-${conversation.id}`
+                            ? null
+                            : `recent-${conversation.id}`
+                        )
+                      }
+                      onClick={() => {
+                        setOpenRailMenu(null)
+                        setRequestedConversationId(
+                          conversation.id
+                        )
+                      }}
+                      onPinAction={() =>
+                        void handlePinLucyConversation(
+                          conversation.id
+                        )
+                      }
+                      onMoveToPlannedTrip={() =>
+                        void handleMoveLucyConversationToPlannedTrip(
+                          conversation.id
+                        )
+                      }
+                      showMoveToPlannedTrip
+                      onRenameAction={() =>
+                        handleRequestRenameLucyConversation(
+                          conversation.id
+                        )
+                      }
+                      onDeleteAction={() =>
+                        handleRequestDeleteLucyConversation(
+                          conversation.id
+                        )
+                      }
+                      pinActionLabel="Pin"
+                    />
+                  ))}
+              </div>
+            )}
           </div>
         </aside>
       )}
@@ -1378,7 +1378,7 @@ export default function LucyWorkspace() {
                   void handleConfirmRenameLucyConversation()
                 }
                 disabled={!conversationRenameValue.trim()}
-                className="rounded-xl bg-slate-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-xl bg-[#9333EA] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#A855F7] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Rename
               </button>
