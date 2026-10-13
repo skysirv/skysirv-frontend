@@ -38,8 +38,8 @@ function RailIcon({
       className={[
         "flex h-10 w-10 items-center justify-center rounded-xl transition",
         active
-          ? "bg-[#163353] text-blue-300"
-          : "text-slate-400 hover:bg-[#35373e] hover:text-white",
+          ? "bg-[#4e286d] text-purple-300"
+          : "text-slate-400 hover:bg-[#35263f] hover:text-white",
       ].join(" ")}
     >
       {children}
@@ -113,8 +113,8 @@ function LucyRailItem({
         className={[
           "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 pr-10 text-left text-sm text-slate-100 transition",
           active
-            ? "bg-[#303239]"
-            : "hover:bg-[#35373e]",
+            ? "bg-[#3b2b4c]"
+            : "hover:bg-[#35263f]",
         ].join(" ")}
       >
         {icon && (
@@ -204,7 +204,7 @@ function LucyRailItem({
                 }
               }}
               className={[
-                "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition hover:bg-[#35373e]",
+                "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition hover:bg-[#35263f]",
                 item.destructive
                   ? "text-red-600"
                   : "text-slate-100",
@@ -292,7 +292,7 @@ function LucyRailMark() {
     <img
       src="/images/stock/lucy-chat/lucy-rail/star.svg"
       alt="Lucy"
-      className="h-6 w-6 object-contain brightness-0 invert"
+      className="h-7 w-7 object-contain" style={{ filter: "brightness(0) saturate(100%) invert(49%) sepia(68%) saturate(1570%) hue-rotate(227deg) brightness(106%)" }}
     />
   )
 }
@@ -333,6 +333,7 @@ export default function LucyWorkspace() {
   const [openRailMenu, setOpenRailMenu] = useState<string | null>(null)
   const [lucyRailCollapsed, setLucyRailCollapsed] =
     useState(false)
+  const [conversationListOpen, setConversationListOpen] = useState(false)
   const [lucyConversations, setLucyConversations] =
     useState<LucyConversationSummary[]>([])
 
@@ -803,7 +804,7 @@ export default function LucyWorkspace() {
   }, [accountMenuOpen])
 
   return (
-    <div className="lucy-dark-workspace flex h-[100dvh] w-full overflow-hidden bg-[#141519] text-slate-100">
+    <div className="lucy-dark-workspace flex h-[100dvh] w-full overflow-hidden bg-[#100d17] text-slate-100">
       <style jsx>{`
         .lucy-scrollbar {
           scrollbar-width: thin;
@@ -842,172 +843,14 @@ export default function LucyWorkspace() {
         }
       `}</style>
       {/* ------------------------------------------------------------------ */}
-      {/* Far-left application rail                                           */}
-      {/* ------------------------------------------------------------------ */}
-      <aside className="flex w-[60px] shrink-0 flex-col items-center border-r border-[#34363d] bg-[#202126] py-3">
-        <RailIcon
-          active
-          ariaLabel="Home"
-          onClick={() => router.push("/")}
-        >
-          <LeftRailAsset
-            src="/images/stock/lucy-chat/left-rail/home.svg"
-            alt="Home"
-            className="h-6 w-6"
-          />
-        </RailIcon>
-        <div className="mt-5 flex flex-col items-center gap-2">
-          <RailIcon ariaLabel="Trips">
-            <LeftRailAsset
-              src="/images/stock/lucy-chat/left-rail/trips.svg"
-              alt="Trips"
-            />
-          </RailIcon>
-          <RailIcon ariaLabel="Saved">
-            <LeftRailAsset
-              src="/images/stock/lucy-chat/left-rail/saved.svg"
-              alt="Saved"
-            />
-          </RailIcon>
-        </div>
-        <div className="mt-auto flex flex-col items-center gap-2">
-          <RailIcon ariaLabel="Help">
-            <LeftRailAsset
-              src="/images/stock/lucy-chat/left-rail/help.svg"
-              alt="Help"
-            />
-          </RailIcon>
-          <div ref={accountMenuRef} className="relative">
-            <RailIcon
-              ariaLabel="Account"
-              onClick={() =>
-                setAccountMenuOpen((current) => !current)
-              }
-            >
-              <LeftRailAsset
-                src="/images/stock/lucy-chat/left-rail/account.svg"
-                alt="Account"
-              />
-            </RailIcon>
-
-            {accountMenuOpen && (
-              <div className="absolute bottom-0 left-[calc(100%+10px)] z-50 w-[240px] overflow-hidden rounded-2xl border border-[#34363d] bg-[#202126] p-2 shadow-[0_18px_45px_rgba(15,23,42,0.16)]">
-                <div className="border-b border-[#34363d] py-1">
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      const token = getAuthToken()
-
-                      setAccountMenuOpen(false)
-
-                      if (!token) {
-                        setAuthModalIntent("dashboard")
-                        setAuthModalOpen(true)
-                        return
-                      }
-
-                      const dashboardPath =
-                        await getSkysirvDashboardPath()
-
-                      if (!dashboardPath) {
-                        setAuthModalIntent("dashboard")
-                        setAuthModalOpen(true)
-                        return
-                      }
-
-                      router.push(dashboardPath)
-                    }}
-                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-slate-100 transition hover:bg-[#35373e]"
-                  >
-                    Skysirv dashboard
-                  </button>
-                </div>
-
-                <div className="py-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAccountMenuOpen(false)
-                      router.push("/account")
-                    }}
-                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-slate-100 transition hover:bg-[#35373e]"
-                  >
-                    Account settings
-                  </button>
-
-                  <button
-                    type="button"
-                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-slate-100 transition hover:bg-[#35373e]"
-                  >
-                    Chat settings
-                  </button>
-                </div>
-
-                <div className="border-t border-[#34363d] pt-1">
-                  {getAuthToken() ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        clearAuthSession()
-
-                        setAccountUser(null)
-                        setAccountPlanId(null)
-                        setLucyConversations([])
-                        setRequestedConversationId(null)
-                        setActiveConversationId(null)
-                        setAccountMenuOpen(false)
-
-                        window.dispatchEvent(
-                          new Event("skysirv-auth-changed")
-                        )
-
-                        router.push("/")
-                      }}
-                      className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-red-600 transition hover:bg-red-950/30"
-                    >
-                      Sign out
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAccountMenuOpen(false)
-                        setAuthModalIntent("workspace")
-                        setAuthModalOpen(true)
-                      }}
-                      className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-slate-100 transition hover:bg-[#35373e]"
-                    >
-                      Sign in
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </aside>
-      {lucyRailCollapsed && (
-        <button
-          type="button"
-          onClick={() => setLucyRailCollapsed(false)}
-          aria-label="Expand Lucy sidebar"
-          title="Expand Lucy sidebar"
-          className="relative z-20 mt-3 flex h-10 w-6 shrink-0 items-center justify-center rounded-r-lg border border-l-0 border-[#34363d] bg-[#202126] text-slate-300 shadow-sm transition hover:bg-[#303239] hover:text-white"
-        >
-          <span className="rotate-180">
-            <CollapseIcon />
-          </span>
-        </button>
-      )}
-      {/* ------------------------------------------------------------------ */}
       {/* Lucy navigation rail                                                */}
       {/* ------------------------------------------------------------------ */}
       {!lucyRailCollapsed && (
-        <aside className="flex w-[292px] shrink-0 flex-col border-r border-[#34363d] bg-[#202126]">
+        <aside className="flex w-[280px] shrink-0 flex-col border-r border-[#382945] bg-[#1b1522]">
           {/* Lucy rail header */}
           <div
             className={[
-              "flex h-[68px] shrink-0 items-center border-b border-[#34363d]",
+              "flex h-[76px] shrink-0 items-center border-b border-[#382945]",
               lucyRailCollapsed
                 ? "justify-center px-2"
                 : "px-4",
@@ -1035,8 +878,8 @@ export default function LucyWorkspace() {
             {!lucyRailCollapsed && (
               <button
                 type="button"
-                aria-label="Search Lucy conversations"
-                className="ml-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-100 transition hover:bg-[#35373e] hover:text-slate-200"
+                aria-label="Search Lucy conversations" disabled
+                className="ml-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-100 transition hover:bg-[#35263f] hover:text-slate-200"
               >
                 <SearchIcon />
               </button>
@@ -1054,8 +897,8 @@ export default function LucyWorkspace() {
               }
               className={
                 lucyRailCollapsed
-                  ? "ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-100 transition hover:bg-[#35373e] hover:text-slate-200"
-                  : "ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-100 transition hover:bg-[#35373e] hover:text-slate-200"
+                  ? "ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-100 transition hover:bg-[#35263f] hover:text-slate-200"
+                  : "ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-100 transition hover:bg-[#35263f] hover:text-slate-200"
               }
             >
               <CollapseIcon />
@@ -1081,7 +924,7 @@ export default function LucyWorkspace() {
               aria-label="New conversation"
               title="New conversation"
               className={[
-                "mt-3 flex items-center rounded-lg text-sm font-medium text-slate-100 transition hover:bg-[#35373e]",
+                "mt-3 flex items-center rounded-lg text-sm font-medium text-slate-100 transition hover:bg-[#35263f]",
                 lucyRailCollapsed
                   ? "h-10 w-full justify-center px-0"
                   : "w-full gap-3 px-3 py-2.5 text-left",
@@ -1099,7 +942,11 @@ export default function LucyWorkspace() {
               )}
             </button>
 
-            {!lucyRailCollapsed && (
+            <button type="button" onClick={() => setConversationListOpen((open) => !open)} aria-expanded={conversationListOpen}
+              className="mt-4 flex w-full items-center justify-between rounded-xl px-3 py-3 text-left text-sm font-medium text-[#d8b6fc] hover:bg-[#34263f]">
+              <span>Conversations</span><span aria-hidden="true">{conversationListOpen ? "⌃" : "⌄"}</span>
+            </button>
+            {conversationListOpen && (
               <>
                 {/* Pinned conversations */}
                 <SectionHeading>
@@ -1279,12 +1126,127 @@ export default function LucyWorkspace() {
             )}
 
           </div>
-        </aside>
+           <div className="relative border-t border-[#382945] p-3">
+          <div ref={accountMenuRef} className="relative">
+            <RailIcon
+              ariaLabel="Account"
+              onClick={() =>
+                setAccountMenuOpen((current) => !current)
+              }
+            >
+              <LeftRailAsset
+                src="/images/stock/lucy-chat/left-rail/account.svg"
+                alt="Account"
+              />
+            </RailIcon>
+
+            {accountMenuOpen && (
+              <div className="absolute bottom-[calc(100%+6px)] left-0 z-50 w-[240px] overflow-hidden rounded-2xl border border-[#34363d] bg-[#202126] p-2 shadow-[0_18px_45px_rgba(15,23,42,0.16)]">
+                <div className="border-b border-[#34363d] py-1">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const token = getAuthToken()
+
+                      setAccountMenuOpen(false)
+
+                      if (!token) {
+                        setAuthModalIntent("dashboard")
+                        setAuthModalOpen(true)
+                        return
+                      }
+
+                      const dashboardPath =
+                        await getSkysirvDashboardPath()
+
+                      if (!dashboardPath) {
+                        setAuthModalIntent("dashboard")
+                        setAuthModalOpen(true)
+                        return
+                      }
+
+                      router.push(dashboardPath)
+                    }}
+                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-slate-100 transition hover:bg-[#35263f]"
+                  >
+                    Skysirv dashboard
+                  </button>
+                </div>
+
+                <div className="py-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAccountMenuOpen(false)
+                      router.push("/account")
+                    }}
+                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-slate-100 transition hover:bg-[#35263f]"
+                  >
+                    Account settings
+                  </button>
+
+                  <button
+                    type="button"
+                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-slate-100 transition hover:bg-[#35263f]"
+                  >
+                    Chat settings
+                  </button>
+                </div>
+
+                <div className="border-t border-[#34363d] pt-1">
+                  {getAuthToken() ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        clearAuthSession()
+
+                        setAccountUser(null)
+                        setAccountPlanId(null)
+                        setLucyConversations([])
+                        setRequestedConversationId(null)
+                        setActiveConversationId(null)
+                        setAccountMenuOpen(false)
+
+                        window.dispatchEvent(
+                          new Event("skysirv-auth-changed")
+                        )
+
+                        router.push("/")
+                      }}
+                      className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-red-600 transition hover:bg-red-950/30"
+                    >
+                      Sign out
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAccountMenuOpen(false)
+                        setAuthModalIntent("workspace")
+                        setAuthModalOpen(true)
+                      }}
+                      className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-slate-100 transition hover:bg-[#35263f]"
+                    >
+                      Sign in
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+           </div>
+         </aside>
       )}
+       {/* ------------------------------------------------------------------ */}
+       {/* Main Lucy conversation workspace                                    */}
       {/* ------------------------------------------------------------------ */}
-      {/* Main Lucy conversation workspace                                    */}
-      {/* ------------------------------------------------------------------ */}
-      <main className="min-w-0 flex-1 bg-[#141519]">
+      <main className="flex min-w-0 flex-1 flex-col bg-[#100d17]">
+         <header className="flex h-[68px] shrink-0 items-center justify-between border-b border-[#2e2238] px-7">
+           <div className="flex items-center gap-2 text-sm text-[#e7ddef]"><span className="text-lg text-[#ba7df9]">✦</span><strong>Lucy</strong><span className="text-[#a396ad]">· Your AI Travel Companion</span></div>
+           <button type="button" onClick={() => { setRequestedConversationId(null); setNewConversationRequestKey((key) => key + 1) }} className="rounded-full border border-[#5e4370] px-4 py-2 text-xs text-[#dbb9ff] hover:bg-[#35243e]">+ New conversation</button>
+         </header>
+         <div className="min-h-0 flex-1">
         <DashboardFlightAttendant
           key={lucyEngineKey}
           tier={lucyTier}
@@ -1371,7 +1333,7 @@ export default function LucyWorkspace() {
                   setConversationPendingRename(null)
                   setConversationRenameValue("")
                 }}
-                className="rounded-xl px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-[#35373e]"
+                className="rounded-xl px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-[#35263f]"
               >
                 Cancel
               </button>
@@ -1414,7 +1376,7 @@ export default function LucyWorkspace() {
                 onClick={() =>
                   setConversationPendingDelete(null)
                 }
-                className="rounded-xl px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-[#35373e]"
+                className="rounded-xl px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-[#35263f]"
               >
                 Cancel
               </button>

@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react"
 
+import LucyVoiceOrb from "./LucyVoiceOrb"
 import AuthModal from "@/components/auth/AuthModal"
 import AuthPanel from "@/components/auth/AuthPanel"
 import { getAuthToken } from "@/utils/auth-storage"
@@ -2572,7 +2573,7 @@ export default function DashboardFlightAttendant({
             }
             className={cn(
               isWorkspace
-                ? "flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#141519] text-slate-100 shadow-none"
+                ? "flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#100d17] text-slate-100 shadow-none"
                 : "overflow-y-auto rounded-[1.75rem] border border-white/10 bg-[#050b18] text-white shadow-[0_24px_70px_rgba(2,6,23,0.28)]",
               expanded
                 ? "flex h-[min(760px,calc(100vh-3rem))] w-full max-w-3xl flex-col shadow-2xl"
@@ -2749,8 +2750,8 @@ export default function DashboardFlightAttendant({
                     : "overflow-y-auto",
                   isWorkspace
                     ? isWorkspaceEmpty
-                      ? "bg-[#141519] px-6 py-0"
-                      : "lucy-workspace-scrollbar min-h-0 flex-1 bg-[#141519] px-6 py-8"
+                      ? "bg-[#100d17] px-6 py-0"
+                      : "lucy-workspace-scrollbar min-h-0 flex-1 bg-[#100d17] px-6 py-8"
                     : "bg-[#071120] px-5 py-4 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/10 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-300/20",
                   expanded
                     ? "min-h-0 flex-1"
@@ -2768,8 +2769,8 @@ export default function DashboardFlightAttendant({
                     "mx-auto w-full",
                     isWorkspace
                       ? isWorkspaceEmpty
-                        ? "max-w-[880px]"
-                        : "max-w-[880px] space-y-8 pb-12"
+                        ? "max-w-[1000px]"
+                        : "max-w-[1000px] space-y-8 pb-12"
                       : "space-y-5 pb-2"
                   )}
                 >
@@ -2842,9 +2843,9 @@ export default function DashboardFlightAttendant({
                     "p-4",
                     isWorkspace
                       ? isWorkspaceEmpty
-                        ? "shrink-0 bg-[#141519] px-6 py-0"
-                        : "border-t border-[#34363d] bg-[#141519] px-6 py-5"
-                      : "bg-[#141519] px-6 py-5"
+                        ? "shrink-0 bg-[#100d17] px-6 py-0"
+                        : "border-t border-[#34363d] bg-[#100d17] px-6 py-5"
+                      : "bg-[#100d17] px-6 py-5"
                   )}
                 >
                   <div className="flex items-center justify-between gap-3">
@@ -2882,22 +2883,25 @@ export default function DashboardFlightAttendant({
                   "p-4",
                   isWorkspace
                     ? isWorkspaceEmpty
-                      ? "shrink-0 border-0 bg-[#141519] px-6 py-0"
-                      : "bg-[#141519] px-6 py-5"
+                      ? "shrink-0 border-0 bg-[#100d17] px-6 py-0"
+                      : "bg-[#100d17] px-6 py-5"
                     : "border-t border-white/10 bg-[#050b18]"
                 )}
               >
+                {isWorkspace && (
+                  <LucyVoiceOrb status={voiceStatus} />
+                )}
                 <div
                   className={cn(
                     "mx-auto flex w-full items-center gap-2",
-                    isWorkspace ? "max-w-[880px]" : ""
+                    isWorkspace ? "max-w-[1000px]" : ""
                   )}
                 >
                   <div
                     className={cn(
                       "relative flex-1",
                       isWorkspace
-                        ? "overflow-visible rounded-[1.5rem] border border-[#41434b] bg-[#25262b] shadow-[0_2px_12px_rgba(0,0,0,0.22)] transition"
+                        ? "overflow-visible rounded-[1.5rem] border border-[#5b426d] bg-[#271d31] shadow-[0_12px_38px_rgba(0,0,0,0.28)] transition"
                         : ""
                     )}
                   >
@@ -3109,8 +3113,8 @@ export default function DashboardFlightAttendant({
                         className={cn(
                           "absolute bottom-[9px] right-1.5 inline-flex h-9 w-9 items-center justify-center rounded-full transition disabled:cursor-not-allowed disabled:opacity-50",
                           voiceStatus === "idle" || voiceStatus === "error"
-                            ? "bg-blue-600 text-white hover:bg-blue-700"
-                            : "bg-blue-600 text-white shadow-[0_2px_12px_rgba(37,99,235,0.38)] hover:bg-blue-700"
+                            ? "bg-[#8b45dc] text-white hover:bg-[#a15df0]"
+                            : "bg-[#8b45dc] text-white shadow-[0_0_20px_rgba(160,79,245,0.4)] hover:bg-[#a15df0]"
                         )}
                       >
                         {voiceStatus === "idle" || voiceStatus === "error" ? (
@@ -3288,7 +3292,8 @@ export default function DashboardFlightAttendant({
 
     if (align === "left") {
       return (
-        <div className="flex justify-start">
+        <div className="flex items-start justify-start gap-3">
+          {workspace && <span aria-label="Lucy" className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#63318b] text-[#edccff] shadow-[0_0_20px_rgba(150,75,220,0.28)]">✦</span>}
           <div
             className={cn(
               "max-w-[92%] px-1 py-1",
@@ -3314,7 +3319,7 @@ export default function DashboardFlightAttendant({
           className={cn(
             "max-w-[82%] rounded-[1.25rem] px-4 py-3",
             workspace
-              ? "border border-[#42444c] bg-[#292b31] shadow-sm"
+              ? "border border-[#634478] bg-[#352440] shadow-sm"
               : "border border-white/10 bg-white/[0.08] shadow-[0_8px_30px_rgba(0,0,0,0.18)] backdrop-blur-xl"
           )}
         >
@@ -3343,14 +3348,14 @@ export default function DashboardFlightAttendant({
             <span
               className={cn(
                 "h-2 w-2 animate-pulse rounded-full",
-                workspace ? "bg-cyan-500" : "bg-cyan-300"
+                workspace ? "bg-purple-500" : "bg-cyan-300"
               )}
             />
 
             <span
               className={cn(
                 "h-2 w-2 animate-pulse rounded-full",
-                workspace ? "bg-cyan-500" : "bg-cyan-300"
+                workspace ? "bg-purple-500" : "bg-cyan-300"
               )}
               style={{ animationDelay: "120ms" }}
             />
@@ -3358,7 +3363,7 @@ export default function DashboardFlightAttendant({
             <span
               className={cn(
                 "h-2 w-2 animate-pulse rounded-full",
-                workspace ? "bg-cyan-500" : "bg-cyan-300"
+                workspace ? "bg-purple-500" : "bg-cyan-300"
               )}
               style={{ animationDelay: "240ms" }}
             />
