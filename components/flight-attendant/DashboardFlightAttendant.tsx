@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react"
 
+import LucyVoiceOrb from "./LucyVoiceOrb"
 import AuthModal from "@/components/auth/AuthModal"
 import AuthPanel from "@/components/auth/AuthPanel"
 import { getAuthToken } from "@/utils/auth-storage"
@@ -209,6 +210,12 @@ export default function DashboardFlightAttendant({
   const attachmentInputRef = useRef<HTMLInputElement | null>(null)
   const composerFormRef = useRef<HTMLFormElement | null>(null)
 
+  const realtimeSessionGenerationRef = useRef(0)
+  const textRequestGenerationRef = useRef(0)
+  const textRequestAbortRef = useRef<AbortController | null>(null)
+  const conversationLoadGenerationRef = useRef(0)
+  const conversationLoadAbortRef = useRef<AbortController | null>(null)
+  const typingAbortRef = useRef<AbortController | null>(null)
   const realtimePeerConnectionRef = useRef<RTCPeerConnection | null>(null)
   const realtimeLocalStreamRef = useRef<MediaStream | null>(null)
   const realtimeMicTrackRef = useRef<MediaStreamTrack | null>(null)
@@ -385,6 +392,15 @@ export default function DashboardFlightAttendant({
 
   useEffect(() => {
     return () => {
+      realtimeSessionGenerationRef.current += 1
+      textRequestGenerationRef.current += 1
+      conversationLoadGenerationRef.current += 1
+      textRequestAbortRef.current?.abort()
+      conversationLoadAbortRef.current?.abort()
+      typingAbortRef.current?.abort()
+      realtimeDataChannelRef.current?.close()
+      realtimeDataChannelRef.current = null
+
       if (realtimeMicResumeTimerRef.current !== null) {
         window.clearTimeout(realtimeMicResumeTimerRef.current)
         realtimeMicResumeTimerRef.current = null
@@ -416,12 +432,22 @@ export default function DashboardFlightAttendant({
     messageId: string,
     fullText: string
   ) {
-    await typeAssistantMessage({
-      messageId,
-      fullText,
-      setMessages,
-      setAssistantTyping,
-    })
+    typingAbortRef.current?.abort()
+    const controller = new AbortController()
+    typingAbortRef.current = controller
+    try {
+      await typeAssistantMessage({
+        messageId,
+        fullText,
+        setMessages,
+        setAssistantTyping,
+        signal: controller.signal,
+      })
+    } finally {
+      if (typingAbortRef.current === controller) {
+        typingAbortRef.current = null
+      }
+    }
   }
 
   async function appendTypedAssistantReply(fullText: string) {
@@ -465,7 +491,8 @@ export default function DashboardFlightAttendant({
       arguments?: string
       call_id?: string
     },
-    token: string
+    token: string,
+    sessionGeneration: number
   ) {
     if (item.name !== "retrieve_lucy_memories") {
       return false
@@ -522,6 +549,7 @@ export default function DashboardFlightAttendant({
       : []
 
     if (!query || !API_BASE_URL) {
+      if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
       sendRealtimeToolCallOutput(callId, {
         success: false,
         memories: [],
@@ -556,6 +584,7 @@ export default function DashboardFlightAttendant({
         .json()
         .catch(() => null)
 
+      if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
       sendRealtimeToolCallOutput(callId, {
         success: response.ok,
         memories:
@@ -565,12 +594,14 @@ export default function DashboardFlightAttendant({
             : [],
       })
     } catch {
+      if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
       sendRealtimeToolCallOutput(callId, {
         success: false,
         memories: [],
       })
     }
 
+    if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
     try {
       realtimeDataChannelRef.current?.send(
         JSON.stringify({
@@ -590,7 +621,8 @@ export default function DashboardFlightAttendant({
       arguments?: string
       call_id?: string
     },
-    token: string
+    token: string,
+    sessionGeneration: number
   ) {
     if (
       item.name !==
@@ -650,6 +682,7 @@ export default function DashboardFlightAttendant({
       : []
 
     if (!query || !API_BASE_URL) {
+      if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
       sendRealtimeToolCallOutput(callId, {
         success: false,
         conversations: [],
@@ -690,6 +723,7 @@ export default function DashboardFlightAttendant({
         .json()
         .catch(() => null)
 
+      if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
       sendRealtimeToolCallOutput(callId, {
         success: response.ok,
         conversations:
@@ -699,12 +733,14 @@ export default function DashboardFlightAttendant({
             : [],
       })
     } catch {
+      if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
       sendRealtimeToolCallOutput(callId, {
         success: false,
         conversations: [],
       })
     }
 
+    if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
     try {
       realtimeDataChannelRef.current?.send(
         JSON.stringify({
@@ -724,7 +760,8 @@ export default function DashboardFlightAttendant({
       arguments?: string
       call_id?: string
     },
-    token: string
+    token: string,
+    sessionGeneration: number
   ) {
     if (item.name !== "search_flights") {
       return false
@@ -761,6 +798,7 @@ export default function DashboardFlightAttendant({
     }
 
     if (!API_BASE_URL) {
+      if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
       sendRealtimeToolCallOutput(callId, {
         success: false,
         error:
@@ -798,6 +836,7 @@ export default function DashboardFlightAttendant({
         .json()
         .catch(() => null)
 
+      if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
       sendRealtimeToolCallOutput(callId, {
         success: response.ok,
         provider:
@@ -824,6 +863,7 @@ export default function DashboardFlightAttendant({
             "Lucy could not complete the live flight search.",
       })
     } catch {
+      if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
       sendRealtimeToolCallOutput(callId, {
         success: false,
         provider: null,
@@ -835,6 +875,7 @@ export default function DashboardFlightAttendant({
       })
     }
 
+    if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
     try {
       realtimeDataChannelRef.current?.send(
         JSON.stringify({
@@ -854,6 +895,10 @@ export default function DashboardFlightAttendant({
   ) {
     if (!API_BASE_URL) return
 
+    const actionSessionGeneration =
+      realtimeSessionGenerationRef.current
+    const actionConversationId =
+      activeLucyConversationIdRef.current
     const realtimeToolCallId =
       pendingRealtimeToolCallIdRef.current
 
@@ -867,6 +912,15 @@ export default function DashboardFlightAttendant({
         sourceConversationId:
           activeLucyConversationIdRef.current,
       })
+
+      if (
+        actionSessionGeneration !==
+        realtimeSessionGenerationRef.current ||
+        actionConversationId !==
+        activeLucyConversationIdRef.current
+      ) {
+        return
+      }
 
       if (result.confirmedWatchlistRoute) {
         confirmedVoiceWatchlistRoutesRef.current = [
@@ -894,6 +948,10 @@ export default function DashboardFlightAttendant({
       pendingLucyActionRef.current = null
 
       await appendTypedAssistantReply(result.reply)
+      if (
+        actionSessionGeneration !== realtimeSessionGenerationRef.current ||
+        actionConversationId !== activeLucyConversationIdRef.current
+      ) return
 
       if (
         realtimeDataChannelRef.current?.readyState === "open"
@@ -901,6 +959,16 @@ export default function DashboardFlightAttendant({
         speakWithRealtimeLucyVoice(result.reply)
       }
     } catch (error: any) {
+
+      if (
+        actionSessionGeneration !==
+        realtimeSessionGenerationRef.current ||
+        actionConversationId !==
+        activeLucyConversationIdRef.current
+      ) {
+        return
+      }
+
       const errorMessage =
         error?.message ||
         "I couldn’t save that action yet. Please try again in a moment."
@@ -921,6 +989,10 @@ export default function DashboardFlightAttendant({
       setPendingLucyAction(null)
 
       await appendTypedAssistantReply(errorMessage)
+      if (
+        actionSessionGeneration !== realtimeSessionGenerationRef.current ||
+        actionConversationId !== activeLucyConversationIdRef.current
+      ) return
 
       if (
         realtimeDataChannelRef.current?.readyState === "open"
@@ -928,7 +1000,14 @@ export default function DashboardFlightAttendant({
         speakWithRealtimeLucyVoice(errorMessage)
       }
     } finally {
-      setChatLoading(false)
+      if (
+        actionSessionGeneration ===
+        realtimeSessionGenerationRef.current &&
+        actionConversationId ===
+        activeLucyConversationIdRef.current
+      ) {
+        setChatLoading(false)
+      }
     }
   }
 
@@ -958,6 +1037,12 @@ export default function DashboardFlightAttendant({
   }
 
   function resumeRealtimeMicrophoneAfterLucy() {
+    if (
+      !realtimePeerConnectionRef.current ||
+      realtimePeerConnectionRef.current.connectionState === "closed"
+    ) {
+      return
+    }
     resumeRealtimeMicrophoneHelper({
       clearTimer: clearRealtimeMicrophoneResumeTimer,
       isPausedRef: realtimeMicPausedForLucyRef,
@@ -991,6 +1076,7 @@ export default function DashboardFlightAttendant({
   }
 
   function stopLucyVoiceSession() {
+    realtimeSessionGenerationRef.current += 1
     clearRealtimeMicrophoneResumeTimer()
     clearRealtimeLucyCaptionPacing()
 
@@ -1084,6 +1170,9 @@ export default function DashboardFlightAttendant({
 
     setVoiceStatus("connecting")
 
+    const sessionGeneration =
+      ++realtimeSessionGenerationRef.current
+
     try {
       const sessionResponse = await fetch(
         `${API_BASE_URL}/api/flight-attendant/realtime-session`,
@@ -1103,10 +1192,24 @@ export default function DashboardFlightAttendant({
         }
       )
 
+      if (
+        sessionGeneration !==
+        realtimeSessionGenerationRef.current
+      ) {
+        return
+      }
+
       const sessionData =
         (await sessionResponse.json().catch(() => null)) as
         | LucyRealtimeSessionResponse
         | null
+
+      if (
+        sessionGeneration !==
+        realtimeSessionGenerationRef.current
+      ) {
+        return
+      }
 
       if (!sessionResponse.ok) {
         throw new Error(
@@ -1177,6 +1280,13 @@ export default function DashboardFlightAttendant({
       realtimeAudioElementRef.current = audioElement
 
       peerConnection.ontrack = (event) => {
+        if (
+          sessionGeneration !==
+          realtimeSessionGenerationRef.current
+        ) {
+          return
+        }
+
         audioElement.srcObject = event.streams[0]
         setVoiceStatus("speaking")
       }
@@ -1184,6 +1294,16 @@ export default function DashboardFlightAttendant({
       const localStream = await navigator.mediaDevices.getUserMedia({
         audio: true,
       })
+
+      if (
+        sessionGeneration !==
+        realtimeSessionGenerationRef.current
+      ) {
+        localStream.getTracks().forEach((track) => {
+          track.stop()
+        })
+        return
+      }
 
       realtimeLocalStreamRef.current = localStream
 
@@ -1201,6 +1321,13 @@ export default function DashboardFlightAttendant({
       realtimeDataChannelRef.current = dataChannel
 
       dataChannel.addEventListener("open", () => {
+        if (
+          sessionGeneration !==
+          realtimeSessionGenerationRef.current
+        ) {
+          return
+        }
+
         setVoiceStatus("listening")
       })
 
@@ -1338,6 +1465,13 @@ export default function DashboardFlightAttendant({
       }
 
       dataChannel.addEventListener("message", (event) => {
+        if (
+          sessionGeneration !==
+          realtimeSessionGenerationRef.current
+        ) {
+          return
+        }
+
         try {
           const data = JSON.parse(event.data)
 
@@ -1367,7 +1501,8 @@ export default function DashboardFlightAttendant({
             ) {
               void handleRealtimeMemoryRetrievalToolCall(
                 data.item,
-                token
+                token,
+                sessionGeneration
               )
             } else if (
               data.item?.name ===
@@ -1375,7 +1510,8 @@ export default function DashboardFlightAttendant({
             ) {
               void handleRealtimeConversationContextToolCall(
                 data.item,
-                token
+                token,
+                sessionGeneration
               )
             } else if (
               data.item?.name ===
@@ -1383,7 +1519,8 @@ export default function DashboardFlightAttendant({
             ) {
               void handleRealtimeFlightSearchToolCall(
                 data.item,
-                token
+                token,
+                sessionGeneration
               )
             } else {
               const realtimeToolCallId =
@@ -1414,6 +1551,13 @@ export default function DashboardFlightAttendant({
                       setPendingLucyAction(null)
 
                       window.setTimeout(() => {
+                        if (
+                          sessionGeneration !==
+                          realtimeSessionGenerationRef.current
+                        ) {
+                          return
+                        }
+
                         void handleConfirmPendingLucyAction(
                           action,
                           token
@@ -1554,6 +1698,7 @@ export default function DashboardFlightAttendant({
                   title: voiceConversationTitle,
                 })
                   .then((updatedConversation) => {
+                    if (sessionGeneration !== realtimeSessionGenerationRef.current) return
                     setRecentLucyConversations((current) => {
                       const exists = current.some(
                         (conversation) =>
@@ -1579,6 +1724,7 @@ export default function DashboardFlightAttendant({
                     )
                   })
                   .catch((error) => {
+                    if (sessionGeneration !== realtimeSessionGenerationRef.current) return
                     pendingVoiceConversationAutoTitleRef.current =
                       voiceConversationId
 
@@ -1697,7 +1843,8 @@ export default function DashboardFlightAttendant({
               }
 
               window.setTimeout(() => {
-                handleConfirmPendingLucyAction(actionToConfirm, token)
+                if (sessionGeneration !== realtimeSessionGenerationRef.current) return
+                void handleConfirmPendingLucyAction(actionToConfirm, token)
               }, 0)
 
               activeUserVoiceMessageId = null
@@ -1838,7 +1985,11 @@ export default function DashboardFlightAttendant({
 
             if (realtimePeerConnectionRef.current) {
               window.setTimeout(() => {
-                if (realtimePeerConnectionRef.current) {
+                if (
+                  sessionGeneration ===
+                  realtimeSessionGenerationRef.current &&
+                  realtimePeerConnectionRef.current === peerConnection
+                ) {
                   setVoiceStatus("listening")
                 }
               }, 1800)
@@ -1885,6 +2036,14 @@ export default function DashboardFlightAttendant({
       const offer = await peerConnection.createOffer()
       await peerConnection.setLocalDescription(offer)
 
+      if (
+        sessionGeneration !==
+        realtimeSessionGenerationRef.current
+      ) {
+        peerConnection.close()
+        return
+      }
+
       const sdpResponse = await fetch(
         "https://api.openai.com/v1/realtime/calls",
         {
@@ -1897,19 +2056,50 @@ export default function DashboardFlightAttendant({
         }
       )
 
+      if (
+        sessionGeneration !==
+        realtimeSessionGenerationRef.current
+      ) {
+        peerConnection.close()
+        return
+      }
+
       if (!sdpResponse.ok) {
         throw new Error("Lucy voice connection could not be completed.")
       }
 
       const answerSdp = await sdpResponse.text()
 
+      if (
+        sessionGeneration !==
+        realtimeSessionGenerationRef.current
+      ) {
+        peerConnection.close()
+        return
+      }
+
       await peerConnection.setRemoteDescription({
         type: "answer",
         sdp: answerSdp,
       })
 
+      if (
+        sessionGeneration !==
+        realtimeSessionGenerationRef.current
+      ) {
+        peerConnection.close()
+        return
+      }
+
       setVoiceStatus("listening")
     } catch (error: any) {
+      if (
+        sessionGeneration !==
+        realtimeSessionGenerationRef.current
+      ) {
+        return
+      }
+
       stopLucyVoiceSession()
       setVoiceStatus("error")
 
@@ -1919,7 +2109,12 @@ export default function DashboardFlightAttendant({
       )
 
       window.setTimeout(() => {
-        setVoiceStatus("idle")
+        if (
+          realtimeSessionGenerationRef.current ===
+          sessionGeneration + 1
+        ) {
+          setVoiceStatus("idle")
+        }
       }, 1800)
     }
   }
@@ -2018,6 +2213,19 @@ export default function DashboardFlightAttendant({
       return
     }
 
+    const requestConversationId =
+      activeLucyConversationIdRef.current
+    const requestGeneration =
+      ++textRequestGenerationRef.current
+    textRequestAbortRef.current?.abort()
+    const requestController = new AbortController()
+    textRequestAbortRef.current = requestController
+    let expectedConversationId = requestConversationId
+    const isCurrentRequest = () =>
+      !requestController.signal.aborted &&
+      requestGeneration === textRequestGenerationRef.current &&
+      expectedConversationId === activeLucyConversationIdRef.current
+
     setChatLoading(true)
 
     try {
@@ -2028,12 +2236,15 @@ export default function DashboardFlightAttendant({
         tier,
         dashboardRoutes,
         messages: [...messages, userMessage],
-        conversationId: activeLucyConversationIdRef.current,
+        conversationId: requestConversationId,
+        signal: requestController.signal,
       })
 
+      if (!isCurrentRequest()) return
+
       if (result.conversationId) {
-        activeLucyConversationIdRef.current =
-          result.conversationId
+        activeLucyConversationIdRef.current = result.conversationId
+        expectedConversationId = result.conversationId
       }
 
       if (
@@ -2050,6 +2261,7 @@ export default function DashboardFlightAttendant({
               title: message.slice(0, 80),
             })
 
+          if (!isCurrentRequest()) return
           setRecentLucyConversations((current) =>
             current.map((conversation) =>
               conversation.id === updatedConversation.id
@@ -2068,6 +2280,8 @@ export default function DashboardFlightAttendant({
           )
         }
       }
+
+      if (!isCurrentRequest()) return
 
       const assistantMessageId = createMessageId()
 
@@ -2090,6 +2304,7 @@ export default function DashboardFlightAttendant({
 
       await typeAssistantReply(assistantMessageId, result.reply)
     } catch (error: any) {
+      if (!isCurrentRequest()) return
       setMessages((prev) => [
         ...prev,
         {
@@ -2101,9 +2316,26 @@ export default function DashboardFlightAttendant({
             "Something went wrong while contacting Lucy. Please try again.",
         },
       ])
+
     } finally {
-      setChatLoading(false)
+      if (textRequestAbortRef.current === requestController) {
+        textRequestAbortRef.current = null
+      }
+      if (isCurrentRequest()) setChatLoading(false)
     }
+  }
+
+  function invalidatePendingConversationWork() {
+    textRequestGenerationRef.current += 1
+    textRequestAbortRef.current?.abort()
+    textRequestAbortRef.current = null
+    conversationLoadGenerationRef.current += 1
+    conversationLoadAbortRef.current?.abort()
+    conversationLoadAbortRef.current = null
+    typingAbortRef.current?.abort()
+    typingAbortRef.current = null
+    setChatLoading(false)
+    setAssistantTyping(false)
   }
 
   async function handleNewLucyConversation() {
@@ -2122,8 +2354,12 @@ export default function DashboardFlightAttendant({
       stopLucyVoiceSession()
     }
 
+    invalidatePendingConversationWork()
+
     setConversationSwitching(true)
     setRecentConversationsOpen(false)
+    setChatLoading(false)
+    setAssistantTyping(false)
 
     try {
       const conversation =
@@ -2254,9 +2490,16 @@ export default function DashboardFlightAttendant({
       stopLucyVoiceSession()
     }
 
+    invalidatePendingConversationWork()
+
+    const loadGeneration = ++conversationLoadGenerationRef.current
+    const loadController = new AbortController()
+    conversationLoadAbortRef.current = loadController
     setConversationSwitching(true)
     setConversationRestoring(true)
     setRecentConversationsOpen(false)
+    setChatLoading(false)
+    setAssistantTyping(false)
 
     try {
       const conversation =
@@ -2264,7 +2507,9 @@ export default function DashboardFlightAttendant({
           apiBaseUrl,
           token,
           conversationId,
+          signal: loadController.signal,
         })
+      if (loadGeneration !== conversationLoadGenerationRef.current) return
 
       activeLucyConversationIdRef.current =
         conversation.conversationId
@@ -2293,13 +2538,15 @@ export default function DashboardFlightAttendant({
       )
 
     } catch (error) {
-      console.error(
-        "Unable to open Lucy conversation",
-        error
-      )
+      if (!loadController.signal.aborted) {
+        console.error("Unable to open Lucy conversation", error)
+      }
     } finally {
-      setConversationRestoring(false)
-      setConversationSwitching(false)
+      if (loadGeneration === conversationLoadGenerationRef.current) {
+        conversationLoadAbortRef.current = null
+        setConversationRestoring(false)
+        setConversationSwitching(false)
+      }
     }
   }
 
@@ -2326,7 +2573,7 @@ export default function DashboardFlightAttendant({
             }
             className={cn(
               isWorkspace
-                ? "flex h-full min-h-0 w-full flex-col overflow-hidden bg-white text-slate-900 shadow-none"
+                ? "flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#141519] text-slate-100 shadow-none"
                 : "overflow-y-auto rounded-[1.75rem] border border-white/10 bg-[#050b18] text-white shadow-[0_24px_70px_rgba(2,6,23,0.28)]",
               expanded
                 ? "flex h-[min(760px,calc(100vh-3rem))] w-full max-w-3xl flex-col shadow-2xl"
@@ -2503,8 +2750,8 @@ export default function DashboardFlightAttendant({
                     : "overflow-y-auto",
                   isWorkspace
                     ? isWorkspaceEmpty
-                      ? "bg-white px-6 py-0"
-                      : "lucy-workspace-scrollbar min-h-0 flex-1 bg-white px-6 py-8"
+                      ? "bg-[#141519] px-6 py-0"
+                      : "lucy-workspace-scrollbar min-h-0 flex-1 bg-[#141519] px-6 py-8"
                     : "bg-[#071120] px-5 py-4 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/10 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-300/20",
                   expanded
                     ? "min-h-0 flex-1"
@@ -2522,14 +2769,14 @@ export default function DashboardFlightAttendant({
                     "mx-auto w-full",
                     isWorkspace
                       ? isWorkspaceEmpty
-                        ? "max-w-[880px]"
-                        : "max-w-[880px] space-y-8 pb-12"
+                        ? "max-w-[1000px]"
+                        : "max-w-[1000px] space-y-8 pb-12"
                       : "space-y-5 pb-2"
                   )}
                 >
                   {isWorkspaceEmpty && (
                     <div className="pb-6 text-center">
-                      <h1 className="text-[26px] font-medium tracking-[-0.035em] text-slate-900">
+                      <h1 className="text-[26px] font-medium tracking-[-0.035em] text-slate-100">
                         Where would you like to begin?
                       </h1>
                     </div>
@@ -2596,9 +2843,9 @@ export default function DashboardFlightAttendant({
                     "p-4",
                     isWorkspace
                       ? isWorkspaceEmpty
-                        ? "shrink-0 bg-white px-6 py-0"
-                        : "border-t border-slate-200 bg-white px-6 py-5"
-                      : "bg-white px-6 py-5"
+                        ? "shrink-0 bg-[#141519] px-6 py-0"
+                        : "border-t border-[#34363d] bg-[#141519] px-6 py-5"
+                      : "bg-[#141519] px-6 py-5"
                   )}
                 >
                   <div className="flex items-center justify-between gap-3">
@@ -2636,22 +2883,25 @@ export default function DashboardFlightAttendant({
                   "p-4",
                   isWorkspace
                     ? isWorkspaceEmpty
-                      ? "shrink-0 border-0 bg-white px-6 py-0"
-                      : "bg-white px-6 py-5"
+                      ? "shrink-0 border-0 bg-[#141519] px-6 py-0"
+                      : "bg-[#141519] px-6 py-5"
                     : "border-t border-white/10 bg-[#050b18]"
                 )}
               >
+                {isWorkspace && (
+                  <LucyVoiceOrb status={voiceStatus} />
+                )}
                 <div
                   className={cn(
                     "mx-auto flex w-full items-center gap-2",
-                    isWorkspace ? "max-w-[880px]" : ""
+                    isWorkspace ? "max-w-[1000px]" : ""
                   )}
                 >
                   <div
                     className={cn(
                       "relative flex-1",
                       isWorkspace
-                        ? "overflow-visible rounded-[1.5rem] border border-slate-200 bg-white shadow-[0_2px_12px_rgba(15,23,42,0.08)] transition"
+                        ? "overflow-visible rounded-[1.5rem] border border-[#41434b] bg-[#25262b] shadow-[0_12px_38px_rgba(0,0,0,0.28)] transition"
                         : ""
                     )}
                   >
@@ -2755,13 +3005,13 @@ export default function DashboardFlightAttendant({
                         }
                         aria-label="Add attachment"
                         title="Add attachment"
-                        className="absolute bottom-[7px] left-1.5 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+                        className="absolute bottom-[7px] left-1.5 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full text-slate-300 transition hover:bg-[#35373e] hover:text-white"
                       >
                         <img
                           src="/images/stock/lucy-chat/composer/attachment.svg"
                           alt=""
                           aria-hidden="true"
-                          className="h-[18px] w-[18px] object-contain"
+                          className="h-[18px] w-[18px] object-contain brightness-0 invert"
                         />
                       </button>
                     )}
@@ -2769,7 +3019,7 @@ export default function DashboardFlightAttendant({
                     {isWorkspace && attachmentMenuOpen && (
                       <div
                         ref={attachmentMenuRef}
-                        className="absolute bottom-[calc(100%+10px)] left-0 z-30 w-[220px] overflow-hidden rounded-2xl border border-slate-200 bg-white p-1.5 shadow-[0_16px_40px_rgba(15,23,42,0.14)]"
+                        className="absolute bottom-[calc(100%+10px)] left-0 z-30 w-[220px] overflow-hidden rounded-2xl border border-[#42444c] bg-[#25262b] p-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.4)]"
                       >
                         <button
                           type="button"
@@ -2777,7 +3027,7 @@ export default function DashboardFlightAttendant({
                             setAttachmentMenuOpen(false)
                             attachmentInputRef.current?.click()
                           }}
-                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-slate-700 transition hover:bg-slate-100 hover:text-slate-950"
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-slate-200 transition hover:bg-[#35373e] hover:text-white"
                         >
                           <span className="flex h-8 w-8 items-center justify-center">
                             <img
@@ -2793,7 +3043,7 @@ export default function DashboardFlightAttendant({
 
                         <button
                           type="button"
-                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-slate-700 transition hover:bg-slate-100 hover:text-slate-950"
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-slate-200 transition hover:bg-[#35373e] hover:text-white"
                         >
                           <span className="flex h-8 w-8 items-center justify-center">
                             <img
@@ -2832,7 +3082,7 @@ export default function DashboardFlightAttendant({
                       className={cn(
                         "min-h-[54px] w-full rounded-[1.5rem] px-5 text-sm outline-none transition",
                         isWorkspace
-                          ? "border-0 bg-transparent pl-14 pr-24 text-[15px] font-medium text-slate-950 shadow-none placeholder:text-slate-950 focus:ring-0"
+                          ? "border-0 bg-transparent pl-14 pr-24 text-[15px] font-medium text-slate-100 shadow-none placeholder:text-slate-400 focus:ring-0"
                           : "border border-white/10 bg-white/[0.06] px-14 pr-14 text-white placeholder:text-slate-500 focus:border-cyan-300/40 focus:ring-2 focus:ring-cyan-300/10"
                       )}
                     />
@@ -2862,20 +3112,21 @@ export default function DashboardFlightAttendant({
                         }
                         className={cn(
                           "absolute bottom-[9px] right-1.5 inline-flex h-9 w-9 items-center justify-center rounded-full transition disabled:cursor-not-allowed disabled:opacity-50",
-                          voiceStatus === "idle"
-                            ? "text-slate-500 hover:bg-slate-100 hover:text-cyan-700"
-                            : "bg-cyan-50 text-cyan-700"
+                          voiceStatus === "idle" || voiceStatus === "error"
+                            ? "bg-[#8b45dc] text-white hover:bg-[#a15df0]"
+                            : "bg-[#8b45dc] text-white shadow-[0_0_20px_rgba(160,79,245,0.4)] hover:bg-[#a15df0]"
                         )}
                       >
-                        <img
-                          src="/images/stock/lucy-chat/composer/voice.svg"
-                          alt=""
-                          aria-hidden="true"
-                          className={cn(
-                            "h-[18px] w-[18px] object-contain",
-                            voiceStatus !== "idle" && "animate-pulse"
-                          )}
-                        />
+                        {voiceStatus === "idle" || voiceStatus === "error" ? (
+                          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-[19px] w-[19px]">
+                            <rect x="9" y="3" width="6" height="12" rx="3" stroke="currentColor" strokeWidth="1.8" />
+                            <path d="M6 11a6 6 0 0 0 12 0M12 17v4m-4 0h8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                          </svg>
+                        ) : (
+                          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-[19px] w-[19px]">
+                            <path d="M5 5l14 14M19 5 5 19" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+                          </svg>
+                        )}
                       </button>
                     )}
 
@@ -2889,7 +3140,7 @@ export default function DashboardFlightAttendant({
                       className={cn(
                         "absolute inline-flex h-9 w-9 items-center justify-center rounded-full transition disabled:cursor-not-allowed",
                         isWorkspace
-                          ? "bottom-[9px] right-12 bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                          ? "bottom-[9px] right-12 bg-transparent text-slate-300 hover:bg-[#35373e] hover:text-white"
                           : "right-1.5 top-1/2 -translate-y-1/2 bg-cyan-300 text-slate-950 shadow-sm hover:bg-cyan-200"
                       )}
                     >
@@ -2900,7 +3151,7 @@ export default function DashboardFlightAttendant({
                           src="/images/stock/lucy-chat/composer/send.svg"
                           alt=""
                           aria-hidden="true"
-                          className="h-[18px] w-[18px] object-contain"
+                          className="h-[18px] w-[18px] object-contain brightness-0 invert"
                         />
                       )}
                     </button>
@@ -3041,17 +3292,18 @@ export default function DashboardFlightAttendant({
 
     if (align === "left") {
       return (
-        <div className="flex justify-start">
+        <div className="flex items-start justify-start gap-3">
+          {workspace && <span aria-label="Lucy" className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#63318b] text-[#edccff] shadow-[0_0_20px_rgba(150,75,220,0.28)]">✦</span>}
           <div
             className={cn(
               "max-w-[92%] px-1 py-1",
-              workspace ? "text-slate-700" : ""
+              workspace ? "text-slate-300" : ""
             )}
           >
             <p
               className={cn(
                 "whitespace-pre-line text-sm leading-7",
-                workspace ? "text-slate-700" : "text-slate-100"
+                workspace ? "text-slate-300" : "text-slate-100"
               )}
             >
               {cleanText}
@@ -3067,14 +3319,14 @@ export default function DashboardFlightAttendant({
           className={cn(
             "max-w-[82%] rounded-[1.25rem] px-4 py-3",
             workspace
-              ? "border border-slate-200 bg-slate-50 shadow-sm"
+              ? "border border-[#634478] bg-[#352440] shadow-sm"
               : "border border-white/10 bg-white/[0.08] shadow-[0_8px_30px_rgba(0,0,0,0.18)] backdrop-blur-xl"
           )}
         >
           <p
             className={cn(
               "whitespace-pre-line text-sm leading-6",
-              workspace ? "text-slate-900" : "text-slate-100"
+              workspace ? "text-slate-100" : "text-slate-100"
             )}
           >
             {cleanText}
@@ -3096,14 +3348,14 @@ export default function DashboardFlightAttendant({
             <span
               className={cn(
                 "h-2 w-2 animate-pulse rounded-full",
-                workspace ? "bg-cyan-500" : "bg-cyan-300"
+                workspace ? "bg-purple-500" : "bg-cyan-300"
               )}
             />
 
             <span
               className={cn(
                 "h-2 w-2 animate-pulse rounded-full",
-                workspace ? "bg-cyan-500" : "bg-cyan-300"
+                workspace ? "bg-purple-500" : "bg-cyan-300"
               )}
               style={{ animationDelay: "120ms" }}
             />
@@ -3111,7 +3363,7 @@ export default function DashboardFlightAttendant({
             <span
               className={cn(
                 "h-2 w-2 animate-pulse rounded-full",
-                workspace ? "bg-cyan-500" : "bg-cyan-300"
+                workspace ? "bg-purple-500" : "bg-cyan-300"
               )}
               style={{ animationDelay: "240ms" }}
             />

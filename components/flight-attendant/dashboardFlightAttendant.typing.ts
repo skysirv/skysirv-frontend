@@ -11,6 +11,7 @@ export async function typeAssistantMessage({
     fullText,
     setMessages,
     setAssistantTyping,
+    signal,
 }: {
     messageId: string
     fullText: string
@@ -18,31 +19,35 @@ export async function typeAssistantMessage({
         React.SetStateAction<FlightAttendantMessage[]>
     >
     setAssistantTyping: React.Dispatch<React.SetStateAction<boolean>>
+    signal?: AbortSignal
 }) {
+    if (signal?.aborted) return
     setAssistantTyping(true)
-
     const chunks = fullText.split(/(\s+)/)
-
-    await new Promise<void>((resolve) => {
-        let index = 0
-
-        const timer = window.setInterval(() => {
-            index += 1
-
-            setMessages((prev) =>
-                updateAssistantMessageText(
-                    prev,
-                    messageId,
-                    chunks.slice(0, index).join("")
-                )
-            )
-
-            if (index >= chunks.length) {
-                window.clearInterval(timer)
+    try {
+        await new Promise<void>((resolve) => {
+            let index = 0
+            let settled = false
+            let timer: number | null = null
+            const finish = () => {
+                if (settled) return
+                settled = true
+                if (timer !== null) window.clearInterval(timer)
+                signal?.removeEventListener("abort", finish)
                 resolve()
             }
-        }, 22)
-    })
-
-    setAssistantTyping(false)
+            signal?.addEventListener("abort", finish, { once: true })
+            if (signal?.aborted) return finish()
+            timer = window.setInterval(() => {
+                if (signal?.aborted) return finish()
+                index += 1
+                setMessages((prev) =>
+                    updateAssistantMessageText(prev, messageId, chunks.slice(0, index).join(""))
+                )
+                if (index >= chunks.length) finish()
+            }, 22)
+        })
+    } finally {
+        if (!signal?.aborted) setAssistantTyping(false)
+    }
 }
