@@ -1126,176 +1126,177 @@ export default function LucyWorkspace() {
             )}
 
           </div>
-           <div className="relative border-t border-[#382945] p-3">
-          <div ref={accountMenuRef} className="relative">
-            <RailIcon
-              ariaLabel="Account"
-              onClick={() =>
-                setAccountMenuOpen((current) => !current)
-              }
-            >
-              <LeftRailAsset
-                src="/images/stock/lucy-chat/left-rail/account.svg"
-                alt="Account"
-              />
-            </RailIcon>
+          <div className="relative border-t border-[#382945] p-3">
+            <div ref={accountMenuRef} className="relative">
+              <RailIcon
+                ariaLabel="Account"
+                onClick={() =>
+                  setAccountMenuOpen((current) => !current)
+                }
+              >
+                <LeftRailAsset
+                  src="/images/stock/lucy-chat/left-rail/account.svg"
+                  alt="Account"
+                />
+              </RailIcon>
 
-            {accountMenuOpen && (
-              <div className="absolute bottom-[calc(100%+6px)] left-0 z-50 w-[240px] overflow-hidden rounded-2xl border border-[#34363d] bg-[#202126] p-2 shadow-[0_18px_45px_rgba(15,23,42,0.16)]">
-                <div className="border-b border-[#34363d] py-1">
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      const token = getAuthToken()
-
-                      setAccountMenuOpen(false)
-
-                      if (!token) {
-                        setAuthModalIntent("dashboard")
-                        setAuthModalOpen(true)
-                        return
-                      }
-
-                      const dashboardPath =
-                        await getSkysirvDashboardPath()
-
-                      if (!dashboardPath) {
-                        setAuthModalIntent("dashboard")
-                        setAuthModalOpen(true)
-                        return
-                      }
-
-                      router.push(dashboardPath)
-                    }}
-                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-slate-100 transition hover:bg-[#35263f]"
-                  >
-                    Skysirv dashboard
-                  </button>
-                </div>
-
-                <div className="py-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAccountMenuOpen(false)
-                      router.push("/account")
-                    }}
-                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-slate-100 transition hover:bg-[#35263f]"
-                  >
-                    Account settings
-                  </button>
-
-                  <button
-                    type="button"
-                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-slate-100 transition hover:bg-[#35263f]"
-                  >
-                    Chat settings
-                  </button>
-                </div>
-
-                <div className="border-t border-[#34363d] pt-1">
-                  {getAuthToken() ? (
+              {accountMenuOpen && (
+                <div className="absolute bottom-[calc(100%+6px)] left-0 z-50 w-[240px] overflow-hidden rounded-2xl border border-[#34363d] bg-[#202126] p-2 shadow-[0_18px_45px_rgba(15,23,42,0.16)]">
+                  <div className="border-b border-[#34363d] py-1">
                     <button
                       type="button"
-                      onClick={() => {
-                        clearAuthSession()
+                      onClick={async () => {
+                        const token = getAuthToken()
 
-                        setAccountUser(null)
-                        setAccountPlanId(null)
-                        setLucyConversations([])
-                        setRequestedConversationId(null)
-                        setActiveConversationId(null)
                         setAccountMenuOpen(false)
 
-                        window.dispatchEvent(
-                          new Event("skysirv-auth-changed")
-                        )
+                        if (!token) {
+                          setAuthModalIntent("dashboard")
+                          setAuthModalOpen(true)
+                          return
+                        }
 
-                        router.push("/")
-                      }}
-                      className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-red-600 transition hover:bg-red-950/30"
-                    >
-                      Sign out
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAccountMenuOpen(false)
-                        setAuthModalIntent("workspace")
-                        setAuthModalOpen(true)
+                        const dashboardPath =
+                          await getSkysirvDashboardPath()
+
+                        if (!dashboardPath) {
+                          setAuthModalIntent("dashboard")
+                          setAuthModalOpen(true)
+                          return
+                        }
+
+                        router.push(dashboardPath)
                       }}
                       className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-slate-100 transition hover:bg-[#35263f]"
                     >
-                      Sign in
+                      Skysirv dashboard
                     </button>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
+                  </div>
 
-           </div>
-         </aside>
+                  <div className="py-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAccountMenuOpen(false)
+                        router.push("/account")
+                      }}
+                      className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-slate-100 transition hover:bg-[#35263f]"
+                    >
+                      Account settings
+                    </button>
+
+                    <button
+                      type="button"
+                      className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-slate-100 transition hover:bg-[#35263f]"
+                    >
+                      Chat settings
+                    </button>
+                  </div>
+
+                  <div className="border-t border-[#34363d] pt-1">
+                    {getAuthToken() ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          clearAuthSession()
+
+                          setAccountUser(null)
+                          setAccountPlanId(null)
+                          setLucyConversations([])
+                          setRequestedConversationId(null)
+                          setActiveConversationId(null)
+                          setAccountMenuOpen(false)
+
+                          window.dispatchEvent(
+                            new Event("skysirv-auth-changed")
+                          )
+
+                          router.push("/")
+                        }}
+                        className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-red-600 transition hover:bg-red-950/30"
+                      >
+                        Sign out
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAccountMenuOpen(false)
+                          setAuthModalIntent("workspace")
+                          setAuthModalOpen(true)
+                        }}
+                        className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-slate-100 transition hover:bg-[#35263f]"
+                      >
+                        Sign in
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+          </div>
+        </aside>
       )}
-       {/* ------------------------------------------------------------------ */}
-       {/* Main Lucy conversation workspace                                    */}
+      {/* ------------------------------------------------------------------ */}
+      {/* Main Lucy conversation workspace                                    */}
       {/* ------------------------------------------------------------------ */}
       <main className="flex min-w-0 flex-1 flex-col bg-[#100d17]">
-         <header className="flex h-[68px] shrink-0 items-center justify-between border-b border-[#2e2238] px-7">
-           <div className="flex items-center gap-2 text-sm text-[#e7ddef]"><span className="text-lg text-[#ba7df9]">✦</span><strong>Lucy</strong><span className="text-[#a396ad]">· Your AI Travel Companion</span></div>
-           <button type="button" onClick={() => { setRequestedConversationId(null); setNewConversationRequestKey((key) => key + 1) }} className="rounded-full border border-[#5e4370] px-4 py-2 text-xs text-[#dbb9ff] hover:bg-[#35243e]">+ New conversation</button>
-         </header>
-         <div className="min-h-0 flex-1">
-        <DashboardFlightAttendant
-          key={lucyEngineKey}
-          tier={lucyTier}
-          placement="workspace"
-          defaultOpen
-          dashboardRoutes={[]}
-          requestedConversationId={requestedConversationId}
-          newConversationRequestKey={newConversationRequestKey}
-          initialPrompt={homepageInitialPrompt}
-          onActiveConversationChange={setActiveConversationId}
-          onConversationCreated={(conversation) => {
-            setLucyConversations((current) => [
-              conversation,
-              ...current.filter(
-                (item) => item.id !== conversation.id
-              ),
-            ])
+        <header className="flex h-[68px] shrink-0 items-center justify-between border-b border-[#2e2238] px-7">
+          <div className="flex items-center gap-2 text-sm text-[#e7ddef]"><span className="text-lg text-[#ba7df9]">✦</span><strong>Lucy</strong><span className="text-[#a396ad]">· Your AI Travel Companion</span></div>
+          <button type="button" onClick={() => { setRequestedConversationId(null); setNewConversationRequestKey((key) => key + 1) }} className="rounded-full border border-[#5e4370] px-4 py-2 text-xs text-[#dbb9ff] hover:bg-[#35243e]">+ New conversation</button>
+        </header>
+        <div className="min-h-0 flex-1">
+          <DashboardFlightAttendant
+            key={lucyEngineKey}
+            tier={lucyTier}
+            placement="workspace"
+            defaultOpen
+            dashboardRoutes={[]}
+            requestedConversationId={requestedConversationId}
+            newConversationRequestKey={newConversationRequestKey}
+            initialPrompt={homepageInitialPrompt}
+            onActiveConversationChange={setActiveConversationId}
+            onConversationCreated={(conversation) => {
+              setLucyConversations((current) => [
+                conversation,
+                ...current.filter(
+                  (item) => item.id !== conversation.id
+                ),
+              ])
 
-            setActiveConversationId(conversation.id)
-          }}
-          onConversationUpdated={(conversation) => {
-            setLucyConversations((current) =>
-              current.map((item) =>
-                item.id === conversation.id
-                  ? conversation
-                  : item
-              )
-            )
-
-            const homepagePrompt =
-              homepageInitialPrompt?.trim()
-
-            if (
-              homepagePrompt &&
-              conversation.title ===
-              homepagePrompt.slice(0, 80)
-            ) {
-              sessionStorage.removeItem(
-                LUCY_HOMEPAGE_PROMPT_KEY
+              setActiveConversationId(conversation.id)
+            }}
+            onConversationUpdated={(conversation) => {
+              setLucyConversations((current) =>
+                current.map((item) =>
+                  item.id === conversation.id
+                    ? conversation
+                    : item
+                )
               )
 
-              localStorage.removeItem(
-                LUCY_HOMEPAGE_PROMPT_KEY
-              )
+              const homepagePrompt =
+                homepageInitialPrompt?.trim()
 
-              setHomepageInitialPrompt(null)
-            }
-          }}
-        />
+              if (
+                homepagePrompt &&
+                conversation.title ===
+                homepagePrompt.slice(0, 80)
+              ) {
+                sessionStorage.removeItem(
+                  LUCY_HOMEPAGE_PROMPT_KEY
+                )
+
+                localStorage.removeItem(
+                  LUCY_HOMEPAGE_PROMPT_KEY
+                )
+
+                setHomepageInitialPrompt(null)
+              }
+            }}
+          />
+        </div>
       </main>
 
       {conversationPendingRename && (
