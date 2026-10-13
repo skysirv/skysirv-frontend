@@ -2,6 +2,8 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react"
 
+import LucyVoiceOrb from "./LucyVoiceOrb"
+
 import AuthModal from "@/components/auth/AuthModal"
 import AuthPanel from "@/components/auth/AuthPanel"
 import { getAuthToken } from "@/utils/auth-storage"
@@ -2887,6 +2889,9 @@ export default function DashboardFlightAttendant({
                     : "border-t border-white/10 bg-[#050b18]"
                 )}
               >
+                {isWorkspace && (
+                  <LucyVoiceOrb status={voiceStatus} />
+                )}
                 <div
                   className={cn(
                     "mx-auto flex w-full items-center gap-2",
@@ -3108,20 +3113,25 @@ export default function DashboardFlightAttendant({
                         }
                         className={cn(
                           "absolute bottom-[9px] right-1.5 inline-flex h-9 w-9 items-center justify-center rounded-full transition disabled:cursor-not-allowed disabled:opacity-50",
-                          voiceStatus === "idle"
+                          voiceStatus === "idle" || voiceStatus === "error"
                             ? "text-slate-500 hover:bg-slate-100 hover:text-cyan-700"
-                            : "bg-cyan-50 text-cyan-700"
+                            : "bg-blue-600 text-white shadow-[0_2px_12px_rgba(37,99,235,0.38)] hover:bg-blue-700"
                         )}
+                        aria-pressed={voiceStatus !== "idle" && voiceStatus !== "error"}
                       >
-                        <img
-                          src="/images/stock/lucy-chat/composer/voice.svg"
-                          alt=""
-                          aria-hidden="true"
-                          className={cn(
-                            "h-[18px] w-[18px] object-contain",
-                            voiceStatus !== "idle" && "animate-pulse"
-                          )}
-                        />
+                        {voiceStatus === "idle" || voiceStatus === "error" ? (
+                          <img
+                            src="/images/stock/lucy-chat/composer/voice.svg"
+                            alt=""
+                            aria-hidden="true"
+                            className="h-[18px] w-[18px] object-contain"
+                          />
+                        ) : (
+                          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-[19px] w-[19px]">
+                            <rect x="9" y="3" width="6" height="12" rx="3" stroke="currentColor" strokeWidth="1.8" />
+                            <path d="M6 11a6 6 0 0 0 12 0M12 17v4m-4 0h8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                          </svg>
+                        )}
                       </button>
                     )}
 
