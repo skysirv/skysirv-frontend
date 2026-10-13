@@ -48,7 +48,8 @@ import { typeAssistantMessage } from "./dashboardFlightAttendant.typing"
 import {
   type DashboardFlightAttendantProps,
   type DashboardRouteContext,
-  type FlightAttendantMessage
+  type FlightAttendantMessage,
+  type LucyLiveSearchResult
 } from "./dashboardFlightAttendant.types"
 
 import {
@@ -203,6 +204,8 @@ export default function DashboardFlightAttendant({
     key: string
     timestamp: number
   } | null>(null)
+  const pendingVoiceLiveSearchRef =
+    useRef<LucyLiveSearchResult | null>(null)
   const hasHomepagePromptRef =
     useRef(false)
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
@@ -837,6 +840,23 @@ export default function DashboardFlightAttendant({
         .catch(() => null)
 
       if (sessionGeneration !== realtimeSessionGenerationRef.current) return true
+
+      if (
+        response.ok &&
+        Array.isArray(data?.offers)
+      ) {
+        pendingVoiceLiveSearchRef.current = {
+          type: "flights",
+          provider:
+            data?.provider ?? null,
+          offerRequestId:
+            data?.offerRequestId ?? null,
+          liveMode:
+            data?.liveMode ?? null,
+          offers: data.offers,
+        }
+      }
+
       sendRealtimeToolCallOutput(callId, {
         success: response.ok,
         provider:
@@ -884,6 +904,384 @@ export default function DashboardFlightAttendant({
       )
     } catch {
       // Flight search should never terminate voice.
+    }
+
+    return true
+  }
+
+  async function handleRealtimeHotelSearchToolCall(
+    item: {
+      name?: string
+      arguments?: string
+      call_id?: string
+    },
+    token: string,
+    sessionGeneration: number
+  ) {
+    if (item.name !== "search_hotels") {
+      return false
+    }
+
+    const callId =
+      typeof item.call_id === "string"
+        ? item.call_id.trim()
+        : ""
+
+    if (!callId) {
+      return true
+    }
+
+    if (
+      shouldIgnoreDuplicateVoiceToolCall(
+        `search_hotels:${callId}`,
+        lastVoiceToolCallRef
+      )
+    ) {
+      return true
+    }
+
+    let parsedArguments: Record<string, unknown> = {}
+
+    try {
+      parsedArguments =
+        typeof item.arguments === "string" &&
+          item.arguments.trim()
+          ? JSON.parse(item.arguments)
+          : {}
+    } catch {
+      parsedArguments = {}
+    }
+
+    if (!API_BASE_URL) {
+      if (
+        sessionGeneration !==
+        realtimeSessionGenerationRef.current
+      ) {
+        return true
+      }
+
+      sendRealtimeToolCallOutput(callId, {
+        success: false,
+        error:
+          "Live hotel search is not available right now.",
+        hotels: [],
+      })
+
+      try {
+        realtimeDataChannelRef.current?.send(
+          JSON.stringify({
+            type: "response.create",
+          })
+        )
+      } catch {
+        // Hotel-search failure should not terminate voice.
+      }
+
+      return true
+    }
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/flight-attendant/hotels/search`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(parsedArguments),
+        }
+      )
+
+      const data = await response
+        .json()
+        .catch(() => null)
+
+      if (
+        sessionGeneration !==
+        realtimeSessionGenerationRef.current
+      ) {
+        return true
+      }
+
+      if (
+        response.ok &&
+        Array.isArray(data?.hotels)
+      ) {
+        pendingVoiceLiveSearchRef.current = {
+          type: "hotels",
+          provider:
+            data?.provider ?? null,
+          destination:
+            data?.destination ?? null,
+          checkInDate:
+            data?.checkInDate ?? null,
+          checkOutDate:
+            data?.checkOutDate ?? null,
+          hotels: data.hotels,
+        }
+      }
+
+      sendRealtimeToolCallOutput(callId, {
+        success: response.ok,
+        provider:
+          response.ok
+            ? data?.provider ?? null
+            : null,
+        destination:
+          response.ok
+            ? data?.destination ?? null
+            : null,
+        checkInDate:
+          response.ok
+            ? data?.checkInDate ?? null
+            : null,
+        checkOutDate:
+          response.ok
+            ? data?.checkOutDate ?? null
+            : null,
+        hotels:
+          response.ok &&
+            Array.isArray(data?.hotels)
+            ? data.hotels
+            : [],
+        error:
+          response.ok
+            ? null
+            : data?.error ||
+            "Lucy could not complete the live hotel search.",
+      })
+    } catch {
+      if (
+        sessionGeneration !==
+        realtimeSessionGenerationRef.current
+      ) {
+        return true
+      }
+
+      sendRealtimeToolCallOutput(callId, {
+        success: false,
+        provider: null,
+        destination: null,
+        checkInDate: null,
+        checkOutDate: null,
+        hotels: [],
+        error:
+          "Lucy could not complete the live hotel search.",
+      })
+    }
+
+    if (
+      sessionGeneration !==
+      realtimeSessionGenerationRef.current
+    ) {
+      return true
+    }
+
+    try {
+      realtimeDataChannelRef.current?.send(
+        JSON.stringify({
+          type: "response.create",
+        })
+      )
+    } catch {
+      // Hotel search should never terminate voice.
+    }
+
+    return true
+  }
+
+  async function handleRealtimeCarSearchToolCall(
+    item: {
+      name?: string
+      arguments?: string
+      call_id?: string
+    },
+    token: string,
+    sessionGeneration: number
+  ) {
+    if (item.name !== "search_cars") {
+      return false
+    }
+
+    const callId =
+      typeof item.call_id === "string"
+        ? item.call_id.trim()
+        : ""
+
+    if (!callId) {
+      return true
+    }
+
+    if (
+      shouldIgnoreDuplicateVoiceToolCall(
+        `search_cars:${callId}`,
+        lastVoiceToolCallRef
+      )
+    ) {
+      return true
+    }
+
+    let parsedArguments: Record<string, unknown> = {}
+
+    try {
+      parsedArguments =
+        typeof item.arguments === "string" &&
+          item.arguments.trim()
+          ? JSON.parse(item.arguments)
+          : {}
+    } catch {
+      parsedArguments = {}
+    }
+
+    if (!API_BASE_URL) {
+      if (
+        sessionGeneration !==
+        realtimeSessionGenerationRef.current
+      ) {
+        return true
+      }
+
+      sendRealtimeToolCallOutput(callId, {
+        success: false,
+        error:
+          "Live rental-car search is not available right now.",
+        cars: [],
+      })
+
+      try {
+        realtimeDataChannelRef.current?.send(
+          JSON.stringify({
+            type: "response.create",
+          })
+        )
+      } catch {
+        // Car-search failure should not terminate voice.
+      }
+
+      return true
+    }
+
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/flight-attendant/cars/search`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(parsedArguments),
+        }
+      )
+
+      const data = await response
+        .json()
+        .catch(() => null)
+
+      if (
+        sessionGeneration !==
+        realtimeSessionGenerationRef.current
+      ) {
+        return true
+      }
+
+      if (
+        response.ok &&
+        Array.isArray(data?.cars)
+      ) {
+        pendingVoiceLiveSearchRef.current = {
+          type: "cars",
+          provider:
+            data?.provider ?? null,
+          correlationId:
+            data?.correlationId ?? null,
+          pickupLocation:
+            data?.pickupLocation ?? null,
+          dropoffLocation:
+            data?.dropoffLocation ?? null,
+          pickupDate:
+            data?.pickupDate ?? null,
+          dropoffDate:
+            data?.dropoffDate ?? null,
+          cars: data.cars,
+        }
+      }
+
+      sendRealtimeToolCallOutput(callId, {
+        success: response.ok,
+        provider:
+          response.ok
+            ? data?.provider ?? null
+            : null,
+        correlationId:
+          response.ok
+            ? data?.correlationId ?? null
+            : null,
+        pickupLocation:
+          response.ok
+            ? data?.pickupLocation ?? null
+            : null,
+        dropoffLocation:
+          response.ok
+            ? data?.dropoffLocation ?? null
+            : null,
+        pickupDate:
+          response.ok
+            ? data?.pickupDate ?? null
+            : null,
+        dropoffDate:
+          response.ok
+            ? data?.dropoffDate ?? null
+            : null,
+        cars:
+          response.ok &&
+            Array.isArray(data?.cars)
+            ? data.cars
+            : [],
+        error:
+          response.ok
+            ? null
+            : data?.error ||
+            "Lucy could not complete the live rental-car search.",
+      })
+    } catch {
+      if (
+        sessionGeneration !==
+        realtimeSessionGenerationRef.current
+      ) {
+        return true
+      }
+
+      sendRealtimeToolCallOutput(callId, {
+        success: false,
+        provider: null,
+        correlationId: null,
+        pickupLocation: null,
+        dropoffLocation: null,
+        pickupDate: null,
+        dropoffDate: null,
+        cars: [],
+        error:
+          "Lucy could not complete the live rental-car search.",
+      })
+    }
+
+    if (
+      sessionGeneration !==
+      realtimeSessionGenerationRef.current
+    ) {
+      return true
+    }
+
+    try {
+      realtimeDataChannelRef.current?.send(
+        JSON.stringify({
+          type: "response.create",
+        })
+      )
+    } catch {
+      // Car search should never terminate voice.
     }
 
     return true
@@ -1085,6 +1483,7 @@ export default function DashboardFlightAttendant({
     suppressNextRealtimeSpeechTextRef.current = false
     localRealtimeSpeechMessageIdRef.current = null
     lastVoiceToolCallRef.current = null
+    pendingVoiceLiveSearchRef.current = null
     pendingRealtimeToolCallIdRef.current = null
     pendingVoiceConversationAutoTitleRef.current = null
 
@@ -1410,11 +1809,31 @@ export default function DashboardFlightAttendant({
               )
             }
 
-            return appendVoiceAssistantMessage({
-              messages: prev,
-              messageId: assistantMessageId,
-              text: visibleText,
-            })
+            const liveSearch =
+              pendingVoiceLiveSearchRef.current
+
+            const nextMessages =
+              appendVoiceAssistantMessage({
+                messages: prev,
+                messageId: assistantMessageId,
+                text: visibleText,
+              })
+
+            if (!liveSearch) {
+              return nextMessages
+            }
+
+            pendingVoiceLiveSearchRef.current = null
+
+            return nextMessages.map(
+              (message) =>
+                message.id === assistantMessageId
+                  ? {
+                    ...message,
+                    liveSearch,
+                  }
+                  : message
+            )
           })
 
           const hasMoreWords =
@@ -1518,6 +1937,24 @@ export default function DashboardFlightAttendant({
               "search_flights"
             ) {
               void handleRealtimeFlightSearchToolCall(
+                data.item,
+                token,
+                sessionGeneration
+              )
+            } else if (
+              data.item?.name ===
+              "search_hotels"
+            ) {
+              void handleRealtimeHotelSearchToolCall(
+                data.item,
+                token,
+                sessionGeneration
+              )
+            } else if (
+              data.item?.name ===
+              "search_cars"
+            ) {
+              void handleRealtimeCarSearchToolCall(
                 data.item,
                 token,
                 sessionGeneration
@@ -2299,6 +2736,8 @@ export default function DashboardFlightAttendant({
           role: "assistant",
           label: "Lucy",
           text: "",
+          liveSearch:
+            result.liveSearch ?? null,
         },
       ])
 
@@ -2819,6 +3258,9 @@ export default function DashboardFlightAttendant({
                       <AssistantBubble
                         key={message.id}
                         text={message.text}
+                        liveSearch={
+                          message.liveSearch ?? null
+                        }
                         align={
                           message.role === "user"
                             ? "right"
@@ -3279,10 +3721,13 @@ export default function DashboardFlightAttendant({
 
   function AssistantBubble({
     text,
+    liveSearch = null,
     align,
     workspace = false,
   }: {
     text: string
+    liveSearch?:
+    FlightAttendantMessage["liveSearch"]
     align: "left" | "right"
     workspace?: boolean
   }) {
@@ -3308,6 +3753,142 @@ export default function DashboardFlightAttendant({
             >
               {cleanText}
             </p>
+
+            {liveSearch && (
+              <div className="mt-4 space-y-3">
+                {liveSearch.type === "flights" &&
+                  liveSearch.offers.map((offer) => (
+                    <div
+                      key={offer.offerId}
+                      className="rounded-2xl border border-white/10 bg-white/[0.04] p-4"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-white">
+                            {offer.airlineName ||
+                              offer.airlineIataCode ||
+                              "Airline"}{" "}
+                            {offer.flightNumber || ""}
+                          </p>
+
+                          <p className="mt-1 text-xs text-slate-400">
+                            {offer.departureTime || "Departure time unavailable"}
+                            {" → "}
+                            {offer.arrivalTime || "Arrival time unavailable"}
+                          </p>
+
+                          <p className="mt-1 text-xs text-slate-400">
+                            {offer.stops === 0
+                              ? "Nonstop"
+                              : `${offer.stops ?? 0} stop${offer.stops === 1 ? "" : "s"
+                              }`}
+                            {offer.duration
+                              ? ` · ${offer.duration}`
+                              : ""}
+                          </p>
+                        </div>
+
+                        <div className="shrink-0 text-right">
+                          <p className="text-sm font-semibold text-white">
+                            {offer.totalCurrency || "USD"}{" "}
+                            {offer.totalAmount ?? "—"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                {liveSearch.type === "hotels" &&
+                  liveSearch.hotels.map((hotel) => (
+                    <div
+                      key={
+                        hotel.searchResultId ||
+                        hotel.accommodationId ||
+                        hotel.name
+                      }
+                      className="rounded-2xl border border-white/10 bg-white/[0.04] p-4"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-white">
+                            {hotel.name}
+                          </p>
+
+                          <p className="mt-1 text-xs text-slate-400">
+                            {hotel.cityName || ""}
+                            {hotel.rating != null
+                              ? ` · ${hotel.rating}★`
+                              : ""}
+                          </p>
+
+                          {hotel.address && (
+                            <p className="mt-1 text-xs text-slate-500">
+                              {hotel.address}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="shrink-0 text-right">
+                          <p className="text-sm font-semibold text-white">
+                            {hotel.totalCurrency || "USD"}{" "}
+                            {hotel.totalAmount ?? "—"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                {liveSearch.type === "cars" &&
+                  liveSearch.cars.map((car, index) => (
+                    <div
+                      key={`${car.fareCode || car.vehicleCode || car.name}-${index}`}
+                      className="rounded-2xl border border-white/10 bg-white/[0.04] p-4"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-white">
+                            {car.name}
+                          </p>
+
+                          <p className="mt-1 text-xs text-slate-400">
+                            {car.supplierName || "Rental supplier"}
+                            {car.type
+                              ? ` · ${car.type}`
+                              : ""}
+                          </p>
+
+                          <p className="mt-1 text-xs text-slate-400">
+                            {car.automatic === true
+                              ? "Automatic"
+                              : car.automatic === false
+                                ? "Manual"
+                                : "Transmission unavailable"}
+                            {car.passengers != null
+                              ? ` · ${car.passengers} passengers`
+                              : ""}
+                            {car.bags != null
+                              ? ` · ${car.bags} bags`
+                              : ""}
+                          </p>
+
+                          {car.freeCancellation === true && (
+                            <p className="mt-1 text-xs text-emerald-300">
+                              Free cancellation
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="shrink-0 text-right">
+                          <p className="text-sm font-semibold text-white">
+                            {car.currency || "USD"}{" "}
+                            {car.totalAmount ?? "—"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
           </div>
         </div>
       )

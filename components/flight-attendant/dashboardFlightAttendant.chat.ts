@@ -2,6 +2,7 @@ import type {
   DashboardLucyTier,
   DashboardRouteContext,
   FlightAttendantMessage,
+  LucyLiveSearchResult,
 } from "./dashboardFlightAttendant.types"
 
 import {
@@ -14,6 +15,7 @@ type LucyChatApiResponse = {
   model?: string
   reply?: string
   action?: LucyAction | null
+  liveSearch?: LucyLiveSearchResult | null
   conversationId?: string
   error?: string
 }
@@ -80,6 +82,7 @@ export type LucyConversationSummary = {
 export type LucyChatResult = {
   reply: string
   action: LucyAction | null
+  liveSearch: LucyLiveSearchResult | null
   conversationId: string | null
 }
 
@@ -130,6 +133,8 @@ export async function sendLucyChatMessage({
       data?.reply ||
       "I’m here, but I could not generate a response.",
     action: normalizeLucyAction(data?.action),
+    liveSearch:
+      data?.liveSearch ?? null,
     conversationId:
       typeof data?.conversationId === "string"
         ? data.conversationId
