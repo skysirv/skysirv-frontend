@@ -5,16 +5,13 @@ import Navbar from '@/components/ui/Navbar';
 import { Toaster } from '@/components/ui/Toasts/toaster';
 import { PropsWithChildren, Suspense } from 'react';
 import { getURL } from '@/utils/helpers';
-import { Inter } from 'next/font/google';
 import MainContentShell from '@/components/layout/MainContentShell';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/600.css';
+import '@fontsource/inter/800.css';
 import 'styles/main.css';
 import "mapbox-gl/dist/mapbox-gl.css"
 import "flag-icons/css/flag-icons.min.css"
-
-const inter = Inter({
-  subsets: ['latin'],
-  weight: ['400', '600', '800']
-});
 
 const title = 'Skysirv';
 const description =
@@ -62,7 +59,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
       </head>
 
       <body
-        className={`${inter.className} min-h-screen bg-white text-slate-900`}
+        className="min-h-screen bg-white text-slate-900"
       >
         <Script
           src="https://accounts.google.com/gsi/client"
