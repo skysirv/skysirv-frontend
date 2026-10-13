@@ -1,14 +1,14 @@
 .stage{position:relative;width:178px;height:178px;display:flex;align-items:center;justify-content:center}
-.glow{position:absolute;inset:3px;border-radius:50%;background:radial-gradient(circle,rgba(164,79,255,.42),rgba(123,47,211,.13) 50%,transparent 73%);filter:blur(13px);animation:glow 3.4s ease-in-out infinite}
-.orb{position:relative;width:124px;height:124px;border-radius:50%;overflow:hidden;isolation:isolate;background:radial-gradient(circle at 30% 23%,#f5d7ff 0%,#d3a1fa 22%,#ad6ae7 49%,#7435b9 78%,#45226d 100%);box-shadow:inset -14px -16px 27px rgba(51,18,91,.4),0 0 33px rgba(164,75,244,.4),0 0 65px rgba(120,43,214,.19);animation:breathe 3.4s ease-in-out infinite}
+.glow{position:absolute;inset:3px;border-radius:50%;background:radial-gradient(circle,rgba(174,96,255,.64),rgba(123,47,211,.22) 50%,transparent 73%);filter:blur(17px);animation:glow 2.7s ease-in-out infinite}
+.orb{position:relative;width:124px;height:124px;border-radius:50%;overflow:hidden;isolation:isolate;background:radial-gradient(circle at 30% 23%,#f5d7ff 0%,#d3a1fa 22%,#ad6ae7 49%,#7435b9 78%,#45226d 100%);box-shadow:inset -14px -16px 27px rgba(51,18,91,.4),0 0 40px rgba(164,75,244,.52),0 0 80px rgba(120,43,214,.26);animation:breathe 2.7s ease-in-out infinite}
 .cloudOne,.cloudTwo,.cloudThree,.shine{position:absolute;pointer-events:none}
 .cloudOne{inset:-28%;background:radial-gradient(ellipse at 30% 40%,rgba(255,247,255,.9),transparent 49%);filter:blur(12px);animation:driftOne 5.5s ease-in-out infinite alternate}
 .cloudTwo{inset:-24%;background:radial-gradient(ellipse at 70% 64%,rgba(92,34,169,.67),transparent 57%);filter:blur(14px);animation:driftTwo 6.2s ease-in-out infinite alternate}
 .cloudThree{inset:-30%;background:radial-gradient(ellipse at 52% 77%,rgba(230,169,255,.53),transparent 48%);filter:blur(16px);animation:driftThree 7.2s ease-in-out infinite alternate}
 .shine{left:14px;top:12px;width:72px;height:38px;border-radius:50%;transform:rotate(-26deg);background:rgba(255,255,255,.23);filter:blur(13px)}
-.speaking .orb,.speaking .glow{animation-duration:1.35s}.speaking .cloudOne{animation-duration:2.3s}.speaking .cloudTwo{animation-duration:2.7s}.connecting .orb{opacity:.72}
-@keyframes breathe{0%,100%{transform:scale(.97)}50%{transform:scale(1.06)}}
-@keyframes glow{0%,100%{transform:scale(.92);opacity:.65}50%{transform:scale(1.12);opacity:1}}
+.speaking .orb,.speaking .glow{animation-duration:1.15s}.speaking .cloudOne{animation-duration:2.3s}.speaking .cloudTwo{animation-duration:2.7s}.speaking .cloudThree{animation-duration:2.5s}.connecting .orb{opacity:.72}
+@keyframes breathe{0%,100%{transform:scale(.95)}50%{transform:scale(1.085)}}
+@keyframes glow{0%,100%{transform:scale(.88);opacity:.6}50%{transform:scale(1.22);opacity:1}}
 @keyframes driftOne{from{transform:translate(-10px,-8px) rotate(-8deg)}to{transform:translate(13px,12px) rotate(10deg)}}
 @keyframes driftTwo{from{transform:translate(12px,-9px)}to{transform:translate(-12px,13px)}}
 @keyframes driftThree{from{transform:translate(-8px,9px)}to{transform:translate(10px,-12px)}}

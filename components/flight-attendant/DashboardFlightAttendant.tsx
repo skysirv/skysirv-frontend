@@ -2573,7 +2573,7 @@ export default function DashboardFlightAttendant({
             }
             className={cn(
               isWorkspace
-                ? "flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#100d17] text-slate-100 shadow-none"
+                ? "flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#141519] text-slate-100 shadow-none"
                 : "overflow-y-auto rounded-[1.75rem] border border-white/10 bg-[#050b18] text-white shadow-[0_24px_70px_rgba(2,6,23,0.28)]",
               expanded
                 ? "flex h-[min(760px,calc(100vh-3rem))] w-full max-w-3xl flex-col shadow-2xl"
@@ -2750,8 +2750,8 @@ export default function DashboardFlightAttendant({
                     : "overflow-y-auto",
                   isWorkspace
                     ? isWorkspaceEmpty
-                      ? "bg-[#100d17] px-6 py-0"
-                      : "lucy-workspace-scrollbar min-h-0 flex-1 bg-[#100d17] px-6 py-8"
+                      ? "bg-[#141519] px-6 py-0"
+                      : "lucy-workspace-scrollbar min-h-0 flex-1 bg-[#141519] px-6 py-8"
                     : "bg-[#071120] px-5 py-4 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/10 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-300/20",
                   expanded
                     ? "min-h-0 flex-1"
@@ -2843,9 +2843,9 @@ export default function DashboardFlightAttendant({
                     "p-4",
                     isWorkspace
                       ? isWorkspaceEmpty
-                        ? "shrink-0 bg-[#100d17] px-6 py-0"
-                        : "border-t border-[#34363d] bg-[#100d17] px-6 py-5"
-                      : "bg-[#100d17] px-6 py-5"
+                        ? "shrink-0 bg-[#141519] px-6 py-0"
+                        : "border-t border-[#34363d] bg-[#141519] px-6 py-5"
+                      : "bg-[#141519] px-6 py-5"
                   )}
                 >
                   <div className="flex items-center justify-between gap-3">
@@ -2883,8 +2883,8 @@ export default function DashboardFlightAttendant({
                   "p-4",
                   isWorkspace
                     ? isWorkspaceEmpty
-                      ? "shrink-0 border-0 bg-[#100d17] px-6 py-0"
-                      : "bg-[#100d17] px-6 py-5"
+                      ? "shrink-0 border-0 bg-[#141519] px-6 py-0"
+                      : "bg-[#141519] px-6 py-5"
                     : "border-t border-white/10 bg-[#050b18]"
                 )}
               >
@@ -2901,7 +2901,7 @@ export default function DashboardFlightAttendant({
                     className={cn(
                       "relative flex-1",
                       isWorkspace
-                        ? "overflow-visible rounded-[1.5rem] border border-[#5b426d] bg-[#271d31] shadow-[0_12px_38px_rgba(0,0,0,0.28)] transition"
+                        ? "overflow-visible rounded-[1.5rem] border border-[#41434b] bg-[#25262b] shadow-[0_12px_38px_rgba(0,0,0,0.28)] transition"
                         : ""
                     )}
                   >
