@@ -6,63 +6,47 @@
   align-items: center;
   justify-content: center;
 }
-.halo {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(42, 142, 255, .30) 0%, rgba(62, 153, 255, .11) 43%, transparent 72%);
-  animation: haloBreathe 3s ease-in-out infinite;
-}
-.ring {
-  position: absolute;
-  width: 108px;
-  height: 108px;
-  border: 1px solid rgba(61, 141, 249, .25);
-  border-radius: 50%;
-  animation: ringBreathe 3s ease-in-out infinite;
-}
 .orb {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 86px;
-  height: 86px;
+  width: 104px;
+  height: 104px;
   border-radius: 50%;
   overflow: hidden;
-  background: radial-gradient(circle at 34% 26%, #d8f4ff 0%, #7cc6ff 21%, #398df0 51%, #2155ba 77%, #163777 100%);
-  box-shadow: inset -9px -12px 19px rgba(14, 43, 104, .38), 0 0 26px rgba(45, 127, 240, .35);
-  animation: orbBreathe 3s ease-in-out infinite;
+  isolation: isolate;
+  background: radial-gradient(circle at 32% 26%, #f4f9ff 0%, #d2e2ff 28%, #9cbff8 58%, #5885da 100%);
+  box-shadow: inset -12px -13px 22px rgba(48, 85, 171, .25), 0 8px 34px rgba(70, 116, 224, .15);
+  animation: breathe 3.3s ease-in-out infinite;
 }
-.highlight {
-  position: absolute;
-  left: 19px;
-  top: 13px;
-  width: 37px;
-  height: 21px;
+.cloudOne, .cloudTwo, .shine { position: absolute; pointer-events: none; }
+.cloudOne {
+  inset: -25% -30%;
+  background: radial-gradient(ellipse at 33% 40%, rgba(255,255,255,.72), transparent 52%);
+  filter: blur(11px);
+  animation: driftOne 6s ease-in-out infinite alternate;
+}
+.cloudTwo {
+  inset: -25% -30%;
+  background: radial-gradient(ellipse at 68% 64%, rgba(96,149,236,.5), transparent 56%);
+  filter: blur(13px);
+  animation: driftTwo 7s ease-in-out infinite alternate;
+}
+.shine {
+  width: 70px;
+  height: 38px;
+  left: 7px;
+  top: 8px;
   border-radius: 50%;
-  transform: rotate(-27deg);
-  background: rgba(255,255,255,.28);
-  filter: blur(6px);
+  transform: rotate(-28deg);
+  background: rgba(255,255,255,.22);
+  filter: blur(13px);
 }
-.haloSpeaking { animation-duration: 1.05s; }
-.ringSpeaking { animation-duration: 1.05s; }
-.orbSpeaking { animation: orbSpeak 1.05s ease-in-out infinite; }
-.orbConnecting { animation-duration: 1.7s; opacity: .75; }
-.bars { position: relative; display: flex; align-items: center; gap: 5px; height: 28px; }
-.bars span {
-  display: block;
-  width: 4px;
-  height: 10px;
-  border-radius: 99px;
-  background: rgba(255,255,255,.92);
-  animation: wave .75s ease-in-out infinite alternate;
-}
-@keyframes haloBreathe { 0%,100% { transform: scale(.91); opacity: .65; } 50% { transform: scale(1.09); opacity: 1; } }
-@keyframes ringBreathe { 0%,100% { transform: scale(.96); opacity: .5; } 50% { transform: scale(1.08); opacity: 1; } }
-@keyframes orbBreathe { 0%,100% { transform: scale(.98); } 50% { transform: scale(1.035); } }
-@keyframes orbSpeak { 0%,100% { transform: scale(.98); } 30% { transform: scale(1.09); } 70% { transform: scale(1.025); } }
-@keyframes wave { from { height: 7px; } to { height: 25px; } }
+.speaking .orb { animation-duration: 1.25s; }
+.speaking .cloudOne { animation-duration: 2.3s; }
+.speaking .cloudTwo { animation-duration: 2.8s; }
+.connecting .orb { opacity: .7; animation-duration: 1.7s; }
+@keyframes breathe { 0%,100% { transform: scale(.97); } 50% { transform: scale(1.055); } }
+@keyframes driftOne { from { transform: translate(-8px,-7px) rotate(-9deg); } to { transform: translate(13px,13px) rotate(11deg); } }
+@keyframes driftTwo { from { transform: translate(10px,-10px); } to { transform: translate(-12px,12px); } }
 @media (prefers-reduced-motion: reduce) {
-  .halo, .ring, .orb, .bars span { animation: none !important; }
+  .orb, .cloudOne, .cloudTwo { animation: none !important; }
 }

@@ -38,8 +38,8 @@ function RailIcon({
       className={[
         "flex h-10 w-10 items-center justify-center rounded-xl transition",
         active
-          ? "bg-cyan-50 text-cyan-700"
-          : "text-slate-500 hover:bg-slate-100 hover:text-slate-800",
+          ? "bg-[#163353] text-blue-300"
+          : "text-slate-400 hover:bg-[#35373e] hover:text-white",
       ].join(" ")}
     >
       {children}
@@ -54,7 +54,7 @@ function SectionHeading({
 }) {
   return (
     <div className="px-3 pb-2 pt-6">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-950">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-100">
         {children}
       </p>
     </div>
@@ -111,10 +111,10 @@ function LucyRailItem({
         type="button"
         onClick={onClick}
         className={[
-          "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 pr-10 text-left text-sm text-slate-950 transition",
+          "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 pr-10 text-left text-sm text-slate-100 transition",
           active
-            ? "bg-slate-100"
-            : "hover:bg-slate-100",
+            ? "bg-[#303239]"
+            : "hover:bg-[#35373e]",
         ].join(" ")}
       >
         {icon && (
@@ -122,7 +122,7 @@ function LucyRailItem({
             src={icon}
             alt=""
             aria-hidden="true"
-            className="h-4 w-4 shrink-0 object-contain"
+            className="h-4 w-4 shrink-0 object-contain brightness-0 invert"
           />
         )}
         <span className="min-w-0 truncate">
@@ -142,11 +142,11 @@ function LucyRailItem({
           src="/images/stock/lucy-chat/lucy-rail/more.svg"
           alt=""
           aria-hidden="true"
-          className="h-4 w-4 object-contain"
+          className="h-4 w-4 object-contain brightness-0 invert"
         />
       </button>
       {menuOpen && (
-        <div className="absolute right-2 top-[calc(100%-2px)] z-40 w-[180px] rounded-xl border border-slate-200 bg-white p-1.5 shadow-[0_14px_35px_rgba(15,23,42,0.14)]">
+        <div className="absolute right-2 top-[calc(100%-2px)] z-40 w-[180px] rounded-xl border border-[#34363d] bg-[#202126] p-1.5 shadow-[0_14px_35px_rgba(15,23,42,0.14)]">
           {[
             {
               label: "Share",
@@ -204,17 +204,17 @@ function LucyRailItem({
                 }
               }}
               className={[
-                "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition hover:bg-slate-100",
+                "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition hover:bg-[#35373e]",
                 item.destructive
                   ? "text-red-600"
-                  : "text-slate-950",
+                  : "text-slate-100",
               ].join(" ")}
             >
               <img
                 src={item.icon}
                 alt=""
                 aria-hidden="true"
-                className="h-4 w-4 shrink-0 object-contain"
+                className="h-4 w-4 shrink-0 object-contain brightness-0 invert"
               />
               <span>{item.label}</span>
             </button>
@@ -282,7 +282,7 @@ function LeftRailAsset({
     <img
       src={src}
       alt={alt}
-      className={`${className} object-contain`}
+      className={`${className} object-contain brightness-0 invert`}
     />
   )
 }
@@ -292,7 +292,7 @@ function LucyRailMark() {
     <img
       src="/images/stock/lucy-chat/lucy-rail/star.svg"
       alt="Lucy"
-      className="h-6 w-6 object-contain"
+      className="h-6 w-6 object-contain brightness-0 invert"
     />
   )
 }
@@ -803,7 +803,7 @@ export default function LucyWorkspace() {
   }, [accountMenuOpen])
 
   return (
-    <div className="flex h-[100dvh] w-full overflow-hidden bg-white text-slate-900">
+    <div className="lucy-dark-workspace flex h-[100dvh] w-full overflow-hidden bg-[#141519] text-slate-100">
       <style jsx>{`
         .lucy-scrollbar {
           scrollbar-width: thin;
@@ -844,7 +844,7 @@ export default function LucyWorkspace() {
       {/* ------------------------------------------------------------------ */}
       {/* Far-left application rail                                           */}
       {/* ------------------------------------------------------------------ */}
-      <aside className="flex w-[60px] shrink-0 flex-col items-center border-r border-slate-200 bg-white py-3">
+      <aside className="flex w-[60px] shrink-0 flex-col items-center border-r border-[#34363d] bg-[#202126] py-3">
         <RailIcon
           active
           ariaLabel="Home"
@@ -891,8 +891,8 @@ export default function LucyWorkspace() {
             </RailIcon>
 
             {accountMenuOpen && (
-              <div className="absolute bottom-0 left-[calc(100%+10px)] z-50 w-[240px] overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_18px_45px_rgba(15,23,42,0.16)]">
-                <div className="border-b border-slate-100 py-1">
+              <div className="absolute bottom-0 left-[calc(100%+10px)] z-50 w-[240px] overflow-hidden rounded-2xl border border-[#34363d] bg-[#202126] p-2 shadow-[0_18px_45px_rgba(15,23,42,0.16)]">
+                <div className="border-b border-[#34363d] py-1">
                   <button
                     type="button"
                     onClick={async () => {
@@ -917,7 +917,7 @@ export default function LucyWorkspace() {
 
                       router.push(dashboardPath)
                     }}
-                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-slate-950 transition hover:bg-slate-100"
+                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-slate-100 transition hover:bg-[#35373e]"
                   >
                     Skysirv dashboard
                   </button>
@@ -930,20 +930,20 @@ export default function LucyWorkspace() {
                       setAccountMenuOpen(false)
                       router.push("/account")
                     }}
-                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-slate-950 transition hover:bg-slate-100"
+                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-slate-100 transition hover:bg-[#35373e]"
                   >
                     Account settings
                   </button>
 
                   <button
                     type="button"
-                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-slate-950 transition hover:bg-slate-100"
+                    className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-slate-100 transition hover:bg-[#35373e]"
                   >
                     Chat settings
                   </button>
                 </div>
 
-                <div className="border-t border-slate-100 pt-1">
+                <div className="border-t border-[#34363d] pt-1">
                   {getAuthToken() ? (
                     <button
                       type="button"
@@ -963,7 +963,7 @@ export default function LucyWorkspace() {
 
                         router.push("/")
                       }}
-                      className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-red-600 transition hover:bg-red-50"
+                      className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-red-600 transition hover:bg-red-950/30"
                     >
                       Sign out
                     </button>
@@ -975,7 +975,7 @@ export default function LucyWorkspace() {
                         setAuthModalIntent("workspace")
                         setAuthModalOpen(true)
                       }}
-                      className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-slate-950 transition hover:bg-slate-100"
+                      className="flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm text-slate-100 transition hover:bg-[#35373e]"
                     >
                       Sign in
                     </button>
@@ -992,7 +992,7 @@ export default function LucyWorkspace() {
           onClick={() => setLucyRailCollapsed(false)}
           aria-label="Expand Lucy sidebar"
           title="Expand Lucy sidebar"
-          className="relative z-20 mt-3 flex h-10 w-6 shrink-0 items-center justify-center rounded-r-lg border border-l-0 border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 hover:text-slate-950"
+          className="relative z-20 mt-3 flex h-10 w-6 shrink-0 items-center justify-center rounded-r-lg border border-l-0 border-[#34363d] bg-[#202126] text-slate-300 shadow-sm transition hover:bg-[#303239] hover:text-white"
         >
           <span className="rotate-180">
             <CollapseIcon />
@@ -1003,11 +1003,11 @@ export default function LucyWorkspace() {
       {/* Lucy navigation rail                                                */}
       {/* ------------------------------------------------------------------ */}
       {!lucyRailCollapsed && (
-        <aside className="flex w-[292px] shrink-0 flex-col border-r border-slate-200 bg-white">
+        <aside className="flex w-[292px] shrink-0 flex-col border-r border-[#34363d] bg-[#202126]">
           {/* Lucy rail header */}
           <div
             className={[
-              "flex h-[68px] shrink-0 items-center border-b border-slate-200",
+              "flex h-[68px] shrink-0 items-center border-b border-[#34363d]",
               lucyRailCollapsed
                 ? "justify-center px-2"
                 : "px-4",
@@ -1025,7 +1025,7 @@ export default function LucyWorkspace() {
 
               {!lucyRailCollapsed && (
                 <div className="min-w-0">
-                  <p className="truncate text-[26px] font-semibold tracking-[-0.02em] text-slate-950">
+                  <p className="truncate text-[26px] font-semibold tracking-[-0.02em] text-slate-100">
                     Lucy
                   </p>
                 </div>
@@ -1036,7 +1036,7 @@ export default function LucyWorkspace() {
               <button
                 type="button"
                 aria-label="Search Lucy conversations"
-                className="ml-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-950 transition hover:bg-slate-100 hover:text-slate-700"
+                className="ml-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-100 transition hover:bg-[#35373e] hover:text-slate-200"
               >
                 <SearchIcon />
               </button>
@@ -1054,8 +1054,8 @@ export default function LucyWorkspace() {
               }
               className={
                 lucyRailCollapsed
-                  ? "ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-950 transition hover:bg-slate-100 hover:text-slate-700"
-                  : "ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-950 transition hover:bg-slate-100 hover:text-slate-700"
+                  ? "ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-100 transition hover:bg-[#35373e] hover:text-slate-200"
+                  : "ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-100 transition hover:bg-[#35373e] hover:text-slate-200"
               }
             >
               <CollapseIcon />
@@ -1081,7 +1081,7 @@ export default function LucyWorkspace() {
               aria-label="New conversation"
               title="New conversation"
               className={[
-                "mt-3 flex items-center rounded-lg text-sm font-medium text-slate-950 transition hover:bg-slate-100",
+                "mt-3 flex items-center rounded-lg text-sm font-medium text-slate-100 transition hover:bg-[#35373e]",
                 lucyRailCollapsed
                   ? "h-10 w-full justify-center px-0"
                   : "w-full gap-3 px-3 py-2.5 text-left",
@@ -1091,7 +1091,7 @@ export default function LucyWorkspace() {
                 src="/images/stock/lucy-chat/lucy-rail/new-conversation.svg"
                 alt=""
                 aria-hidden="true"
-                className="h-5 w-5 shrink-0 object-contain"
+                className="h-5 w-5 shrink-0 object-contain brightness-0 invert"
               />
 
               {!lucyRailCollapsed && (
@@ -1284,7 +1284,7 @@ export default function LucyWorkspace() {
       {/* ------------------------------------------------------------------ */}
       {/* Main Lucy conversation workspace                                    */}
       {/* ------------------------------------------------------------------ */}
-      <main className="min-w-0 flex-1 bg-white">
+      <main className="min-w-0 flex-1 bg-[#141519]">
         <DashboardFlightAttendant
           key={lucyEngineKey}
           tier={lucyTier}
@@ -1338,12 +1338,12 @@ export default function LucyWorkspace() {
 
       {conversationPendingRename && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/30 px-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
-            <h2 className="text-lg font-semibold text-slate-950">
+          <div className="w-full max-w-md rounded-2xl border border-[#34363d] bg-[#202126] p-6 shadow-2xl">
+            <h2 className="text-lg font-semibold text-slate-100">
               Rename conversation
             </h2>
 
-            <p className="mt-2 text-sm leading-6 text-slate-600">
+            <p className="mt-2 text-sm leading-6 text-slate-400">
               Choose a new name for this Lucy conversation.
             </p>
 
@@ -1361,7 +1361,7 @@ export default function LucyWorkspace() {
                 }
               }}
               autoFocus
-              className="mt-5 w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-slate-950 outline-none transition focus:border-slate-500"
+              className="mt-5 w-full rounded-xl bg-[#292b31] border border-[#4a4c55] px-3.5 py-2.5 text-sm text-slate-100 outline-none transition focus:border-slate-500"
             />
 
             <div className="mt-6 flex justify-end gap-3">
@@ -1371,7 +1371,7 @@ export default function LucyWorkspace() {
                   setConversationPendingRename(null)
                   setConversationRenameValue("")
                 }}
-                className="rounded-xl px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                className="rounded-xl px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-[#35373e]"
               >
                 Cancel
               </button>
@@ -1393,15 +1393,15 @@ export default function LucyWorkspace() {
 
       {conversationPendingDelete && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/30 px-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
-            <h2 className="text-lg font-semibold text-slate-950">
+          <div className="w-full max-w-md rounded-2xl border border-[#34363d] bg-[#202126] p-6 shadow-2xl">
+            <h2 className="text-lg font-semibold text-slate-100">
               Delete conversation?
             </h2>
 
-            <p className="mt-2 text-sm leading-6 text-slate-600">
+            <p className="mt-2 text-sm leading-6 text-slate-400">
               This will remove
               {" "}
-              <span className="font-medium text-slate-900">
+              <span className="font-medium text-slate-100">
                 {conversationPendingDelete.title}
               </span>
               {" "}
@@ -1414,7 +1414,7 @@ export default function LucyWorkspace() {
                 onClick={() =>
                   setConversationPendingDelete(null)
                 }
-                className="rounded-xl px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                className="rounded-xl px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-[#35373e]"
               >
                 Cancel
               </button>
